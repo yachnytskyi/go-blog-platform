@@ -1,0 +1,43 @@
+version: '3.9'
+services:
+
+  mongodb:
+    image: mongo
+    container_name: mongodb
+    restart: always
+    env_file: ./app.env
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongodbDATA:/data/db
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - redisDATA:/data
+
+  # app:
+  #   build:
+  #     context: ./
+  #     dockerfile: Dockerfile.dev
+  #     target: builder
+  #   image: app
+  #   env_file: ./app.env
+  #   ports:
+  #     - "8080:8080"
+  #   environment:
+  #     - ENV=dev
+  #   volumes:
+  #     - ./:/go/src/app
+  #   # Have to use $$ (double-dollar) so docker does not try to substitute a variable.
+  #   depends_on:
+  #     - mongodb
+  #     - redis
+  #   command: reflex -r "\.go$$" -s -- sh -c "go run ./"
+
+volumes:
+  mongodbDATA:
+  redisDATA:

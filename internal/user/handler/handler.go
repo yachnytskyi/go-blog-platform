@@ -10,7 +10,6 @@ import (
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	"github.com/yachnytskyi/golang-mongo-grpc/models"
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utils"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type UserHandler struct {
@@ -60,13 +59,9 @@ func (userHandler *UserHandler) Login(ctx *gin.Context) {
 
 	context := ctx.Request.Context()
 
-	user, err := userHandler.userService.UserGetByEmail(context, credentials.Email)
+	user, err := userHandler.userService.Login(context, credentials)
 
 	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid email or password"})
-			return
-		}
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}

@@ -17,7 +17,7 @@ type UserHandler struct {
 	userService user.Service
 }
 
-func NewUserHandlers(userService user.Service) UserHandler {
+func NewUserHandler(userService user.Service) UserHandler {
 	return UserHandler{userService: userService}
 }
 
@@ -34,7 +34,9 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 		return
 	}
 
-	newUser, err := userHandler.userService.Register(user)
+	context := ctx.Request.Context()
+
+	newUser, err := userHandler.userService.Register(context, user)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "email already exists") {
@@ -56,7 +58,9 @@ func (userHandler *UserHandler) Login(ctx *gin.Context) {
 		return
 	}
 
-	user, err := userHandler.userService.UserGetByEmail(credentials.Email)
+	context := ctx.Request.Context()
+
+	user, err := userHandler.userService.UserGetByEmail(context, credentials.Email)
 
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -110,7 +114,9 @@ func (userHandler *UserHandler) RefreshAccessToken(ctx *gin.Context) {
 		return
 	}
 
-	user, err := userHandler.userService.UserGetById(fmt.Sprint(userID))
+	context := ctx.Request.Context()
+
+	user, err := userHandler.userService.UserGetById(context, fmt.Sprint(userID))
 
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": "the user is belonged to this token no longer exists "})

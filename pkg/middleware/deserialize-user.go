@@ -39,8 +39,9 @@ func DeserializeUser(userService user.Service) gin.HandlerFunc {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": "fail", "message": err.Error()})
 			return
 		}
+		context := ctx.Request.Context()
 
-		user, err := userService.UserGetById(fmt.Sprint(userID))
+		user, err := userService.UserGetById(context, fmt.Sprint(userID))
 
 		if err != nil {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": "fail", "message": "The user belonging to this token no logger exists"})

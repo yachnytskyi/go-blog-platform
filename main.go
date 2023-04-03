@@ -11,9 +11,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	"github.com/yachnytskyi/golang-mongo-grpc/config"
+
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user/handler"
+	"github.com/yachnytskyi/golang-mongo-grpc/internal/user/repository"
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user/service"
+
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -26,9 +29,10 @@ var (
 	mongoClient *mongo.Client
 	redisClient *redis.Client
 
-	userService user.Service
-	userHandler handler.UserHandler
-	userRouter  handler.UserRouter
+	userRepository user.Repository
+	userService    user.Service
+	userHandler    handler.UserHandler
+	userRouter     handler.UserRouter
 
 	userCollection *mongo.Collection
 )
@@ -79,8 +83,10 @@ func init() {
 
 	// Collections.
 	userCollection = mongoClient.Database("golang_mongodb").Collection("users")
-	userService = service.NewUserService(userCollection, ctx)
-	userHandler = handler.NewUserHandlers(userService)
+	userRepository = repository.NewUserRepository(userCollection)
+	userService = service.NewUserService(userRepository)
+
+	userHandler = handler.NewUserHandler(userService)
 	userRouter = handler.NewUserRouter(userHandler)
 
 	// Create the Gin Engine instance.

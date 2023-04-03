@@ -35,17 +35,11 @@ func (userService *UserService) Login(ctx context.Context, user *models.UserSign
 	// Verify password - we previously created this method.
 	matchPasswords := utils.VerifyPassword(fetchedUser.Password, user.Password)
 
-	fmt.Println(matchPasswords)
-
 	if matchPasswords != nil {
 		return nil, fmt.Errorf("invalid email or password")
 	}
 
 	return fetchedUser, err
-}
-
-func VerifyPassword(s1, s2 string) {
-	panic("unimplemented")
 }
 
 func (userService *UserService) UserGetById(ctx context.Context, userID string) (*models.UserFullResponse, error) {

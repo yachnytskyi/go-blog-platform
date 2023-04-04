@@ -31,8 +31,8 @@ var (
 
 	userRepository user.Repository
 	userService    user.Service
-	userHandler    handler.UserHandler
-	userRouter     handler.UserRouter
+	userHandler    user.Handler
+	userRouter     user.Router
 
 	userCollection *mongo.Collection
 )
@@ -121,6 +121,6 @@ func main() {
 		ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": value})
 	})
 
-	userRouter.UserRoute(router, userService)
+	userRouter.UserRouter(router, userService)
 	log.Fatal(server.Run(":" + config.Port))
 }

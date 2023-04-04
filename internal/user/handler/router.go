@@ -7,15 +7,15 @@ import (
 )
 
 type UserRouter struct {
-	userHandler UserHandler
+	userHandler user.Handler
 }
 
-func NewUserRouter(userHandler UserHandler) UserRouter {
-	return UserRouter{userHandler: userHandler}
+func NewUserRouter(userHandler user.Handler) user.Router {
+	return &UserRouter{userHandler: userHandler}
 }
 
-func (userRouter *UserRouter) UserRoute(rg *gin.RouterGroup, userService user.Service) {
-	router := rg.Group("/users")
+func (userRouter *UserRouter) UserRouter(routerGroup *gin.RouterGroup, userService user.Service) {
+	router := routerGroup.Group("/users")
 
 	router.POST("/register", userRouter.userHandler.Register)
 	router.POST("/login", userRouter.userHandler.Login)

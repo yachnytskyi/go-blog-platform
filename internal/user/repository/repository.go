@@ -63,7 +63,7 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *models
 	return newUser, nil
 }
 
-func (userRepository *UserRepository) UserGetById(ctx context.Context, userID string) (*models.UserFullResponse, error) {
+func (userRepository *UserRepository) GetUserById(ctx context.Context, userID string) (*models.UserFullResponse, error) {
 	objectUserID, _ := primitive.ObjectIDFromHex(userID)
 
 	var user *models.UserFullResponse
@@ -81,7 +81,7 @@ func (userRepository *UserRepository) UserGetById(ctx context.Context, userID st
 	return user, nil
 }
 
-func (userRepository *UserRepository) UserGetByEmail(ctx context.Context, email string) (*models.UserFullResponse, error) {
+func (userRepository *UserRepository) GetUserByEmail(ctx context.Context, email string) (*models.UserFullResponse, error) {
 	var user *models.UserFullResponse
 
 	query := bson.M{"email": strings.ToLower(email)}

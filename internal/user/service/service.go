@@ -25,7 +25,7 @@ func (userService *UserService) Register(ctx context.Context, user *models.UserC
 }
 
 func (userService *UserService) Login(ctx context.Context, user *models.UserSignIn) (*models.UserFullResponse, error) {
-	fetchedUser, err := userService.userRepository.UserGetByEmail(ctx, user.Email)
+	fetchedUser, err := userService.userRepository.GetUserByEmail(ctx, user.Email)
 
 	// Will return wrong email or password.
 	if err != nil {
@@ -42,14 +42,14 @@ func (userService *UserService) Login(ctx context.Context, user *models.UserSign
 	return fetchedUser, err
 }
 
-func (userService *UserService) UserGetById(ctx context.Context, userID string) (*models.UserFullResponse, error) {
-	user, err := userService.userRepository.UserGetById(ctx, userID)
+func (userService *UserService) GetUserById(ctx context.Context, userID string) (*models.UserFullResponse, error) {
+	user, err := userService.userRepository.GetUserById(ctx, userID)
 
 	return user, err
 }
 
-func (userService *UserService) UserGetByEmail(ctx context.Context, email string) (*models.UserFullResponse, error) {
-	user, err := userService.userRepository.UserGetByEmail(ctx, email)
+func (userService *UserService) GetUserByEmail(ctx context.Context, email string) (*models.UserFullResponse, error) {
+	user, err := userService.userRepository.GetUserById(ctx, email)
 
 	return user, err
 }

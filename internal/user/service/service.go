@@ -53,3 +53,9 @@ func (userService *UserService) UserGetByEmail(ctx context.Context, email string
 
 	return user, err
 }
+
+func (userService *UserService) UpdateUserById(ctx context.Context, userID string, key string, value string) (*models.UserFullResponse, error) {
+	user, err := userService.userRepository.UpdateUserById(ctx, userID, key, value)
+
+	return user, err
+}

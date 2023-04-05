@@ -1,9 +1,10 @@
 package main
 
-// Require the packages
+// Require the packages.
 import (
 	"context"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 
@@ -34,13 +35,15 @@ var (
 	userHandler    user.Handler
 	userRouter     user.Router
 
-	userCollection *mongo.Collection
+	userCollection   *mongo.Collection
+	templateInstance *template.Template
 )
 
 // Init function that will run before the "main" function.
 func init() {
 
 	// Load the .env variables.
+	templateInstance = template.Must(template.ParseGlob("pkg/templates/*.html"))
 	config, err := config.LoadConfig(".")
 
 	if err != nil {
@@ -86,7 +89,7 @@ func init() {
 	userRepository = repository.NewUserRepository(userCollection)
 	userService = service.NewUserService(userRepository)
 
-	userHandler = handler.NewUserHandler(userService)
+	userHandler = handler.NewUserHandler(userService, templateInstance)
 	userRouter = handler.NewUserRouter(userHandler)
 
 	// Create the Gin Engine instance.

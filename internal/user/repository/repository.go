@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -94,4 +95,20 @@ func (userRepository *UserRepository) UserGetByEmail(ctx context.Context, email 
 	}
 
 	return user, nil
+}
+
+func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID string, key string, value string) (*models.UserFullResponse, error) {
+	userObjectID, _ := primitive.ObjectIDFromHex(userID)
+	query := bson.D{{Key: "_id", Value: userObjectID}}
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: key, Value: value}}}}
+	result, err := userRepository.collection.UpdateOne(ctx, query, update)
+
+	fmt.Println(result.ModifiedCount)
+
+	if err != nil {
+		fmt.Println(err)
+		return &models.UserFullResponse{}, err
+	}
+
+	return &models.UserFullResponse{}, nil
 }

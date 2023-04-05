@@ -2,10 +2,13 @@ package handler
 
 import (
 	"fmt"
+	"html/template"
+	"log"
 	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/thanhpk/randstr"
 	"github.com/yachnytskyi/golang-mongo-grpc/config"
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	"github.com/yachnytskyi/golang-mongo-grpc/models"
@@ -14,10 +17,11 @@ import (
 
 type UserHandler struct {
 	userService user.Service
+	template    *template.Template
 }
 
-func NewUserHandler(userService user.Service) user.Handler {
-	return &UserHandler{userService: userService}
+func NewUserHandler(userService user.Service, template *template.Template) user.Handler {
+	return &UserHandler{userService: userService, template: template}
 }
 
 func (userHandler *UserHandler) Register(ctx *gin.Context) {
@@ -46,7 +50,44 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "data": gin.H{"user": models.FilteredResponse(newUser)}})
+	config, err := config.LoadConfig(".")
+
+	if err != nil {
+		log.Fatal("could not load the config", err)
+	}
+
+	// Generate Verification Code.
+	code := randstr.String(20)
+
+	verificationCode := utils.Encode(code)
+
+	// Update the user in Database.
+	userHandler.userService.UpdateUserById(context, newUser.UserID.Hex(), "verificationCode", verificationCode)
+
+	firstName := newUser.Name
+
+	if strings.Contains(firstName, " ") {
+		firstName = strings.Split(firstName, " ")[1]
+	}
+
+	// firstName = utils.UserFirstName(firstName)
+
+	// Send an email.
+	emailData := utils.EmailData{
+		URL:       config.Origin + "/verifyemail/" + code,
+		FirstName: firstName,
+		Subject:   "Your account verification code",
+	}
+
+	err = utils.SendEmail(newUser, &emailData, userHandler.template, "verificationCode.html")
+
+	if err != nil {
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": "Error in sending an email"})
+		return
+	}
+
+	message := "We sent an email with a verification code to " + user.Email
+	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "message": message})
 }
 
 func (userHandler *UserHandler) Login(ctx *gin.Context) {

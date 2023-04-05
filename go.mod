@@ -6,7 +6,10 @@ require github.com/spf13/viper v1.15.0
 
 require (
 	cloud.google.com/go v0.105.0 // indirect
+	github.com/k3a/html2text v1.1.0 // indirect
 	github.com/sagikazarmark/crypt v0.9.0 // indirect
+	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
+	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df // indirect
 )
 
 require (
@@ -44,6 +47,7 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
+	github.com/thanhpk/randstr v1.0.5
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.9 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect

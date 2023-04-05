@@ -112,3 +112,20 @@ func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID
 
 	return &models.UserFullResponse{}, nil
 }
+
+func (userRepository *UserRepository) DeleteUserById(ctx context.Context, userID string) error {
+	userObjectID, _ := primitive.ObjectIDFromHex(userID)
+	query := bson.M{"_id": userObjectID}
+
+	result, err := userRepository.collection.DeleteOne(ctx, query)
+
+	if err != nil {
+		return err
+	}
+
+	if result.DeletedCount == 0 {
+		return err
+	}
+
+	return nil
+}

@@ -59,3 +59,9 @@ func (userService *UserService) UpdateUserById(ctx context.Context, userID strin
 
 	return user, err
 }
+
+func (userService *UserService) DeleteUserById(ctx context.Context, userID string) error {
+	result := userService.userRepository.DeleteUserById(ctx, userID)
+
+	return result
+}

@@ -134,6 +134,13 @@ func (userHandler *UserHandler) Login(ctx *gin.Context) {
 func (userHandler *UserHandler) RefreshAccessToken(ctx *gin.Context) {
 	message := "could not refresh access token"
 
+	currentUser := ctx.MustGet("currentUser").(*models.UserFullResponse)
+
+	if currentUser == nil {
+		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": message})
+		return
+	}
+
 	cookie, err := ctx.Cookie("refresh_token")
 
 	if err != nil {
@@ -171,7 +178,7 @@ func (userHandler *UserHandler) RefreshAccessToken(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
 }
 
-func (userHandler *UserHandler) LogoutUser(ctx *gin.Context) {
+func (userHandler *UserHandler) Logout(ctx *gin.Context) {
 	ctx.SetCookie("access_token", "", -1, "/", "localhost", false, true)
 	ctx.SetCookie("refresh_token", "", -1, "/", "localhost", false, true)
 	ctx.SetCookie("logged_in", "", -1, "/", "localhost", false, true)
@@ -183,4 +190,17 @@ func (userHandler *UserHandler) GetMe(ctx *gin.Context) {
 	currentUser := ctx.MustGet("currentUser").(*models.UserFullResponse)
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": models.FilteredResponse(currentUser)}})
+}
+
+func (userHandler *UserHandler) Delete(ctx *gin.Context) {
+	context := ctx.Request.Context()
+
+	currentUser := ctx.MustGet("currentUser").(*models.UserFullResponse)
+	err := userHandler.userService.DeleteUserById(context, fmt.Sprint(currentUser.UserID.Hex()))
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+	}
+
+	ctx.JSON(http.StatusNoContent, nil)
 }

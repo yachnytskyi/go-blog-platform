@@ -6,6 +6,7 @@ type Handler interface {
 	Register(ctx *gin.Context)
 	Login(ctx *gin.Context)
 	RefreshAccessToken(ctx *gin.Context)
-	LogoutUser(ctx *gin.Context)
 	GetMe(ctx *gin.Context)
+	Logout(ctx *gin.Context)
+	Delete(ctx *gin.Context)
 }

@@ -12,4 +12,5 @@ type Service interface {
 	GetUserById(ctx context.Context, userID string) (*models.UserFullResponse, error)
 	GetUserByEmail(ctx context.Context, email string) (*models.UserFullResponse, error)
 	UpdateUserById(ctx context.Context, userID string, key string, value string) (*models.UserFullResponse, error)
+	DeleteUserById(ctx context.Context, userID string) error
 }

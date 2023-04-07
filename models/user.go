@@ -18,6 +18,12 @@ type UserCreate struct {
 	UpdatedAt       time.Time `json:"updated_at" bson:"updated_at"`
 }
 
+// [PUT].
+type UserUpdate struct {
+	Name      string    `json:"name" bson:"name" binding:"required"`
+	UpdatedAt time.Time `json:"updated_at" bson:"updated_at"`
+}
+
 // [POST].
 type UserSignIn struct {
 	Email    string `json:"email" bson:"email" binding:"required,lte=40,email"`

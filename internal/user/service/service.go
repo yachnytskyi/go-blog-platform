@@ -42,6 +42,18 @@ func (userService *UserService) Login(ctx context.Context, user *models.UserSign
 	return fetchedUser, err
 }
 
+func (userService *UserService) UpdateNewRegisteredUserById(ctx context.Context, userID string, key string, value string) (*models.UserFullResponse, error) {
+	user, err := userService.userRepository.UpdateNewRegisteredUserById(ctx, userID, key, value)
+
+	return user, err
+}
+
+func (userService *UserService) UpdateUserById(ctx context.Context, userID string, user *models.UserUpdate) (*models.UserFullResponse, error) {
+	updatedUser, err := userService.userRepository.UpdateUserById(ctx, userID, user)
+
+	return updatedUser, err
+}
+
 func (userService *UserService) GetUserById(ctx context.Context, userID string) (*models.UserFullResponse, error) {
 	user, err := userService.userRepository.GetUserById(ctx, userID)
 
@@ -50,12 +62,6 @@ func (userService *UserService) GetUserById(ctx context.Context, userID string) 
 
 func (userService *UserService) GetUserByEmail(ctx context.Context, email string) (*models.UserFullResponse, error) {
 	user, err := userService.userRepository.GetUserById(ctx, email)
-
-	return user, err
-}
-
-func (userService *UserService) UpdateUserById(ctx context.Context, userID string, key string, value string) (*models.UserFullResponse, error) {
-	user, err := userService.userRepository.UpdateUserById(ctx, userID, key, value)
 
 	return user, err
 }

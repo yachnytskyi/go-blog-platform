@@ -70,8 +70,6 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 		firstName = strings.Split(firstName, " ")[1]
 	}
 
-	// firstName = utils.UserFirstName(firstName)
-
 	// Send an email.
 	emailData := utils.EmailData{
 		URL:       config.Origin + "/verifyemail/" + code,

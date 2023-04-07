@@ -62,7 +62,7 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 	verificationCode := utils.Encode(code)
 
 	// Update the user in Database.
-	userHandler.userService.UpdateUserById(context, newUser.UserID.Hex(), "verificationCode", verificationCode)
+	userHandler.userService.UpdateNewRegisteredUserById(context, newUser.UserID.Hex(), "verificationCode", verificationCode)
 
 	firstName := newUser.Name
 
@@ -195,12 +195,35 @@ func (userHandler *UserHandler) GetMe(ctx *gin.Context) {
 func (userHandler *UserHandler) Delete(ctx *gin.Context) {
 	context := ctx.Request.Context()
 
-	currentUser := ctx.MustGet("currentUser").(*models.UserFullResponse)
-	err := userHandler.userService.DeleteUserById(context, fmt.Sprint(currentUser.UserID.Hex()))
+	currentUser := ctx.MustGet("currentUser")
+	userID := currentUser.(*models.UserFullResponse).UserID.Hex()
+	err := userHandler.userService.DeleteUserById(context, fmt.Sprint(userID))
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 	}
 
 	ctx.JSON(http.StatusNoContent, nil)
+}
+
+func (userHandler *UserHandler) UpdateUser(ctx *gin.Context) {
+	context := ctx.Request.Context()
+
+	currentUser := ctx.MustGet("currentUser")
+	userID := currentUser.(*models.UserFullResponse).UserID.Hex()
+
+	var updatedUserData *models.UserUpdate
+
+	if err := ctx.ShouldBindJSON(&updatedUserData); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+		return
+	}
+
+	updatedUser, err := userHandler.userService.UpdateUserById(context, fmt.Sprint(userID), updatedUserData)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "You successfully updated your settings!", "data": gin.H{"user": models.FilteredResponse(updatedUser)}})
 }

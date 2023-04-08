@@ -18,16 +18,27 @@ type UserCreate struct {
 	UpdatedAt       time.Time `json:"updated_at" bson:"updated_at"`
 }
 
-// [PUT].
-type UserUpdate struct {
-	Name      string    `json:"name" bson:"name" binding:"required"`
-	UpdatedAt time.Time `json:"updated_at" bson:"updated_at"`
-}
-
 // [POST].
 type UserSignIn struct {
 	Email    string `json:"email" bson:"email" binding:"required,lte=40,email"`
 	Password string `json:"password" bson:"email" binding:"required,min=8"`
+}
+
+// [GET].
+type ForgottenPasswordInput struct {
+	Email string `json:"email" binding:"required"`
+}
+
+// [POST].
+type ResetUserPasswordInput struct {
+	Password        string `json:"password" binding:"required"`
+	PasswordConfirm string `json:"passwordConfirm" binding:"required"`
+}
+
+// [PUT].
+type UserUpdate struct {
+	Name      string    `json:"name" bson:"name" binding:"required"`
+	UpdatedAt time.Time `json:"updated_at" bson:"updated_at"`
 }
 
 // [GET].

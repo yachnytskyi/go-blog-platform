@@ -62,6 +62,60 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *models
 	return newUser, nil
 }
 
+func (userRepository *UserRepository) UpdateNewRegisteredUserById(ctx context.Context, userID string, key string, value string) (*models.UserFullResponse, error) {
+	userObjectID, _ := primitive.ObjectIDFromHex(userID)
+	query := bson.D{{Key: "_id", Value: userObjectID}}
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: key, Value: value}}}}
+	result, err := userRepository.collection.UpdateOne(ctx, query, update)
+
+	if err != nil {
+		return &models.UserFullResponse{}, err
+	}
+
+	if result.ModifiedCount == 0 {
+		return &models.UserFullResponse{}, err
+	}
+
+	return &models.UserFullResponse{}, nil
+}
+
+func (userRepository *UserRepository) UpdatePasswordResetTokenUserByEmail(ctx context.Context, email string, firstKey string, firstValue string,
+	secondKey string, SecondValue time.Time) error {
+
+	query := bson.D{{Key: "email", Value: strings.ToLower(email)}}
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: firstKey, Value: firstValue}, {Key: secondKey, Value: secondKey}}}}
+	result, err := userRepository.collection.UpdateOne(ctx, query, update)
+
+	if err != nil {
+		return err
+	}
+
+	if result.ModifiedCount == 0 {
+		return err
+	}
+
+	return nil
+}
+
+func (userRepository *UserRepository) ResetUserPassword(ctx context.Context, password string, userResetToken string) error {
+	hashedPassword, _ := utils.HashPassword(password)
+
+	query := bson.D{{Key: "passwordResetToken", Value: userResetToken}}
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: "password", Value: hashedPassword}}}, {Key: "$unset", Value: bson.D{{Key: "passwordResetToken", Value: ""}, {Key: "passwordResetAt", Value: ""}}}}
+
+	result, err := userRepository.collection.UpdateOne(ctx, query, update)
+
+	if err != nil {
+		return err
+	}
+
+	if result.ModifiedCount == 0 {
+		return err
+	}
+
+	return nil
+}
+
 func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID string, user *models.UserUpdate) (*models.UserFullResponse, error) {
 	user.UpdatedAt = time.Now()
 
@@ -84,23 +138,6 @@ func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID
 	}
 
 	return updatedUser, nil
-}
-
-func (userRepository *UserRepository) UpdateNewRegisteredUserById(ctx context.Context, userID string, key string, value string) (*models.UserFullResponse, error) {
-	userObjectID, _ := primitive.ObjectIDFromHex(userID)
-	query := bson.D{{Key: "_id", Value: userObjectID}}
-	update := bson.D{{Key: "$set", Value: bson.D{{Key: key, Value: value}}}}
-	result, err := userRepository.collection.UpdateOne(ctx, query, update)
-
-	if err != nil {
-		return &models.UserFullResponse{}, err
-	}
-
-	if result.ModifiedCount == 0 {
-		return &models.UserFullResponse{}, err
-	}
-
-	return &models.UserFullResponse{}, nil
 }
 
 func (userRepository *UserRepository) GetUserById(ctx context.Context, userID string) (*models.UserFullResponse, error) {

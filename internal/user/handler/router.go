@@ -19,12 +19,14 @@ func (userRouter *UserRouter) UserRouter(routerGroup *gin.RouterGroup, userServi
 
 	router.POST("/register", userRouter.userHandler.Register)
 	router.POST("/login", userRouter.userHandler.Login)
-	// router.GET("/refresh", middleware.DeserializeUser(userService), userRouter.userHandler.RefreshAccessToken)
-	// router.GET("/logout", middleware.DeserializeUser(userService), userRouter.userHandler.Logout)
 
 	router.Use(middleware.DeserializeUser(userService))
+	router.POST("/forgotten-password", userRouter.userHandler.ForgottenPassword)
+	router.PATCH("/reset-password/:resetToken", userRouter.userHandler.ResetUserPassword)
+
 	router.GET("/refresh", userRouter.userHandler.RefreshAccessToken)
 	router.GET("/logout", userRouter.userHandler.Logout)
+
 	router.GET("/me", userRouter.userHandler.GetMe)
 	router.PUT("/update", userRouter.userHandler.UpdateUser)
 	router.DELETE("/delete", userRouter.userHandler.Delete)

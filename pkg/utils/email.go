@@ -3,8 +3,11 @@ package utils
 import (
 	"bytes"
 	"crypto/tls"
+	"fmt"
 	"html/template"
 	"log"
+	"os"
+	"path/filepath"
 
 	"github.com/k3a/html2text"
 	"github.com/yachnytskyi/golang-mongo-grpc/config"
@@ -19,7 +22,29 @@ type EmailData struct {
 }
 
 // Email template parser.
-func SendEmail(user *models.UserFullResponse, data *EmailData, temp *template.Template, templateName string) error {
+func ParseTemplateDirectory(directory string) (*template.Template, error) {
+	var paths []string
+
+	err := filepath.Walk(directory, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			paths = append(paths, path)
+		}
+		return nil
+	})
+
+	fmt.Println("parsing templates...")
+
+	if err != nil {
+		return nil, err
+	}
+
+	return template.ParseFiles(paths...)
+}
+
+func SendEmail(user *models.UserFullResponse, data *EmailData, templateName string) error {
 	config, err := config.LoadConfig(".")
 
 	if err != nil {
@@ -36,9 +61,15 @@ func SendEmail(user *models.UserFullResponse, data *EmailData, temp *template.Te
 
 	var body bytes.Buffer
 
-	if err := temp.ExecuteTemplate(&body, templateName, &data); err != nil {
-		log.Fatal("Could not execute template", err)
+	template, err := ParseTemplateDirectory("pkg/templates")
+
+	if err != nil {
+		log.Fatal("Could not parse template", err)
 	}
+
+	template = template.Lookup(templateName)
+	template.Execute(&body, &data)
+	fmt.Println(template.Name())
 
 	message := gomail.NewMessage()
 

@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/thanhpk/randstr"
@@ -65,10 +66,7 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 	userHandler.userService.UpdateNewRegisteredUserById(context, newUser.UserID.Hex(), "verificationCode", verificationCode)
 
 	firstName := newUser.Name
-
-	if strings.Contains(firstName, " ") {
-		firstName = strings.Split(firstName, " ")[1]
-	}
+	firstName = utils.UserFirstName(firstName)
 
 	// Send an email.
 	emailData := utils.EmailData{
@@ -77,7 +75,7 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 		Subject:   "Your account verification code",
 	}
 
-	err = utils.SendEmail(newUser, &emailData, userHandler.template, "verificationCode.html")
+	err = utils.SendEmail(newUser, &emailData, "verificationCode.html")
 
 	if err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": "Error in sending an email"})
@@ -129,6 +127,100 @@ func (userHandler *UserHandler) Login(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
 }
 
+func (userHandler *UserHandler) ForgottenPassword(ctx *gin.Context) {
+	var userEmail *models.ForgottenPasswordInput
+
+	if err := ctx.ShouldBindJSON(&userEmail); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+		return
+	}
+
+	message := "We sent you an email with needed instructions"
+	context := ctx.Request.Context()
+
+	user, err := userHandler.userService.GetUserByEmail(context, userEmail.Email)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": err.Error()})
+		return
+	}
+
+	if !user.Verified {
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": "Please verify you account"})
+		return
+	}
+
+	config, err := config.LoadConfig(".")
+
+	if err != nil {
+		log.Fatal("Could not load config", err)
+	}
+
+	// Generate verification code.
+	resetToken := randstr.String(20)
+	passwordResetToken := utils.Encode(resetToken)
+	passwordResetAt := time.Now().Add(time.Minute * 15)
+
+	// Update the user.
+	err = userHandler.userService.UpdatePasswordResetTokenUserByEmail(context, user.Email, "passwordResetToken", passwordResetToken, "passwordResetAt", passwordResetAt)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "success", "message": err.Error()})
+		return
+	}
+
+	firstName := user.Name
+	firstName = utils.UserFirstName(firstName)
+
+	// Send an email.
+	emailData := utils.EmailData{
+		URL:       config.Origin + "/reset-password/" + resetToken,
+		FirstName: firstName,
+		Subject:   "Your password reset token (it is valid for 10 minutes)",
+	}
+
+	err = utils.SendEmail(user, &emailData, "resetPassword.html")
+
+	if err != nil {
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "success", "message": "Error in sending an email"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
+
+}
+
+func (userHandler *UserHandler) ResetUserPassword(ctx *gin.Context) {
+	resetToken := ctx.Params.ByName("resetToken")
+	var credentials *models.ResetUserPasswordInput
+
+	if err := ctx.ShouldBindJSON(&credentials); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+		return
+	}
+
+	if credentials.Password != credentials.PasswordConfirm {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Passwords do not match"})
+		return
+	}
+
+	passwordResetToken := utils.Encode(resetToken)
+	context := ctx.Request.Context()
+
+	err := userHandler.userService.ResetUserPassword(context, credentials.Password, passwordResetToken)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+	}
+
+	ctx.SetCookie("access_token", "", -1, "/", "localhost", false, true)
+	ctx.SetCookie("refresh_token", "", -1, "/", "localhost", false, true)
+	ctx.SetCookie("logged_in", "", -1, "/", "localhost", false, true)
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "Congratulations! Your password was updated successfully! Please sign in again."})
+
+}
+
 func (userHandler *UserHandler) RefreshAccessToken(ctx *gin.Context) {
 	message := "could not refresh access token"
 
@@ -176,6 +268,28 @@ func (userHandler *UserHandler) RefreshAccessToken(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
 }
 
+func (userHandler *UserHandler) UpdateUser(ctx *gin.Context) {
+	context := ctx.Request.Context()
+
+	currentUser := ctx.MustGet("currentUser")
+	userID := currentUser.(*models.UserFullResponse).UserID.Hex()
+
+	var updatedUserData *models.UserUpdate
+
+	if err := ctx.ShouldBindJSON(&updatedUserData); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+		return
+	}
+
+	updatedUser, err := userHandler.userService.UpdateUserById(context, fmt.Sprint(userID), updatedUserData)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "You successfully updated your settings!", "data": gin.H{"user": models.FilteredResponse(updatedUser)}})
+}
+
 func (userHandler *UserHandler) Logout(ctx *gin.Context) {
 	ctx.SetCookie("access_token", "", -1, "/", "localhost", false, true)
 	ctx.SetCookie("refresh_token", "", -1, "/", "localhost", false, true)
@@ -202,26 +316,4 @@ func (userHandler *UserHandler) Delete(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusNoContent, nil)
-}
-
-func (userHandler *UserHandler) UpdateUser(ctx *gin.Context) {
-	context := ctx.Request.Context()
-
-	currentUser := ctx.MustGet("currentUser")
-	userID := currentUser.(*models.UserFullResponse).UserID.Hex()
-
-	var updatedUserData *models.UserUpdate
-
-	if err := ctx.ShouldBindJSON(&updatedUserData); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
-		return
-	}
-
-	updatedUser, err := userHandler.userService.UpdateUserById(context, fmt.Sprint(userID), updatedUserData)
-
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
-	}
-
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "You successfully updated your settings!", "data": gin.H{"user": models.FilteredResponse(updatedUser)}})
 }

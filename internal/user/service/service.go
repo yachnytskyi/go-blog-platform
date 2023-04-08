@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utils"
@@ -48,6 +49,21 @@ func (userService *UserService) UpdateNewRegisteredUserById(ctx context.Context,
 	return user, err
 }
 
+func (userService *UserService) UpdatePasswordResetTokenUserByEmail(ctx context.Context, email string, firstKey string, firstValue string,
+	secondKey string, secondValue time.Time) error {
+	result := userService.userRepository.UpdatePasswordResetTokenUserByEmail(ctx, email, firstKey, firstValue, secondKey, secondValue)
+
+	return result
+
+}
+
+func (userService *UserService) ResetUserPassword(ctx context.Context, password string, userResetToken string) error {
+	result := userService.userRepository.ResetUserPassword(ctx, password, userResetToken)
+
+	return result
+
+}
+
 func (userService *UserService) UpdateUserById(ctx context.Context, userID string, user *models.UserUpdate) (*models.UserFullResponse, error) {
 	updatedUser, err := userService.userRepository.UpdateUserById(ctx, userID, user)
 
@@ -61,7 +77,7 @@ func (userService *UserService) GetUserById(ctx context.Context, userID string) 
 }
 
 func (userService *UserService) GetUserByEmail(ctx context.Context, email string) (*models.UserFullResponse, error) {
-	user, err := userService.userRepository.GetUserById(ctx, email)
+	user, err := userService.userRepository.GetUserByEmail(ctx, email)
 
 	return user, err
 }

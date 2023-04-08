@@ -57,8 +57,8 @@ func (userService *UserService) UpdatePasswordResetTokenUserByEmail(ctx context.
 
 }
 
-func (userService *UserService) ResetUserPassword(ctx context.Context, password string, userResetToken string) error {
-	result := userService.userRepository.ResetUserPassword(ctx, password, userResetToken)
+func (userService *UserService) ResetUserPassword(ctx context.Context, firstKey string, firstValue string, secondKey string, passwordKey, password string) error {
+	result := userService.userRepository.ResetUserPassword(ctx, firstKey, firstValue, secondKey, passwordKey, password)
 
 	return result
 

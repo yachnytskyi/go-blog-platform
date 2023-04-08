@@ -97,11 +97,11 @@ func (userRepository *UserRepository) UpdatePasswordResetTokenUserByEmail(ctx co
 	return nil
 }
 
-func (userRepository *UserRepository) ResetUserPassword(ctx context.Context, password string, userResetToken string) error {
+func (userRepository *UserRepository) ResetUserPassword(ctx context.Context, firstKey string, firstValue string, secondKey string, passwordKey, password string) error {
 	hashedPassword, _ := utils.HashPassword(password)
 
-	query := bson.D{{Key: "passwordResetToken", Value: userResetToken}}
-	update := bson.D{{Key: "$set", Value: bson.D{{Key: "password", Value: hashedPassword}}}, {Key: "$unset", Value: bson.D{{Key: "passwordResetToken", Value: ""}, {Key: "passwordResetAt", Value: ""}}}}
+	query := bson.D{{Key: firstKey, Value: firstValue}}
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: passwordKey, Value: hashedPassword}}}, {Key: "$unset", Value: bson.D{{Key: firstKey, Value: ""}, {Key: secondKey, Value: ""}}}}
 
 	result, err := userRepository.collection.UpdateOne(ctx, query, update)
 

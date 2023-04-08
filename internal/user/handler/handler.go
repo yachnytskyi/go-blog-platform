@@ -176,7 +176,7 @@ func (userHandler *UserHandler) ForgottenPassword(ctx *gin.Context) {
 	emailData := utils.EmailData{
 		URL:       config.Origin + "/reset-password/" + resetToken,
 		FirstName: firstName,
-		Subject:   "Your password reset token (it is valid for 10 minutes)",
+		Subject:   "Your password reset token (it is valid for 15 minutes)",
 	}
 
 	err = utils.SendEmail(user, &emailData, "resetPassword.html")
@@ -207,7 +207,8 @@ func (userHandler *UserHandler) ResetUserPassword(ctx *gin.Context) {
 	passwordResetToken := utils.Encode(resetToken)
 	context := ctx.Request.Context()
 
-	err := userHandler.userService.ResetUserPassword(context, credentials.Password, passwordResetToken)
+	// Update the user.
+	err := userHandler.userService.ResetUserPassword(context, "passwordResetToken", passwordResetToken, "passwordResetAt", "password", credentials.Password)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})

@@ -259,8 +259,7 @@ func (userHandler *UserHandler) RefreshAccessToken(ctx *gin.Context) {
 		return
 	}
 
-	ctx.SetCookie("access_token", accessToken, config.AccessTokenMaxAge*60, "/", "localhost", false, true)
-	ctx.SetCookie("logged_in", "true", config.AccessTokenMaxAge*60, "/", "localhost", false, false)
+	utils.RefreshAccessTokenSetCookies(ctx, accessToken, config.AccessTokenMaxAge*60)
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
 }
@@ -288,9 +287,7 @@ func (userHandler *UserHandler) UpdateUser(ctx *gin.Context) {
 }
 
 func (userHandler *UserHandler) Logout(ctx *gin.Context) {
-	ctx.SetCookie("access_token", "", -1, "/", "localhost", false, true)
-	ctx.SetCookie("refresh_token", "", -1, "/", "localhost", false, true)
-	ctx.SetCookie("logged_in", "", -1, "/", "localhost", false, true)
+	utils.LogoutSetCookies(ctx)
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success"})
 }

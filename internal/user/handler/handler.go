@@ -221,7 +221,7 @@ func (userHandler *UserHandler) ResetUserPassword(ctx *gin.Context) {
 func (userHandler *UserHandler) RefreshAccessToken(ctx *gin.Context) {
 	message := "could not refresh access token"
 
-	currentUser := ctx.MustGet("currentUser").(*models.UserFullResponse)
+	currentUser := ctx.MustGet("currentUser").(*models.UserDBFullResponse)
 
 	if currentUser == nil {
 		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": message})
@@ -268,7 +268,7 @@ func (userHandler *UserHandler) UpdateUser(ctx *gin.Context) {
 	context := ctx.Request.Context()
 
 	currentUser := ctx.MustGet("currentUser")
-	userID := currentUser.(*models.UserFullResponse).UserID.Hex()
+	userID := currentUser.(*models.UserDBFullResponse).UserID.Hex()
 
 	var updatedUserData *models.UserUpdate
 
@@ -293,7 +293,7 @@ func (userHandler *UserHandler) Logout(ctx *gin.Context) {
 }
 
 func (userHandler *UserHandler) GetMe(ctx *gin.Context) {
-	currentUser := ctx.MustGet("currentUser").(*models.UserFullResponse)
+	currentUser := ctx.MustGet("currentUser").(*models.UserDBFullResponse)
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": models.FilteredResponse(currentUser)}})
 }
@@ -302,7 +302,7 @@ func (userHandler *UserHandler) Delete(ctx *gin.Context) {
 	context := ctx.Request.Context()
 
 	currentUser := ctx.MustGet("currentUser")
-	userID := currentUser.(*models.UserFullResponse).UserID.Hex()
+	userID := currentUser.(*models.UserDBFullResponse).UserID.Hex()
 	err := userHandler.userService.DeleteUserById(context, fmt.Sprint(userID))
 
 	if err != nil {

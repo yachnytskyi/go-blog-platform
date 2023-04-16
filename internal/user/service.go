@@ -8,13 +8,13 @@ import (
 )
 
 type Service interface {
-	Register(ctx context.Context, user *models.UserCreate) (*models.UserFullResponse, error)
-	Login(ctx context.Context, user *models.UserSignIn) (*models.UserFullResponse, error)
-	UpdateNewRegisteredUserById(ctx context.Context, userID string, key string, value string) (*models.UserFullResponse, error)
+	Register(ctx context.Context, user *models.UserCreate) (*models.UserDBFullResponse, error)
+	Login(ctx context.Context, user *models.UserSignIn) (*models.UserDBFullResponse, error)
+	UpdateNewRegisteredUserById(ctx context.Context, userID string, key string, value string) (*models.UserDBFullResponse, error)
 	UpdatePasswordResetTokenUserByEmail(ctx context.Context, email string, firstKey string, firstValue string, secondKey string, secondValue time.Time) error
 	ResetUserPassword(ctx context.Context, firstKey string, firstValue string, secondKey, passwordKey, password string) error
-	UpdateUserById(ctx context.Context, userID string, user *models.UserUpdate) (*models.UserFullResponse, error)
-	GetUserById(ctx context.Context, userID string) (*models.UserFullResponse, error)
-	GetUserByEmail(ctx context.Context, email string) (*models.UserFullResponse, error)
+	UpdateUserById(ctx context.Context, userID string, user *models.UserUpdate) (*models.UserDBFullResponse, error)
+	GetUserById(ctx context.Context, userID string) (*models.UserDBFullResponse, error)
+	GetUserByEmail(ctx context.Context, email string) (*models.UserDBFullResponse, error)
 	DeleteUserById(ctx context.Context, userID string) error
 }

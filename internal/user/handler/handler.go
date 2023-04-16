@@ -57,7 +57,7 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 		log.Fatal("could not load the config", err)
 	}
 
-	// Generate Verification Code.
+	// Generate verification code.
 	code := randstr.String(20)
 
 	verificationCode := utils.Encode(code)
@@ -120,9 +120,7 @@ func (userHandler *UserHandler) Login(ctx *gin.Context) {
 		return
 	}
 
-	ctx.SetCookie("access_token", accessToken, config.AccessTokenMaxAge*60, "/", "localhost", false, true)
-	ctx.SetCookie("refresh_token", refreshToken, config.RefreshTokenMaxAge*60, "/", "localhost", false, true)
-	ctx.SetCookie("logged_in", "true", config.AccessTokenMaxAge*60, "/", "localhost", false, false)
+	utils.LoginSetCookies(ctx, accessToken, config.AccessTokenMaxAge*60, refreshToken, config.RefreshTokenMaxAge*60)
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
 }
@@ -214,9 +212,7 @@ func (userHandler *UserHandler) ResetUserPassword(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 	}
 
-	ctx.SetCookie("access_token", "", -1, "/", "localhost", false, true)
-	ctx.SetCookie("refresh_token", "", -1, "/", "localhost", false, true)
-	ctx.SetCookie("logged_in", "", -1, "/", "localhost", false, true)
+	utils.ResetUserPasswordSetCookies(ctx)
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "Congratulations! Your password was updated successfully! Please sign in again."})
 
@@ -225,7 +221,7 @@ func (userHandler *UserHandler) ResetUserPassword(ctx *gin.Context) {
 func (userHandler *UserHandler) RefreshAccessToken(ctx *gin.Context) {
 	message := "could not refresh access token"
 
-	currentUser := ctx.MustGet("currentUser").(*models.UserFullResponse)
+	currentUser := ctx.MustGet("currentUser").(*models.UserDBFullResponse)
 
 	if currentUser == nil {
 		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": message})
@@ -263,8 +259,7 @@ func (userHandler *UserHandler) RefreshAccessToken(ctx *gin.Context) {
 		return
 	}
 
-	ctx.SetCookie("access_token", accessToken, config.AccessTokenMaxAge*60, "/", "localhost", false, true)
-	ctx.SetCookie("logged_in", "true", config.AccessTokenMaxAge*60, "/", "localhost", false, false)
+	utils.RefreshAccessTokenSetCookies(ctx, accessToken, config.AccessTokenMaxAge*60)
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
 }
@@ -273,7 +268,7 @@ func (userHandler *UserHandler) UpdateUser(ctx *gin.Context) {
 	context := ctx.Request.Context()
 
 	currentUser := ctx.MustGet("currentUser")
-	userID := currentUser.(*models.UserFullResponse).UserID.Hex()
+	userID := currentUser.(*models.UserDBFullResponse).UserID.Hex()
 
 	var updatedUserData *models.UserUpdate
 
@@ -292,15 +287,13 @@ func (userHandler *UserHandler) UpdateUser(ctx *gin.Context) {
 }
 
 func (userHandler *UserHandler) Logout(ctx *gin.Context) {
-	ctx.SetCookie("access_token", "", -1, "/", "localhost", false, true)
-	ctx.SetCookie("refresh_token", "", -1, "/", "localhost", false, true)
-	ctx.SetCookie("logged_in", "", -1, "/", "localhost", false, true)
+	utils.LogoutSetCookies(ctx)
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success"})
 }
 
 func (userHandler *UserHandler) GetMe(ctx *gin.Context) {
-	currentUser := ctx.MustGet("currentUser").(*models.UserFullResponse)
+	currentUser := ctx.MustGet("currentUser").(*models.UserDBFullResponse)
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": models.FilteredResponse(currentUser)}})
 }
@@ -309,7 +302,7 @@ func (userHandler *UserHandler) Delete(ctx *gin.Context) {
 	context := ctx.Request.Context()
 
 	currentUser := ctx.MustGet("currentUser")
-	userID := currentUser.(*models.UserFullResponse).UserID.Hex()
+	userID := currentUser.(*models.UserDBFullResponse).UserID.Hex()
 	err := userHandler.userService.DeleteUserById(context, fmt.Sprint(userID))
 
 	if err != nil {

@@ -42,7 +42,7 @@ type UserUpdate struct {
 }
 
 // [GET].
-type UserFullResponse struct {
+type UserDBFullResponse struct {
 	UserID          primitive.ObjectID `json:"user_id" bson:"_id"`
 	Name            string             `json:"name" bson:"name"`
 	Email           string             `json:"email" bson:"email"`
@@ -65,7 +65,7 @@ type UserResponse struct {
 }
 
 // User mapping.
-func FilteredResponse(user *UserFullResponse) UserResponse {
+func FilteredResponse(user *UserDBFullResponse) UserResponse {
 	return UserResponse{
 		UserID:    user.UserID,
 		Email:     user.Email,

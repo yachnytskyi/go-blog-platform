@@ -57,7 +57,7 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 		log.Fatal("could not load the config", err)
 	}
 
-	// Generate Verification Code.
+	// Generate verification code.
 	code := randstr.String(20)
 
 	verificationCode := utils.Encode(code)
@@ -120,9 +120,7 @@ func (userHandler *UserHandler) Login(ctx *gin.Context) {
 		return
 	}
 
-	ctx.SetCookie("access_token", accessToken, config.AccessTokenMaxAge*60, "/", "localhost", false, true)
-	ctx.SetCookie("refresh_token", refreshToken, config.RefreshTokenMaxAge*60, "/", "localhost", false, true)
-	ctx.SetCookie("logged_in", "true", config.AccessTokenMaxAge*60, "/", "localhost", false, false)
+	utils.LoginSetCookies(ctx, accessToken, config.AccessTokenMaxAge*60, refreshToken, config.RefreshTokenMaxAge*60)
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
 }

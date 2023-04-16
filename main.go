@@ -32,8 +32,8 @@ var (
 
 	userRepository user.Repository
 	userService    user.Service
-	userHandler    user.Handler
-	userRouter     user.Router
+	userHandler    handler.UserHandler
+	userRouter     handler.UserRouter
 
 	userCollection   *mongo.Collection
 	templateInstance *template.Template

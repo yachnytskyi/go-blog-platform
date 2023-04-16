@@ -7,11 +7,11 @@ import (
 )
 
 type UserRouter struct {
-	userHandler user.Handler
+	userHandler UserHandler
 }
 
-func NewUserRouter(userHandler user.Handler) user.Router {
-	return &UserRouter{userHandler: userHandler}
+func NewUserRouter(userHandler UserHandler) UserRouter {
+	return UserRouter{userHandler: userHandler}
 }
 
 func (userRouter *UserRouter) UserRouter(routerGroup *gin.RouterGroup, userService user.Service) {

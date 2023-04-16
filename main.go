@@ -14,7 +14,7 @@ import (
 	"github.com/yachnytskyi/golang-mongo-grpc/config"
 
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
-	"github.com/yachnytskyi/golang-mongo-grpc/internal/user/handler"
+	"github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http_gin"
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user/repository"
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user/service"
 
@@ -32,8 +32,8 @@ var (
 
 	userRepository user.Repository
 	userService    user.Service
-	userHandler    handler.UserHandler
-	userRouter     handler.UserRouter
+	userHandler    http_gin.UserHandler
+	userRouter     http_gin.UserRouter
 
 	userCollection   *mongo.Collection
 	templateInstance *template.Template
@@ -89,8 +89,8 @@ func init() {
 	userRepository = repository.NewUserRepository(userCollection)
 	userService = service.NewUserService(userRepository)
 
-	userHandler = handler.NewUserHandler(userService, templateInstance)
-	userRouter = handler.NewUserRouter(userHandler)
+	userHandler = http_gin.NewUserHandler(userService, templateInstance)
+	userRouter = http_gin.NewUserRouter(userHandler)
 
 	// Create the Gin Engine instance.
 	server = gin.Default()

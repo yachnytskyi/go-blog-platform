@@ -1,4 +1,4 @@
-package handler
+package http_gin
 
 import (
 	"fmt"

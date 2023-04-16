@@ -19,13 +19,13 @@ func NewUserService(userRepository user.Repository) user.Service {
 	return &UserService{userRepository: userRepository}
 }
 
-func (userService *UserService) Register(ctx context.Context, user *models.UserCreate) (*models.UserDBFullResponse, error) {
+func (userService *UserService) Register(ctx context.Context, user *models.UserCreate) (*models.UserDB, error) {
 	createdUser, err := userService.userRepository.Register(ctx, user)
 
 	return createdUser, err
 }
 
-func (userService *UserService) Login(ctx context.Context, user *models.UserSignIn) (*models.UserDBFullResponse, error) {
+func (userService *UserService) Login(ctx context.Context, user *models.UserSignIn) (*models.UserDB, error) {
 	fetchedUser, err := userService.userRepository.GetUserByEmail(ctx, user.Email)
 
 	// Will return wrong email or password.
@@ -43,7 +43,7 @@ func (userService *UserService) Login(ctx context.Context, user *models.UserSign
 	return fetchedUser, err
 }
 
-func (userService *UserService) UpdateNewRegisteredUserById(ctx context.Context, userID string, key string, value string) (*models.UserDBFullResponse, error) {
+func (userService *UserService) UpdateNewRegisteredUserById(ctx context.Context, userID string, key string, value string) (*models.UserDB, error) {
 	user, err := userService.userRepository.UpdateNewRegisteredUserById(ctx, userID, key, value)
 
 	return user, err
@@ -64,19 +64,19 @@ func (userService *UserService) ResetUserPassword(ctx context.Context, firstKey 
 
 }
 
-func (userService *UserService) UpdateUserById(ctx context.Context, userID string, user *models.UserUpdate) (*models.UserDBFullResponse, error) {
+func (userService *UserService) UpdateUserById(ctx context.Context, userID string, user *models.UserUpdate) (*models.UserDB, error) {
 	updatedUser, err := userService.userRepository.UpdateUserById(ctx, userID, user)
 
 	return updatedUser, err
 }
 
-func (userService *UserService) GetUserById(ctx context.Context, userID string) (*models.UserDBFullResponse, error) {
+func (userService *UserService) GetUserById(ctx context.Context, userID string) (*models.UserDB, error) {
 	user, err := userService.userRepository.GetUserById(ctx, userID)
 
 	return user, err
 }
 
-func (userService *UserService) GetUserByEmail(ctx context.Context, email string) (*models.UserDBFullResponse, error) {
+func (userService *UserService) GetUserByEmail(ctx context.Context, email string) (*models.UserDB, error) {
 	user, err := userService.userRepository.GetUserByEmail(ctx, email)
 
 	return user, err

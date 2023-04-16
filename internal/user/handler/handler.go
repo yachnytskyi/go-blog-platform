@@ -21,8 +21,8 @@ type UserHandler struct {
 	template    *template.Template
 }
 
-func NewUserHandler(userService user.Service, template *template.Template) user.Handler {
-	return &UserHandler{userService: userService, template: template}
+func NewUserHandler(userService user.Service, template *template.Template) UserHandler {
+	return UserHandler{userService: userService, template: template}
 }
 
 func (userHandler *UserHandler) Register(ctx *gin.Context) {

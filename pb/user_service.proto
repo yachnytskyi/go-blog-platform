@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "github.com/yachnytskyi/golang-mongo-grpc/pb";
+
+import "rpc_register_user.proto";
+import "user.proto";
+
+
+service UserService {
+    rpc Register(RegisterUserInput) returns (GenericResponse) {}
+    rpc VerifyEmail(VerifyEmailRequest) returns (GenericResponse) {}
+}
+
+message VerifyEmailRequest { string verificationCode = 1; }

@@ -6,12 +6,17 @@ import (
 	"fmt"
 	"html/template"
 	"log"
+	"net"
 	"net/http"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	"github.com/yachnytskyi/golang-mongo-grpc/config"
+	"github.com/yachnytskyi/golang-mongo-grpc/gapi"
+	"github.com/yachnytskyi/golang-mongo-grpc/pb"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http_gin"
@@ -105,6 +110,37 @@ func main() {
 
 	defer mongoClient.Disconnect(ctx)
 
+	startGinServer(config)
+	// startGrpcServer(config)
+}
+
+func startGrpcServer(config config.Config) {
+	server, err := gapi.NewGrpcServer(config, userService, userCollection)
+
+	if err != nil {
+		log.Fatal("cannot createt grpc server: ", err)
+	}
+
+	grpcServer := grpc.NewServer()
+	pb.RegisterUserServiceServer(grpcServer, server)
+	reflection.Register(grpcServer)
+
+	listener, err := net.Listen("tcp", config.GrpcServerAddress)
+
+	if err != nil {
+		log.Fatal("cannot create grpc server: ", err)
+	}
+
+	log.Printf("start grpc server on %s", listener.Addr().String())
+	err = grpcServer.Serve(listener)
+
+	if err != nil {
+		log.Fatal("cannot create grpc server: ", err)
+	}
+
+}
+
+func startGinServer(config config.Config) {
 	value, err := redisClient.Get(ctx, "test").Result()
 
 	if err == redis.Nil {

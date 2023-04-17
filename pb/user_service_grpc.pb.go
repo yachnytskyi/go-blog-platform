@@ -20,7 +20,9 @@ const _ = grpc.SupportPackageIsVersion7
 
 const (
 	UserService_Register_FullMethodName    = "/pb.UserService/Register"
+	UserService_Login_FullMethodName       = "/pb.UserService/Login"
 	UserService_VerifyEmail_FullMethodName = "/pb.UserService/VerifyEmail"
+	UserService_GetMe_FullMethodName       = "/pb.UserService/GetMe"
 )
 
 // UserServiceClient is the client API for UserService service.
@@ -28,7 +30,9 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserServiceClient interface {
 	Register(ctx context.Context, in *RegisterUserInput, opts ...grpc.CallOption) (*GenericResponse, error)
+	Login(ctx context.Context, in *LoginUserInput, opts ...grpc.CallOption) (*LoginUserResponse, error)
 	VerifyEmail(ctx context.Context, in *VerifyEmailRequest, opts ...grpc.CallOption) (*GenericResponse, error)
+	GetMe(ctx context.Context, in *GetMeRequest, opts ...grpc.CallOption) (*UserResponse, error)
 }
 
 type userServiceClient struct {
@@ -48,9 +52,27 @@ func (c *userServiceClient) Register(ctx context.Context, in *RegisterUserInput,
 	return out, nil
 }
 
+func (c *userServiceClient) Login(ctx context.Context, in *LoginUserInput, opts ...grpc.CallOption) (*LoginUserResponse, error) {
+	out := new(LoginUserResponse)
+	err := c.cc.Invoke(ctx, UserService_Login_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *userServiceClient) VerifyEmail(ctx context.Context, in *VerifyEmailRequest, opts ...grpc.CallOption) (*GenericResponse, error) {
 	out := new(GenericResponse)
 	err := c.cc.Invoke(ctx, UserService_VerifyEmail_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) GetMe(ctx context.Context, in *GetMeRequest, opts ...grpc.CallOption) (*UserResponse, error) {
+	out := new(UserResponse)
+	err := c.cc.Invoke(ctx, UserService_GetMe_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +84,9 @@ func (c *userServiceClient) VerifyEmail(ctx context.Context, in *VerifyEmailRequ
 // for forward compatibility
 type UserServiceServer interface {
 	Register(context.Context, *RegisterUserInput) (*GenericResponse, error)
+	Login(context.Context, *LoginUserInput) (*LoginUserResponse, error)
 	VerifyEmail(context.Context, *VerifyEmailRequest) (*GenericResponse, error)
+	GetMe(context.Context, *GetMeRequest) (*UserResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -73,8 +97,14 @@ type UnimplementedUserServiceServer struct {
 func (UnimplementedUserServiceServer) Register(context.Context, *RegisterUserInput) (*GenericResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
 }
+func (UnimplementedUserServiceServer) Login(context.Context, *LoginUserInput) (*LoginUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
+}
 func (UnimplementedUserServiceServer) VerifyEmail(context.Context, *VerifyEmailRequest) (*GenericResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VerifyEmail not implemented")
+}
+func (UnimplementedUserServiceServer) GetMe(context.Context, *GetMeRequest) (*UserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMe not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 
@@ -107,6 +137,24 @@ func _UserService_Register_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LoginUserInput)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).Login(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_Login_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).Login(ctx, req.(*LoginUserInput))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _UserService_VerifyEmail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(VerifyEmailRequest)
 	if err := dec(in); err != nil {
@@ -125,6 +173,24 @@ func _UserService_VerifyEmail_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_GetMe_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).GetMe(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UserService_GetMe_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).GetMe(ctx, req.(*GetMeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -137,8 +203,16 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _UserService_Register_Handler,
 		},
 		{
+			MethodName: "Login",
+			Handler:    _UserService_Login_Handler,
+		},
+		{
 			MethodName: "VerifyEmail",
 			Handler:    _UserService_VerifyEmail_Handler,
+		},
+		{
+			MethodName: "GetMe",
+			Handler:    _UserService_GetMe_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -12,19 +12,19 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (server *Server) Register(ctx context.Context, req *pb.RegisterUserInput) (*pb.GenericResponse, error) {
-	if req.GetPassword() != req.GetPasswordConfirm() {
+func (userServer *UserServer) Register(ctx context.Context, request *pb.RegisterUserInput) (*pb.GenericResponse, error) {
+	if request.GetPassword() != request.GetPasswordConfirm() {
 		return nil, status.Errorf(codes.InvalidArgument, "passwords do not match")
 	}
 
 	user := models.UserCreate{
-		Name:            req.GetName(),
-		Email:           req.GetEmail(),
-		Password:        req.GetPassword(),
-		PasswordConfirm: req.GetPasswordConfirm(),
+		Name:            request.GetName(),
+		Email:           request.GetEmail(),
+		Password:        request.GetPassword(),
+		PasswordConfirm: request.GetPasswordConfirm(),
 	}
 
-	newUser, err := server.userService.Register(ctx, &user)
+	newUser, err := userServer.userService.Register(ctx, &user)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "email already exist") {
@@ -40,14 +40,14 @@ func (server *Server) Register(ctx context.Context, req *pb.RegisterUserInput) (
 	verificationCode := utils.Encode(code)
 
 	// Update the user in database.
-	server.userService.UpdateNewRegisteredUserById(ctx, newUser.UserID.Hex(), "verificationCode", verificationCode)
+	userServer.userService.UpdateNewRegisteredUserById(ctx, newUser.UserID.Hex(), "verificationCode", verificationCode)
 
 	var firstName = newUser.Name
 	firstName = utils.UserFirstName(firstName)
 
 	// Send an email.
 	emailData := utils.EmailData{
-		URL:       server.config.Origin + "/verifyemail/" + code,
+		URL:       userServer.config.Origin + "/verifyemail/" + code,
 		FirstName: firstName,
 		Subject:   "Your account verification code",
 	}

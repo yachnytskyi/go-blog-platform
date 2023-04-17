@@ -110,19 +110,19 @@ func main() {
 
 	defer mongoClient.Disconnect(ctx)
 
-	startGinServer(config)
-	// startGrpcServer(config)
+	// startGinServer(config)
+	startGrpcServer(config)
 }
 
 func startGrpcServer(config config.Config) {
-	server, err := gapi.NewGrpcServer(config, userService, userCollection)
+	userServer, err := gapi.NewGrpcUserServer(config, userService, userCollection)
 
 	if err != nil {
 		log.Fatal("cannot createt grpc server: ", err)
 	}
 
 	grpcServer := grpc.NewServer()
-	pb.RegisterUserServiceServer(grpcServer, server)
+	pb.RegisterUserServiceServer(grpcServer, userServer)
 	reflection.Register(grpcServer)
 
 	listener, err := net.Listen("tcp", config.GrpcServerAddress)

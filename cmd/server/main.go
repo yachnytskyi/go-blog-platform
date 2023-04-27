@@ -13,15 +13,20 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	"github.com/yachnytskyi/golang-mongo-grpc/config"
-	"github.com/yachnytskyi/golang-mongo-grpc/gapi"
 	"github.com/yachnytskyi/golang-mongo-grpc/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
-	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
-	"github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http_gin"
-	"github.com/yachnytskyi/golang-mongo-grpc/internal/user/repository"
-	"github.com/yachnytskyi/golang-mongo-grpc/internal/user/service"
+	postPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
+	postHttpPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/http/v1"
+	postRepositoryPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post/repository"
+	postServicePackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post/service"
+	userPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
+	userGrpcPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1"
+	userHttpPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/v1"
+	userRepositoryPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/repository"
+
+	userServicePackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/service"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -35,12 +40,18 @@ var (
 	mongoClient *mongo.Client
 	redisClient *redis.Client
 
-	userRepository user.Repository
-	userService    user.Service
-	userHandler    http_gin.UserHandler
-	userRouter     http_gin.UserRouter
+	userCollection *mongo.Collection
+	userRepository userPackage.Repository
+	userService    userPackage.Service
+	userHandler    userHttpPackage.UserHandler
+	userRouter     userHttpPackage.UserRouter
 
-	userCollection   *mongo.Collection
+	postCollection *mongo.Collection
+	postRepository postPackage.Repository
+	postService    postPackage.Service
+	postHandler    postHttpPackage.PostHandler
+	postRouter     postHttpPackage.PostRouter
+
 	templateInstance *template.Template
 )
 
@@ -91,11 +102,23 @@ func init() {
 
 	// Collections.
 	userCollection = mongoClient.Database("golang_mongodb").Collection("users")
-	userRepository = repository.NewUserRepository(userCollection)
-	userService = service.NewUserService(userRepository)
+	postCollection = mongoClient.Database("golang_mongodb").Collection("posts")
 
-	userHandler = http_gin.NewUserHandler(userService, templateInstance)
-	userRouter = http_gin.NewUserRouter(userHandler)
+	// Repositories.
+	userRepository = userRepositoryPackage.NewUserRepository(userCollection)
+	postRepository = postRepositoryPackage.NewPostRepository(postCollection)
+
+	// Services.
+	userService = userServicePackage.NewUserService(userRepository)
+	postService = postServicePackage.NewPostService(postRepository)
+
+	// Handlers
+	userHandler = userHttpPackage.NewUserHandler(userService, templateInstance)
+	postHandler = postHttpPackage.NewPostHandler(postService)
+
+	// Routers.
+	userRouter = userHttpPackage.NewUserRouter(userHandler)
+	postRouter = postHttpPackage.NewPostRouter(postHandler)
 
 	// Create the Gin Engine instance.
 	server = gin.Default()
@@ -110,12 +133,12 @@ func main() {
 
 	defer mongoClient.Disconnect(ctx)
 
-	// startGinServer(config)
-	startGrpcServer(config)
+	startGinServer(config)
+	// startGrpcServer(config)
 }
 
 func startGrpcServer(config config.Config) {
-	userServer, err := gapi.NewGrpcUserServer(config, userService, userCollection)
+	userServer, err := userGrpcPackage.NewGrpcUserServer(config, userService, userCollection)
 
 	if err != nil {
 		log.Fatal("cannot createt grpc server: ", err)
@@ -161,5 +184,7 @@ func startGinServer(config config.Config) {
 	})
 
 	userRouter.UserRouter(router, userService)
+	postRouter.PostRouter(router)
+
 	log.Fatal(server.Run(":" + config.Port))
 }

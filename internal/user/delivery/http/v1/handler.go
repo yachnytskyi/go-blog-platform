@@ -1,4 +1,4 @@
-package http_gin
+package v1
 
 import (
 	"fmt"
@@ -40,7 +40,7 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 
 	context := ctx.Request.Context()
 
-	newUser, err := userHandler.userService.Register(context, user)
+	createdUser, err := userHandler.userService.Register(context, user)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "email already exists") {
@@ -63,9 +63,9 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 	verificationCode := utils.Encode(code)
 
 	// Update the user in Database.
-	userHandler.userService.UpdateNewRegisteredUserById(context, newUser.UserID.Hex(), "verificationCode", verificationCode)
+	userHandler.userService.UpdateNewRegisteredUserById(context, createdUser.UserID.Hex(), "verificationCode", verificationCode)
 
-	firstName := newUser.Name
+	firstName := createdUser.Name
 	firstName = utils.UserFirstName(firstName)
 
 	// Send an email.
@@ -75,7 +75,7 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 		Subject:   "Your account verification code",
 	}
 
-	err = utils.SendEmail(newUser, &emailData, "verificationCode.html")
+	err = utils.SendEmail(createdUser, &emailData, "verificationCode.html")
 
 	if err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": "Error in sending an email"})
@@ -136,14 +136,14 @@ func (userHandler *UserHandler) ForgottenPassword(ctx *gin.Context) {
 	message := "We sent you an email with needed instructions"
 	context := ctx.Request.Context()
 
-	user, err := userHandler.userService.GetUserByEmail(context, userEmail.Email)
+	fetchedUser, err := userHandler.userService.GetUserByEmail(context, userEmail.Email)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": err.Error()})
 		return
 	}
 
-	if !user.Verified {
+	if !fetchedUser.Verified {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": "Please verify you account"})
 		return
 	}
@@ -160,14 +160,14 @@ func (userHandler *UserHandler) ForgottenPassword(ctx *gin.Context) {
 	passwordResetAt := time.Now().Add(time.Minute * 15)
 
 	// Update the user.
-	err = userHandler.userService.UpdatePasswordResetTokenUserByEmail(context, user.Email, "passwordResetToken", passwordResetToken, "passwordResetAt", passwordResetAt)
+	err = userHandler.userService.UpdatePasswordResetTokenUserByEmail(context, fetchedUser.Email, "passwordResetToken", passwordResetToken, "passwordResetAt", passwordResetAt)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "success", "message": err.Error()})
 		return
 	}
 
-	firstName := user.Name
+	firstName := fetchedUser.Name
 	firstName = utils.UserFirstName(firstName)
 
 	// Send an email.
@@ -177,7 +177,7 @@ func (userHandler *UserHandler) ForgottenPassword(ctx *gin.Context) {
 		Subject:   "Your password reset token (it is valid for 15 minutes)",
 	}
 
-	err = utils.SendEmail(user, &emailData, "resetPassword.html")
+	err = utils.SendEmail(fetchedUser, &emailData, "resetPassword.html")
 
 	if err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "success", "message": "Error in sending an email"})

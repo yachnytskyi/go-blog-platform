@@ -4,11 +4,10 @@
 // - protoc             v3.21.12
 // source: user_service.proto
 
-package pb
+package models
 
 import (
 	context "context"
-	proto_generated "github.com/yachnytskyi/golang-mongo-grpc/proto-generated"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -20,20 +19,20 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	UserService_Register_FullMethodName    = "/grpc.UserService/Register"
-	UserService_Login_FullMethodName       = "/grpc.UserService/Login"
-	UserService_VerifyEmail_FullMethodName = "/grpc.UserService/VerifyEmail"
-	UserService_GetMe_FullMethodName       = "/grpc.UserService/GetMe"
+	UserService_Register_FullMethodName    = "/models.UserService/Register"
+	UserService_Login_FullMethodName       = "/models.UserService/Login"
+	UserService_VerifyEmail_FullMethodName = "/models.UserService/VerifyEmail"
+	UserService_GetMe_FullMethodName       = "/models.UserService/GetMe"
 )
 
 // UserServiceClient is the client API for UserService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserServiceClient interface {
-	Register(ctx context.Context, in *RegisterUserInput, opts ...grpc.CallOption) (*proto_generated.GenericResponse, error)
+	Register(ctx context.Context, in *RegisterUserInput, opts ...grpc.CallOption) (*GenericResponse, error)
 	Login(ctx context.Context, in *LoginUserInput, opts ...grpc.CallOption) (*LoginUserResponse, error)
-	VerifyEmail(ctx context.Context, in *VerifyEmailRequest, opts ...grpc.CallOption) (*proto_generated.GenericResponse, error)
-	GetMe(ctx context.Context, in *GetMeRequest, opts ...grpc.CallOption) (*proto_generated.UserResponse, error)
+	VerifyEmail(ctx context.Context, in *VerifyEmailRequest, opts ...grpc.CallOption) (*GenericResponse, error)
+	GetMe(ctx context.Context, in *GetMeRequest, opts ...grpc.CallOption) (*UserResponse, error)
 }
 
 type userServiceClient struct {
@@ -44,8 +43,8 @@ func NewUserServiceClient(cc grpc.ClientConnInterface) UserServiceClient {
 	return &userServiceClient{cc}
 }
 
-func (c *userServiceClient) Register(ctx context.Context, in *RegisterUserInput, opts ...grpc.CallOption) (*proto_generated.GenericResponse, error) {
-	out := new(proto_generated.GenericResponse)
+func (c *userServiceClient) Register(ctx context.Context, in *RegisterUserInput, opts ...grpc.CallOption) (*GenericResponse, error) {
+	out := new(GenericResponse)
 	err := c.cc.Invoke(ctx, UserService_Register_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -62,8 +61,8 @@ func (c *userServiceClient) Login(ctx context.Context, in *LoginUserInput, opts 
 	return out, nil
 }
 
-func (c *userServiceClient) VerifyEmail(ctx context.Context, in *VerifyEmailRequest, opts ...grpc.CallOption) (*proto_generated.GenericResponse, error) {
-	out := new(proto_generated.GenericResponse)
+func (c *userServiceClient) VerifyEmail(ctx context.Context, in *VerifyEmailRequest, opts ...grpc.CallOption) (*GenericResponse, error) {
+	out := new(GenericResponse)
 	err := c.cc.Invoke(ctx, UserService_VerifyEmail_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -71,8 +70,8 @@ func (c *userServiceClient) VerifyEmail(ctx context.Context, in *VerifyEmailRequ
 	return out, nil
 }
 
-func (c *userServiceClient) GetMe(ctx context.Context, in *GetMeRequest, opts ...grpc.CallOption) (*proto_generated.UserResponse, error) {
-	out := new(proto_generated.UserResponse)
+func (c *userServiceClient) GetMe(ctx context.Context, in *GetMeRequest, opts ...grpc.CallOption) (*UserResponse, error) {
+	out := new(UserResponse)
 	err := c.cc.Invoke(ctx, UserService_GetMe_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -84,10 +83,10 @@ func (c *userServiceClient) GetMe(ctx context.Context, in *GetMeRequest, opts ..
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
 type UserServiceServer interface {
-	Register(context.Context, *RegisterUserInput) (*proto_generated.GenericResponse, error)
+	Register(context.Context, *RegisterUserInput) (*GenericResponse, error)
 	Login(context.Context, *LoginUserInput) (*LoginUserResponse, error)
-	VerifyEmail(context.Context, *VerifyEmailRequest) (*proto_generated.GenericResponse, error)
-	GetMe(context.Context, *GetMeRequest) (*proto_generated.UserResponse, error)
+	VerifyEmail(context.Context, *VerifyEmailRequest) (*GenericResponse, error)
+	GetMe(context.Context, *GetMeRequest) (*UserResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -95,16 +94,16 @@ type UserServiceServer interface {
 type UnimplementedUserServiceServer struct {
 }
 
-func (UnimplementedUserServiceServer) Register(context.Context, *RegisterUserInput) (*proto_generated.GenericResponse, error) {
+func (UnimplementedUserServiceServer) Register(context.Context, *RegisterUserInput) (*GenericResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
 }
 func (UnimplementedUserServiceServer) Login(context.Context, *LoginUserInput) (*LoginUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
 }
-func (UnimplementedUserServiceServer) VerifyEmail(context.Context, *VerifyEmailRequest) (*proto_generated.GenericResponse, error) {
+func (UnimplementedUserServiceServer) VerifyEmail(context.Context, *VerifyEmailRequest) (*GenericResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VerifyEmail not implemented")
 }
-func (UnimplementedUserServiceServer) GetMe(context.Context, *GetMeRequest) (*proto_generated.UserResponse, error) {
+func (UnimplementedUserServiceServer) GetMe(context.Context, *GetMeRequest) (*UserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMe not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
@@ -196,7 +195,7 @@ func _UserService_GetMe_Handler(srv interface{}, ctx context.Context, dec func(i
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var UserService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "grpc.UserService",
+	ServiceName: "models.UserService",
 	HandlerType: (*UserServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

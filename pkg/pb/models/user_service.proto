@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package grpc;
+package models;
 
-option go_package = "github.com/yachnytskyi/golang-mongo-grpc/pb";
+option go_package = "github.com/yachnytskyi/golang-mongo-grpc/pkg/pb/models";
 
 import "rpc_register_user.proto";
 import "rpc_login_user.proto";

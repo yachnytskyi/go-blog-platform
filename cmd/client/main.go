@@ -25,14 +25,14 @@ func main() {
 	// Register.
 	if false {
 		registerUserClient := client.NewRegisterUserClient(connect)
-		newUser := &pb.RegisterUserInput{
+		createdUser := &pb.RegisterUserInput{
 			Name:            "Test Test",
 			Email:           "test100@gmail.com",
 			Password:        "somepassword",
 			PasswordConfirm: "somepassword",
 		}
 
-		registerUserClient.Register(newUser)
+		registerUserClient.Register(createdUser)
 	}
 
 	// Login.

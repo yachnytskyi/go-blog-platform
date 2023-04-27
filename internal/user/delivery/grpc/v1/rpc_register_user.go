@@ -1,4 +1,4 @@
-package gapi
+package v1
 
 import (
 	"context"
@@ -24,10 +24,10 @@ func (userServer *UserServer) Register(ctx context.Context, request *pb.Register
 		PasswordConfirm: request.GetPasswordConfirm(),
 	}
 
-	newUser, err := userServer.userService.Register(ctx, &user)
+	createdUser, err := userServer.userService.Register(ctx, &user)
 
 	if err != nil {
-		if strings.Contains(err.Error(), "email already exist") {
+		if strings.Contains(err.Error(), "email already exists") {
 			return nil, status.Errorf(codes.AlreadyExists, "%s", err.Error())
 
 		}
@@ -40,9 +40,9 @@ func (userServer *UserServer) Register(ctx context.Context, request *pb.Register
 	verificationCode := utils.Encode(code)
 
 	// Update the user in database.
-	userServer.userService.UpdateNewRegisteredUserById(ctx, newUser.UserID.Hex(), "verificationCode", verificationCode)
+	userServer.userService.UpdateNewRegisteredUserById(ctx, createdUser.UserID.Hex(), "verificationCode", verificationCode)
 
-	var firstName = newUser.Name
+	var firstName = createdUser.Name
 	firstName = utils.UserFirstName(firstName)
 
 	// Send an email.
@@ -52,13 +52,13 @@ func (userServer *UserServer) Register(ctx context.Context, request *pb.Register
 		Subject:   "Your account verification code",
 	}
 
-	err = utils.SendEmail(newUser, &emailData, "verificationCode.html")
+	err = utils.SendEmail(createdUser, &emailData, "verificationCode.html")
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "There was an error sending email: %s", err.Error())
 
 	}
 
-	message := "We sent an email with a verification code to " + newUser.Email
+	message := "We sent an email with a verification code to " + createdUser.Email
 
 	response := &pb.GenericResponse{
 		Status:  "success",

@@ -44,23 +44,22 @@ func (userService *UserService) Login(ctx context.Context, user *models.UserSign
 }
 
 func (userService *UserService) UpdateNewRegisteredUserById(ctx context.Context, userID string, key string, value string) (*models.UserDB, error) {
-	user, err := userService.userRepository.UpdateNewRegisteredUserById(ctx, userID, key, value)
+	updatedUser, err := userService.userRepository.UpdateNewRegisteredUserById(ctx, userID, key, value)
 
-	return user, err
+	return updatedUser, err
 }
 
 func (userService *UserService) UpdatePasswordResetTokenUserByEmail(ctx context.Context, email string, firstKey string, firstValue string,
 	secondKey string, secondValue time.Time) error {
-	result := userService.userRepository.UpdatePasswordResetTokenUserByEmail(ctx, email, firstKey, firstValue, secondKey, secondValue)
+	updatedUser := userService.userRepository.UpdatePasswordResetTokenUserByEmail(ctx, email, firstKey, firstValue, secondKey, secondValue)
 
-	return result
-
+	return updatedUser
 }
 
 func (userService *UserService) ResetUserPassword(ctx context.Context, firstKey string, firstValue string, secondKey string, passwordKey, password string) error {
-	result := userService.userRepository.ResetUserPassword(ctx, firstKey, firstValue, secondKey, passwordKey, password)
+	updatedUser := userService.userRepository.ResetUserPassword(ctx, firstKey, firstValue, secondKey, passwordKey, password)
 
-	return result
+	return updatedUser
 
 }
 
@@ -71,19 +70,19 @@ func (userService *UserService) UpdateUserById(ctx context.Context, userID strin
 }
 
 func (userService *UserService) GetUserById(ctx context.Context, userID string) (*models.UserDB, error) {
-	user, err := userService.userRepository.GetUserById(ctx, userID)
+	fetchedUser, err := userService.userRepository.GetUserById(ctx, userID)
 
-	return user, err
+	return fetchedUser, err
 }
 
 func (userService *UserService) GetUserByEmail(ctx context.Context, email string) (*models.UserDB, error) {
-	user, err := userService.userRepository.GetUserByEmail(ctx, email)
+	fetchedUser, err := userService.userRepository.GetUserByEmail(ctx, email)
 
-	return user, err
+	return fetchedUser, err
 }
 
 func (userService *UserService) DeleteUserById(ctx context.Context, userID string) error {
-	result := userService.userRepository.DeleteUserById(ctx, userID)
+	deletedUser := userService.userRepository.DeleteUserById(ctx, userID)
 
-	return result
+	return deletedUser
 }

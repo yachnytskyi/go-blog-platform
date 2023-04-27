@@ -1,4 +1,4 @@
-package gapi
+package v1
 
 import (
 	"github.com/yachnytskyi/golang-mongo-grpc/config"

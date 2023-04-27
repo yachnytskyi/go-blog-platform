@@ -23,6 +23,40 @@ func NewUserRepository(collection *mongo.Collection) user.Repository {
 	return &UserRepository{collection: collection}
 }
 
+func (userRepository *UserRepository) GetUserById(ctx context.Context, userID string) (*models.UserDB, error) {
+	objectUserID, _ := primitive.ObjectIDFromHex(userID)
+
+	var fetchedUser *models.UserDB
+
+	query := bson.M{"_id": objectUserID}
+	err := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
+
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return &models.UserDB{}, err
+		}
+		return nil, err
+	}
+
+	return fetchedUser, nil
+}
+
+func (userRepository *UserRepository) GetUserByEmail(ctx context.Context, email string) (*models.UserDB, error) {
+	var fetchedUser *models.UserDB
+
+	query := bson.M{"email": strings.ToLower(email)}
+	err := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
+
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return &models.UserDB{}, err
+		}
+		return nil, err
+	}
+
+	return fetchedUser, nil
+}
+
 func (userRepository *UserRepository) Register(ctx context.Context, user *models.UserCreate) (*models.UserDB, error) {
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = user.CreatedAt
@@ -51,15 +85,15 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *models
 		return nil, errors.New("could not create an index for an email")
 	}
 
-	var newUser *models.UserDB
+	var createdUser *models.UserDB
 	query := bson.M{"_id": result.InsertedID}
 
-	err = userRepository.collection.FindOne(ctx, query).Decode(&newUser)
+	err = userRepository.collection.FindOne(ctx, query).Decode(&createdUser)
 	if err != nil {
 		return nil, err
 	}
 
-	return newUser, nil
+	return createdUser, nil
 }
 
 func (userRepository *UserRepository) UpdateNewRegisteredUserById(ctx context.Context, userID string, key string, value string) (*models.UserDB, error) {
@@ -138,40 +172,6 @@ func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID
 	}
 
 	return updatedUser, nil
-}
-
-func (userRepository *UserRepository) GetUserById(ctx context.Context, userID string) (*models.UserDB, error) {
-	objectUserID, _ := primitive.ObjectIDFromHex(userID)
-
-	var user *models.UserDB
-
-	query := bson.M{"_id": objectUserID}
-	err := userRepository.collection.FindOne(ctx, query).Decode(&user)
-
-	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return &models.UserDB{}, err
-		}
-		return nil, err
-	}
-
-	return user, nil
-}
-
-func (userRepository *UserRepository) GetUserByEmail(ctx context.Context, email string) (*models.UserDB, error) {
-	var user *models.UserDB
-
-	query := bson.M{"email": strings.ToLower(email)}
-	err := userRepository.collection.FindOne(ctx, query).Decode(&user)
-
-	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return &models.UserDB{}, err
-		}
-		return nil, err
-	}
-
-	return user, nil
 }
 
 func (userRepository *UserRepository) DeleteUserById(ctx context.Context, userID string) error {

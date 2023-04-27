@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/post"
 	"github.com/yachnytskyi/golang-mongo-grpc/models"
+	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utils"
 )
 
 type PostHandler struct {
@@ -19,7 +20,10 @@ func NewPostHandler(postService post.Service) PostHandler {
 }
 
 func (postHandler *PostHandler) CreatePost(ctx *gin.Context) {
-	var post *models.PostCreate
+	var post *models.PostCreate = new(models.PostCreate)
+	currentUser := ctx.MustGet("currentUser").(*models.UserDB)
+	post.User = currentUser.Name
+	post.UserID = currentUser.UserID.Hex()
 
 	if err := ctx.ShouldBindJSON(&post); err != nil {
 		ctx.JSON(http.StatusBadRequest, err.Error())
@@ -49,6 +53,21 @@ func (postHandler *PostHandler) UpdatePost(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
+
+	fetchedPost, err := postHandler.postService.GetPostById(ctx, postID)
+
+	if err != nil {
+		if strings.Contains(err.Error(), "Id exists") {
+			ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
+		return
+	}
+
+	userID := fetchedPost.UserID
+
+	utils.IsOwner(userID, ctx)
 
 	updatedPost, err := postHandler.postService.UpdatePost(ctx, postID, updatedPostData)
 

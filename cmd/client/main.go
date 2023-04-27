@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/yachnytskyi/golang-mongo-grpc/client"
-	"github.com/yachnytskyi/golang-mongo-grpc/pb"
+	pb "github.com/yachnytskyi/golang-mongo-grpc/pkg/proto-generated"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )

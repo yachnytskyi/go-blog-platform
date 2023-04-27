@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/yachnytskyi/golang-mongo-grpc/pb"
+	pb "github.com/yachnytskyi/golang-mongo-grpc/pkg/proto-generated"
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"google.golang.org/grpc/codes"

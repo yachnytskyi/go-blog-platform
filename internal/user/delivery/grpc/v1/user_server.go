@@ -3,7 +3,7 @@ package v1
 import (
 	"github.com/yachnytskyi/golang-mongo-grpc/config"
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
-	pb "github.com/yachnytskyi/golang-mongo-grpc/pkg/proto-generated"
+	pb "github.com/yachnytskyi/golang-mongo-grpc/pkg/pb"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 

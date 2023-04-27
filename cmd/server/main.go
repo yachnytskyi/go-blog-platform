@@ -13,7 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	"github.com/yachnytskyi/golang-mongo-grpc/config"
-	pb "github.com/yachnytskyi/golang-mongo-grpc/pkg/proto-generated"
+	pb "github.com/yachnytskyi/golang-mongo-grpc/pkg/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
@@ -184,7 +184,7 @@ func startGinServer(config config.Config) {
 	})
 
 	userRouter.UserRouter(router, userService)
-	postRouter.PostRouter(router)
+	postRouter.PostRouter(router, userService)
 
 	log.Fatal(server.Run(":" + config.Port))
 }

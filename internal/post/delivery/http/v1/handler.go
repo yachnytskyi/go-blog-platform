@@ -66,8 +66,12 @@ func (postHandler *PostHandler) UpdatePost(ctx *gin.Context) {
 	}
 
 	userID := fetchedPost.UserID
+	message := "sorry, but you cannot not edit this post"
 
-	utils.IsOwner(userID, ctx)
+	if err = utils.IsOwner(ctx, userID); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": message})
+		return
+	}
 
 	updatedPost, err := postHandler.postService.UpdatePost(ctx, postID, updatedPostData)
 

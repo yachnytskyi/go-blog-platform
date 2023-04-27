@@ -1,18 +1,19 @@
 package utils
 
 import (
-	"net/http"
+	"errors"
 
 	"github.com/gin-gonic/gin"
 	"github.com/yachnytskyi/golang-mongo-grpc/models"
 )
 
-func IsOwner(userID string, ctx *gin.Context) {
+func IsOwner(ctx *gin.Context, userID string) error {
 	currentUser := ctx.MustGet("currentUser").(*models.UserDB)
 	currentUserID := currentUser.UserID.Hex()
 
 	if currentUserID != userID {
-		ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": "fail", "message": "You are not logged in"})
-		return
+		return errors.New("sorry, but you cannot edit this post")
 	}
+
+	return nil
 }

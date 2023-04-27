@@ -267,8 +267,8 @@ func (userHandler *UserHandler) RefreshAccessToken(ctx *gin.Context) {
 func (userHandler *UserHandler) UpdateUser(ctx *gin.Context) {
 	context := ctx.Request.Context()
 
-	currentUser := ctx.MustGet("currentUser")
-	userID := currentUser.(*models.UserDB).UserID.Hex()
+	currentUser := ctx.MustGet("currentUser").(*models.UserDB)
+	userID := currentUser.UserID.Hex()
 
 	var updatedUserData *models.UserUpdate
 

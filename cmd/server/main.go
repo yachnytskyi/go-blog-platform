@@ -13,7 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	"github.com/yachnytskyi/golang-mongo-grpc/config"
-	"github.com/yachnytskyi/golang-mongo-grpc/pb"
+	pb "github.com/yachnytskyi/golang-mongo-grpc/pkg/proto-generated"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 

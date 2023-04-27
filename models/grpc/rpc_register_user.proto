@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package pb;
+package grpc;
 
 option go_package = "github.com/yachnytskyi/golang-mongo-grpc/pb";
 

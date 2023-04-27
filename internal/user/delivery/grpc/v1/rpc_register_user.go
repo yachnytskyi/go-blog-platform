@@ -6,7 +6,7 @@ import (
 
 	"github.com/thanhpk/randstr"
 	"github.com/yachnytskyi/golang-mongo-grpc/models"
-	"github.com/yachnytskyi/golang-mongo-grpc/pb"
+	pb "github.com/yachnytskyi/golang-mongo-grpc/pkg/proto-generated"
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utils"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

@@ -1,9 +1,9 @@
 syntax = "proto3";
 
-package pb;
+package grpc;
 
 import "google/protobuf/timestamp.proto";
-option go_package = "github.com/yachnytskyi/golang-mongo-grpc/pb";
+option go_package = "github.com/yachnytskyi/golang-mongo-grpc/proto-generated";
 
 message User {
   string id = 1;

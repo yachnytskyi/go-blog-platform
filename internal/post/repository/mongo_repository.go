@@ -90,8 +90,8 @@ func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int,
 }
 
 func (postRepository *PostRepository) CreatePost(ctx context.Context, post *models.PostCreate) (*models.PostDB, error) {
-	post.CreateAt = time.Now()
-	post.UpdatedAt = post.CreateAt
+	post.CreatedAt = time.Now()
+	post.UpdatedAt = post.CreatedAt
 	result, err := postRepository.collection.InsertOne(ctx, post)
 
 	if err != nil {

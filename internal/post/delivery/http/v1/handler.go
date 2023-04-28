@@ -23,7 +23,7 @@ func (postHandler *PostHandler) CreatePost(ctx *gin.Context) {
 	var post *models.PostCreate = new(models.PostCreate)
 	currentUser := ctx.MustGet("currentUser").(*models.UserDB)
 	post.User = currentUser.Name
-	post.UserID = currentUser.UserID.Hex()
+	post.UserID = currentUser.UserID
 
 	if err := ctx.ShouldBindJSON(&post); err != nil {
 		ctx.JSON(http.StatusBadRequest, err.Error())

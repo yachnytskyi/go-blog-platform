@@ -2,8 +2,6 @@ package models
 
 import (
 	"time"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // [POST].
@@ -43,25 +41,25 @@ type UserUpdate struct {
 
 // [GET].
 type UserDB struct {
-	UserID          primitive.ObjectID `json:"user_id" bson:"_id"`
-	Name            string             `json:"name" bson:"name"`
-	Email           string             `json:"email" bson:"email"`
-	Password        string             `json:"password" bson:"password"`
-	PasswordConfirm string             `json:"password_confirm" bson:"password_confirm,omitempty"`
-	Role            string             `json:"role" bson:"role"`
-	Verified        bool               `json:"verified" bson:"verified"`
-	CreatedAt       time.Time          `json:"created_at" bson:"created_at"`
-	UpdatedAt       time.Time          `json:"updated_at" bson:"updated_at"`
+	UserID          string    `json:"user_id" bson:"_id"`
+	Name            string    `json:"name" bson:"name"`
+	Email           string    `json:"email" bson:"email"`
+	Password        string    `json:"password" bson:"password"`
+	PasswordConfirm string    `json:"password_confirm" bson:"password_confirm,omitempty"`
+	Role            string    `json:"role" bson:"role"`
+	Verified        bool      `json:"verified" bson:"verified"`
+	CreatedAt       time.Time `json:"created_at" bson:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at" bson:"updated_at"`
 }
 
 // [GET].
 type UserResponse struct {
-	UserID    primitive.ObjectID `json:"user_id" bson:"_id"`
-	Name      string             `json:"name" bson:"name"`
-	Email     string             `json:"email" bson:"email"`
-	Role      string             `json:"role" bson:"role"`
-	CreatedAt time.Time          `json:"created_at" bson:"created_at"`
-	UpdatedAt time.Time          `json:"updated_at" bson:"updated_at"`
+	UserID    string    `json:"user_id" bson:"_id"`
+	Name      string    `json:"name" bson:"name"`
+	Email     string    `json:"email" bson:"email"`
+	Role      string    `json:"role" bson:"role"`
+	CreatedAt time.Time `json:"created_at" bson:"created_at"`
+	UpdatedAt time.Time `json:"updated_at" bson:"updated_at"`
 }
 
 // User mapping.

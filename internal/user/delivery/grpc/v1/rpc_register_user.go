@@ -40,7 +40,7 @@ func (userServer *UserServer) Register(ctx context.Context, request *pb.Register
 	verificationCode := utils.Encode(code)
 
 	// Update the user in database.
-	userServer.userService.UpdateNewRegisteredUserById(ctx, createdUser.UserID.Hex(), "verificationCode", verificationCode)
+	userServer.userService.UpdateNewRegisteredUserById(ctx, createdUser.UserID, "verificationCode", verificationCode)
 
 	var firstName = createdUser.Name
 	firstName = utils.UserFirstName(firstName)

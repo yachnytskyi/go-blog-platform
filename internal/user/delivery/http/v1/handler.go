@@ -63,7 +63,7 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 	verificationCode := utils.Encode(code)
 
 	// Update the user in Database.
-	userHandler.userService.UpdateNewRegisteredUserById(context, createdUser.UserID.Hex(), "verificationCode", verificationCode)
+	userHandler.userService.UpdateNewRegisteredUserById(context, createdUser.UserID, "verificationCode", verificationCode)
 
 	firstName := createdUser.Name
 	firstName = utils.UserFirstName(firstName)
@@ -268,7 +268,7 @@ func (userHandler *UserHandler) UpdateUser(ctx *gin.Context) {
 	context := ctx.Request.Context()
 
 	currentUser := ctx.MustGet("currentUser").(*models.UserDB)
-	userID := currentUser.UserID.Hex()
+	userID := currentUser.UserID
 
 	var updatedUserData *models.UserUpdate
 
@@ -302,7 +302,7 @@ func (userHandler *UserHandler) Delete(ctx *gin.Context) {
 	context := ctx.Request.Context()
 
 	currentUser := ctx.MustGet("currentUser")
-	userID := currentUser.(*models.UserDB).UserID.Hex()
+	userID := currentUser.(*models.UserDB).UserID
 	err := userHandler.userService.DeleteUserById(context, fmt.Sprint(userID))
 
 	if err != nil {

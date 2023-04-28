@@ -19,7 +19,7 @@ func (userServer *UserServer) GetMe(ctx context.Context, request *pb.GetMeReques
 
 	response := &pb.UserResponse{
 		User: &pb.User{
-			Id:        user.UserID.Hex(),
+			Id:        user.UserID,
 			Name:      user.Name,
 			Email:     user.Email,
 			Role:      user.Role,

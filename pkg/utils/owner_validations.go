@@ -9,7 +9,7 @@ import (
 
 func IsOwner(ctx *gin.Context, userID string) error {
 	currentUser := ctx.MustGet("currentUser").(*models.UserDB)
-	currentUserID := currentUser.UserID.Hex()
+	currentUserID := currentUser.UserID
 
 	if currentUserID != userID {
 		return errors.New("sorry, but you cannot edit this post")

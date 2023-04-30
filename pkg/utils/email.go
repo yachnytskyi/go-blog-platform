@@ -44,7 +44,7 @@ func ParseTemplateDirectory(directory string) (*template.Template, error) {
 	return template.ParseFiles(paths...)
 }
 
-func SendEmail(user *models.UserDB, data *EmailData, templateName string) error {
+func SendEmail(user *models.UserFullResponse, data *EmailData, templateName string) error {
 	config, err := config.LoadConfig(".")
 
 	if err != nil {

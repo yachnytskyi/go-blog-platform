@@ -28,6 +28,6 @@ func (userRouter *UserRouter) UserRouter(routerGroup *gin.RouterGroup, userServi
 	router.GET("/logout", userRouter.userHandler.Logout)
 
 	router.GET("/me", userRouter.userHandler.GetMe)
-	router.PUT("/update", userRouter.userHandler.UpdateUser)
+	router.PUT("/update", userRouter.userHandler.UpdateUserById)
 	router.DELETE("/delete", userRouter.userHandler.Delete)
 }

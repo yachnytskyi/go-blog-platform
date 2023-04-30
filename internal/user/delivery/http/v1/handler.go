@@ -219,7 +219,7 @@ func (userHandler *UserHandler) ResetUserPassword(ctx *gin.Context) {
 func (userHandler *UserHandler) RefreshAccessToken(ctx *gin.Context) {
 	message := "could not refresh access token"
 
-	currentUser := ctx.MustGet("currentUser").(*models.UserDB)
+	currentUser := ctx.MustGet("currentUser").(*models.UserFullResponse)
 
 	if currentUser == nil {
 		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": message})
@@ -258,8 +258,8 @@ func (userHandler *UserHandler) RefreshAccessToken(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
 }
 
-func (userHandler *UserHandler) UpdateUser(ctx *gin.Context) {
-	currentUser := ctx.MustGet("currentUser").(*models.UserDB)
+func (userHandler *UserHandler) UpdateUserById(ctx *gin.Context) {
+	currentUser := ctx.MustGet("currentUser").(*models.UserFullResponse)
 	userID := currentUser.UserID
 	context := ctx.Request.Context()
 
@@ -270,13 +270,13 @@ func (userHandler *UserHandler) UpdateUser(ctx *gin.Context) {
 		return
 	}
 
-	updatedUser, err := userHandler.userService.UpdateUserById(context, fmt.Sprint(userID), updatedUserData)
+	updatedUser, err := userHandler.userService.UpdateUserById(context, userID, updatedUserData)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "You successfully updated your settings!", "data": gin.H{"user": models.FilteredResponse(updatedUser)}})
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "You successfully updated your settings!", "data": gin.H{"user": updatedUser}})
 }
 
 func (userHandler *UserHandler) Logout(ctx *gin.Context) {
@@ -286,14 +286,14 @@ func (userHandler *UserHandler) Logout(ctx *gin.Context) {
 }
 
 func (userHandler *UserHandler) GetMe(ctx *gin.Context) {
-	currentUser := ctx.MustGet("currentUser").(*models.UserDB)
+	currentUser := ctx.MustGet("currentUser").(*models.UserFullResponse)
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": models.FilteredResponse(currentUser)}})
 }
 
 func (userHandler *UserHandler) Delete(ctx *gin.Context) {
 	currentUser := ctx.MustGet("currentUser")
-	userID := currentUser.(*models.UserDB).UserID
+	userID := currentUser.(*models.UserFullResponse).UserID
 	context := ctx.Request.Context()
 
 	err := userHandler.userService.DeleteUserById(context, fmt.Sprint(userID))

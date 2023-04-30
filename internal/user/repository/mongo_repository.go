@@ -23,17 +23,17 @@ func NewUserRepository(collection *mongo.Collection) user.Repository {
 	return &UserRepository{collection: collection}
 }
 
-func (userRepository *UserRepository) GetUserById(ctx context.Context, userID string) (*models.UserDB, error) {
+func (userRepository *UserRepository) GetUserById(ctx context.Context, userID string) (*models.UserFullResponse, error) {
 	objectUserID, _ := primitive.ObjectIDFromHex(userID)
 
-	var fetchedUser *models.UserDB
+	var fetchedUser *models.UserFullResponse
 
 	query := bson.M{"_id": objectUserID}
 	err := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
 
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return &models.UserDB{}, err
+			return &models.UserFullResponse{}, err
 		}
 		return nil, err
 	}
@@ -41,15 +41,15 @@ func (userRepository *UserRepository) GetUserById(ctx context.Context, userID st
 	return fetchedUser, nil
 }
 
-func (userRepository *UserRepository) GetUserByEmail(ctx context.Context, email string) (*models.UserDB, error) {
-	var fetchedUser *models.UserDB
+func (userRepository *UserRepository) GetUserByEmail(ctx context.Context, email string) (*models.UserFullResponse, error) {
+	var fetchedUser *models.UserFullResponse
 
 	query := bson.M{"email": strings.ToLower(email)}
 	err := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
 
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return &models.UserDB{}, err
+			return &models.UserFullResponse{}, err
 		}
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (userRepository *UserRepository) GetUserByEmail(ctx context.Context, email 
 	return fetchedUser, nil
 }
 
-func (userRepository *UserRepository) Register(ctx context.Context, user *models.UserCreate) (*models.UserDB, error) {
+func (userRepository *UserRepository) Register(ctx context.Context, user *models.UserCreate) (*models.UserFullResponse, error) {
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = user.CreatedAt
 	user.Email = strings.ToLower(user.Email)
@@ -85,7 +85,7 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *models
 		return nil, errors.New("could not create an index for an email")
 	}
 
-	var createdUser *models.UserDB
+	var createdUser *models.UserFullResponse
 	query := bson.M{"_id": result.InsertedID}
 
 	err = userRepository.collection.FindOne(ctx, query).Decode(&createdUser)
@@ -96,21 +96,21 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *models
 	return createdUser, nil
 }
 
-func (userRepository *UserRepository) UpdateNewRegisteredUserById(ctx context.Context, userID string, key string, value string) (*models.UserDB, error) {
+func (userRepository *UserRepository) UpdateNewRegisteredUserById(ctx context.Context, userID string, key string, value string) (*models.UserFullResponse, error) {
 	userObjectID, _ := primitive.ObjectIDFromHex(userID)
 	query := bson.D{{Key: "_id", Value: userObjectID}}
 	update := bson.D{{Key: "$set", Value: bson.D{{Key: key, Value: value}}}}
 	result, err := userRepository.collection.UpdateOne(ctx, query, update)
 
 	if err != nil {
-		return &models.UserDB{}, err
+		return &models.UserFullResponse{}, err
 	}
 
 	if result.ModifiedCount == 0 {
-		return &models.UserDB{}, err
+		return &models.UserFullResponse{}, err
 	}
 
-	return &models.UserDB{}, nil
+	return &models.UserFullResponse{}, nil
 }
 
 func (userRepository *UserRepository) UpdatePasswordResetTokenUserByEmail(ctx context.Context, email string, firstKey string, firstValue string,
@@ -150,13 +150,13 @@ func (userRepository *UserRepository) ResetUserPassword(ctx context.Context, fir
 	return nil
 }
 
-func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID string, user *models.UserUpdate) (*models.UserDB, error) {
+func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID string, user *models.UserUpdate) (*models.UserResponse, error) {
 	user.UpdatedAt = time.Now()
 
 	mappedUser, err := utils.MongoMapping(user)
 
 	if err != nil {
-		return &models.UserDB{}, err
+		return &models.UserResponse{}, err
 	}
 
 	userObjectID, _ := primitive.ObjectIDFromHex(userID)
@@ -165,7 +165,7 @@ func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID
 	update := bson.D{{Key: "$set", Value: mappedUser}}
 	result := userRepository.collection.FindOneAndUpdate(ctx, query, update, options.FindOneAndUpdate().SetReturnDocument(1))
 
-	var updatedUser *models.UserDB
+	var updatedUser *models.UserResponse
 
 	if err := result.Decode(&updatedUser); err != nil {
 		return nil, err

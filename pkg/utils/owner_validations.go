@@ -8,7 +8,7 @@ import (
 )
 
 func GetCurrentUserID(ctx *gin.Context) string {
-	currentUser := ctx.MustGet("currentUser").(*models.UserDB)
+	currentUser := ctx.MustGet("currentUser").(*models.UserFullResponse)
 	currentUserID := currentUser.UserID
 
 	return currentUserID

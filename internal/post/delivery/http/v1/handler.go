@@ -22,6 +22,7 @@ func NewPostHandler(postService post.Service) PostHandler {
 func (postHandler *PostHandler) GetAllPosts(ctx *gin.Context) {
 	page := ctx.DefaultQuery("page", "1")
 	limit := ctx.DefaultQuery("limit", "10")
+	context := ctx.Request.Context()
 
 	intPage, err := strconv.Atoi(page)
 
@@ -37,7 +38,7 @@ func (postHandler *PostHandler) GetAllPosts(ctx *gin.Context) {
 		return
 	}
 
-	fetchedPosts, err := postHandler.postService.GetAllPosts(ctx, intPage, intLimit)
+	fetchedPosts, err := postHandler.postService.GetAllPosts(context, intPage, intLimit)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
@@ -49,8 +50,9 @@ func (postHandler *PostHandler) GetAllPosts(ctx *gin.Context) {
 
 func (postHandler *PostHandler) GetPostById(ctx *gin.Context) {
 	postID := ctx.Param("postID")
+	context := ctx.Request.Context()
 
-	fetchedPost, err := postHandler.postService.GetPostById(ctx, postID)
+	fetchedPost, err := postHandler.postService.GetPostById(context, postID)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "Id exists") {
@@ -69,12 +71,13 @@ func (postHandler *PostHandler) CreatePost(ctx *gin.Context) {
 	currentUser := ctx.MustGet("currentUser").(*models.UserDB)
 	post.User = currentUser.Name
 	post.UserID = currentUser.UserID
+	context := ctx.Request.Context()
 
 	if err := ctx.ShouldBindJSON(&post); err != nil {
 		ctx.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	createdPost, err := postHandler.postService.CreatePost(ctx, post)
+	createdPost, err := postHandler.postService.CreatePost(context, post)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "sorry, but this title already exists. Please choose another one") {
@@ -92,6 +95,7 @@ func (postHandler *PostHandler) CreatePost(ctx *gin.Context) {
 func (postHandler *PostHandler) UpdatePostById(ctx *gin.Context) {
 	postID := ctx.Param("postID")
 	currentUserID := utils.GetCurrentUserID(ctx)
+	context := ctx.Request.Context()
 
 	var updatedPostData *models.PostUpdate = new(models.PostUpdate)
 
@@ -100,7 +104,7 @@ func (postHandler *PostHandler) UpdatePostById(ctx *gin.Context) {
 		return
 	}
 
-	updatedPost, err := postHandler.postService.UpdatePostById(ctx, postID, updatedPostData, currentUserID)
+	updatedPost, err := postHandler.postService.UpdatePostById(context, postID, updatedPostData, currentUserID)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "Id exists") {
@@ -121,8 +125,9 @@ func (postHandler *PostHandler) UpdatePostById(ctx *gin.Context) {
 func (postHandler *PostHandler) DeletePostByID(ctx *gin.Context) {
 	postID := ctx.Param("postID")
 	currentUserID := utils.GetCurrentUserID(ctx)
+	context := ctx.Request.Context()
 
-	err := postHandler.postService.DeletePostByID(ctx, postID, currentUserID)
+	err := postHandler.postService.DeletePostByID(context, postID, currentUserID)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "Id exists") {

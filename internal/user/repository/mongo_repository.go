@@ -64,10 +64,11 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *models
 	user.PasswordConfirm = ""
 	user.Verified = true
 	user.Role = "user"
-
-	// Encrypt the provided password.
 	user.Password, _ = utils.HashPassword(user.Password)
-	result, err := userRepository.collection.InsertOne(ctx, &user)
+
+	mappedUser := models.UserCreateMongoDBMapping(user)
+
+	result, err := userRepository.collection.InsertOne(ctx, &mappedUser)
 
 	if err != nil {
 		if err, ok := err.(mongo.WriteException); ok && err.WriteErrors[0].Code == 11000 {

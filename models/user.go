@@ -62,14 +62,44 @@ type UserResponse struct {
 	UpdatedAt time.Time `json:"updated_at" bson:"updated_at" db:"updated_at"`
 }
 
+// User repository model.
+// type UserMongoDB {
+
+// }
+
+// [POST].
+type UserCreateMongoDB struct {
+	Name            string    `json:"name" bson:"name" db:"name" binding:"required"`
+	Email           string    `json:"email" bson:"email" db:"emal" binding:"required,lte=40,email"`
+	Password        string    `json:"password" bson:"password" db:"password" binding:"required,min=8"`
+	PasswordConfirm string    `json:"password_confirm" bson:"password_confirm,omitempty" db:"password_confirm,omitempty" binding:"required"`
+	Role            string    `json:"role" bson:"role" db:"role"`
+	Verified        bool      `json:"verified" bson:"verified" db:"verified"`
+	CreatedAt       time.Time `json:"created_at" bson:"created_at" db:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at" bson:"updated_at" db:"updated_at"`
+}
+
 // User mapping.
 func FilteredResponse(user *UserFullResponse) UserResponse {
 	return UserResponse{
 		UserID:    user.UserID,
-		Email:     user.Email,
 		Name:      user.Name,
+		Email:     user.Email,
 		Role:      user.Role,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
+	}
+}
+
+func UserCreateMongoDBMapping(user *UserCreate) UserCreateMongoDB {
+	return UserCreateMongoDB{
+		Name:            user.Name,
+		Email:           user.Email,
+		Password:        user.Password,
+		PasswordConfirm: user.PasswordConfirm,
+		Role:            user.Role,
+		Verified:        user.Verified,
+		CreatedAt:       user.CreatedAt,
+		UpdatedAt:       user.UpdatedAt,
 	}
 }

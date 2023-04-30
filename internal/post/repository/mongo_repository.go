@@ -120,7 +120,7 @@ func (postRepository *PostRepository) CreatePost(ctx context.Context, post *mode
 	return createdPost, nil
 }
 
-func (postRepository *PostRepository) UpdatePost(ctx context.Context, postID string, post *models.PostUpdate) (*models.PostDB, error) {
+func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID string, post *models.PostUpdate) (*models.PostDB, error) {
 	mappedPost, err := utils.MongoMapping(post)
 
 	if err != nil {
@@ -135,7 +135,7 @@ func (postRepository *PostRepository) UpdatePost(ctx context.Context, postID str
 	var updatedPost *models.PostDB
 
 	if err := result.Decode(&updatedPost); err != nil {
-		return nil, errors.New("no post with that Id exists")
+		return nil, errors.New("sorry, but this title already exists. Please choose another one")
 	}
 
 	return updatedPost, nil

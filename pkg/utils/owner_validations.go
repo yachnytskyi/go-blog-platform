@@ -7,12 +7,16 @@ import (
 	"github.com/yachnytskyi/golang-mongo-grpc/models"
 )
 
-func IsOwner(ctx *gin.Context, userID string) error {
+func GetCurrentUserID(ctx *gin.Context) string {
 	currentUser := ctx.MustGet("currentUser").(*models.UserDB)
 	currentUserID := currentUser.UserID
 
+	return currentUserID
+}
+
+func IsUserOwner(currentUserID string, userID string) error {
 	if currentUserID != userID {
-		return errors.New("sorry, but you cannot edit this post")
+		return errors.New("sorry, but you do not have permissions to do that")
 	}
 
 	return nil

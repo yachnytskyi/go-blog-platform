@@ -24,6 +24,6 @@ func (postRouter *PostRouter) PostRouter(routerGroup *gin.RouterGroup, userServi
 	router.Use(middleware.DeserializeUser(userService))
 
 	router.POST("/", postRouter.postHandler.CreatePost)
-	router.PUT("/:postID", postRouter.postHandler.UpdatePost)
+	router.PUT("/:postID", postRouter.postHandler.UpdatePostById)
 	router.DELETE("/:postID", postRouter.postHandler.DeletePostByID)
 }

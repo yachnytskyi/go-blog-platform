@@ -5,6 +5,7 @@ import (
 
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/post"
 	"github.com/yachnytskyi/golang-mongo-grpc/models"
+	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utils"
 )
 
 type PostService struct {
@@ -33,13 +34,37 @@ func (postService *PostService) CreatePost(ctx context.Context, post *models.Pos
 	return createdPost, err
 }
 
-func (postService *PostService) UpdatePost(ctx context.Context, postID string, post *models.PostUpdate) (*models.PostDB, error) {
-	updatedPost, err := postService.postRepository.UpdatePost(ctx, postID, post)
+func (postService *PostService) UpdatePostById(ctx context.Context, postID string, post *models.PostUpdate, currentUserID string) (*models.PostDB, error) {
+	fetchedPost, err := postService.GetPostById(ctx, postID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	userID := fetchedPost.UserID
+
+	if err := utils.IsUserOwner(currentUserID, userID); err != nil {
+		return nil, err
+	}
+
+	updatedPost, err := postService.postRepository.UpdatePostById(ctx, postID, post)
 
 	return updatedPost, err
 }
 
-func (postService *PostService) DeletePostByID(ctx context.Context, postID string) error {
+func (postService *PostService) DeletePostByID(ctx context.Context, postID string, currentUserID string) error {
+	fetchedPost, err := postService.GetPostById(ctx, postID)
+
+	if err != nil {
+		return err
+	}
+
+	userID := fetchedPost.UserID
+
+	if err := utils.IsUserOwner(currentUserID, userID); err != nil {
+		return err
+	}
+
 	deletedPost := postService.postRepository.DeletePostByID(ctx, postID)
 
 	return deletedPost

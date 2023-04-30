@@ -2,26 +2,24 @@ package models
 
 import (
 	"time"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // [POST].
 type UserCreate struct {
-	Name            string    `json:"name" bson:"name" binding:"required"`
-	Email           string    `json:"email" bson:"email" binding:"required,lte=40,email"`
-	Password        string    `json:"password" bson:"password" binding:"required,min=8"`
-	PasswordConfirm string    `json:"password_confirm" bson:"password_confirm,omitempty" binding:"required"`
-	Role            string    `json:"role" bson:"role"`
-	Verified        bool      `json:"verified" bson:"verified"`
-	CreatedAt       time.Time `json:"created_at" bson:"created_at"`
-	UpdatedAt       time.Time `json:"updated_at" bson:"updated_at"`
+	Name            string    `json:"name" bson:"name" db:"name" binding:"required"`
+	Email           string    `json:"email" bson:"email" db:"emal" binding:"required,lte=40,email"`
+	Password        string    `json:"password" bson:"password" db:"password" binding:"required,min=8"`
+	PasswordConfirm string    `json:"password_confirm" bson:"password_confirm,omitempty" db:"password_confirm,omitempty" binding:"required"`
+	Role            string    `json:"role" bson:"role" db:"role"`
+	Verified        bool      `json:"verified" bson:"verified" db:"verified"`
+	CreatedAt       time.Time `json:"created_at" bson:"created_at" db:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at" bson:"updated_at" db:"updated_at"`
 }
 
 // [POST].
 type UserSignIn struct {
-	Email    string `json:"email" bson:"email" binding:"required,lte=40,email"`
-	Password string `json:"password" bson:"email" binding:"required,min=8"`
+	Email    string `json:"email" bson:"email" db:"email" binding:"required,lte=40,email"`
+	Password string `json:"password" bson:"password" db:"password" binding:"required,min=8"`
 }
 
 // [GET].
@@ -37,31 +35,31 @@ type ResetUserPasswordInput struct {
 
 // [PUT].
 type UserUpdate struct {
-	Name      string    `json:"name" bson:"name" binding:"required"`
-	UpdatedAt time.Time `json:"updated_at" bson:"updated_at"`
+	Name      string    `json:"name" bson:"name" db:"name" binding:"required"`
+	UpdatedAt time.Time `json:"updated_at" bson:"updated_at" db:"updated_at"`
 }
 
 // [GET].
 type UserDB struct {
-	UserID          primitive.ObjectID `json:"user_id" bson:"_id"`
-	Name            string             `json:"name" bson:"name"`
-	Email           string             `json:"email" bson:"email"`
-	Password        string             `json:"password" bson:"password"`
-	PasswordConfirm string             `json:"password_confirm" bson:"password_confirm,omitempty"`
-	Role            string             `json:"role" bson:"role"`
-	Verified        bool               `json:"verified" bson:"verified"`
-	CreatedAt       time.Time          `json:"created_at" bson:"created_at"`
-	UpdatedAt       time.Time          `json:"updated_at" bson:"updated_at"`
+	UserID          string    `json:"user_id" bson:"_id" db:"user_id"`
+	Name            string    `json:"name" bson:"name" db:"name"`
+	Email           string    `json:"email" bson:"email" db:"email"`
+	Password        string    `json:"password" bson:"password" db:"password"`
+	PasswordConfirm string    `json:"password_confirm" bson:"password_confirm,omitempty" db:"password_confirm,omitempty"`
+	Role            string    `json:"role" bson:"role" db:"role"`
+	Verified        bool      `json:"verified" bson:"verified" db:"verified"`
+	CreatedAt       time.Time `json:"created_at" bson:"created_at" db:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at" bson:"updated_at" db:"updated_at"`
 }
 
 // [GET].
 type UserResponse struct {
-	UserID    primitive.ObjectID `json:"user_id" bson:"_id"`
-	Name      string             `json:"name" bson:"name"`
-	Email     string             `json:"email" bson:"email"`
-	Role      string             `json:"role" bson:"role"`
-	CreatedAt time.Time          `json:"created_at" bson:"created_at"`
-	UpdatedAt time.Time          `json:"updated_at" bson:"updated_at"`
+	UserID    string    `json:"user_id" bson:"_id" db:"user_id"`
+	Name      string    `json:"name" bson:"name" db:"name"`
+	Email     string    `json:"email" bson:"email" db:"email"`
+	Role      string    `json:"role" bson:"role" db:"role"`
+	CreatedAt time.Time `json:"created_at" bson:"created_at" db:"created_at"`
+	UpdatedAt time.Time `json:"updated_at" bson:"updated_at" db:"updated_at"`
 }
 
 // User mapping.

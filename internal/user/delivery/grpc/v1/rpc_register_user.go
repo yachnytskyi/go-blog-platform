@@ -6,7 +6,7 @@ import (
 
 	"github.com/thanhpk/randstr"
 	"github.com/yachnytskyi/golang-mongo-grpc/models"
-	pb "github.com/yachnytskyi/golang-mongo-grpc/pkg/proto-generated"
+	pb "github.com/yachnytskyi/golang-mongo-grpc/pkg/pb"
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utils"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -40,7 +40,7 @@ func (userServer *UserServer) Register(ctx context.Context, request *pb.Register
 	verificationCode := utils.Encode(code)
 
 	// Update the user in database.
-	userServer.userService.UpdateNewRegisteredUserById(ctx, createdUser.UserID.Hex(), "verificationCode", verificationCode)
+	userServer.userService.UpdateNewRegisteredUserById(ctx, createdUser.UserID, "verificationCode", verificationCode)
 
 	var firstName = createdUser.Name
 	firstName = utils.UserFirstName(firstName)

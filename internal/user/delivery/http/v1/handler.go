@@ -27,6 +27,7 @@ func NewUserHandler(userService user.Service, template *template.Template) UserH
 
 func (userHandler *UserHandler) Register(ctx *gin.Context) {
 	var user *models.UserCreate
+	context := ctx.Request.Context()
 
 	if err := ctx.ShouldBindJSON(&user); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
@@ -37,8 +38,6 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Passwords do not match"})
 		return
 	}
-
-	context := ctx.Request.Context()
 
 	createdUser, err := userHandler.userService.Register(context, user)
 
@@ -63,7 +62,7 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 	verificationCode := utils.Encode(code)
 
 	// Update the user in Database.
-	userHandler.userService.UpdateNewRegisteredUserById(context, createdUser.UserID.Hex(), "verificationCode", verificationCode)
+	userHandler.userService.UpdateNewRegisteredUserById(context, createdUser.UserID, "verificationCode", verificationCode)
 
 	firstName := createdUser.Name
 	firstName = utils.UserFirstName(firstName)
@@ -88,13 +87,12 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 
 func (userHandler *UserHandler) Login(ctx *gin.Context) {
 	var credentials *models.UserSignIn
+	context := ctx.Request.Context()
 
 	if err := ctx.ShouldBindJSON(&credentials); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
-
-	context := ctx.Request.Context()
 
 	user, err := userHandler.userService.Login(context, credentials)
 
@@ -127,6 +125,7 @@ func (userHandler *UserHandler) Login(ctx *gin.Context) {
 
 func (userHandler *UserHandler) ForgottenPassword(ctx *gin.Context) {
 	var userEmail *models.ForgottenPasswordInput
+	context := ctx.Request.Context()
 
 	if err := ctx.ShouldBindJSON(&userEmail); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
@@ -134,7 +133,6 @@ func (userHandler *UserHandler) ForgottenPassword(ctx *gin.Context) {
 	}
 
 	message := "We sent you an email with needed instructions"
-	context := ctx.Request.Context()
 
 	fetchedUser, err := userHandler.userService.GetUserByEmail(context, userEmail.Email)
 
@@ -191,6 +189,7 @@ func (userHandler *UserHandler) ForgottenPassword(ctx *gin.Context) {
 func (userHandler *UserHandler) ResetUserPassword(ctx *gin.Context) {
 	resetToken := ctx.Params.ByName("resetToken")
 	var credentials *models.ResetUserPasswordInput
+	context := ctx.Request.Context()
 
 	if err := ctx.ShouldBindJSON(&credentials); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
@@ -203,7 +202,6 @@ func (userHandler *UserHandler) ResetUserPassword(ctx *gin.Context) {
 	}
 
 	passwordResetToken := utils.Encode(resetToken)
-	context := ctx.Request.Context()
 
 	// Update the user.
 	err := userHandler.userService.ResetUserPassword(context, "passwordResetToken", passwordResetToken, "passwordResetAt", "password", credentials.Password)
@@ -244,15 +242,11 @@ func (userHandler *UserHandler) RefreshAccessToken(ctx *gin.Context) {
 		return
 	}
 
-	context := ctx.Request.Context()
-
-	user, err := userHandler.userService.GetUserById(context, fmt.Sprint(userID))
-
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": "the user is belonged to this token no longer exists "})
 	}
 
-	accessToken, err := utils.CreateToken(config.AccessTokenExpiresIn, user.UserID, config.AccessTokenPrivateKey)
+	accessToken, err := utils.CreateToken(config.AccessTokenExpiresIn, userID, config.AccessTokenPrivateKey)
 
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": err.Error()})
@@ -265,10 +259,9 @@ func (userHandler *UserHandler) RefreshAccessToken(ctx *gin.Context) {
 }
 
 func (userHandler *UserHandler) UpdateUser(ctx *gin.Context) {
+	currentUser := ctx.MustGet("currentUser").(*models.UserDB)
+	userID := currentUser.UserID
 	context := ctx.Request.Context()
-
-	currentUser := ctx.MustGet("currentUser")
-	userID := currentUser.(*models.UserDB).UserID.Hex()
 
 	var updatedUserData *models.UserUpdate
 
@@ -299,10 +292,10 @@ func (userHandler *UserHandler) GetMe(ctx *gin.Context) {
 }
 
 func (userHandler *UserHandler) Delete(ctx *gin.Context) {
+	currentUser := ctx.MustGet("currentUser")
+	userID := currentUser.(*models.UserDB).UserID
 	context := ctx.Request.Context()
 
-	currentUser := ctx.MustGet("currentUser")
-	userID := currentUser.(*models.UserDB).UserID.Hex()
 	err := userHandler.userService.DeleteUserById(context, fmt.Sprint(userID))
 
 	if err != nil {

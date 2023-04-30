@@ -90,8 +90,8 @@ func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int,
 }
 
 func (postRepository *PostRepository) CreatePost(ctx context.Context, post *models.PostCreate) (*models.PostDB, error) {
-	post.CreateAt = time.Now()
-	post.UpdatedAt = post.CreateAt
+	post.CreatedAt = time.Now()
+	post.UpdatedAt = post.CreatedAt
 	result, err := postRepository.collection.InsertOne(ctx, post)
 
 	if err != nil {
@@ -120,7 +120,7 @@ func (postRepository *PostRepository) CreatePost(ctx context.Context, post *mode
 	return createdPost, nil
 }
 
-func (postRepository *PostRepository) UpdatePost(ctx context.Context, postID string, post *models.PostUpdate) (*models.PostDB, error) {
+func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID string, post *models.PostUpdate) (*models.PostDB, error) {
 	mappedPost, err := utils.MongoMapping(post)
 
 	if err != nil {
@@ -135,7 +135,7 @@ func (postRepository *PostRepository) UpdatePost(ctx context.Context, postID str
 	var updatedPost *models.PostDB
 
 	if err := result.Decode(&updatedPost); err != nil {
-		return nil, errors.New("no post with that Id exists")
+		return nil, errors.New("sorry, but this title already exists. Please choose another one")
 	}
 
 	return updatedPost, nil

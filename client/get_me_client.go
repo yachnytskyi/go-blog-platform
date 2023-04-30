@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	pb "github.com/yachnytskyi/golang-mongo-grpc/pkg/proto-generated"
+	pb "github.com/yachnytskyi/golang-mongo-grpc/pkg/pb"
 	"google.golang.org/grpc"
 )
 

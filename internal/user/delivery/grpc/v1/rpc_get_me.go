@@ -3,7 +3,7 @@ package v1
 import (
 	"context"
 
-	pb "github.com/yachnytskyi/golang-mongo-grpc/pkg/proto-generated"
+	pb "github.com/yachnytskyi/golang-mongo-grpc/pkg/pb"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -19,7 +19,7 @@ func (userServer *UserServer) GetMe(ctx context.Context, request *pb.GetMeReques
 
 	response := &pb.UserResponse{
 		User: &pb.User{
-			Id:        user.UserID.Hex(),
+			Id:        user.UserID,
 			Name:      user.Name,
 			Email:     user.Email,
 			Role:      user.Role,

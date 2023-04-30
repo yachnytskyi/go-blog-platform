@@ -244,15 +244,11 @@ func (userHandler *UserHandler) RefreshAccessToken(ctx *gin.Context) {
 		return
 	}
 
-	context := ctx.Request.Context()
-
-	user, err := userHandler.userService.GetUserById(context, fmt.Sprint(userID))
-
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": "the user is belonged to this token no longer exists "})
 	}
 
-	accessToken, err := utils.CreateToken(config.AccessTokenExpiresIn, user.UserID, config.AccessTokenPrivateKey)
+	accessToken, err := utils.CreateToken(config.AccessTokenExpiresIn, userID, config.AccessTokenPrivateKey)
 
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": err.Error()})

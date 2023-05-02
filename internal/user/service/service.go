@@ -63,7 +63,7 @@ func (userService *UserService) ResetUserPassword(ctx context.Context, firstKey 
 
 }
 
-func (userService *UserService) UpdateUserById(ctx context.Context, userID string, user *models.UserUpdate) (*models.UserResponse, error) {
+func (userService *UserService) UpdateUserById(ctx context.Context, userID string, user *models.UserUpdateDomain) (*models.UserResponse, error) {
 	updatedUser, err := userService.userRepository.UpdateUserById(ctx, userID, user)
 
 	return updatedUser, err

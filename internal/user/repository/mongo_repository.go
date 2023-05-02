@@ -151,10 +151,11 @@ func (userRepository *UserRepository) ResetUserPassword(ctx context.Context, fir
 	return nil
 }
 
-func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID string, user *models.UserUpdate) (*models.UserResponse, error) {
+func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID string, user *models.UserUpdateDomain) (*models.UserResponse, error) {
+	userMapped := models.UserUpdateDomainMappingToRepository(user)
 	user.UpdatedAt = time.Now()
 
-	mappedUser, err := utils.MongoMapping(user)
+	mappedUser, err := utils.MongoMapping(userMapped)
 
 	if err != nil {
 		return &models.UserResponse{}, err

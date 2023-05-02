@@ -263,7 +263,7 @@ func (userHandler *UserHandler) UpdateUserById(ctx *gin.Context) {
 	userID := currentUser.UserID
 	context := ctx.Request.Context()
 
-	var updatedUserData *models.UserUpdate
+	var updatedUserData *models.UserUpdateDomain
 
 	if err := ctx.ShouldBindJSON(&updatedUserData); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})

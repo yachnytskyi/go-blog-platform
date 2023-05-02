@@ -34,7 +34,13 @@ type ResetUserPasswordInput struct {
 }
 
 // [PUT].
-type UserUpdate struct {
+type UserUpdateDomain struct {
+	Name      string    `json:"name" bson:"name" db:"name" binding:"required"`
+	UpdatedAt time.Time `json:"updated_at" bson:"updated_at" db:"updated_at"`
+}
+
+// [PUT].
+type UserUpdateRepository struct {
 	Name      string    `json:"name" bson:"name" db:"name" binding:"required"`
 	UpdatedAt time.Time `json:"updated_at" bson:"updated_at" db:"updated_at"`
 }
@@ -61,11 +67,6 @@ type UserResponse struct {
 	CreatedAt time.Time `json:"created_at" bson:"created_at" db:"created_at"`
 	UpdatedAt time.Time `json:"updated_at" bson:"updated_at" db:"updated_at"`
 }
-
-// User repository model.
-// type UserMongoDB {
-
-// }
 
 // [POST].
 type UserCreateMongoDB struct {
@@ -101,5 +102,12 @@ func UserCreateMongoDBMapping(user *UserCreate) UserCreateMongoDB {
 		Verified:        user.Verified,
 		CreatedAt:       user.CreatedAt,
 		UpdatedAt:       user.UpdatedAt,
+	}
+}
+
+func UserUpdateDomainMappingToRepository(user *UserUpdateDomain) UserUpdateRepository {
+	return UserUpdateRepository{
+		Name:      user.Name,
+		UpdatedAt: user.UpdatedAt,
 	}
 }

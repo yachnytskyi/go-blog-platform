@@ -68,7 +68,7 @@ func (postHandler *PostHandler) GetPostById(ctx *gin.Context) {
 
 func (postHandler *PostHandler) CreatePost(ctx *gin.Context) {
 	var post *models.PostCreate = new(models.PostCreate)
-	currentUser := ctx.MustGet("currentUser").(*models.UserResponse)
+	currentUser := ctx.MustGet("currentUser").(*models.UserFullResponse)
 	post.User = currentUser.Name
 	post.UserID = currentUser.UserID
 	context := ctx.Request.Context()
@@ -84,7 +84,6 @@ func (postHandler *PostHandler) CreatePost(ctx *gin.Context) {
 			ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": err.Error()})
 			return
 		}
-
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}

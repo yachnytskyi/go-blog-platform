@@ -26,7 +26,7 @@ func NewUserHandler(userService user.Service, template *template.Template) UserH
 }
 
 func (userHandler *UserHandler) Register(ctx *gin.Context) {
-	var user *models.UserCreate
+	var user *models.UserCreateDomain = new(models.UserCreateDomain)
 	context := ctx.Request.Context()
 
 	if err := ctx.ShouldBindJSON(&user); err != nil {
@@ -263,7 +263,7 @@ func (userHandler *UserHandler) UpdateUserById(ctx *gin.Context) {
 	userID := currentUser.UserID
 	context := ctx.Request.Context()
 
-	var updatedUserData *models.UserUpdateDomain
+	var updatedUserData *models.UserUpdateDomain = new(models.UserUpdateDomain)
 
 	if err := ctx.ShouldBindJSON(&updatedUserData); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
@@ -288,7 +288,7 @@ func (userHandler *UserHandler) Logout(ctx *gin.Context) {
 func (userHandler *UserHandler) GetMe(ctx *gin.Context) {
 	currentUser := ctx.MustGet("currentUser").(*models.UserFullResponse)
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": models.FilteredResponse(currentUser)}})
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": models.UserFullResponseMappingToUserResponse(currentUser)}})
 }
 
 func (userHandler *UserHandler) Delete(ctx *gin.Context) {

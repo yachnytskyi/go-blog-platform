@@ -19,7 +19,7 @@ func NewUserService(userRepository user.Repository) user.Service {
 	return &UserService{userRepository: userRepository}
 }
 
-func (userService *UserService) Register(ctx context.Context, user *models.UserCreate) (*models.UserFullResponse, error) {
+func (userService *UserService) Register(ctx context.Context, user *models.UserCreateDomain) (*models.UserFullResponse, error) {
 	createdUser, err := userService.userRepository.Register(ctx, user)
 
 	return createdUser, err

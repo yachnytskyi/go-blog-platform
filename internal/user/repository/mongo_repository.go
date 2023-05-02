@@ -57,7 +57,7 @@ func (userRepository *UserRepository) GetUserByEmail(ctx context.Context, email 
 	return fetchedUser, nil
 }
 
-func (userRepository *UserRepository) Register(ctx context.Context, user *models.UserCreate) (*models.UserFullResponse, error) {
+func (userRepository *UserRepository) Register(ctx context.Context, user *models.UserCreateDomain) (*models.UserFullResponse, error) {
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = user.CreatedAt
 	user.Email = strings.ToLower(user.Email)
@@ -66,9 +66,9 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *models
 	user.Role = "user"
 	user.Password, _ = utils.HashPassword(user.Password)
 
-	mappedUser := models.UserCreateMongoDBMapping(user)
+	repositoryMappedUser := models.UserCreateDomainMappingToRepository(user)
 
-	result, err := userRepository.collection.InsertOne(ctx, &mappedUser)
+	result, err := userRepository.collection.InsertOne(ctx, &repositoryMappedUser)
 
 	if err != nil {
 		if err, ok := err.(mongo.WriteException); ok && err.WriteErrors[0].Code == 11000 {
@@ -152,10 +152,9 @@ func (userRepository *UserRepository) ResetUserPassword(ctx context.Context, fir
 }
 
 func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID string, user *models.UserUpdateDomain) (*models.UserResponse, error) {
-	userMapped := models.UserUpdateDomainMappingToRepository(user)
+	repositoryMappedUser := models.UserUpdateDomainMappingToRepository(user)
 	user.UpdatedAt = time.Now()
-
-	mappedUser, err := utils.MongoMapping(userMapped)
+	mongoMappedUser, err := utils.MongoMapping(repositoryMappedUser)
 
 	if err != nil {
 		return &models.UserResponse{}, err
@@ -164,7 +163,7 @@ func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID
 	userObjectID, _ := primitive.ObjectIDFromHex(userID)
 
 	query := bson.D{{Key: "_id", Value: userObjectID}}
-	update := bson.D{{Key: "$set", Value: mappedUser}}
+	update := bson.D{{Key: "$set", Value: mongoMappedUser}}
 	result := userRepository.collection.FindOneAndUpdate(ctx, query, update, options.FindOneAndUpdate().SetReturnDocument(1))
 
 	var updatedUser *models.UserResponse

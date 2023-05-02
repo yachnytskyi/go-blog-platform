@@ -5,7 +5,19 @@ import (
 )
 
 // [POST].
-type UserCreate struct {
+type UserCreateDomain struct {
+	Name            string    `json:"name" bson:"name" db:"name" binding:"required"`
+	Email           string    `json:"email" bson:"email" db:"emal" binding:"required,lte=40,email"`
+	Password        string    `json:"password" bson:"password" db:"password" binding:"required,min=8"`
+	PasswordConfirm string    `json:"password_confirm" bson:"password_confirm,omitempty" db:"password_confirm,omitempty" binding:"required"`
+	Role            string    `json:"role" bson:"role" db:"role"`
+	Verified        bool      `json:"verified" bson:"verified" db:"verified"`
+	CreatedAt       time.Time `json:"created_at" bson:"created_at" db:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at" bson:"updated_at" db:"updated_at"`
+}
+
+// [POST].
+type UserCreateRepository struct {
 	Name            string    `json:"name" bson:"name" db:"name" binding:"required"`
 	Email           string    `json:"email" bson:"email" db:"emal" binding:"required,lte=40,email"`
 	Password        string    `json:"password" bson:"password" db:"password" binding:"required,min=8"`
@@ -68,20 +80,8 @@ type UserResponse struct {
 	UpdatedAt time.Time `json:"updated_at" bson:"updated_at" db:"updated_at"`
 }
 
-// [POST].
-type UserCreateMongoDB struct {
-	Name            string    `json:"name" bson:"name" db:"name" binding:"required"`
-	Email           string    `json:"email" bson:"email" db:"emal" binding:"required,lte=40,email"`
-	Password        string    `json:"password" bson:"password" db:"password" binding:"required,min=8"`
-	PasswordConfirm string    `json:"password_confirm" bson:"password_confirm,omitempty" db:"password_confirm,omitempty" binding:"required"`
-	Role            string    `json:"role" bson:"role" db:"role"`
-	Verified        bool      `json:"verified" bson:"verified" db:"verified"`
-	CreatedAt       time.Time `json:"created_at" bson:"created_at" db:"created_at"`
-	UpdatedAt       time.Time `json:"updated_at" bson:"updated_at" db:"updated_at"`
-}
-
 // User mapping.
-func FilteredResponse(user *UserFullResponse) UserResponse {
+func UserFullResponseMappingToUserResponse(user *UserFullResponse) UserResponse {
 	return UserResponse{
 		UserID:    user.UserID,
 		Name:      user.Name,
@@ -92,8 +92,8 @@ func FilteredResponse(user *UserFullResponse) UserResponse {
 	}
 }
 
-func UserCreateMongoDBMapping(user *UserCreate) UserCreateMongoDB {
-	return UserCreateMongoDB{
+func UserCreateDomainMappingToRepository(user *UserCreateDomain) UserCreateRepository {
+	return UserCreateRepository{
 		Name:            user.Name,
 		Email:           user.Email,
 		Password:        user.Password,

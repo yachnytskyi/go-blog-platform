@@ -22,12 +22,12 @@ func NewPostRepository(collection *mongo.Collection) post.Repository {
 	return &PostRepository{collection: collection}
 }
 
-func (postRepository *PostRepository) GetPostById(ctx context.Context, postID string) (*models.PostDB, error) {
+func (postRepository *PostRepository) GetPostById(ctx context.Context, postID string) (*models.Post, error) {
 	postObjectID, _ := primitive.ObjectIDFromHex(postID)
 
 	query := bson.M{"_id": postObjectID}
 
-	var fetchedPost *models.PostDB
+	var fetchedPost *models.Post
 
 	if err := postRepository.collection.FindOne(ctx, query).Decode(&fetchedPost); err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -40,7 +40,7 @@ func (postRepository *PostRepository) GetPostById(ctx context.Context, postID st
 	return fetchedPost, nil
 }
 
-func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int, limit int) ([]*models.PostDB, error) {
+func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int, limit int) ([]*models.Post, error) {
 	if page == 0 {
 		page = 1
 	}
@@ -65,10 +65,10 @@ func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int,
 
 	defer cursor.Close(ctx)
 
-	var fetchedPosts []*models.PostDB
+	var fetchedPosts []*models.Post
 
 	for cursor.Next(ctx) {
-		post := &models.PostDB{}
+		post := &models.Post{}
 		err := cursor.Decode(post)
 
 		if err != nil {
@@ -83,13 +83,13 @@ func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int,
 	}
 
 	if len(fetchedPosts) == 0 {
-		return []*models.PostDB{}, nil
+		return []*models.Post{}, nil
 	}
 
 	return fetchedPosts, nil
 }
 
-func (postRepository *PostRepository) CreatePost(ctx context.Context, post *models.PostCreate) (*models.PostDB, error) {
+func (postRepository *PostRepository) CreatePost(ctx context.Context, post *models.PostCreate) (*models.Post, error) {
 	post.CreatedAt = time.Now()
 	post.UpdatedAt = post.CreatedAt
 	result, err := postRepository.collection.InsertOne(ctx, post)
@@ -110,7 +110,7 @@ func (postRepository *PostRepository) CreatePost(ctx context.Context, post *mode
 		return nil, errors.New("could not create an index for a title")
 	}
 
-	var createdPost *models.PostDB
+	var createdPost *models.Post
 	query := bson.M{"_id": result.InsertedID}
 
 	if err = postRepository.collection.FindOne(ctx, query).Decode(&createdPost); err != nil {
@@ -120,7 +120,7 @@ func (postRepository *PostRepository) CreatePost(ctx context.Context, post *mode
 	return createdPost, nil
 }
 
-func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID string, post *models.PostUpdate) (*models.PostDB, error) {
+func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID string, post *models.PostUpdate) (*models.Post, error) {
 	mappedPost, err := utils.MongoMapping(post)
 
 	if err != nil {
@@ -132,7 +132,7 @@ func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID
 	update := bson.D{{Key: "$set", Value: mappedPost}}
 	result := postRepository.collection.FindOneAndUpdate(ctx, query, update, options.FindOneAndUpdate().SetReturnDocument(1))
 
-	var updatedPost *models.PostDB
+	var updatedPost *models.Post
 
 	if err := result.Decode(&updatedPost); err != nil {
 		return nil, errors.New("sorry, but this title already exists. Please choose another one")

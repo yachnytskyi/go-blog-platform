@@ -16,25 +16,25 @@ func NewPostService(postRepository post.Repository) post.Service {
 	return &PostService{postRepository: postRepository}
 }
 
-func (postService *PostService) GetPostById(ctx context.Context, postID string) (*models.PostDB, error) {
+func (postService *PostService) GetPostById(ctx context.Context, postID string) (*models.Post, error) {
 	fetchedPost, err := postService.postRepository.GetPostById(ctx, postID)
 
 	return fetchedPost, err
 }
 
-func (postService *PostService) GetAllPosts(ctx context.Context, page int, limit int) ([]*models.PostDB, error) {
+func (postService *PostService) GetAllPosts(ctx context.Context, page int, limit int) ([]*models.Post, error) {
 	fetchedPosts, err := postService.postRepository.GetAllPosts(ctx, page, limit)
 
 	return fetchedPosts, err
 }
 
-func (postService *PostService) CreatePost(ctx context.Context, post *models.PostCreate) (*models.PostDB, error) {
+func (postService *PostService) CreatePost(ctx context.Context, post *models.PostCreate) (*models.Post, error) {
 	createdPost, err := postService.postRepository.CreatePost(ctx, post)
 
 	return createdPost, err
 }
 
-func (postService *PostService) UpdatePostById(ctx context.Context, postID string, post *models.PostUpdate, currentUserID string) (*models.PostDB, error) {
+func (postService *PostService) UpdatePostById(ctx context.Context, postID string, post *models.PostUpdate, currentUserID string) (*models.Post, error) {
 	fetchedPost, err := postService.GetPostById(ctx, postID)
 
 	if err != nil {

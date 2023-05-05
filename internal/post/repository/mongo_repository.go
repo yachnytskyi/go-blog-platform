@@ -23,9 +23,9 @@ func NewPostRepository(collection *mongo.Collection) post.Repository {
 }
 
 func (postRepository *PostRepository) GetPostById(ctx context.Context, postID string) (*models.Post, error) {
-	postObjectID, _ := primitive.ObjectIDFromHex(postID)
+	postIDMappedToMongoDB, _ := primitive.ObjectIDFromHex(postID)
 
-	query := bson.M{"_id": postObjectID}
+	query := bson.M{"_id": postIDMappedToMongoDB}
 
 	var fetchedPost *models.Post
 
@@ -130,8 +130,8 @@ func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID
 		return nil, err
 	}
 
-	postObjectID, _ := primitive.ObjectIDFromHex(postID)
-	query := bson.D{{Key: "_id", Value: postObjectID}}
+	postIDMappedToMongoDB, _ := primitive.ObjectIDFromHex(postID)
+	query := bson.D{{Key: "_id", Value: postIDMappedToMongoDB}}
 	update := bson.D{{Key: "$set", Value: postMappedToMongoDB}}
 	result := postRepository.collection.FindOneAndUpdate(ctx, query, update, options.FindOneAndUpdate().SetReturnDocument(1))
 
@@ -145,8 +145,8 @@ func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID
 }
 
 func (postRepository *PostRepository) DeletePostByID(ctx context.Context, postID string) error {
-	postObjectID, _ := primitive.ObjectIDFromHex(postID)
-	query := bson.M{"_id": postObjectID}
+	postIDMappedToMongoDB, _ := primitive.ObjectIDFromHex(postID)
+	query := bson.M{"_id": postIDMappedToMongoDB}
 
 	result, err := postRepository.collection.DeleteOne(ctx, query)
 

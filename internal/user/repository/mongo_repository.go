@@ -24,11 +24,11 @@ func NewUserRepository(collection *mongo.Collection) user.Repository {
 }
 
 func (userRepository *UserRepository) GetUserById(ctx context.Context, userID string) (*models.User, error) {
-	objectUserID, _ := primitive.ObjectIDFromHex(userID)
+	userIDMappedToMongoDB, _ := primitive.ObjectIDFromHex(userID)
 
 	var fetchedUser *models.User
 
-	query := bson.M{"_id": objectUserID}
+	query := bson.M{"_id": userIDMappedToMongoDB}
 	err := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
 
 	if err != nil {
@@ -98,8 +98,8 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *models
 }
 
 func (userRepository *UserRepository) UpdateNewRegisteredUserById(ctx context.Context, userID string, key string, value string) (*models.User, error) {
-	userObjectID, _ := primitive.ObjectIDFromHex(userID)
-	query := bson.D{{Key: "_id", Value: userObjectID}}
+	userIDMappedToMongoDB, _ := primitive.ObjectIDFromHex(userID)
+	query := bson.D{{Key: "_id", Value: userIDMappedToMongoDB}}
 	update := bson.D{{Key: "$set", Value: bson.D{{Key: key, Value: value}}}}
 	result, err := userRepository.collection.UpdateOne(ctx, query, update)
 
@@ -160,9 +160,9 @@ func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID
 		return &models.UserView{}, err
 	}
 
-	userObjectID, _ := primitive.ObjectIDFromHex(userID)
+	userIDMappedToMongoDB, _ := primitive.ObjectIDFromHex(userID)
 
-	query := bson.D{{Key: "_id", Value: userObjectID}}
+	query := bson.D{{Key: "_id", Value: userIDMappedToMongoDB}}
 	update := bson.D{{Key: "$set", Value: mongoMappedUser}}
 	result := userRepository.collection.FindOneAndUpdate(ctx, query, update, options.FindOneAndUpdate().SetReturnDocument(1))
 
@@ -176,8 +176,8 @@ func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID
 }
 
 func (userRepository *UserRepository) DeleteUserById(ctx context.Context, userID string) error {
-	userObjectID, _ := primitive.ObjectIDFromHex(userID)
-	query := bson.M{"_id": userObjectID}
+	userIDMappedToMongoDB, _ := primitive.ObjectIDFromHex(userID)
+	query := bson.M{"_id": userIDMappedToMongoDB}
 
 	result, err := userRepository.collection.DeleteOne(ctx, query)
 

@@ -92,7 +92,9 @@ func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int,
 func (postRepository *PostRepository) CreatePost(ctx context.Context, post *models.PostCreate) (*models.Post, error) {
 	post.CreatedAt = time.Now()
 	post.UpdatedAt = post.CreatedAt
-	result, err := postRepository.collection.InsertOne(ctx, post)
+
+	postMappedToRepository := models.PostCreateToPostCreateRepositoryMapper(post)
+	result, err := postRepository.collection.InsertOne(ctx, postMappedToRepository)
 
 	if err != nil {
 		if er, ok := err.(mongo.WriteException); ok && er.WriteErrors[0].Code == 11000 {
@@ -121,7 +123,8 @@ func (postRepository *PostRepository) CreatePost(ctx context.Context, post *mode
 }
 
 func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID string, post *models.PostUpdate) (*models.Post, error) {
-	mappedPost, err := utils.MongoMapping(post)
+	postMappedToRepository := models.PostUpdateToPostUpdateRepositoryMapper(post)
+	postMappedToMongoDB, err := utils.MongoMapping(postMappedToRepository)
 
 	if err != nil {
 		return nil, err
@@ -129,7 +132,7 @@ func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID
 
 	postObjectID, _ := primitive.ObjectIDFromHex(postID)
 	query := bson.D{{Key: "_id", Value: postObjectID}}
-	update := bson.D{{Key: "$set", Value: mappedPost}}
+	update := bson.D{{Key: "$set", Value: postMappedToMongoDB}}
 	result := postRepository.collection.FindOneAndUpdate(ctx, query, update, options.FindOneAndUpdate().SetReturnDocument(1))
 
 	var updatedPost *models.Post

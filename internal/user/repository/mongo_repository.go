@@ -66,7 +66,7 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *models
 	user.Role = "user"
 	user.Password, _ = utils.HashPassword(user.Password)
 
-	repositoryMappedUser := models.UserCreateDomainMappingToRepository(user)
+	repositoryMappedUser := models.UserCreateToUserCreateRepositoryMapper(user)
 
 	result, err := userRepository.collection.InsertOne(ctx, &repositoryMappedUser)
 
@@ -152,7 +152,7 @@ func (userRepository *UserRepository) ResetUserPassword(ctx context.Context, fir
 }
 
 func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID string, user *models.UserUpdate) (*models.UserView, error) {
-	repositoryMappedUser := models.UserUpdateDomainMappingToRepository(user)
+	repositoryMappedUser := models.UserUpdateToUserUpdateRepositoryMapper(user)
 	user.UpdatedAt = time.Now()
 	mongoMappedUser, err := utils.MongoMapping(repositoryMappedUser)
 

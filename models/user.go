@@ -80,7 +80,7 @@ type UserView struct {
 	UpdatedAt time.Time `json:"updated_at" bson:"updated_at" db:"updated_at"`
 }
 
-func UserToUserRepositoryMapper(user *User) UserView {
+func UserToUserViewMapper(user *User) UserView {
 	return UserView{
 		UserID:    user.UserID,
 		Name:      user.Name,
@@ -91,7 +91,7 @@ func UserToUserRepositoryMapper(user *User) UserView {
 	}
 }
 
-func UserCreateDomainMappingToRepository(user *UserCreate) UserCreateRepository {
+func UserCreateToUserCreateRepositoryMapper(user *UserCreate) UserCreateRepository {
 	return UserCreateRepository{
 		Name:            user.Name,
 		Email:           user.Email,
@@ -104,7 +104,7 @@ func UserCreateDomainMappingToRepository(user *UserCreate) UserCreateRepository 
 	}
 }
 
-func UserUpdateDomainMappingToRepository(user *UserUpdate) UserUpdateRepository {
+func UserUpdateToUserUpdateRepositoryMapper(user *UserUpdate) UserUpdateRepository {
 	return UserUpdateRepository{
 		Name:      user.Name,
 		UpdatedAt: user.UpdatedAt,

@@ -3,7 +3,7 @@ package v1
 import (
 	"context"
 
-	pb "github.com/yachnytskyi/golang-mongo-grpc/pkg/pb"
+	pb "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/model/pb"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -11,7 +11,7 @@ import (
 
 func (userServer *UserServer) GetMe(ctx context.Context, request *pb.GetMeRequest) (*pb.UserResponse, error) {
 	userID := request.GetId()
-	user, err := userServer.userService.GetUserById(ctx, userID)
+	user, err := userServer.userUseCase.GetUserById(ctx, userID)
 
 	if err != nil {
 		return nil, status.Errorf(codes.Unimplemented, err.Error())

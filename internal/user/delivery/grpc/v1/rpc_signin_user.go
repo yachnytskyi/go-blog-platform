@@ -3,14 +3,14 @@ package v1
 import (
 	"context"
 
-	pb "github.com/yachnytskyi/golang-mongo-grpc/pkg/pb"
+	pb "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/model/pb"
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utils"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 func (userServer *UserServer) Login(ctx context.Context, request *pb.LoginUserInput) (*pb.LoginUserResponse, error) {
-	user, err := userServer.userService.GetUserByEmail(ctx, request.GetEmail())
+	user, err := userServer.userUseCase.GetUserByEmail(ctx, request.GetEmail())
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())

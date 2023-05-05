@@ -1,9 +1,9 @@
 syntax = "proto3";
 
-package models;
+package model;
 
 import "google/protobuf/timestamp.proto";
-option go_package = "github.com/yachnytskyi/golang-mongo-grpc/pkg/pb/models";
+option go_package = "github.com/yachnytskyi/golang-mongo-grpc/pkg/pb/model";
 
 message User {
   string id = 1;

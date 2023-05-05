@@ -6,25 +6,25 @@ import (
 	"log"
 	"time"
 
-	pb "github.com/yachnytskyi/golang-mongo-grpc/pkg/pb"
+	pb "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/model/pb"
 	"google.golang.org/grpc"
 )
 
 type LoginUserClient struct {
-	service pb.UserServiceClient
+	usecase pb.UserUseCaseClient
 }
 
 func NewLoginUserClient(connection *grpc.ClientConn) *LoginUserClient {
-	service := pb.NewUserServiceClient(connection)
+	usecase := pb.NewUserUseCaseClient(connection)
 
-	return &LoginUserClient{service}
+	return &LoginUserClient{usecase}
 }
 
 func (loginUserClient *LoginUserClient) Login(credentials *pb.LoginUserInput) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	response, err := loginUserClient.service.Login(ctx, credentials)
+	response, err := loginUserClient.usecase.Login(ctx, credentials)
 
 	if err != nil {
 		log.Fatalf("Login: %v", err)

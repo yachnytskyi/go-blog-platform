@@ -12,7 +12,9 @@ import (
 	"github.com/thanhpk/randstr"
 	"github.com/yachnytskyi/golang-mongo-grpc/config"
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
-	"github.com/yachnytskyi/golang-mongo-grpc/models"
+	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/model"
+	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
+
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utils"
 )
 
@@ -26,7 +28,7 @@ func NewUserHandler(userService user.Service, template *template.Template) UserH
 }
 
 func (userHandler *UserHandler) Register(ctx *gin.Context) {
-	var user *models.UserCreate = new(models.UserCreate)
+	var user *userModel.UserCreate = new(userModel.UserCreate)
 	context := ctx.Request.Context()
 
 	if err := ctx.ShouldBindJSON(&user); err != nil {
@@ -86,7 +88,7 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 }
 
 func (userHandler *UserHandler) Login(ctx *gin.Context) {
-	var credentials *models.UserSignIn
+	var credentials *userModel.UserSignIn
 	context := ctx.Request.Context()
 
 	if err := ctx.ShouldBindJSON(&credentials); err != nil {
@@ -124,7 +126,7 @@ func (userHandler *UserHandler) Login(ctx *gin.Context) {
 }
 
 func (userHandler *UserHandler) ForgottenPassword(ctx *gin.Context) {
-	var userEmail *models.UserForgottenPassword
+	var userEmail *userModel.UserForgottenPassword
 	context := ctx.Request.Context()
 
 	if err := ctx.ShouldBindJSON(&userEmail); err != nil {
@@ -188,7 +190,7 @@ func (userHandler *UserHandler) ForgottenPassword(ctx *gin.Context) {
 
 func (userHandler *UserHandler) ResetUserPassword(ctx *gin.Context) {
 	resetToken := ctx.Params.ByName("resetToken")
-	var credentials *models.UserResetPassword
+	var credentials *userModel.UserResetPassword
 	context := ctx.Request.Context()
 
 	if err := ctx.ShouldBindJSON(&credentials); err != nil {
@@ -219,7 +221,7 @@ func (userHandler *UserHandler) ResetUserPassword(ctx *gin.Context) {
 func (userHandler *UserHandler) RefreshAccessToken(ctx *gin.Context) {
 	message := "could not refresh access token"
 
-	currentUser := ctx.MustGet("currentUser").(*models.User)
+	currentUser := ctx.MustGet("currentUser").(*userModel.User)
 
 	if currentUser == nil {
 		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": message})
@@ -259,11 +261,11 @@ func (userHandler *UserHandler) RefreshAccessToken(ctx *gin.Context) {
 }
 
 func (userHandler *UserHandler) UpdateUserById(ctx *gin.Context) {
-	currentUser := ctx.MustGet("currentUser").(*models.User)
+	currentUser := ctx.MustGet("currentUser").(*userModel.User)
 	userID := currentUser.UserID
 	context := ctx.Request.Context()
 
-	var updatedUserData *models.UserUpdate = new(models.UserUpdate)
+	var updatedUserData *userModel.UserUpdate = new(userModel.UserUpdate)
 
 	if err := ctx.ShouldBindJSON(&updatedUserData); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
@@ -286,14 +288,14 @@ func (userHandler *UserHandler) Logout(ctx *gin.Context) {
 }
 
 func (userHandler *UserHandler) GetMe(ctx *gin.Context) {
-	currentUser := ctx.MustGet("currentUser").(*models.User)
+	currentUser := ctx.MustGet("currentUser").(*userModel.User)
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": models.UserToUserViewMapper(currentUser)}})
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": userViewModel.UserToUserViewMapper(currentUser)}})
 }
 
 func (userHandler *UserHandler) Delete(ctx *gin.Context) {
 	currentUser := ctx.MustGet("currentUser")
-	userID := currentUser.(*models.User).UserID
+	userID := currentUser.(*userModel.User).UserID
 	context := ctx.Request.Context()
 
 	err := userHandler.userService.DeleteUserById(context, fmt.Sprint(userID))

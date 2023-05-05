@@ -11,7 +11,7 @@ import (
 
 	"github.com/k3a/html2text"
 	"github.com/yachnytskyi/golang-mongo-grpc/config"
-	"github.com/yachnytskyi/golang-mongo-grpc/models"
+	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	"gopkg.in/gomail.v2"
 )
 
@@ -44,7 +44,7 @@ func ParseTemplateDirectory(directory string) (*template.Template, error) {
 	return template.ParseFiles(paths...)
 }
 
-func SendEmail(user *models.User, data *EmailData, templateName string) error {
+func SendEmail(user *userModel.User, data *EmailData, templateName string) error {
 	config, err := config.LoadConfig(".")
 
 	if err != nil {

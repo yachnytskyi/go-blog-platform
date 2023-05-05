@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/thanhpk/randstr"
-	"github.com/yachnytskyi/golang-mongo-grpc/models"
+	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	pb "github.com/yachnytskyi/golang-mongo-grpc/pkg/pb"
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utils"
 	"google.golang.org/grpc/codes"
@@ -17,7 +17,7 @@ func (userServer *UserServer) Register(ctx context.Context, request *pb.Register
 		return nil, status.Errorf(codes.InvalidArgument, "passwords do not match")
 	}
 
-	user := models.UserCreate{
+	user := userModel.UserCreate{
 		Name:            request.GetName(),
 		Email:           request.GetEmail(),
 		Password:        request.GetPassword(),

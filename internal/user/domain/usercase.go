@@ -8,7 +8,7 @@ import (
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utils"
 
-	"github.com/yachnytskyi/golang-mongo-grpc/models"
+	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 )
 
 type UserService struct {
@@ -19,13 +19,13 @@ func NewUserService(userRepository user.Repository) user.Service {
 	return &UserService{userRepository: userRepository}
 }
 
-func (userService *UserService) Register(ctx context.Context, user *models.UserCreate) (*models.User, error) {
+func (userService *UserService) Register(ctx context.Context, user *userModel.UserCreate) (*userModel.User, error) {
 	createdUser, err := userService.userRepository.Register(ctx, user)
 
 	return createdUser, err
 }
 
-func (userService *UserService) Login(ctx context.Context, user *models.UserSignIn) (*models.User, error) {
+func (userService *UserService) Login(ctx context.Context, user *userModel.UserSignIn) (*userModel.User, error) {
 	fetchedUser, err := userService.userRepository.GetUserByEmail(ctx, user.Email)
 
 	// Will return wrong email or password.
@@ -43,7 +43,7 @@ func (userService *UserService) Login(ctx context.Context, user *models.UserSign
 	return fetchedUser, err
 }
 
-func (userService *UserService) UpdateNewRegisteredUserById(ctx context.Context, userID string, key string, value string) (*models.User, error) {
+func (userService *UserService) UpdateNewRegisteredUserById(ctx context.Context, userID string, key string, value string) (*userModel.User, error) {
 	updatedUser, err := userService.userRepository.UpdateNewRegisteredUserById(ctx, userID, key, value)
 
 	return updatedUser, err
@@ -63,19 +63,19 @@ func (userService *UserService) ResetUserPassword(ctx context.Context, firstKey 
 
 }
 
-func (userService *UserService) UpdateUserById(ctx context.Context, userID string, user *models.UserUpdate) (*models.UserView, error) {
+func (userService *UserService) UpdateUserById(ctx context.Context, userID string, user *userModel.UserUpdate) (*userModel.User, error) {
 	updatedUser, err := userService.userRepository.UpdateUserById(ctx, userID, user)
 
 	return updatedUser, err
 }
 
-func (userService *UserService) GetUserById(ctx context.Context, userID string) (*models.User, error) {
+func (userService *UserService) GetUserById(ctx context.Context, userID string) (*userModel.User, error) {
 	fetchedUser, err := userService.userRepository.GetUserById(ctx, userID)
 
 	return fetchedUser, err
 }
 
-func (userService *UserService) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
+func (userService *UserService) GetUserByEmail(ctx context.Context, email string) (*userModel.User, error) {
 	fetchedUser, err := userService.userRepository.GetUserByEmail(ctx, email)
 
 	return fetchedUser, err

@@ -22,11 +22,11 @@ import (
 	postRepositoryPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post/repository"
 	postServicePackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post/service"
 	userPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
+	userRepositoryPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/mongo"
 	userGrpcPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1"
 	userHttpPackageV1 "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/v1"
-	userRepositoryPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/repository"
 
-	userServicePackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/service"
+	userServicePackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

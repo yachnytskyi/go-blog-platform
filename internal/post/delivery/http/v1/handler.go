@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/post"
+	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	"github.com/yachnytskyi/golang-mongo-grpc/models"
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utils"
 )
@@ -68,7 +69,7 @@ func (postHandler *PostHandler) GetPostById(ctx *gin.Context) {
 
 func (postHandler *PostHandler) CreatePost(ctx *gin.Context) {
 	var post *models.PostCreate = new(models.PostCreate)
-	currentUser := ctx.MustGet("currentUser").(*models.User)
+	currentUser := ctx.MustGet("currentUser").(*userModel.User)
 	post.User = currentUser.Name
 	post.UserID = currentUser.UserID
 	context := ctx.Request.Context()

@@ -17,7 +17,7 @@ func (userServer *UserServer) Register(ctx context.Context, request *pb.Register
 		return nil, status.Errorf(codes.InvalidArgument, "passwords do not match")
 	}
 
-	user := models.UserCreateDomain{
+	user := models.UserCreate{
 		Name:            request.GetName(),
 		Email:           request.GetEmail(),
 		Password:        request.GetPassword(),

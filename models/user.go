@@ -5,7 +5,7 @@ import (
 )
 
 // [POST].
-type UserCreateDomain struct {
+type UserCreate struct {
 	Name            string    `json:"name" bson:"name" db:"name" binding:"required"`
 	Email           string    `json:"email" bson:"email" db:"emal" binding:"required,lte=40,email"`
 	Password        string    `json:"password" bson:"password" db:"password" binding:"required,min=8"`
@@ -46,7 +46,7 @@ type ResetUserPasswordInput struct {
 }
 
 // [PUT].
-type UserUpdateDomain struct {
+type UserUpdate struct {
 	Name      string    `json:"name" bson:"name" db:"name" binding:"required"`
 	UpdatedAt time.Time `json:"updated_at" bson:"updated_at" db:"updated_at"`
 }
@@ -80,7 +80,6 @@ type UserView struct {
 	UpdatedAt time.Time `json:"updated_at" bson:"updated_at" db:"updated_at"`
 }
 
-// User mapping.
 func UserToUserRepositoryMapper(user *User) UserView {
 	return UserView{
 		UserID:    user.UserID,
@@ -92,7 +91,7 @@ func UserToUserRepositoryMapper(user *User) UserView {
 	}
 }
 
-func UserCreateDomainMappingToRepository(user *UserCreateDomain) UserCreateRepository {
+func UserCreateDomainMappingToRepository(user *UserCreate) UserCreateRepository {
 	return UserCreateRepository{
 		Name:            user.Name,
 		Email:           user.Email,
@@ -105,7 +104,7 @@ func UserCreateDomainMappingToRepository(user *UserCreateDomain) UserCreateRepos
 	}
 }
 
-func UserUpdateDomainMappingToRepository(user *UserUpdateDomain) UserUpdateRepository {
+func UserUpdateDomainMappingToRepository(user *UserUpdate) UserUpdateRepository {
 	return UserUpdateRepository{
 		Name:      user.Name,
 		UpdatedAt: user.UpdatedAt,

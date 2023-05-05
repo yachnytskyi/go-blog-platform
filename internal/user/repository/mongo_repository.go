@@ -57,7 +57,7 @@ func (userRepository *UserRepository) GetUserByEmail(ctx context.Context, email 
 	return fetchedUser, nil
 }
 
-func (userRepository *UserRepository) Register(ctx context.Context, user *models.UserCreateDomain) (*models.User, error) {
+func (userRepository *UserRepository) Register(ctx context.Context, user *models.UserCreate) (*models.User, error) {
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = user.CreatedAt
 	user.Email = strings.ToLower(user.Email)
@@ -151,7 +151,7 @@ func (userRepository *UserRepository) ResetUserPassword(ctx context.Context, fir
 	return nil
 }
 
-func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID string, user *models.UserUpdateDomain) (*models.UserView, error) {
+func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID string, user *models.UserUpdate) (*models.UserView, error) {
 	repositoryMappedUser := models.UserUpdateDomainMappingToRepository(user)
 	user.UpdatedAt = time.Now()
 	mongoMappedUser, err := utils.MongoMapping(repositoryMappedUser)

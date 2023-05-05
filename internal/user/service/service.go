@@ -19,7 +19,7 @@ func NewUserService(userRepository user.Repository) user.Service {
 	return &UserService{userRepository: userRepository}
 }
 
-func (userService *UserService) Register(ctx context.Context, user *models.UserCreateDomain) (*models.User, error) {
+func (userService *UserService) Register(ctx context.Context, user *models.UserCreate) (*models.User, error) {
 	createdUser, err := userService.userRepository.Register(ctx, user)
 
 	return createdUser, err
@@ -63,7 +63,7 @@ func (userService *UserService) ResetUserPassword(ctx context.Context, firstKey 
 
 }
 
-func (userService *UserService) UpdateUserById(ctx context.Context, userID string, user *models.UserUpdateDomain) (*models.UserView, error) {
+func (userService *UserService) UpdateUserById(ctx context.Context, userID string, user *models.UserUpdate) (*models.UserView, error) {
 	updatedUser, err := userService.userRepository.UpdateUserById(ctx, userID, user)
 
 	return updatedUser, err

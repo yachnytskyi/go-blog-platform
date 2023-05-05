@@ -19,12 +19,12 @@ import (
 )
 
 type UserHandler struct {
-	userService user.Service
+	userUseCase user.UseCase
 	template    *template.Template
 }
 
-func NewUserHandler(userService user.Service, template *template.Template) UserHandler {
-	return UserHandler{userService: userService, template: template}
+func NewUserHandler(userUseCase user.UseCase, template *template.Template) UserHandler {
+	return UserHandler{userUseCase: userUseCase, template: template}
 }
 
 func (userHandler *UserHandler) Register(ctx *gin.Context) {
@@ -41,7 +41,7 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 		return
 	}
 
-	createdUser, err := userHandler.userService.Register(context, user)
+	createdUser, err := userHandler.userUseCase.Register(context, user)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "email already exists") {
@@ -64,7 +64,7 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 	verificationCode := utils.Encode(code)
 
 	// Update the user in Database.
-	userHandler.userService.UpdateNewRegisteredUserById(context, createdUser.UserID, "verificationCode", verificationCode)
+	userHandler.userUseCase.UpdateNewRegisteredUserById(context, createdUser.UserID, "verificationCode", verificationCode)
 
 	firstName := createdUser.Name
 	firstName = utils.UserFirstName(firstName)
@@ -96,7 +96,7 @@ func (userHandler *UserHandler) Login(ctx *gin.Context) {
 		return
 	}
 
-	user, err := userHandler.userService.Login(context, credentials)
+	user, err := userHandler.userUseCase.Login(context, credentials)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
@@ -136,7 +136,7 @@ func (userHandler *UserHandler) ForgottenPassword(ctx *gin.Context) {
 
 	message := "We sent you an email with needed instructions"
 
-	fetchedUser, err := userHandler.userService.GetUserByEmail(context, userEmail.Email)
+	fetchedUser, err := userHandler.userUseCase.GetUserByEmail(context, userEmail.Email)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": err.Error()})
@@ -160,7 +160,7 @@ func (userHandler *UserHandler) ForgottenPassword(ctx *gin.Context) {
 	passwordResetAt := time.Now().Add(time.Minute * 15)
 
 	// Update the user.
-	err = userHandler.userService.UpdatePasswordResetTokenUserByEmail(context, fetchedUser.Email, "passwordResetToken", passwordResetToken, "passwordResetAt", passwordResetAt)
+	err = userHandler.userUseCase.UpdatePasswordResetTokenUserByEmail(context, fetchedUser.Email, "passwordResetToken", passwordResetToken, "passwordResetAt", passwordResetAt)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "success", "message": err.Error()})
@@ -206,7 +206,7 @@ func (userHandler *UserHandler) ResetUserPassword(ctx *gin.Context) {
 	passwordResetToken := utils.Encode(resetToken)
 
 	// Update the user.
-	err := userHandler.userService.ResetUserPassword(context, "passwordResetToken", passwordResetToken, "passwordResetAt", "password", credentials.Password)
+	err := userHandler.userUseCase.ResetUserPassword(context, "passwordResetToken", passwordResetToken, "passwordResetAt", "password", credentials.Password)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
@@ -272,7 +272,7 @@ func (userHandler *UserHandler) UpdateUserById(ctx *gin.Context) {
 		return
 	}
 
-	updatedUser, err := userHandler.userService.UpdateUserById(context, userID, updatedUserData)
+	updatedUser, err := userHandler.userUseCase.UpdateUserById(context, userID, updatedUserData)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
@@ -298,7 +298,7 @@ func (userHandler *UserHandler) Delete(ctx *gin.Context) {
 	userID := currentUser.(*userModel.User).UserID
 	context := ctx.Request.Context()
 
-	err := userHandler.userService.DeleteUserById(context, fmt.Sprint(userID))
+	err := userHandler.userUseCase.DeleteUserById(context, fmt.Sprint(userID))
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})

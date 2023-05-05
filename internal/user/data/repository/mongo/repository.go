@@ -68,9 +68,9 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *userMo
 	user.Role = "user"
 	user.Password, _ = utils.HashPassword(user.Password)
 
-	repositoryMappedUser := userRepositoryModel.UserCreateToUserCreateRepositoryMapper(user)
+	userMappedToRepository := userRepositoryModel.UserCreateToUserCreateRepositoryMapper(user)
 
-	result, err := userRepository.collection.InsertOne(ctx, &repositoryMappedUser)
+	result, err := userRepository.collection.InsertOne(ctx, &userMappedToRepository)
 
 	if err != nil {
 		if err, ok := err.(mongo.WriteException); ok && err.WriteErrors[0].Code == 11000 {
@@ -100,9 +100,10 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *userMo
 }
 
 func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID string, user *userModel.UserUpdate) (*userModel.User, error) {
-	repositoryMappedUser := userRepositoryModel.UserUpdateToUserUpdateRepositoryMapper(user)
+	userMappedToRepository := userRepositoryModel.UserUpdateToUserUpdateRepositoryMapper(user)
 	user.UpdatedAt = time.Now()
-	mongoMappedUser, err := utils.MongoMapping(repositoryMappedUser)
+
+	userMappedToMongoDB, err := utils.MongoMappper(userMappedToRepository)
 
 	if err != nil {
 		return &userModel.User{}, err
@@ -111,7 +112,7 @@ func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID
 	userIDMappedToMongoDB, _ := primitive.ObjectIDFromHex(userID)
 
 	query := bson.D{{Key: "_id", Value: userIDMappedToMongoDB}}
-	update := bson.D{{Key: "$set", Value: mongoMappedUser}}
+	update := bson.D{{Key: "$set", Value: userMappedToMongoDB}}
 	result := userRepository.collection.FindOneAndUpdate(ctx, query, update, options.FindOneAndUpdate().SetReturnDocument(1))
 
 	var updatedUser *userModel.User

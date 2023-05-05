@@ -7,17 +7,17 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/post"
+	postModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
-	"github.com/yachnytskyi/golang-mongo-grpc/models"
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utils"
 )
 
 type PostHandler struct {
-	postService post.Service
+	postUseCase post.UseCase
 }
 
-func NewPostHandler(postService post.Service) PostHandler {
-	return PostHandler{postService: postService}
+func NewPostHandler(postUseCase post.UseCase) PostHandler {
+	return PostHandler{postUseCase: postUseCase}
 }
 
 func (postHandler *PostHandler) GetAllPosts(ctx *gin.Context) {
@@ -39,7 +39,7 @@ func (postHandler *PostHandler) GetAllPosts(ctx *gin.Context) {
 		return
 	}
 
-	fetchedPosts, err := postHandler.postService.GetAllPosts(context, intPage, intLimit)
+	fetchedPosts, err := postHandler.postUseCase.GetAllPosts(context, intPage, intLimit)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
@@ -53,7 +53,7 @@ func (postHandler *PostHandler) GetPostById(ctx *gin.Context) {
 	postID := ctx.Param("postID")
 	context := ctx.Request.Context()
 
-	fetchedPost, err := postHandler.postService.GetPostById(context, postID)
+	fetchedPost, err := postHandler.postUseCase.GetPostById(context, postID)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "Id exists") {
@@ -68,7 +68,7 @@ func (postHandler *PostHandler) GetPostById(ctx *gin.Context) {
 }
 
 func (postHandler *PostHandler) CreatePost(ctx *gin.Context) {
-	var post *models.PostCreate = new(models.PostCreate)
+	var post *postModel.PostCreate = new(postModel.PostCreate)
 	currentUser := ctx.MustGet("currentUser").(*userModel.User)
 	post.User = currentUser.Name
 	post.UserID = currentUser.UserID
@@ -78,7 +78,7 @@ func (postHandler *PostHandler) CreatePost(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	createdPost, err := postHandler.postService.CreatePost(context, post)
+	createdPost, err := postHandler.postUseCase.CreatePost(context, post)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "sorry, but this title already exists. Please choose another one") {
@@ -97,14 +97,14 @@ func (postHandler *PostHandler) UpdatePostById(ctx *gin.Context) {
 	currentUserID := utils.GetCurrentUserID(ctx)
 	context := ctx.Request.Context()
 
-	var updatedPostData *models.PostUpdate = new(models.PostUpdate)
+	var updatedPostData *postModel.PostUpdate = new(postModel.PostUpdate)
 
 	if err := ctx.ShouldBindJSON(&updatedPostData); err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
-	updatedPost, err := postHandler.postService.UpdatePostById(context, postID, updatedPostData, currentUserID)
+	updatedPost, err := postHandler.postUseCase.UpdatePostById(context, postID, updatedPostData, currentUserID)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "Id exists") {
@@ -127,7 +127,7 @@ func (postHandler *PostHandler) DeletePostByID(ctx *gin.Context) {
 	currentUserID := utils.GetCurrentUserID(ctx)
 	context := ctx.Request.Context()
 
-	err := postHandler.postService.DeletePostByID(context, postID, currentUserID)
+	err := postHandler.postUseCase.DeletePostByID(context, postID, currentUserID)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "Id exists") {

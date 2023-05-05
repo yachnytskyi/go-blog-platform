@@ -7,7 +7,7 @@ import (
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 )
 
-type Service interface {
+type UseCase interface {
 	GetUserById(ctx context.Context, userID string) (*userModel.User, error)
 	GetUserByEmail(ctx context.Context, email string) (*userModel.User, error)
 	Register(ctx context.Context, user *userModel.UserCreate) (*userModel.User, error)

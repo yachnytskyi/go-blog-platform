@@ -12,7 +12,7 @@ import (
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utils"
 )
 
-func DeserializeUser(userService user.Service) gin.HandlerFunc {
+func DeserializeUser(userUseCase user.UseCase) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var accessToken string
 		cookie, err := ctx.Cookie("access_token")
@@ -41,7 +41,7 @@ func DeserializeUser(userService user.Service) gin.HandlerFunc {
 		}
 		context := ctx.Request.Context()
 
-		user, err := userService.GetUserById(context, fmt.Sprint(userID))
+		user, err := userUseCase.GetUserById(context, fmt.Sprint(userID))
 
 		if err != nil {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": "fail", "message": "You are not logged in"})

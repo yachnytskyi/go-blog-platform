@@ -10,11 +10,11 @@ import (
 type UserServer struct {
 	pb.UnimplementedUserServiceServer
 	config         config.Config
-	userService    user.Service
+	userService    user.UseCase
 	userCollection *mongo.Collection
 }
 
-func NewGrpcUserServer(config config.Config, userService user.Service, userCollection *mongo.Collection) (*UserServer, error) {
+func NewGrpcUserServer(config config.Config, userService user.UseCase, userCollection *mongo.Collection) (*UserServer, error) {
 
 	userServer := &UserServer{
 		config:         config,

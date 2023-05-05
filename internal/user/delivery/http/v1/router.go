@@ -14,13 +14,13 @@ func NewUserRouter(userHandler UserHandler) UserRouter {
 	return UserRouter{userHandler: userHandler}
 }
 
-func (userRouter *UserRouter) UserRouter(routerGroup *gin.RouterGroup, userService user.Service) {
+func (userRouter *UserRouter) UserRouter(routerGroup *gin.RouterGroup, userUseCase user.UseCase) {
 	router := routerGroup.Group("/users")
 
 	router.POST("/register", userRouter.userHandler.Register)
 	router.POST("/login", userRouter.userHandler.Login)
 
-	router.Use(middleware.DeserializeUser(userService))
+	router.Use(middleware.DeserializeUser(userUseCase))
 	router.POST("/forgotten-password", userRouter.userHandler.ForgottenPassword)
 	router.PATCH("/reset-password/:resetToken", userRouter.userHandler.ResetUserPassword)
 

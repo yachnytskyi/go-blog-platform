@@ -18,15 +18,14 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	postPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
+	postRepositoryPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post/data/repository/mongo"
 	postHttpPackageV1 "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/http/v1"
-	postRepositoryPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post/repository"
-	postServicePackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post/service"
+	postUseCasePackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/usecase"
 	userPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	userRepositoryPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/mongo"
 	userGrpcPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1"
 	userHttpPackageV1 "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/v1"
-
-	userServicePackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain"
+	userUseCasePackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -42,13 +41,13 @@ var (
 
 	userCollection *mongo.Collection
 	userRepository userPackage.Repository
-	userService    userPackage.Service
+	userUseCase    userPackage.UseCase
 	userHandler    userHttpPackageV1.UserHandler
 	userRouter     userHttpPackageV1.UserRouter
 
 	postCollection *mongo.Collection
 	postRepository postPackage.Repository
-	postService    postPackage.Service
+	postUseCase    postPackage.UseCase
 	postHandler    postHttpPackageV1.PostHandler
 	postRouter     postHttpPackageV1.PostRouter
 
@@ -108,13 +107,13 @@ func init() {
 	userRepository = userRepositoryPackage.NewUserRepository(userCollection)
 	postRepository = postRepositoryPackage.NewPostRepository(postCollection)
 
-	// Services.
-	userService = userServicePackage.NewUserService(userRepository)
-	postService = postServicePackage.NewPostService(postRepository)
+	// Use Cases.
+	userUseCase = userUseCasePackage.NewUserUseCase(userRepository)
+	postUseCase = postUseCasePackage.NewUseCase(postRepository)
 
 	// Handlers
-	userHandler = userHttpPackageV1.NewUserHandler(userService, templateInstance)
-	postHandler = postHttpPackageV1.NewPostHandler(postService)
+	userHandler = userHttpPackageV1.NewUserHandler(userUseCase, templateInstance)
+	postHandler = postHttpPackageV1.NewPostHandler(postUseCase)
 
 	// Routers.
 	userRouter = userHttpPackageV1.NewUserRouter(userHandler)
@@ -138,7 +137,7 @@ func main() {
 }
 
 func startGrpcServer(config config.Config) {
-	userServer, err := userGrpcPackage.NewGrpcUserServer(config, userService, userCollection)
+	userServer, err := userGrpcPackage.NewGrpcUserServer(config, userUseCase, userCollection)
 
 	if err != nil {
 		log.Fatal("cannot createt grpc server: ", err)
@@ -183,8 +182,8 @@ func startGinServer(config config.Config) {
 		ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": value})
 	})
 
-	userRouter.UserRouter(router, userService)
-	postRouter.PostRouter(router, userService)
+	userRouter.UserRouter(router, userUseCase)
+	postRouter.PostRouter(router, userUseCase)
 
 	log.Fatal(server.Run(":" + config.Port))
 }

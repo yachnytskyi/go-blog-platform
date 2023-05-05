@@ -6,7 +6,9 @@ import (
 	"time"
 
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/post"
-	"github.com/yachnytskyi/golang-mongo-grpc/models"
+	postRepositoryModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/data/repository/model"
+	postModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
+
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -22,12 +24,12 @@ func NewPostRepository(collection *mongo.Collection) post.Repository {
 	return &PostRepository{collection: collection}
 }
 
-func (postRepository *PostRepository) GetPostById(ctx context.Context, postID string) (*models.Post, error) {
+func (postRepository *PostRepository) GetPostById(ctx context.Context, postID string) (*postModel.Post, error) {
 	postIDMappedToMongoDB, _ := primitive.ObjectIDFromHex(postID)
 
 	query := bson.M{"_id": postIDMappedToMongoDB}
 
-	var fetchedPost *models.Post
+	var fetchedPost *postModel.Post
 
 	if err := postRepository.collection.FindOne(ctx, query).Decode(&fetchedPost); err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -40,7 +42,7 @@ func (postRepository *PostRepository) GetPostById(ctx context.Context, postID st
 	return fetchedPost, nil
 }
 
-func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int, limit int) ([]*models.Post, error) {
+func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int, limit int) ([]*postModel.Post, error) {
 	if page == 0 {
 		page = 1
 	}
@@ -65,10 +67,10 @@ func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int,
 
 	defer cursor.Close(ctx)
 
-	var fetchedPosts []*models.Post
+	var fetchedPosts []*postModel.Post
 
 	for cursor.Next(ctx) {
-		post := &models.Post{}
+		post := &postModel.Post{}
 		err := cursor.Decode(post)
 
 		if err != nil {
@@ -83,17 +85,17 @@ func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int,
 	}
 
 	if len(fetchedPosts) == 0 {
-		return []*models.Post{}, nil
+		return []*postModel.Post{}, nil
 	}
 
 	return fetchedPosts, nil
 }
 
-func (postRepository *PostRepository) CreatePost(ctx context.Context, post *models.PostCreate) (*models.Post, error) {
+func (postRepository *PostRepository) CreatePost(ctx context.Context, post *postModel.PostCreate) (*postModel.Post, error) {
 	post.CreatedAt = time.Now()
 	post.UpdatedAt = post.CreatedAt
 
-	postMappedToRepository := models.PostCreateToPostCreateRepositoryMapper(post)
+	postMappedToRepository := postRepositoryModel.PostCreateToPostCreateRepositoryMapper(post)
 	result, err := postRepository.collection.InsertOne(ctx, postMappedToRepository)
 
 	if err != nil {
@@ -112,7 +114,7 @@ func (postRepository *PostRepository) CreatePost(ctx context.Context, post *mode
 		return nil, errors.New("could not create an index for a title")
 	}
 
-	var createdPost *models.Post
+	var createdPost *postModel.Post
 	query := bson.M{"_id": result.InsertedID}
 
 	if err = postRepository.collection.FindOne(ctx, query).Decode(&createdPost); err != nil {
@@ -122,9 +124,9 @@ func (postRepository *PostRepository) CreatePost(ctx context.Context, post *mode
 	return createdPost, nil
 }
 
-func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID string, post *models.PostUpdate) (*models.Post, error) {
-	postMappedToRepository := models.PostUpdateToPostUpdateRepositoryMapper(post)
-	postMappedToMongoDB, err := utils.MongoMapping(postMappedToRepository)
+func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID string, post *postModel.PostUpdate) (*postModel.Post, error) {
+	postMappedToRepository := postRepositoryModel.PostUpdateToPostUpdateRepositoryMapper(post)
+	postMappedToMongoDB, err := utils.MongoMappper(postMappedToRepository)
 
 	if err != nil {
 		return nil, err
@@ -135,7 +137,7 @@ func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID
 	update := bson.D{{Key: "$set", Value: postMappedToMongoDB}}
 	result := postRepository.collection.FindOneAndUpdate(ctx, query, update, options.FindOneAndUpdate().SetReturnDocument(1))
 
-	var updatedPost *models.Post
+	var updatedPost *postModel.Post
 
 	if err := result.Decode(&updatedPost); err != nil {
 		return nil, errors.New("sorry, but this title already exists. Please choose another one")

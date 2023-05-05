@@ -15,13 +15,13 @@ func NewPostRouter(postHandler PostHandler) PostRouter {
 	return PostRouter{postHandler: postHandler}
 }
 
-func (postRouter *PostRouter) PostRouter(routerGroup *gin.RouterGroup, userService user.Service) {
+func (postRouter *PostRouter) PostRouter(routerGroup *gin.RouterGroup, userUseCase user.UseCase) {
 	router := routerGroup.Group("/posts")
 
 	router.GET("/", postRouter.postHandler.GetAllPosts)
 	router.GET("/:postID", postRouter.postHandler.GetPostById)
 
-	router.Use(middleware.DeserializeUser(userService))
+	router.Use(middleware.DeserializeUser(userUseCase))
 
 	router.POST("/", postRouter.postHandler.CreatePost)
 	router.PUT("/:postID", postRouter.postHandler.UpdatePostById)

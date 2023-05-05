@@ -58,7 +58,7 @@ type UserUpdateRepository struct {
 }
 
 // [GET].
-type UserFullResponse struct {
+type User struct {
 	UserID          string    `json:"user_id" bson:"_id" db:"user_id"`
 	Name            string    `json:"name" bson:"name" db:"name"`
 	Email           string    `json:"email" bson:"email" db:"email"`
@@ -81,7 +81,7 @@ type UserResponse struct {
 }
 
 // User mapping.
-func UserFullResponseMappingToUserResponse(user *UserFullResponse) UserResponse {
+func UserFullResponseMappingToUserResponse(user *User) UserResponse {
 	return UserResponse{
 		UserID:    user.UserID,
 		Name:      user.Name,

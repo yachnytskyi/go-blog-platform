@@ -68,7 +68,7 @@ func (postHandler *PostHandler) GetPostById(ctx *gin.Context) {
 
 func (postHandler *PostHandler) CreatePost(ctx *gin.Context) {
 	var post *models.PostCreate = new(models.PostCreate)
-	currentUser := ctx.MustGet("currentUser").(*models.UserFullResponse)
+	currentUser := ctx.MustGet("currentUser").(*models.User)
 	post.User = currentUser.Name
 	post.UserID = currentUser.UserID
 	context := ctx.Request.Context()

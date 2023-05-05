@@ -124,7 +124,7 @@ func (userHandler *UserHandler) Login(ctx *gin.Context) {
 }
 
 func (userHandler *UserHandler) ForgottenPassword(ctx *gin.Context) {
-	var userEmail *models.ForgottenPasswordInput
+	var userEmail *models.UserForgottenPassword
 	context := ctx.Request.Context()
 
 	if err := ctx.ShouldBindJSON(&userEmail); err != nil {
@@ -188,7 +188,7 @@ func (userHandler *UserHandler) ForgottenPassword(ctx *gin.Context) {
 
 func (userHandler *UserHandler) ResetUserPassword(ctx *gin.Context) {
 	resetToken := ctx.Params.ByName("resetToken")
-	var credentials *models.ResetUserPasswordInput
+	var credentials *models.UserResetPassword
 	context := ctx.Request.Context()
 
 	if err := ctx.ShouldBindJSON(&credentials); err != nil {

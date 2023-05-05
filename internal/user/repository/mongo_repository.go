@@ -151,13 +151,13 @@ func (userRepository *UserRepository) ResetUserPassword(ctx context.Context, fir
 	return nil
 }
 
-func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID string, user *models.UserUpdateDomain) (*models.UserResponse, error) {
+func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID string, user *models.UserUpdateDomain) (*models.UserView, error) {
 	repositoryMappedUser := models.UserUpdateDomainMappingToRepository(user)
 	user.UpdatedAt = time.Now()
 	mongoMappedUser, err := utils.MongoMapping(repositoryMappedUser)
 
 	if err != nil {
-		return &models.UserResponse{}, err
+		return &models.UserView{}, err
 	}
 
 	userObjectID, _ := primitive.ObjectIDFromHex(userID)
@@ -166,7 +166,7 @@ func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID
 	update := bson.D{{Key: "$set", Value: mongoMappedUser}}
 	result := userRepository.collection.FindOneAndUpdate(ctx, query, update, options.FindOneAndUpdate().SetReturnDocument(1))
 
-	var updatedUser *models.UserResponse
+	var updatedUser *models.UserView
 
 	if err := result.Decode(&updatedUser); err != nil {
 		return nil, err

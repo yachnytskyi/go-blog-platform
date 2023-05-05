@@ -71,7 +71,7 @@ type User struct {
 }
 
 // [GET].
-type UserResponse struct {
+type UserView struct {
 	UserID    string    `json:"user_id" bson:"_id" db:"user_id"`
 	Name      string    `json:"name" bson:"name" db:"name"`
 	Email     string    `json:"email" bson:"email" db:"email"`
@@ -81,8 +81,8 @@ type UserResponse struct {
 }
 
 // User mapping.
-func UserFullResponseMappingToUserResponse(user *User) UserResponse {
-	return UserResponse{
+func UserToUserRepositoryMapper(user *User) UserView {
+	return UserView{
 		UserID:    user.UserID,
 		Name:      user.Name,
 		Email:     user.Email,

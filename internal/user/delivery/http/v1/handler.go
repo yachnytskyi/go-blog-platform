@@ -288,7 +288,7 @@ func (userHandler *UserHandler) Logout(ctx *gin.Context) {
 func (userHandler *UserHandler) GetMe(ctx *gin.Context) {
 	currentUser := ctx.MustGet("currentUser").(*models.User)
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": models.UserFullResponseMappingToUserResponse(currentUser)}})
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": models.UserToUserRepositoryMapper(currentUser)}})
 }
 
 func (userHandler *UserHandler) Delete(ctx *gin.Context) {

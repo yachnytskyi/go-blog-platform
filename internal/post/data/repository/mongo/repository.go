@@ -40,7 +40,6 @@ func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int,
 	option.SetSkip(int64(skip))
 
 	query := bson.M{}
-
 	cursor, err := postRepository.collection.Find(ctx, query, &option)
 
 	if err != nil {
@@ -134,6 +133,7 @@ func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID
 	}
 
 	postIDMappedToMongoDB, _ := primitive.ObjectIDFromHex(postID)
+
 	query := bson.D{{Key: "_id", Value: postIDMappedToMongoDB}}
 	update := bson.D{{Key: "$set", Value: postMappedToMongoDB}}
 	result := postRepository.collection.FindOneAndUpdate(ctx, query, update, options.FindOneAndUpdate().SetReturnDocument(1))
@@ -149,8 +149,8 @@ func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID
 
 func (postRepository *PostRepository) DeletePostByID(ctx context.Context, postID string) error {
 	postIDMappedToMongoDB, _ := primitive.ObjectIDFromHex(postID)
-	query := bson.M{"_id": postIDMappedToMongoDB}
 
+	query := bson.M{"_id": postIDMappedToMongoDB}
 	result, err := postRepository.collection.DeleteOne(ctx, query)
 
 	if err != nil {

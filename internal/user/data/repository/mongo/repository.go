@@ -29,7 +29,6 @@ func (userRepository *UserRepository) GetUserById(ctx context.Context, userID st
 	userIDMappedToMongoDB, _ := primitive.ObjectIDFromHex(userID)
 
 	var fetchedUser *userModel.User
-
 	query := bson.M{"_id": userIDMappedToMongoDB}
 	err := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
 
@@ -124,6 +123,7 @@ func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID
 
 func (userRepository *UserRepository) UpdateNewRegisteredUserById(ctx context.Context, userID string, key string, value string) (*userModel.User, error) {
 	userIDMappedToMongoDB, _ := primitive.ObjectIDFromHex(userID)
+
 	query := bson.D{{Key: "_id", Value: userIDMappedToMongoDB}}
 	update := bson.D{{Key: "$set", Value: bson.D{{Key: key, Value: value}}}}
 	result, err := userRepository.collection.UpdateOne(ctx, query, update)
@@ -178,8 +178,8 @@ func (userRepository *UserRepository) ResetUserPassword(ctx context.Context, fir
 
 func (userRepository *UserRepository) DeleteUserById(ctx context.Context, userID string) error {
 	userIDMappedToMongoDB, _ := primitive.ObjectIDFromHex(userID)
-	query := bson.M{"_id": userIDMappedToMongoDB}
 
+	query := bson.M{"_id": userIDMappedToMongoDB}
 	result, err := userRepository.collection.DeleteOne(ctx, query)
 
 	if err != nil {

@@ -1,4 +1,4 @@
-package v1
+package gin
 
 import (
 	"fmt"
@@ -12,8 +12,8 @@ import (
 	"github.com/thanhpk/randstr"
 	"github.com/yachnytskyi/golang-mongo-grpc/config"
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
+	httpGinUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin/utility"
 	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
-	httpV1Utility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/v1/utility"
 	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/model"
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility"
@@ -119,7 +119,7 @@ func (userHandler *UserHandler) Login(ctx *gin.Context) {
 		return
 	}
 
-	httpV1Utility.LoginSetCookies(ctx, accessToken, config.AccessTokenMaxAge*60, refreshToken, config.RefreshTokenMaxAge*60)
+	httpGinUtility.LoginSetCookies(ctx, accessToken, config.AccessTokenMaxAge*60, refreshToken, config.RefreshTokenMaxAge*60)
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
 }
@@ -209,7 +209,7 @@ func (userHandler *UserHandler) ResetUserPassword(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 	}
 
-	httpV1Utility.ResetUserPasswordSetCookies(ctx)
+	httpGinUtility.ResetUserPasswordSetCookies(ctx)
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "Congratulations! Your password was updated successfully! Please sign in again."})
 
@@ -252,7 +252,7 @@ func (userHandler *UserHandler) RefreshAccessToken(ctx *gin.Context) {
 		return
 	}
 
-	httpV1Utility.RefreshAccessTokenSetCookies(ctx, accessToken, config.AccessTokenMaxAge*60)
+	httpGinUtility.RefreshAccessTokenSetCookies(ctx, accessToken, config.AccessTokenMaxAge*60)
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
 }
@@ -278,7 +278,7 @@ func (userHandler *UserHandler) UpdateUserById(ctx *gin.Context) {
 }
 
 func (userHandler *UserHandler) Logout(ctx *gin.Context) {
-	httpV1Utility.LogoutSetCookies(ctx)
+	httpGinUtility.LogoutSetCookies(ctx)
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success"})
 }

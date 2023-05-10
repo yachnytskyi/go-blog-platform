@@ -1,9 +1,9 @@
-package v1
+package gin
 
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
-	httpV1Utility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/v1/utility"
+	httpGinUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin/utility"
 )
 
 type UserRouter struct {
@@ -20,7 +20,7 @@ func (userRouter *UserRouter) UserRouter(routerGroup *gin.RouterGroup, userUseCa
 	router.POST("/register", userRouter.userHandler.Register)
 	router.POST("/login", userRouter.userHandler.Login)
 
-	router.Use(httpV1Utility.DeserializeUser(userUseCase))
+	router.Use(httpGinUtility.DeserializeUser(userUseCase))
 	router.POST("/forgotten-password", userRouter.userHandler.ForgottenPassword)
 	router.PATCH("/reset-password/:resetToken", userRouter.userHandler.ResetUserPassword)
 

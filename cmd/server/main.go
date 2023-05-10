@@ -19,12 +19,12 @@ import (
 
 	postPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
 	postRepositoryPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post/data/repository/mongo"
-	postHttpPackageV1 "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/http/v1"
+	postHttpGinPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/http/gin"
 	postUseCasePackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/usecase"
 	userPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	userRepositoryPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/mongo"
 	userGrpcPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1"
-	userHttpPackageV1 "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/v1"
+	userHttpGinPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin"
 	userUseCasePackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -42,14 +42,14 @@ var (
 	userCollection *mongo.Collection
 	userRepository userPackage.Repository
 	userUseCase    userPackage.UseCase
-	userHandler    userHttpPackageV1.UserHandler
-	userRouter     userHttpPackageV1.UserRouter
+	userHandler    userHttpGinPackage.UserHandler
+	userRouter     userHttpGinPackage.UserRouter
 
 	postCollection *mongo.Collection
 	postRepository postPackage.Repository
 	postUseCase    postPackage.UseCase
-	postHandler    postHttpPackageV1.PostHandler
-	postRouter     postHttpPackageV1.PostRouter
+	postHandler    postHttpGinPackage.PostHandler
+	postRouter     postHttpGinPackage.PostRouter
 
 	templateInstance *template.Template
 )
@@ -112,12 +112,12 @@ func init() {
 	postUseCase = postUseCasePackage.NewUseCase(postRepository)
 
 	// Handlers
-	userHandler = userHttpPackageV1.NewUserHandler(userUseCase, templateInstance)
-	postHandler = postHttpPackageV1.NewPostHandler(postUseCase)
+	userHandler = userHttpGinPackage.NewUserHandler(userUseCase, templateInstance)
+	postHandler = postHttpGinPackage.NewPostHandler(postUseCase)
 
 	// Routers.
-	userRouter = userHttpPackageV1.NewUserRouter(userHandler)
-	postRouter = postHttpPackageV1.NewPostRouter(postHandler)
+	userRouter = userHttpGinPackage.NewUserRouter(userHandler)
+	postRouter = postHttpGinPackage.NewPostRouter(postHandler)
 
 	// Create the Gin Engine instance.
 	server = gin.Default()

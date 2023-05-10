@@ -1,9 +1,9 @@
-package v1
+package gin
 
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
-	httpV1Utility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/v1/utility"
+	httpGinUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin/utility"
 )
 
 type PostRouter struct {
@@ -20,7 +20,7 @@ func (postRouter *PostRouter) PostRouter(routerGroup *gin.RouterGroup, userUseCa
 	router.GET("/", postRouter.postHandler.GetAllPosts)
 	router.GET("/:postID", postRouter.postHandler.GetPostById)
 
-	router.Use(httpV1Utility.DeserializeUser(userUseCase))
+	router.Use(httpGinUtility.DeserializeUser(userUseCase))
 
 	router.POST("/", postRouter.postHandler.CreatePost)
 	router.PUT("/:postID", postRouter.postHandler.UpdatePostById)

@@ -6,14 +6,12 @@ import (
 
 func UserCreateToUserCreateRepositoryMapper(user *userModel.UserCreate) UserCreateRepository {
 	return UserCreateRepository{
-		Name:            user.Name,
-		Email:           user.Email,
-		Password:        user.Password,
-		PasswordConfirm: user.PasswordConfirm,
-		Role:            user.Role,
-		Verified:        user.Verified,
-		CreatedAt:       user.CreatedAt,
-		UpdatedAt:       user.UpdatedAt,
+		Name:      user.Name,
+		Email:     user.Email,
+		Password:  user.Password,
+		Verified:  user.Verified,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
 	}
 }
 

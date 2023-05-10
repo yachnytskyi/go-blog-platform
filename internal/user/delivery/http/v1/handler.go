@@ -273,7 +273,7 @@ func (userHandler *UserHandler) UpdateUserById(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "You successfully updated your settings!", "data": gin.H{"user": updatedUser}})
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "You successfully updated your settings!", "data": gin.H{"user": userViewModel.UserToUserViewMapper(updatedUser)}})
 }
 
 func (userHandler *UserHandler) Logout(ctx *gin.Context) {

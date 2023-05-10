@@ -24,24 +24,6 @@ func NewPostRepository(collection *mongo.Collection) post.Repository {
 	return &PostRepository{collection: collection}
 }
 
-func (postRepository *PostRepository) GetPostById(ctx context.Context, postID string) (*postModel.Post, error) {
-	postIDMappedToMongoDB, _ := primitive.ObjectIDFromHex(postID)
-
-	query := bson.M{"_id": postIDMappedToMongoDB}
-
-	var fetchedPost *postModel.Post
-
-	if err := postRepository.collection.FindOne(ctx, query).Decode(&fetchedPost); err != nil {
-		if err == mongo.ErrNoDocuments {
-			return nil, errors.New("no document with that Id exists")
-		}
-
-		return nil, err
-	}
-
-	return fetchedPost, nil
-}
-
 func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int, limit int) ([]*postModel.Post, error) {
 	if page == 0 {
 		page = 1
@@ -91,11 +73,29 @@ func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int,
 	return fetchedPosts, nil
 }
 
-func (postRepository *PostRepository) CreatePost(ctx context.Context, post *postModel.PostCreate) (*postModel.Post, error) {
-	post.CreatedAt = time.Now()
-	post.UpdatedAt = post.CreatedAt
+func (postRepository *PostRepository) GetPostById(ctx context.Context, postID string) (*postModel.Post, error) {
+	postIDMappedToMongoDB, _ := primitive.ObjectIDFromHex(postID)
 
+	query := bson.M{"_id": postIDMappedToMongoDB}
+
+	var fetchedPost *postModel.Post
+
+	if err := postRepository.collection.FindOne(ctx, query).Decode(&fetchedPost); err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, errors.New("no document with that Id exists")
+		}
+
+		return nil, err
+	}
+
+	return fetchedPost, nil
+}
+
+func (postRepository *PostRepository) CreatePost(ctx context.Context, post *postModel.PostCreate) (*postModel.Post, error) {
 	postMappedToRepository := postRepositoryModel.PostCreateToPostCreateRepositoryMapper(post)
+	postMappedToRepository.CreatedAt = time.Now()
+	postMappedToRepository.UpdatedAt = post.CreatedAt
+
 	result, err := postRepository.collection.InsertOne(ctx, postMappedToRepository)
 
 	if err != nil {
@@ -126,6 +126,7 @@ func (postRepository *PostRepository) CreatePost(ctx context.Context, post *post
 
 func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID string, post *postModel.PostUpdate) (*postModel.Post, error) {
 	postMappedToRepository := postRepositoryModel.PostUpdateToPostUpdateRepositoryMapper(post)
+	postMappedToRepository.UpdatedAt = time.Now()
 	postMappedToMongoDB, err := utils.MongoMappper(postMappedToRepository)
 
 	if err != nil {

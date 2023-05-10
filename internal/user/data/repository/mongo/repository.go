@@ -60,15 +60,13 @@ func (userRepository *UserRepository) GetUserByEmail(ctx context.Context, email 
 }
 
 func (userRepository *UserRepository) Register(ctx context.Context, user *userModel.UserCreate) (*userModel.User, error) {
-	user.CreatedAt = time.Now()
-	user.UpdatedAt = user.CreatedAt
-	user.Email = strings.ToLower(user.Email)
-	user.PasswordConfirm = ""
-	user.Verified = true
-	user.Role = "user"
-	user.Password, _ = utils.HashPassword(user.Password)
-
 	userMappedToRepository := userRepositoryModel.UserCreateToUserCreateRepositoryMapper(user)
+	userMappedToRepository.CreatedAt = time.Now()
+	userMappedToRepository.UpdatedAt = user.CreatedAt
+	userMappedToRepository.Email = strings.ToLower(user.Email)
+	userMappedToRepository.Verified = true
+	userMappedToRepository.Role = "user"
+	userMappedToRepository.Password, _ = utils.HashPassword(user.Password)
 
 	result, err := userRepository.collection.InsertOne(ctx, &userMappedToRepository)
 
@@ -101,7 +99,7 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *userMo
 
 func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID string, user *userModel.UserUpdate) (*userModel.User, error) {
 	userMappedToRepository := userRepositoryModel.UserUpdateToUserUpdateRepositoryMapper(user)
-	user.UpdatedAt = time.Now()
+	userMappedToRepository.UpdatedAt = time.Now()
 
 	userMappedToMongoDB, err := utils.MongoMappper(userMappedToRepository)
 

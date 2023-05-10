@@ -62,7 +62,7 @@ func SendEmail(user *userModel.User, data *EmailData, templateName string) error
 
 	var body bytes.Buffer
 
-	template, err := ParseTemplateDirectory("pkg/templates")
+	template, err := ParseTemplateDirectory("internal/user/delivery/http/utility/templates")
 
 	if err != nil {
 		log.Fatal("Could not parse template", err)

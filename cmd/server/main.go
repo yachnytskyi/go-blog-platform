@@ -58,7 +58,7 @@ var (
 func init() {
 
 	// Load the .env variables.
-	templateInstance = template.Must(template.ParseGlob("pkg/templates/*.html"))
+	templateInstance = template.Must(template.ParseGlob("internal/user/delivery/http/utility/templates/*.html"))
 	config, err := config.LoadConfig(".")
 
 	if err != nil {

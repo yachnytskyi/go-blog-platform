@@ -5,7 +5,7 @@ import (
 
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/post"
 	postModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utils"
+	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility"
 )
 
 type PostUseCase struct {
@@ -43,7 +43,7 @@ func (postUseCase *PostUseCase) UpdatePostById(ctx context.Context, postID strin
 
 	userID := fetchedPost.UserID
 
-	if err := utils.IsUserOwner(currentUserID, userID); err != nil {
+	if err := utility.IsUserOwner(currentUserID, userID); err != nil {
 		return nil, err
 	}
 
@@ -61,7 +61,7 @@ func (postUseCase *PostUseCase) DeletePostByID(ctx context.Context, postID strin
 
 	userID := fetchedPost.UserID
 
-	if err := utils.IsUserOwner(currentUserID, userID); err != nil {
+	if err := utility.IsUserOwner(currentUserID, userID); err != nil {
 		return err
 	}
 

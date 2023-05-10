@@ -1,4 +1,4 @@
-package utils
+package utility
 
 import (
 	"bytes"
@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/k3a/html2text"
 	"github.com/yachnytskyi/golang-mongo-grpc/config"
@@ -87,4 +88,12 @@ func SendEmail(user *userModel.User, data *EmailData, templateName string) error
 		return err
 	}
 	return nil
+}
+
+func UserFirstName(firstName string) string {
+	if strings.Contains(firstName, " ") {
+		firstName = strings.Split(firstName, " ")[1]
+	}
+
+	return firstName
 }

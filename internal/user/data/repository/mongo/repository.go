@@ -10,7 +10,8 @@ import (
 	userRepositoryModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/model"
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utils"
+	repositoryUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/utility"
+	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -65,7 +66,7 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *userMo
 	userMappedToRepository.Email = strings.ToLower(user.Email)
 	userMappedToRepository.Verified = true
 	userMappedToRepository.Role = "user"
-	userMappedToRepository.Password, _ = utils.HashPassword(user.Password)
+	userMappedToRepository.Password, _ = repositoryUtility.HashPassword(user.Password)
 
 	result, err := userRepository.collection.InsertOne(ctx, &userMappedToRepository)
 
@@ -100,7 +101,7 @@ func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID
 	userMappedToRepository := userRepositoryModel.UserUpdateToUserUpdateRepositoryMapper(user)
 	userMappedToRepository.UpdatedAt = time.Now()
 
-	userMappedToMongoDB, err := utils.MongoMappper(userMappedToRepository)
+	userMappedToMongoDB, err := utility.MongoMappper(userMappedToRepository)
 
 	if err != nil {
 		return &userModel.User{}, err
@@ -158,7 +159,7 @@ func (userRepository *UserRepository) UpdatePasswordResetTokenUserByEmail(ctx co
 }
 
 func (userRepository *UserRepository) ResetUserPassword(ctx context.Context, firstKey string, firstValue string, secondKey string, passwordKey, password string) error {
-	hashedPassword, _ := utils.HashPassword(password)
+	hashedPassword, _ := repositoryUtility.HashPassword(password)
 
 	query := bson.D{{Key: firstKey, Value: firstValue}}
 	update := bson.D{{Key: "$set", Value: bson.D{{Key: passwordKey, Value: hashedPassword}}}, {Key: "$unset", Value: bson.D{{Key: firstKey, Value: ""}, {Key: secondKey, Value: ""}}}}

@@ -9,7 +9,7 @@ import (
 	postRepositoryModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/data/repository/model"
 	postModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
 
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utils"
+	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -126,7 +126,7 @@ func (postRepository *PostRepository) CreatePost(ctx context.Context, post *post
 func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID string, post *postModel.PostUpdate) (*postModel.Post, error) {
 	postMappedToRepository := postRepositoryModel.PostUpdateToPostUpdateRepositoryMapper(post)
 	postMappedToRepository.UpdatedAt = time.Now()
-	postMappedToMongoDB, err := utils.MongoMappper(postMappedToRepository)
+	postMappedToMongoDB, err := utility.MongoMappper(postMappedToRepository)
 
 	if err != nil {
 		return nil, err

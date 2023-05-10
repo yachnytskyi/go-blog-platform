@@ -11,9 +11,7 @@ type PostCreateRepository struct {
 	User      string    `json:"user" bson:"user" binding:"required"`
 	CreatedAt time.Time `json:"created_at,omitempty" bson:"created_at,omitempty"`
 	UpdatedAt time.Time `json:"updated_at,omitempty" bson:"updated_at,omitempty"`
-
 }
-
 
 // [PUT].
 type PostUpdateRepository struct {
@@ -23,6 +21,5 @@ type PostUpdateRepository struct {
 	Image     string    `json:"image,omitempty" bson:"image,omitempty" db:"image,omitempty"`
 	User      string    `json:"user,omitempty" bson:"user,omitempty" db:"user,omitempty"`
 	CreatedAt time.Time `json:"created_at,omitempty" bson:"created_at,omitempty" db:"created_at,omitempty"`
-
 	UpdatedAt time.Time `json:"updated_at,omitempty" bson:"updated_at,omitempty" db:"updated_at,omitempty"`
 }

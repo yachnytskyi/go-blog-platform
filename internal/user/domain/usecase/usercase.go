@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utils"
+	repositoryUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/utility"
 
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 )
@@ -34,7 +34,7 @@ func (userUseCase *UserUseCase) Login(ctx context.Context, user *userModel.UserS
 	}
 
 	// Verify password - we previously created this method.
-	matchPasswords := utils.VerifyPassword(fetchedUser.Password, user.Password)
+	matchPasswords := repositoryUtility.VerifyPassword(fetchedUser.Password, user.Password)
 
 	if matchPasswords != nil {
 		return nil, fmt.Errorf("invalid email or password")

@@ -12,10 +12,11 @@ import (
 	"github.com/thanhpk/randstr"
 	"github.com/yachnytskyi/golang-mongo-grpc/config"
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
+	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
+	httpV1Utility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/v1/utility"
 	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/model"
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
-
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utils"
+	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility"
 )
 
 type UserHandler struct {
@@ -60,22 +61,22 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 	// Generate verification code.
 	code := randstr.String(20)
 
-	verificationCode := utils.Encode(code)
+	verificationCode := utility.Encode(code)
 
 	// Update the user in Database.
 	userHandler.userUseCase.UpdateNewRegisteredUserById(ctx.Request.Context(), createdUser.UserID, "verificationCode", verificationCode)
 
 	firstName := createdUser.Name
-	firstName = utils.UserFirstName(firstName)
+	firstName = httpUtility.UserFirstName(firstName)
 
 	// Send an email.
-	emailData := utils.EmailData{
+	emailData := httpUtility.EmailData{
 		URL:       config.Origin + "/verifyemail/" + code,
 		FirstName: firstName,
 		Subject:   "Your account verification code",
 	}
 
-	err = utils.SendEmail(createdUser, &emailData, "verificationCode.html")
+	err = httpUtility.SendEmail(createdUser, &emailData, "verificationCode.html")
 
 	if err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": "Error in sending an email"})
@@ -104,21 +105,21 @@ func (userHandler *UserHandler) Login(ctx *gin.Context) {
 	config, _ := config.LoadConfig(".")
 
 	// Generate tokens.
-	accessToken, err := utils.CreateToken(config.AccessTokenExpiresIn, user.UserID, config.AccessTokenPrivateKey)
+	accessToken, err := httpUtility.CreateToken(config.AccessTokenExpiresIn, user.UserID, config.AccessTokenPrivateKey)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
-	refreshToken, err := utils.CreateToken(config.RefreshTokenExpiresIn, user.UserID, config.RefreshTokenPrivateKey)
+	refreshToken, err := httpUtility.CreateToken(config.RefreshTokenExpiresIn, user.UserID, config.RefreshTokenPrivateKey)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
-	utils.LoginSetCookies(ctx, accessToken, config.AccessTokenMaxAge*60, refreshToken, config.RefreshTokenMaxAge*60)
+	httpV1Utility.LoginSetCookies(ctx, accessToken, config.AccessTokenMaxAge*60, refreshToken, config.RefreshTokenMaxAge*60)
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
 }
@@ -153,7 +154,7 @@ func (userHandler *UserHandler) ForgottenPassword(ctx *gin.Context) {
 
 	// Generate verification code.
 	resetToken := randstr.String(20)
-	passwordResetToken := utils.Encode(resetToken)
+	passwordResetToken := utility.Encode(resetToken)
 	passwordResetAt := time.Now().Add(time.Minute * 15)
 
 	// Update the user.
@@ -165,16 +166,16 @@ func (userHandler *UserHandler) ForgottenPassword(ctx *gin.Context) {
 	}
 
 	firstName := fetchedUser.Name
-	firstName = utils.UserFirstName(firstName)
+	firstName = httpUtility.UserFirstName(firstName)
 
 	// Send an email.
-	emailData := utils.EmailData{
+	emailData := httpUtility.EmailData{
 		URL:       config.Origin + "/reset-password/" + resetToken,
 		FirstName: firstName,
 		Subject:   "Your password reset token (it is valid for 15 minutes)",
 	}
 
-	err = utils.SendEmail(fetchedUser, &emailData, "resetPassword.html")
+	err = httpUtility.SendEmail(fetchedUser, &emailData, "resetPassword.html")
 
 	if err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "success", "message": "Error in sending an email"})
@@ -199,7 +200,7 @@ func (userHandler *UserHandler) ResetUserPassword(ctx *gin.Context) {
 		return
 	}
 
-	passwordResetToken := utils.Encode(resetToken)
+	passwordResetToken := utility.Encode(resetToken)
 
 	// Update the user.
 	err := userHandler.userUseCase.ResetUserPassword(ctx.Request.Context(), "passwordResetToken", passwordResetToken, "passwordResetAt", "password", credentials.Password)
@@ -208,7 +209,7 @@ func (userHandler *UserHandler) ResetUserPassword(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 	}
 
-	utils.ResetUserPasswordSetCookies(ctx)
+	httpV1Utility.ResetUserPasswordSetCookies(ctx)
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "Congratulations! Your password was updated successfully! Please sign in again."})
 
@@ -233,7 +234,7 @@ func (userHandler *UserHandler) RefreshAccessToken(ctx *gin.Context) {
 
 	config, _ := config.LoadConfig(".")
 
-	userID, err := utils.ValidateToken(cookie, config.RefreshTokenPublicKey)
+	userID, err := httpUtility.ValidateToken(cookie, config.RefreshTokenPublicKey)
 
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": err.Error()})
@@ -244,14 +245,14 @@ func (userHandler *UserHandler) RefreshAccessToken(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": "the user is belonged to this token no longer exists "})
 	}
 
-	accessToken, err := utils.CreateToken(config.AccessTokenExpiresIn, userID, config.AccessTokenPrivateKey)
+	accessToken, err := httpUtility.CreateToken(config.AccessTokenExpiresIn, userID, config.AccessTokenPrivateKey)
 
 	if err != nil {
 		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
-	utils.RefreshAccessTokenSetCookies(ctx, accessToken, config.AccessTokenMaxAge*60)
+	httpV1Utility.RefreshAccessTokenSetCookies(ctx, accessToken, config.AccessTokenMaxAge*60)
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
 }
@@ -277,7 +278,7 @@ func (userHandler *UserHandler) UpdateUserById(ctx *gin.Context) {
 }
 
 func (userHandler *UserHandler) Logout(ctx *gin.Context) {
-	utils.LogoutSetCookies(ctx)
+	httpV1Utility.LogoutSetCookies(ctx)
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success"})
 }

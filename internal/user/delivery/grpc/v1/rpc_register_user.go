@@ -6,8 +6,10 @@ import (
 
 	"github.com/thanhpk/randstr"
 	pb "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/model/pb"
+	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utils"
+
+	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -37,22 +39,22 @@ func (userServer *UserServer) Register(ctx context.Context, request *pb.Register
 	// Generate verification code.
 	code := randstr.String(20)
 
-	verificationCode := utils.Encode(code)
+	verificationCode := utility.Encode(code)
 
 	// Update the user in database.
 	userServer.userUseCase.UpdateNewRegisteredUserById(ctx, createdUser.UserID, "verificationCode", verificationCode)
 
 	var firstName = createdUser.Name
-	firstName = utils.UserFirstName(firstName)
+	firstName = httpUtility.UserFirstName(firstName)
 
 	// Send an email.
-	emailData := utils.EmailData{
+	emailData := httpUtility.EmailData{
 		URL:       userServer.config.Origin + "/verifyemail/" + code,
 		FirstName: firstName,
 		Subject:   "Your account verification code",
 	}
 
-	err = utils.SendEmail(createdUser, &emailData, "verificationCode.html")
+	err = httpUtility.SendEmail(createdUser, &emailData, "verificationCode.html")
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "There was an error sending email: %s", err.Error())
 

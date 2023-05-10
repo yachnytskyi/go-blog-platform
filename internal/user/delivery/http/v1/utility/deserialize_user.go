@@ -1,4 +1,4 @@
-package middleware
+package utility
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"github.com/yachnytskyi/golang-mongo-grpc/config"
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utils"
+	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
 )
 
 func DeserializeUser(userUseCase user.UseCase) gin.HandlerFunc {
@@ -33,7 +33,7 @@ func DeserializeUser(userUseCase user.UseCase) gin.HandlerFunc {
 
 		config, _ := config.LoadConfig(".")
 
-		userID, err := utils.ValidateToken(accessToken, config.AccessTokenPublicKey)
+		userID, err := httpUtility.ValidateToken(accessToken, config.AccessTokenPublicKey)
 
 		if err != nil {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": "fail", "message": err.Error()})

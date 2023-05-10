@@ -1,8 +1,7 @@
-package utils
+package utility
 
 import (
 	"encoding/base64"
-	"strings"
 )
 
 func Encode(baseString string) string {
@@ -18,12 +17,4 @@ func Decode(encodedString string) (string, error) {
 	}
 
 	return string(data), nil
-}
-
-func UserFirstName(firstName string) string {
-	if strings.Contains(firstName, " ") {
-		firstName = strings.Split(firstName, " ")[1]
-	}
-
-	return firstName
 }

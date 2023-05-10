@@ -29,7 +29,6 @@ func NewUserHandler(userUseCase user.UseCase, template *template.Template) UserH
 
 func (userHandler *UserHandler) Register(ctx *gin.Context) {
 	var user *userModel.UserCreate = new(userModel.UserCreate)
-	context := ctx.Request.Context()
 
 	if err := ctx.ShouldBindJSON(&user); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
@@ -41,7 +40,7 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 		return
 	}
 
-	createdUser, err := userHandler.userUseCase.Register(context, user)
+	createdUser, err := userHandler.userUseCase.Register(ctx.Request.Context(), user)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "email already exists") {
@@ -64,7 +63,7 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 	verificationCode := utils.Encode(code)
 
 	// Update the user in Database.
-	userHandler.userUseCase.UpdateNewRegisteredUserById(context, createdUser.UserID, "verificationCode", verificationCode)
+	userHandler.userUseCase.UpdateNewRegisteredUserById(ctx.Request.Context(), createdUser.UserID, "verificationCode", verificationCode)
 
 	firstName := createdUser.Name
 	firstName = utils.UserFirstName(firstName)
@@ -89,14 +88,13 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 
 func (userHandler *UserHandler) Login(ctx *gin.Context) {
 	var credentials *userModel.UserSignIn
-	context := ctx.Request.Context()
 
 	if err := ctx.ShouldBindJSON(&credentials); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
-	user, err := userHandler.userUseCase.Login(context, credentials)
+	user, err := userHandler.userUseCase.Login(ctx.Request.Context(), credentials)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
@@ -127,7 +125,6 @@ func (userHandler *UserHandler) Login(ctx *gin.Context) {
 
 func (userHandler *UserHandler) ForgottenPassword(ctx *gin.Context) {
 	var userEmail *userModel.UserForgottenPassword
-	context := ctx.Request.Context()
 
 	if err := ctx.ShouldBindJSON(&userEmail); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
@@ -136,7 +133,7 @@ func (userHandler *UserHandler) ForgottenPassword(ctx *gin.Context) {
 
 	message := "We sent you an email with needed instructions"
 
-	fetchedUser, err := userHandler.userUseCase.GetUserByEmail(context, userEmail.Email)
+	fetchedUser, err := userHandler.userUseCase.GetUserByEmail(ctx.Request.Context(), userEmail.Email)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": err.Error()})
@@ -160,7 +157,7 @@ func (userHandler *UserHandler) ForgottenPassword(ctx *gin.Context) {
 	passwordResetAt := time.Now().Add(time.Minute * 15)
 
 	// Update the user.
-	err = userHandler.userUseCase.UpdatePasswordResetTokenUserByEmail(context, fetchedUser.Email, "passwordResetToken", passwordResetToken, "passwordResetAt", passwordResetAt)
+	err = userHandler.userUseCase.UpdatePasswordResetTokenUserByEmail(ctx.Request.Context(), fetchedUser.Email, "passwordResetToken", passwordResetToken, "passwordResetAt", passwordResetAt)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "success", "message": err.Error()})
@@ -191,7 +188,6 @@ func (userHandler *UserHandler) ForgottenPassword(ctx *gin.Context) {
 func (userHandler *UserHandler) ResetUserPassword(ctx *gin.Context) {
 	resetToken := ctx.Params.ByName("resetToken")
 	var credentials *userModel.UserResetPassword
-	context := ctx.Request.Context()
 
 	if err := ctx.ShouldBindJSON(&credentials); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
@@ -206,7 +202,7 @@ func (userHandler *UserHandler) ResetUserPassword(ctx *gin.Context) {
 	passwordResetToken := utils.Encode(resetToken)
 
 	// Update the user.
-	err := userHandler.userUseCase.ResetUserPassword(context, "passwordResetToken", passwordResetToken, "passwordResetAt", "password", credentials.Password)
+	err := userHandler.userUseCase.ResetUserPassword(ctx.Request.Context(), "passwordResetToken", passwordResetToken, "passwordResetAt", "password", credentials.Password)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
@@ -263,7 +259,6 @@ func (userHandler *UserHandler) RefreshAccessToken(ctx *gin.Context) {
 func (userHandler *UserHandler) UpdateUserById(ctx *gin.Context) {
 	currentUser := ctx.MustGet("currentUser").(*userModel.User)
 	userID := currentUser.UserID
-	context := ctx.Request.Context()
 
 	var updatedUserData *userModel.UserUpdate = new(userModel.UserUpdate)
 
@@ -272,7 +267,7 @@ func (userHandler *UserHandler) UpdateUserById(ctx *gin.Context) {
 		return
 	}
 
-	updatedUser, err := userHandler.userUseCase.UpdateUserById(context, userID, updatedUserData)
+	updatedUser, err := userHandler.userUseCase.UpdateUserById(ctx.Request.Context(), userID, updatedUserData)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
@@ -296,9 +291,8 @@ func (userHandler *UserHandler) GetMe(ctx *gin.Context) {
 func (userHandler *UserHandler) Delete(ctx *gin.Context) {
 	currentUser := ctx.MustGet("currentUser")
 	userID := currentUser.(*userModel.User).UserID
-	context := ctx.Request.Context()
 
-	err := userHandler.userUseCase.DeleteUserById(context, fmt.Sprint(userID))
+	err := userHandler.userUseCase.DeleteUserById(ctx.Request.Context(), fmt.Sprint(userID))
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})

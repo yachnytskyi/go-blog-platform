@@ -66,16 +66,16 @@ func (postHandler *PostHandler) GetPostById(ctx *gin.Context) {
 }
 
 func (postHandler *PostHandler) CreatePost(ctx *gin.Context) {
-	var post *postModel.PostCreate = new(postModel.PostCreate)
+	var createdPostData *postModel.PostCreate = new(postModel.PostCreate)
 	currentUser := ctx.MustGet("currentUser").(*userModel.User)
-	post.User = currentUser.Name
-	post.UserID = currentUser.UserID
+	createdPostData.User = currentUser.Name
+	createdPostData.UserID = currentUser.UserID
 
-	if err := ctx.ShouldBindJSON(&post); err != nil {
+	if err := ctx.ShouldBindJSON(&createdPostData); err != nil {
 		ctx.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	createdPost, err := postHandler.postUseCase.CreatePost(ctx.Request.Context(), post)
+	createdPost, err := postHandler.postUseCase.CreatePost(ctx.Request.Context(), createdPostData)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "sorry, but this title already exists. Please choose another one") {

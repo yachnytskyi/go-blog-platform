@@ -29,19 +29,19 @@ func NewUserHandler(userUseCase user.UseCase, template *template.Template) UserH
 }
 
 func (userHandler *UserHandler) Register(ctx *gin.Context) {
-	var user *userModel.UserCreate = new(userModel.UserCreate)
+	var createdUserData *userModel.UserCreate = new(userModel.UserCreate)
 
-	if err := ctx.ShouldBindJSON(&user); err != nil {
+	if err := ctx.ShouldBindJSON(&createdUserData); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
-	if user.Password != user.PasswordConfirm {
+	if createdUserData.Password != createdUserData.PasswordConfirm {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Passwords do not match"})
 		return
 	}
 
-	createdUser, err := userHandler.userUseCase.Register(ctx.Request.Context(), user)
+	createdUser, err := userHandler.userUseCase.Register(ctx.Request.Context(), createdUserData)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "email already exists") {
@@ -83,7 +83,7 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 		return
 	}
 
-	message := "We sent an email with a verification code to " + user.Email
+	message := "We sent an email with a verification code to " + createdUserData.Email
 	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "message": message})
 }
 

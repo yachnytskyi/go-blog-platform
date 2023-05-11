@@ -6,21 +6,21 @@ import (
 	"log"
 	"time"
 
-	pb "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/model/pb"
+	userProtobufV1 "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1/model/pb"
 	"google.golang.org/grpc"
 )
 
 type RegisterUserClient struct {
-	usecase pb.UserUseCaseClient
+	usecase userProtobufV1.UserUseCaseClient
 }
 
 func NewRegisterUserClient(connection *grpc.ClientConn) *RegisterUserClient {
-	usecase := pb.NewUserUseCaseClient(connection)
+	usecase := userProtobufV1.NewUserUseCaseClient(connection)
 
 	return &RegisterUserClient{usecase}
 }
 
-func (registerUserClient *RegisterUserClient) Register(credentials *pb.RegisterUserInput) {
+func (registerUserClient *RegisterUserClient) Register(credentials *userProtobufV1.RegisterUserInput) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(time.Millisecond*5000))
 	defer cancel()
 

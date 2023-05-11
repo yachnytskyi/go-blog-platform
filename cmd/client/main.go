@@ -4,7 +4,7 @@ import (
 	"log"
 
 	userClient "github.com/yachnytskyi/golang-mongo-grpc/cmd/client/user"
-	pb "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/model/pb"
+	userProtobufV1 "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1/model/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -25,7 +25,7 @@ func main() {
 	// Register.
 	if false {
 		registerUserClient := userClient.NewRegisterUserClient(connect)
-		createdUser := &pb.RegisterUserInput{
+		createdUser := &userProtobufV1.RegisterUserInput{
 			Name:            "Test Test",
 			Email:           "test100@gmail.com",
 			Password:        "somepassword",
@@ -39,7 +39,7 @@ func main() {
 	if true {
 		loginUserClient := userClient.NewLoginUserClient(connect)
 
-		credentials := &pb.LoginUserInput{
+		credentials := &userProtobufV1.LoginUserInput{
 			Email:    "test100@gmail.com",
 			Password: "somepassword",
 		}
@@ -50,7 +50,7 @@ func main() {
 	// Get Me.
 	if false {
 		getMeClient := userClient.NewGetMeClient(connect)
-		id := &pb.GetMeRequest{
+		id := &userProtobufV1.GetMeRequest{
 			Id: "628cffb91e50302d360c1a2c",
 		}
 		getMeClient.GetMeUser(id)

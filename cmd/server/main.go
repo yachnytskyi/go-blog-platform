@@ -13,7 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	"github.com/yachnytskyi/golang-mongo-grpc/config"
-	pb "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/model/pb"
+	userProtobufV1 "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1/model/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
@@ -144,7 +144,7 @@ func startGrpcServer(config config.Config) {
 	}
 
 	grpcServer := grpc.NewServer()
-	pb.RegisterUserUseCaseServer(grpcServer, userServer)
+	userProtobufV1.RegisterUserUseCaseServer(grpcServer, userServer)
 	reflection.Register(grpcServer)
 
 	listener, err := net.Listen("tcp", config.GrpcServerAddress)

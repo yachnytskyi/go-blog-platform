@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package model;
 
-option go_package = "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/model";
+option go_package = "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1/model";
 
 import "rpc_register_user.proto";
 import "rpc_login_user.proto";

@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/thanhpk/randstr"
-	pb "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/model/pb"
+	pb "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1/model/pb"
 	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 

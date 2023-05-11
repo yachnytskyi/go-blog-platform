@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/post"
-	postRepositoryModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/data/repository/model"
+	postRepositoryModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/data/repository/mongo/model"
 	postModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
 
 	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility"

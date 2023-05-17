@@ -14,7 +14,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (userServer *UserServer) Register(ctx context.Context, request *pb.RegisterUserInput) (*pb.GenericResponse, error) {
+func (userServer *UserServer) Register(ctx context.Context, request *pb.UserCreate) (*pb.GenericResponse, error) {
 	if request.GetPassword() != request.GetPasswordConfirm() {
 		return nil, status.Errorf(codes.InvalidArgument, "passwords do not match")
 	}

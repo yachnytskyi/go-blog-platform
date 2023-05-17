@@ -20,7 +20,7 @@ func NewRegisterUserClient(connection *grpc.ClientConn) *RegisterUserClient {
 	return &RegisterUserClient{usecase}
 }
 
-func (registerUserClient *RegisterUserClient) Register(credentials *userProtobufV1.RegisterUserInput) {
+func (registerUserClient *RegisterUserClient) Register(credentials *userProtobufV1.UserCreate) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(time.Millisecond*5000))
 	defer cancel()
 

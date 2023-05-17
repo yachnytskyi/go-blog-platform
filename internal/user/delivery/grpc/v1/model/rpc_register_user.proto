@@ -6,11 +6,11 @@ option go_package = "github.com/yachnytskyi/golang-mongo-grpc/internal/user/deli
 
 import "user.proto";
 
-message RegisterUserInput {
+message UserCreate {
     string name = 1;
     string email = 2;
     string password = 3;
     string passwordConfirm = 4;
 }
 
-message RegisterUserResponse { User user = 1; }
+message UserCreatedView { User user = 1; }

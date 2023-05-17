@@ -11,7 +11,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (userServer *UserServer) Login(ctx context.Context, request *pb.LoginUserInput) (*pb.LoginUserResponse, error) {
+func (userServer *UserServer) Login(ctx context.Context, request *pb.LoginUser) (*pb.LoginUserView, error) {
 	user, err := userServer.userUseCase.GetUserByEmail(ctx, request.GetEmail())
 
 	if err != nil {
@@ -41,7 +41,7 @@ func (userServer *UserServer) Login(ctx context.Context, request *pb.LoginUserIn
 		return nil, status.Errorf(codes.PermissionDenied, err.Error())
 	}
 
-	response := &pb.LoginUserResponse{
+	response := &pb.LoginUserView{
 		Status:       "success",
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,

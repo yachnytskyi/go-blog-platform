@@ -9,10 +9,10 @@ import "rpc_login_user.proto";
 import "user.proto";
 
 service UserUseCase {
-    rpc Register(RegisterUserInput) returns (GenericResponse) {}
-    rpc Login(LoginUserInput) returns (LoginUserResponse) {}
+    rpc Register(UserCreate) returns (GenericResponse) {}
+    rpc Login(LoginUser) returns (LoginUserView) {}
     rpc VerifyEmail(VerifyEmailRequest) returns (GenericResponse) {}
-    rpc GetMe(GetMeRequest) returns (UserResponse) {}
+    rpc GetMe(GetMeRequest) returns (UserView) {}
 }
 
 message VerifyEmailRequest { string verificationCode = 1; }

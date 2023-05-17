@@ -29,10 +29,10 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserUseCaseClient interface {
-	Register(ctx context.Context, in *RegisterUserInput, opts ...grpc.CallOption) (*GenericResponse, error)
-	Login(ctx context.Context, in *LoginUserInput, opts ...grpc.CallOption) (*LoginUserResponse, error)
+	Register(ctx context.Context, in *UserCreate, opts ...grpc.CallOption) (*GenericResponse, error)
+	Login(ctx context.Context, in *LoginUser, opts ...grpc.CallOption) (*LoginUserView, error)
 	VerifyEmail(ctx context.Context, in *VerifyEmailRequest, opts ...grpc.CallOption) (*GenericResponse, error)
-	GetMe(ctx context.Context, in *GetMeRequest, opts ...grpc.CallOption) (*UserResponse, error)
+	GetMe(ctx context.Context, in *GetMeRequest, opts ...grpc.CallOption) (*UserView, error)
 }
 
 type userUseCaseClient struct {
@@ -43,7 +43,7 @@ func NewUserUseCaseClient(cc grpc.ClientConnInterface) UserUseCaseClient {
 	return &userUseCaseClient{cc}
 }
 
-func (c *userUseCaseClient) Register(ctx context.Context, in *RegisterUserInput, opts ...grpc.CallOption) (*GenericResponse, error) {
+func (c *userUseCaseClient) Register(ctx context.Context, in *UserCreate, opts ...grpc.CallOption) (*GenericResponse, error) {
 	out := new(GenericResponse)
 	err := c.cc.Invoke(ctx, UserUseCase_Register_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -52,8 +52,8 @@ func (c *userUseCaseClient) Register(ctx context.Context, in *RegisterUserInput,
 	return out, nil
 }
 
-func (c *userUseCaseClient) Login(ctx context.Context, in *LoginUserInput, opts ...grpc.CallOption) (*LoginUserResponse, error) {
-	out := new(LoginUserResponse)
+func (c *userUseCaseClient) Login(ctx context.Context, in *LoginUser, opts ...grpc.CallOption) (*LoginUserView, error) {
+	out := new(LoginUserView)
 	err := c.cc.Invoke(ctx, UserUseCase_Login_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -70,8 +70,8 @@ func (c *userUseCaseClient) VerifyEmail(ctx context.Context, in *VerifyEmailRequ
 	return out, nil
 }
 
-func (c *userUseCaseClient) GetMe(ctx context.Context, in *GetMeRequest, opts ...grpc.CallOption) (*UserResponse, error) {
-	out := new(UserResponse)
+func (c *userUseCaseClient) GetMe(ctx context.Context, in *GetMeRequest, opts ...grpc.CallOption) (*UserView, error) {
+	out := new(UserView)
 	err := c.cc.Invoke(ctx, UserUseCase_GetMe_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -83,10 +83,10 @@ func (c *userUseCaseClient) GetMe(ctx context.Context, in *GetMeRequest, opts ..
 // All implementations must embed UnimplementedUserUseCaseServer
 // for forward compatibility
 type UserUseCaseServer interface {
-	Register(context.Context, *RegisterUserInput) (*GenericResponse, error)
-	Login(context.Context, *LoginUserInput) (*LoginUserResponse, error)
+	Register(context.Context, *UserCreate) (*GenericResponse, error)
+	Login(context.Context, *LoginUser) (*LoginUserView, error)
 	VerifyEmail(context.Context, *VerifyEmailRequest) (*GenericResponse, error)
-	GetMe(context.Context, *GetMeRequest) (*UserResponse, error)
+	GetMe(context.Context, *GetMeRequest) (*UserView, error)
 	mustEmbedUnimplementedUserUseCaseServer()
 }
 
@@ -94,16 +94,16 @@ type UserUseCaseServer interface {
 type UnimplementedUserUseCaseServer struct {
 }
 
-func (UnimplementedUserUseCaseServer) Register(context.Context, *RegisterUserInput) (*GenericResponse, error) {
+func (UnimplementedUserUseCaseServer) Register(context.Context, *UserCreate) (*GenericResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
 }
-func (UnimplementedUserUseCaseServer) Login(context.Context, *LoginUserInput) (*LoginUserResponse, error) {
+func (UnimplementedUserUseCaseServer) Login(context.Context, *LoginUser) (*LoginUserView, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
 }
 func (UnimplementedUserUseCaseServer) VerifyEmail(context.Context, *VerifyEmailRequest) (*GenericResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VerifyEmail not implemented")
 }
-func (UnimplementedUserUseCaseServer) GetMe(context.Context, *GetMeRequest) (*UserResponse, error) {
+func (UnimplementedUserUseCaseServer) GetMe(context.Context, *GetMeRequest) (*UserView, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMe not implemented")
 }
 func (UnimplementedUserUseCaseServer) mustEmbedUnimplementedUserUseCaseServer() {}
@@ -120,7 +120,7 @@ func RegisterUserUseCaseServer(s grpc.ServiceRegistrar, srv UserUseCaseServer) {
 }
 
 func _UserUseCase_Register_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RegisterUserInput)
+	in := new(UserCreate)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -132,13 +132,13 @@ func _UserUseCase_Register_Handler(srv interface{}, ctx context.Context, dec fun
 		FullMethod: UserUseCase_Register_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserUseCaseServer).Register(ctx, req.(*RegisterUserInput))
+		return srv.(UserUseCaseServer).Register(ctx, req.(*UserCreate))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _UserUseCase_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(LoginUserInput)
+	in := new(LoginUser)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -150,7 +150,7 @@ func _UserUseCase_Login_Handler(srv interface{}, ctx context.Context, dec func(i
 		FullMethod: UserUseCase_Login_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserUseCaseServer).Login(ctx, req.(*LoginUserInput))
+		return srv.(UserUseCaseServer).Login(ctx, req.(*LoginUser))
 	}
 	return interceptor(ctx, in, info, handler)
 }

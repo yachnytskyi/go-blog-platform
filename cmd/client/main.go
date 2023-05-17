@@ -25,7 +25,7 @@ func main() {
 	// Register.
 	if false {
 		registerUserClient := userClient.NewRegisterUserClient(connect)
-		createdUser := &userProtobufV1.RegisterUserInput{
+		createdUser := &userProtobufV1.UserCreate{
 			Name:            "Test Test",
 			Email:           "test100@gmail.com",
 			Password:        "somepassword",
@@ -39,7 +39,7 @@ func main() {
 	if true {
 		loginUserClient := userClient.NewLoginUserClient(connect)
 
-		credentials := &userProtobufV1.LoginUserInput{
+		credentials := &userProtobufV1.LoginUser{
 			Email:    "test100@gmail.com",
 			Password: "somepassword",
 		}

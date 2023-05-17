@@ -20,7 +20,7 @@ func NewLoginUserClient(connection *grpc.ClientConn) *LoginUserClient {
 	return &LoginUserClient{usecase}
 }
 
-func (loginUserClient *LoginUserClient) Login(credentials *userProtobufV1.LoginUserInput) {
+func (loginUserClient *LoginUserClient) Login(credentials *userProtobufV1.LoginUser) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 

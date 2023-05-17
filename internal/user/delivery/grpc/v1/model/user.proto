@@ -14,7 +14,7 @@ message User {
   google.protobuf.Timestamp updated_at = 6;
 }
 
-message UserResponse { User user = 1; }
+message UserView { User user = 1; }
 
 message GenericResponse {
   string status = 1;

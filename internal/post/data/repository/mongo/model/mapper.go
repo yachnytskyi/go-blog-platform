@@ -18,11 +18,10 @@ func PostCreateToPostCreateRepositoryMapper(post *postModel.PostCreate) PostCrea
 
 func PostUpdateToPostUpdateRepositoryMapper(post *postModel.PostUpdate) PostUpdateRepository {
 	return PostUpdateRepository{
-		PostID:  post.PostID,
-		Title:   post.Title,
-		Content: post.Content,
-		Image:   post.Image,
-		// User:      post.User,
+		PostID:    post.PostID,
+		Title:     post.Title,
+		Content:   post.Content,
+		Image:     post.Image,
 		CreatedAt: post.CreatedAt,
 		UpdatedAt: post.UpdatedAt,
 	}

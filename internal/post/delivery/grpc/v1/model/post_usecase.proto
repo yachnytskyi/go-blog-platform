@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package model;
+
+option go_package = "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1/model";
+import "post.proto";
+import "rpc_create_post.proto";
+import "rpc_update_post.proto";
+
+service PostUseCase {
+    rpc GetPost(PostById) returns (PostView) {}
+    rpc GetPosts(Posts) returns (stream Post) {}
+    rpc CreatePost(PostCreate) returns (PostView) {}
+    rpc UpdatePost(PostUpdate) returns (PostView) {}
+    rpc DeletePost(PostById) returns (PostDeleteView) {}
+}
+
+message Posts {
+    optional int64 page = 1;
+    optional int64 limit = 2;
+}
+
+message PostById { string PostID = 1; }
+
+message PostDeleteView { bool success = 1; }

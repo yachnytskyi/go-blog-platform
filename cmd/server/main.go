@@ -109,7 +109,7 @@ func init() {
 
 	// Use Cases.
 	userUseCase = userUseCasePackage.NewUserUseCase(userRepository)
-	postUseCase = postUseCasePackage.NewUseCase(postRepository)
+	postUseCase = postUseCasePackage.NewPostUseCase(postRepository)
 
 	// Handlers
 	userHandler = userHttpGinPackage.NewUserHandler(userUseCase, templateInstance)

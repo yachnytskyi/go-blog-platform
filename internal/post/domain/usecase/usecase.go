@@ -12,7 +12,7 @@ type PostUseCase struct {
 	postRepository post.Repository
 }
 
-func NewUseCase(postRepository post.Repository) post.UseCase {
+func NewPostUseCase(postRepository post.Repository) post.UseCase {
 	return &PostUseCase{postRepository: postRepository}
 }
 

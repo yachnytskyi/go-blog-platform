@@ -2,17 +2,18 @@ syntax = "proto3";
 
 package model;
 
-option go_package = "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1/model";
-import "post.proto";
+option go_package = "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/grpc/v1/model";
+
 import "rpc_create_post.proto";
 import "rpc_update_post.proto";
+import "post.proto";
 
 service PostUseCase {
     rpc GetPost(PostById) returns (PostView) {}
     rpc GetPosts(Posts) returns (stream Post) {}
     rpc CreatePost(PostCreate) returns (PostView) {}
-    rpc UpdatePost(PostUpdate) returns (PostView) {}
-    rpc DeletePost(PostById) returns (PostDeleteView) {}
+    rpc UpdatePostById(PostUpdate) returns (PostView) {}
+    rpc DeletePostById(PostById) returns (PostDeleteView) {}
 }
 
 message Posts {

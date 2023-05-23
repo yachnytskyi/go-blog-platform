@@ -14,7 +14,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (userServer *UserServer) Register(ctx context.Context, request *pb.UserCreate) (*pb.GenericResponse, error) {
+func (userGrpcServer *UserGrpcServer) Register(ctx context.Context, request *pb.UserCreate) (*pb.GenericResponse, error) {
 	if request.GetPassword() != request.GetPasswordConfirm() {
 		return nil, status.Errorf(codes.InvalidArgument, "passwords do not match")
 	}
@@ -26,7 +26,7 @@ func (userServer *UserServer) Register(ctx context.Context, request *pb.UserCrea
 		PasswordConfirm: request.GetPasswordConfirm(),
 	}
 
-	createdUser, err := userServer.userUseCase.Register(ctx, &user)
+	createdUser, err := userGrpcServer.userUseCase.Register(ctx, &user)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "email already exists") {
@@ -42,14 +42,14 @@ func (userServer *UserServer) Register(ctx context.Context, request *pb.UserCrea
 	verificationCode := utility.Encode(code)
 
 	// Update the user in database.
-	userServer.userUseCase.UpdateNewRegisteredUserById(ctx, createdUser.UserID, "verificationCode", verificationCode)
+	userGrpcServer.userUseCase.UpdateNewRegisteredUserById(ctx, createdUser.UserID, "verificationCode", verificationCode)
 
 	var firstName = createdUser.Name
 	firstName = httpUtility.UserFirstName(firstName)
 
 	// Send an email.
 	emailData := httpUtility.EmailData{
-		URL:       userServer.config.Origin + "/verifyemail/" + code,
+		URL:       userGrpcServer.config.Origin + "/verifyemail/" + code,
 		FirstName: firstName,
 		Subject:   "Your account verification code",
 	}

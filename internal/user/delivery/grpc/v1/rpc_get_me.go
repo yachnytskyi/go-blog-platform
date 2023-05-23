@@ -9,9 +9,9 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (userServer *UserServer) GetMe(ctx context.Context, request *pb.GetMeRequest) (*pb.UserView, error) {
+func (userGrpcServer *UserGrpcServer) GetMe(ctx context.Context, request *pb.GetMeRequest) (*pb.UserView, error) {
 	userID := request.GetId()
-	user, err := userServer.userUseCase.GetUserById(ctx, userID)
+	user, err := userGrpcServer.userUseCase.GetUserById(ctx, userID)
 
 	if err != nil {
 		return nil, status.Errorf(codes.Unimplemented, err.Error())

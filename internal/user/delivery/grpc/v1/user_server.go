@@ -7,20 +7,20 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type UserServer struct {
+type UserGrpcServer struct {
 	pb.UnimplementedUserUseCaseServer
 	config         config.Config
 	userUseCase    user.UseCase
 	userCollection *mongo.Collection
 }
 
-func NewGrpcUserServer(config config.Config, userUseCase user.UseCase, userCollection *mongo.Collection) (*UserServer, error) {
+func NewGrpcUserServer(config config.Config, userUseCase user.UseCase, userCollection *mongo.Collection) (*UserGrpcServer, error) {
 
-	userServer := &UserServer{
+	userGrpcServer := &UserGrpcServer{
 		config:         config,
 		userUseCase:    userUseCase,
 		userCollection: userCollection,
 	}
 
-	return userServer, nil
+	return userGrpcServer, nil
 }

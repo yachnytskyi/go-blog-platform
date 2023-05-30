@@ -44,6 +44,7 @@ use this command:
 
 To run this code, you will need docker and docker-compose installed on your machine. In the project root, run:  
 ```make up```    
+
 ```make run```
 
 </div>

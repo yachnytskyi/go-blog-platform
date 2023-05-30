@@ -16,16 +16,16 @@ func NewPostUseCase(postRepository post.Repository) post.UseCase {
 	return &PostUseCase{postRepository: postRepository}
 }
 
-func (postUseCase *PostUseCase) GetPostById(ctx context.Context, postID string) (*postModel.Post, error) {
-	fetchedPost, err := postUseCase.postRepository.GetPostById(ctx, postID)
-
-	return fetchedPost, err
-}
-
 func (postUseCase *PostUseCase) GetAllPosts(ctx context.Context, page int, limit int) ([]*postModel.Post, error) {
 	fetchedPosts, err := postUseCase.postRepository.GetAllPosts(ctx, page, limit)
 
 	return fetchedPosts, err
+}
+
+func (postUseCase *PostUseCase) GetPostById(ctx context.Context, postID string) (*postModel.Post, error) {
+	fetchedPost, err := postUseCase.postRepository.GetPostById(ctx, postID)
+
+	return fetchedPost, err
 }
 
 func (postUseCase *PostUseCase) CreatePost(ctx context.Context, post *postModel.PostCreate) (*postModel.Post, error) {

@@ -15,7 +15,7 @@ We have a script in Makefile that allows you to launch the project.
 ## Runing the Application
 
   
-`example.env` file is provided you as an example of your own environment variables, which you you need to put in your 'app.env' file (you should create it on your own). 
+`example.env` file is provided you as an example of your own environment variables, which you you need to put in your `app.env` file (you should create it on your own). 
 
 
 ## From the project root director, run:

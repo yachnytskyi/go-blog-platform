@@ -10,7 +10,7 @@ import "post.proto";
 
 service PostUseCase {
     rpc GetPostById(PostById) returns (PostView) {}
-    rpc GetPosts(Posts) returns (stream Post) {}
+    rpc GetAllPosts(Posts) returns (stream Post) {}
     rpc CreatePost(PostCreate) returns (PostView) {}
     rpc UpdatePostById(PostUpdate) returns (PostView) {}
     rpc DeletePostById(PostById) returns (PostDeleteView) {}

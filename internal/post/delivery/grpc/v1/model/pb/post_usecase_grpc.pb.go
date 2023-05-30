@@ -20,7 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 
 const (
 	PostUseCase_GetPostById_FullMethodName    = "/model.PostUseCase/GetPostById"
-	PostUseCase_GetPosts_FullMethodName       = "/model.PostUseCase/GetPosts"
+	PostUseCase_GetAllPosts_FullMethodName    = "/model.PostUseCase/GetAllPosts"
 	PostUseCase_CreatePost_FullMethodName     = "/model.PostUseCase/CreatePost"
 	PostUseCase_UpdatePostById_FullMethodName = "/model.PostUseCase/UpdatePostById"
 	PostUseCase_DeletePostById_FullMethodName = "/model.PostUseCase/DeletePostById"
@@ -31,7 +31,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PostUseCaseClient interface {
 	GetPostById(ctx context.Context, in *PostById, opts ...grpc.CallOption) (*PostView, error)
-	GetPosts(ctx context.Context, in *Posts, opts ...grpc.CallOption) (PostUseCase_GetPostsClient, error)
+	GetAllPosts(ctx context.Context, in *Posts, opts ...grpc.CallOption) (PostUseCase_GetAllPostsClient, error)
 	CreatePost(ctx context.Context, in *PostCreate, opts ...grpc.CallOption) (*PostView, error)
 	UpdatePostById(ctx context.Context, in *PostUpdate, opts ...grpc.CallOption) (*PostView, error)
 	DeletePostById(ctx context.Context, in *PostById, opts ...grpc.CallOption) (*PostDeleteView, error)
@@ -54,12 +54,12 @@ func (c *postUseCaseClient) GetPostById(ctx context.Context, in *PostById, opts 
 	return out, nil
 }
 
-func (c *postUseCaseClient) GetPosts(ctx context.Context, in *Posts, opts ...grpc.CallOption) (PostUseCase_GetPostsClient, error) {
-	stream, err := c.cc.NewStream(ctx, &PostUseCase_ServiceDesc.Streams[0], PostUseCase_GetPosts_FullMethodName, opts...)
+func (c *postUseCaseClient) GetAllPosts(ctx context.Context, in *Posts, opts ...grpc.CallOption) (PostUseCase_GetAllPostsClient, error) {
+	stream, err := c.cc.NewStream(ctx, &PostUseCase_ServiceDesc.Streams[0], PostUseCase_GetAllPosts_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &postUseCaseGetPostsClient{stream}
+	x := &postUseCaseGetAllPostsClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -69,16 +69,16 @@ func (c *postUseCaseClient) GetPosts(ctx context.Context, in *Posts, opts ...grp
 	return x, nil
 }
 
-type PostUseCase_GetPostsClient interface {
+type PostUseCase_GetAllPostsClient interface {
 	Recv() (*Post, error)
 	grpc.ClientStream
 }
 
-type postUseCaseGetPostsClient struct {
+type postUseCaseGetAllPostsClient struct {
 	grpc.ClientStream
 }
 
-func (x *postUseCaseGetPostsClient) Recv() (*Post, error) {
+func (x *postUseCaseGetAllPostsClient) Recv() (*Post, error) {
 	m := new(Post)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -118,7 +118,7 @@ func (c *postUseCaseClient) DeletePostById(ctx context.Context, in *PostById, op
 // for forward compatibility
 type PostUseCaseServer interface {
 	GetPostById(context.Context, *PostById) (*PostView, error)
-	GetPosts(*Posts, PostUseCase_GetPostsServer) error
+	GetAllPosts(*Posts, PostUseCase_GetAllPostsServer) error
 	CreatePost(context.Context, *PostCreate) (*PostView, error)
 	UpdatePostById(context.Context, *PostUpdate) (*PostView, error)
 	DeletePostById(context.Context, *PostById) (*PostDeleteView, error)
@@ -132,8 +132,8 @@ type UnimplementedPostUseCaseServer struct {
 func (UnimplementedPostUseCaseServer) GetPostById(context.Context, *PostById) (*PostView, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPostById not implemented")
 }
-func (UnimplementedPostUseCaseServer) GetPosts(*Posts, PostUseCase_GetPostsServer) error {
-	return status.Errorf(codes.Unimplemented, "method GetPosts not implemented")
+func (UnimplementedPostUseCaseServer) GetAllPosts(*Posts, PostUseCase_GetAllPostsServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetAllPosts not implemented")
 }
 func (UnimplementedPostUseCaseServer) CreatePost(context.Context, *PostCreate) (*PostView, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreatePost not implemented")
@@ -175,24 +175,24 @@ func _PostUseCase_GetPostById_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
-func _PostUseCase_GetPosts_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _PostUseCase_GetAllPosts_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(Posts)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(PostUseCaseServer).GetPosts(m, &postUseCaseGetPostsServer{stream})
+	return srv.(PostUseCaseServer).GetAllPosts(m, &postUseCaseGetAllPostsServer{stream})
 }
 
-type PostUseCase_GetPostsServer interface {
+type PostUseCase_GetAllPostsServer interface {
 	Send(*Post) error
 	grpc.ServerStream
 }
 
-type postUseCaseGetPostsServer struct {
+type postUseCaseGetAllPostsServer struct {
 	grpc.ServerStream
 }
 
-func (x *postUseCaseGetPostsServer) Send(m *Post) error {
+func (x *postUseCaseGetAllPostsServer) Send(m *Post) error {
 	return x.ServerStream.SendMsg(m)
 }
 
@@ -276,8 +276,8 @@ var PostUseCase_ServiceDesc = grpc.ServiceDesc{
 	},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "GetPosts",
-			Handler:       _PostUseCase_GetPosts_Handler,
+			StreamName:    "GetAllPosts",
+			Handler:       _PostUseCase_GetAllPosts_Handler,
 			ServerStreams: true,
 		},
 	},

@@ -43,7 +43,7 @@ use this command:
 ## Run
 
 To run this code, you will need docker and docker-compose installed on your machine. In the project root, run:  
-```make up```
+```make up```    
 ```make run```
 
 </div>

@@ -28,7 +28,7 @@ You can also find all possible API requests/urls when you launch the project in 
 
 If you need to make rebuild, you have to use this command:
 
-```docker-compose build```      
+```docker-compose build```     
 After that repeat the command ```docker-compose up``` or ```make up``` for launching the project.
 
 
@@ -43,6 +43,6 @@ use this command:
 
 To run this code, you will need docker and docker-compose installed on your machine. In the project root, run:  
 ```make up```
-'''make run'''
+```make run```
 
 </div>

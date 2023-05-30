@@ -35,7 +35,7 @@ After that repeat ```docker-compose up``` or ```make up``` commands for launchin
 
 ## gRPC
 
-To launch gRPC server, you need to comment 'Gin server' out and uncomment 'gRPC server' out in `cmd/server/main.go` file. After successful launch,
+To launch gRPC server, you need to comment 'Gin server' out and uncomment 'gRPC server' out in `cmd/server/main.go` file. After a successful launch,
 use this command:
 
 ```evans --host localhost --port 8081 -r repl```
@@ -49,6 +49,6 @@ To run this code, you will need docker and docker-compose installed on your mach
 ```make run```
   
 # Ways of possible improvements
-I would be grateful for any help you could provide. First of all, I would implement Abstract Factory pattern, to give us an ability to easily switch between repositories and delivery tools. At the current state the settings are hardcoded in `cmd/server/main.go` file, they should be in a config file and defined on first launch of the app. Secondly, add unit and integration tests. Thirdly, fix a bug with launching the application from `Docker Compose`. We have a problem here, that we can't launch the app directly from `Docker Compose`, we need to use `go run main.go` command. I had tried to fix this problem, but haven't had any success. Fourthly, to make a general refactoring of the system.
+I would be grateful for any help you could provide. First of all, I would implement Abstract Factory pattern, to give us an ability to easily switch between repositories and delivery tools. At the current state the settings are hardcoded in `cmd/server/main.go` file, they should be in the config file and defined on first launch of the app. Secondly, add unit and integration tests. Thirdly, fix a bug with launching the application from `Docker Compose`. We have a problem here, that we can't launch the app directly from `Docker Compose`, we need to use `go run main.go` command. I had tried to fix this problem, but haven't had any success. Fourthly, solve a problem with a separated launch of Gin and gRPC servers, we can't launch them simultaneously. Or at least to add a feature of switching between them in the config file. Fifthly, to make a general refactoring of the system.
 
 </div>

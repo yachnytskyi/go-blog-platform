@@ -9,7 +9,7 @@ import "rpc_update_post.proto";
 import "post.proto";
 
 service PostUseCase {
-    rpc GetPost(PostById) returns (PostView) {}
+    rpc GetPostById(PostById) returns (PostView) {}
     rpc GetPosts(Posts) returns (stream Post) {}
     rpc CreatePost(PostCreate) returns (PostView) {}
     rpc UpdatePostById(PostUpdate) returns (PostView) {}
@@ -21,6 +21,6 @@ message Posts {
     optional int64 limit = 2;
 }
 
-message PostById { string PostID = 1; }
+message PostById { string PostID = 1; string UserID = 2; }
 
 message PostDeleteView { bool success = 1; }

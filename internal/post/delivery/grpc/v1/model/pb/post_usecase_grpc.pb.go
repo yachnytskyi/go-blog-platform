@@ -19,7 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	PostUseCase_GetPost_FullMethodName        = "/model.PostUseCase/GetPost"
+	PostUseCase_GetPostById_FullMethodName    = "/model.PostUseCase/GetPostById"
 	PostUseCase_GetPosts_FullMethodName       = "/model.PostUseCase/GetPosts"
 	PostUseCase_CreatePost_FullMethodName     = "/model.PostUseCase/CreatePost"
 	PostUseCase_UpdatePostById_FullMethodName = "/model.PostUseCase/UpdatePostById"
@@ -30,7 +30,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PostUseCaseClient interface {
-	GetPost(ctx context.Context, in *PostById, opts ...grpc.CallOption) (*PostView, error)
+	GetPostById(ctx context.Context, in *PostById, opts ...grpc.CallOption) (*PostView, error)
 	GetPosts(ctx context.Context, in *Posts, opts ...grpc.CallOption) (PostUseCase_GetPostsClient, error)
 	CreatePost(ctx context.Context, in *PostCreate, opts ...grpc.CallOption) (*PostView, error)
 	UpdatePostById(ctx context.Context, in *PostUpdate, opts ...grpc.CallOption) (*PostView, error)
@@ -45,9 +45,9 @@ func NewPostUseCaseClient(cc grpc.ClientConnInterface) PostUseCaseClient {
 	return &postUseCaseClient{cc}
 }
 
-func (c *postUseCaseClient) GetPost(ctx context.Context, in *PostById, opts ...grpc.CallOption) (*PostView, error) {
+func (c *postUseCaseClient) GetPostById(ctx context.Context, in *PostById, opts ...grpc.CallOption) (*PostView, error) {
 	out := new(PostView)
-	err := c.cc.Invoke(ctx, PostUseCase_GetPost_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, PostUseCase_GetPostById_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -117,7 +117,7 @@ func (c *postUseCaseClient) DeletePostById(ctx context.Context, in *PostById, op
 // All implementations must embed UnimplementedPostUseCaseServer
 // for forward compatibility
 type PostUseCaseServer interface {
-	GetPost(context.Context, *PostById) (*PostView, error)
+	GetPostById(context.Context, *PostById) (*PostView, error)
 	GetPosts(*Posts, PostUseCase_GetPostsServer) error
 	CreatePost(context.Context, *PostCreate) (*PostView, error)
 	UpdatePostById(context.Context, *PostUpdate) (*PostView, error)
@@ -129,8 +129,8 @@ type PostUseCaseServer interface {
 type UnimplementedPostUseCaseServer struct {
 }
 
-func (UnimplementedPostUseCaseServer) GetPost(context.Context, *PostById) (*PostView, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetPost not implemented")
+func (UnimplementedPostUseCaseServer) GetPostById(context.Context, *PostById) (*PostView, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPostById not implemented")
 }
 func (UnimplementedPostUseCaseServer) GetPosts(*Posts, PostUseCase_GetPostsServer) error {
 	return status.Errorf(codes.Unimplemented, "method GetPosts not implemented")
@@ -157,20 +157,20 @@ func RegisterPostUseCaseServer(s grpc.ServiceRegistrar, srv PostUseCaseServer) {
 	s.RegisterService(&PostUseCase_ServiceDesc, srv)
 }
 
-func _PostUseCase_GetPost_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _PostUseCase_GetPostById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(PostById)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PostUseCaseServer).GetPost(ctx, in)
+		return srv.(PostUseCaseServer).GetPostById(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: PostUseCase_GetPost_FullMethodName,
+		FullMethod: PostUseCase_GetPostById_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PostUseCaseServer).GetPost(ctx, req.(*PostById))
+		return srv.(PostUseCaseServer).GetPostById(ctx, req.(*PostById))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -258,8 +258,8 @@ var PostUseCase_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*PostUseCaseServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetPost",
-			Handler:    _PostUseCase_GetPost_Handler,
+			MethodName: "GetPostById",
+			Handler:    _PostUseCase_GetPostById_Handler,
 		},
 		{
 			MethodName: "CreatePost",

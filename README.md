@@ -33,7 +33,7 @@ If you need to make rebuild, you have to use this command:
 After that repeat ```docker-compose up``` or ```make up``` commands for launching the project.
 
 
-### gRPC
+## gRPC
 
 To launch gRPC server, you need to comment 'Gin server' out and uncomment 'gRPC server' out in `cmd/server/main.go` file. After successful launch,
 use this command:

@@ -13,12 +13,15 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	"github.com/yachnytskyi/golang-mongo-grpc/config"
-	pb "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/model/pb"
+	postProtobufV1 "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/grpc/v1/model/pb"
+	userProtobufV1 "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1/model/pb"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 
 	postPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
 	postRepositoryPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post/data/repository/mongo"
+	postGrpcPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/grpc/v1"
 	postHttpGinPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/http/gin"
 	postUseCasePackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/usecase"
 	userPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
@@ -109,7 +112,7 @@ func init() {
 
 	// Use Cases.
 	userUseCase = userUseCasePackage.NewUserUseCase(userRepository)
-	postUseCase = postUseCasePackage.NewUseCase(postRepository)
+	postUseCase = postUseCasePackage.NewPostUseCase(postRepository)
 
 	// Handlers
 	userHandler = userHttpGinPackage.NewUserHandler(userUseCase, templateInstance)
@@ -132,19 +135,31 @@ func main() {
 
 	defer mongoClient.Disconnect(ctx)
 
-	startGinServer(config)
-	// startGrpcServer(config)
+	// startGinServer(config)
+	startGrpcServer(config)
 }
 
 func startGrpcServer(config config.Config) {
-	userServer, err := userGrpcPackage.NewGrpcUserServer(config, userUseCase, userCollection)
+	userGrpcServer, err := userGrpcPackage.NewGrpcUserServer(config, userUseCase, userCollection)
 
 	if err != nil {
-		log.Fatal("cannot createt grpc server: ", err)
+		log.Fatal("cannot createt gRPC User Server: ", err)
+	}
+
+	postGrpcServer, err := postGrpcPackage.NewGrpcPostServer(postUseCase)
+
+	if err != nil {
+		log.Fatal("cannot create gRPC Post Server: ", err)
 	}
 
 	grpcServer := grpc.NewServer()
-	pb.RegisterUserUseCaseServer(grpcServer, userServer)
+
+	// Register User gRPC server.
+	userProtobufV1.RegisterUserUseCaseServer(grpcServer, userGrpcServer)
+
+	// Register Post gRPC server.
+	postProtobufV1.RegisterPostUseCaseServer(grpcServer, postGrpcServer)
+
 	reflection.Register(grpcServer)
 
 	listener, err := net.Listen("tcp", config.GrpcServerAddress)

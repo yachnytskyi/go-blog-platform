@@ -31,7 +31,7 @@ type PostUpdate struct {
 	Title     string    `json:"title,omitempty" bson:"title,omitempty" db:"title,omitempty"`
 	Content   string    `json:"content,omitempty" bson:"content,omitempty" db:"content,omitempty"`
 	Image     string    `json:"image,omitempty" bson:"image,omitempty" db:"image,omitempty"`
-	User      string    `json:"user,omitempty" bson:"user,omitempty" db:"user,omitempty"`
+	UserID    string    `json:"-,omitempty" bson:"user_id,omitempty" db:"user_id,omitempty"`
 	CreatedAt time.Time `json:"created_at,omitempty" bson:"created_at,omitempty" db:"created_at,omitempty"`
 	UpdatedAt time.Time `json:"updated_at,omitempty" bson:"updated_at,omitempty" db:"updated_at,omitempty"`
 }

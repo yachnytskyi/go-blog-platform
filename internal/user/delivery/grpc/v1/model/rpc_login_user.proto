@@ -2,14 +2,14 @@ syntax = "proto3";
 
 package model;
 
-option go_package = "github.com/yachnytskyi/golang-mongo-grpc/pkg/pb/model";
+option go_package = "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1/model";
 
-message LoginUserInput {
+message LoginUser {
     string email = 1;
     string password = 2;
 }
 
-message LoginUserResponse {
+message LoginUserView {
     string status = 1;
     string access_token = 2;
     string refresh_token = 3;

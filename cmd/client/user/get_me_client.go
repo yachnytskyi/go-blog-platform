@@ -6,21 +6,21 @@ import (
 	"log"
 	"time"
 
-	pb "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/model/pb"
+	userProtobufV1 "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1/model/pb"
 	"google.golang.org/grpc"
 )
 
 type GetMeClient struct {
-	usecase pb.UserUseCaseClient
+	usecase userProtobufV1.UserUseCaseClient
 }
 
 func NewGetMeClient(connection *grpc.ClientConn) *GetMeClient {
-	usecase := pb.NewUserUseCaseClient(connection)
+	usecase := userProtobufV1.NewUserUseCaseClient(connection)
 
 	return &GetMeClient{usecase}
 }
 
-func (getMeClient *GetMeClient) GetMeUser(credentials *pb.GetMeRequest) {
+func (getMeClient *GetMeClient) GetMeUser(credentials *userProtobufV1.GetMeRequest) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(time.Microsecond*5000))
 	defer cancel()
 

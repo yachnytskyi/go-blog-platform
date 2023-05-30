@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package model;
+
+option go_package = "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/grpc/v1/model";
+
+message PostCreate {
+    string Title = 1;
+    string Content = 2;
+    string Image = 3;
+    string UserID = 4;
+    string User = 5;
+}

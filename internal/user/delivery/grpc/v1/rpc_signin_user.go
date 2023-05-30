@@ -4,15 +4,15 @@ import (
 	"context"
 
 	repositoryUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/utility"
-	pb "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/model/pb"
+	pb "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1/model/pb"
 	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-func (userServer *UserServer) Login(ctx context.Context, request *pb.LoginUserInput) (*pb.LoginUserResponse, error) {
-	user, err := userServer.userUseCase.GetUserByEmail(ctx, request.GetEmail())
+func (userGrpcServer *UserGrpcServer) Login(ctx context.Context, request *pb.LoginUser) (*pb.LoginUserView, error) {
+	user, err := userGrpcServer.userUseCase.GetUserByEmail(ctx, request.GetEmail())
 
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, err.Error())
@@ -29,19 +29,19 @@ func (userServer *UserServer) Login(ctx context.Context, request *pb.LoginUserIn
 	}
 
 	// Generate tokens
-	accessToken, err := httpUtility.CreateToken(userServer.config.AccessTokenExpiresIn, user.UserID, userServer.config.AccessTokenPrivateKey)
+	accessToken, err := httpUtility.CreateToken(userGrpcServer.config.AccessTokenExpiresIn, user.UserID, userGrpcServer.config.AccessTokenPrivateKey)
 
 	if err != nil {
 		return nil, status.Errorf(codes.PermissionDenied, err.Error())
 	}
 
-	refreshToken, err := httpUtility.CreateToken(userServer.config.RefreshTokenExpiresIn, user.UserID, userServer.config.RefreshTokenPrivateKey)
+	refreshToken, err := httpUtility.CreateToken(userGrpcServer.config.RefreshTokenExpiresIn, user.UserID, userGrpcServer.config.RefreshTokenPrivateKey)
 
 	if err != nil {
 		return nil, status.Errorf(codes.PermissionDenied, err.Error())
 	}
 
-	response := &pb.LoginUserResponse{
+	response := &pb.LoginUserView{
 		Status:       "success",
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,

@@ -28,13 +28,14 @@ You can also find all possible API requests/urls when you launch the project in 
 
 If you need to make rebuild, you have to use this command:
 
-```docker-compose build```     
+```docker-compose build``` 
+  
 After that repeat the command ```docker-compose up``` or ```make up``` for launching the project.
 
 
 ### gRPC
 
-To launch gRPC server, you need to comment 'Gin server' out and uncomment 'gRPC server' out. After successful launch,
+To launch gRPC server, you need to comment 'Gin server' out and uncomment 'gRPC server' out in `main.go` file. After successful launch,
 use this command:
 
 ```evans --host localhost --port 8081 -r repl```

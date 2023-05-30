@@ -9,7 +9,8 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func (PostGrpcServer *PostGrpcServer) GetAllPosts(ctx context.Context, postsData *postProtobufV1.Posts, streamOfPosts postProtobufV1.PostUseCase_GetPostsServer) error {
+func (PostGrpcServer *PostGrpcServer) GetPosts(postsData *postProtobufV1.Posts, streamOfPosts postProtobufV1.PostUseCase_GetPostsServer) error {
+	ctx := context.Background()
 	page := postsData.GetPage()
 	limit := postsData.GetLimit()
 

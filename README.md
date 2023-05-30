@@ -30,12 +30,12 @@ If you need to make rebuild, you have to use this command:
 
 ```docker-compose build``` 
   
-After that repeat the command ```docker-compose up``` or ```make up``` for launching the project.
+After that repeat ```docker-compose up``` or ```make up``` commands for launching the project.
 
 
 ### gRPC
 
-To launch gRPC server, you need to comment 'Gin server' out and uncomment 'gRPC server' out in `main.go` file. After successful launch,
+To launch gRPC server, you need to comment 'Gin server' out and uncomment 'gRPC server' out in `cmd/server/main.go` file. After successful launch,
 use this command:
 
 ```evans --host localhost --port 8081 -r repl```
@@ -47,5 +47,8 @@ To run this code, you will need docker and docker-compose installed on your mach
 ```make up```    
 
 ```make run```
+  
+# Ways of possible improvements
+I would be grateful for any help, which you can provide. First of all, I would implement Abstract Factory pattern, to give us an opportunity easily switch between repositories and delivery tools. Right now it's hardcoded in 'cmd/server/main.go' file, it should be in a config file and be instanced on first application startup. Secondly, add unit and integration tests, the project doesn't have them at all. Thirdly, fix a bug with launching the application from `Docker Compose`. We have a problem here, that we can't launch the app directly from `Docker Compose`, we need to use `go run main.go` command. I had tried to fix this problem, but haven't had any success. Fourthly, to make a general refactoring of the system.
 
 </div>

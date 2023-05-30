@@ -13,6 +13,8 @@ gRPC**
 We have a script in Makefile that allows you to launch the project.
 
 ## Runing the Application
+  
+To activate email sending features, you need to put your email provider credentials in app.env (you have an example in the end of `app.env` file).
 
   
 `example.env` file is provided you as an example of your own environment variables, which you you need to put in your `app.env` file (you should create it on your own). 

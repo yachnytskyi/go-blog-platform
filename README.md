@@ -49,6 +49,6 @@ To run this code, you will need docker and docker-compose installed on your mach
 ```make run```
   
 # Ways of possible improvements
-I would be grateful for any help, which you can provide. First of all, I would implement Abstract Factory pattern, to give us an opportunity easily switch between repositories and delivery tools. Right now it's hardcoded in `cmd/server/main.go` file, it should be in a config file and be instanced on first application lauche. Secondly, add unit and integration tests, the project doesn't have them at all. Thirdly, fix a bug with launching the application from `Docker Compose`. We have a problem here, that we can't launch the app directly from `Docker Compose`, we need to use `go run main.go` command. I had tried to fix this problem, but haven't had any success. Fourthly, to make a general refactoring of the system.
+I would be grateful for any help you could provide. First of all, I would implement Abstract Factory pattern, to give us an ability to easily switch between repositories and delivery tools. At the current state the settings are hardcoded in `cmd/server/main.go` file, they should be in a config file and defined on first launch of the app. Secondly, add unit and integration tests. Thirdly, fix a bug with launching the application from `Docker Compose`. We have a problem here, that we can't launch the app directly from `Docker Compose`, we need to use `go run main.go` command. I had tried to fix this problem, but haven't had any success. Fourthly, to make a general refactoring of the system.
 
 </div>

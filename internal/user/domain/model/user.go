@@ -3,6 +3,11 @@ package model
 import "time"
 
 // [GET].
+type Users struct {
+	Users []*User `json:"users"`
+}
+
+// [GET].
 type User struct {
 	UserID    string    `json:"user_id" bson:"_id" db:"user_id"`
 	Name      string    `json:"name" bson:"name" db:"name"`

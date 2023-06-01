@@ -26,7 +26,7 @@ func NewUserRepository(collection *mongo.Collection) user.Repository {
 	return &UserRepository{collection: collection}
 }
 
-func (UserRepository *UserRepository) GetAllUsers(ctx context.Context, page int, limit int) ([]*userModel.User, error) {
+func (UserRepository *UserRepository) GetAllUsers(ctx context.Context, page int, limit int) (*userModel.Users, error) {
 	if page == 0 {
 		page = 1
 	}
@@ -68,10 +68,14 @@ func (UserRepository *UserRepository) GetAllUsers(ctx context.Context, page int,
 	}
 
 	if len(fetchedUsers) == 0 {
-		return []*userModel.User{}, nil
+		return &userModel.Users{
+			Users: make([]*userModel.User, 0),
+		}, nil
 	}
 
-	return fetchedUsers, nil
+	return &userModel.Users{
+		Users: fetchedUsers,
+	}, nil
 }
 
 func (userRepository *UserRepository) GetUserById(ctx context.Context, userID string) (*userModel.User, error) {

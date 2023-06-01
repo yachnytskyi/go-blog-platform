@@ -9,6 +9,7 @@ func UsersToUsersViewMapper(users *model.Users) UsersView {
 
 	for _, user := range users.Users {
 		userView := &UserView{}
+		userView.UserID = user.UserID
 		userView.Name = user.Name
 		userView.Email = user.Email
 		userView.Role = user.Role

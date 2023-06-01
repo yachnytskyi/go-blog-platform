@@ -14,3 +14,22 @@ func UserToUserViewMapper(user *model.User) UserView {
 		UpdatedAt: user.UpdatedAt,
 	}
 }
+
+func UsersToUsersViewMapper(user []*model.User) UsersView {
+	userView := &UserView{}
+	usersView := make([]*UserView, 0, 10)
+
+	for _, user := range user {
+		userView.UserID = user.UserID
+		userView.Name = user.Name
+		userView.Email = user.Email
+		userView.Role = user.Role
+		userView.CreatedAt = user.CreatedAt
+		userView.UpdatedAt = user.UpdatedAt
+		usersView = append(usersView, userView)
+	}
+
+	return UsersView{
+		UsersView: usersView,
+	}
+}

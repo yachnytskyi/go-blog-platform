@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -287,6 +288,35 @@ func (userHandler *UserHandler) GetMe(ctx *gin.Context) {
 	currentUser := ctx.MustGet("currentUser").(*userModel.User)
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": userViewModel.UserToUserViewMapper(currentUser)}})
+}
+
+func (userHandler *UserHandler) GetAllUsers(ctx *gin.Context) {
+	page := ctx.DefaultQuery("page", "1")
+	limit := ctx.DefaultQuery("limit", "10")
+
+	intPage, err := strconv.Atoi(page)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
+		return
+	}
+
+	intLimit, err := strconv.Atoi(limit)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
+		return
+	}
+
+	fetchedUsers, err := userHandler.userUseCase.GetAllUsers(ctx.Request.Context(), intPage, intLimit)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, userViewModel.UsersToUsersViewMapper(fetchedUsers))
+
 }
 
 func (userHandler *UserHandler) GetUserById(ctx *gin.Context) {

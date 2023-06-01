@@ -20,6 +20,7 @@ func (userRouter *UserRouter) UserRouter(routerGroup *gin.RouterGroup, userUseCa
 	router.POST("/register", userRouter.userHandler.Register)
 	router.POST("/login", userRouter.userHandler.Login)
 
+	router.GET("/", userRouter.userHandler.GetAllUsers)
 	router.GET("/:userID", userRouter.userHandler.GetUserById)
 
 	router.Use(httpGinUtility.DeserializeUser(userUseCase))

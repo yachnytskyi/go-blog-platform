@@ -9,7 +9,6 @@ type UsersView struct {
 
 // [GET].
 type UserView struct {
-	UserID    string    `json:"user_id" bson:"_id" db:"user_id"`
 	Name      string    `json:"name" bson:"name" db:"name"`
 	Email     string    `json:"email" bson:"email" db:"email"`
 	Role      string    `json:"role" bson:"role" db:"role"`

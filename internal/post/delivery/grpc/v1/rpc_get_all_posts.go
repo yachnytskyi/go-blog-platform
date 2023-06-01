@@ -20,7 +20,7 @@ func (PostGrpcServer *PostGrpcServer) GetAllPosts(postsData *postProtobufV1.Post
 		return status.Errorf(codes.Internal, err.Error())
 	}
 
-	for _, post := range posts {
+	for _, post := range posts.Posts {
 		streamOfPosts.Send(&postProtobufV1.Post{
 			PostID:    post.PostID,
 			Title:     post.Title,

@@ -24,7 +24,7 @@ func NewPostRepository(collection *mongo.Collection) post.Repository {
 	return &PostRepository{collection: collection}
 }
 
-func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int, limit int) ([]*postModel.Post, error) {
+func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int, limit int) (*postModel.Posts, error) {
 	if page == 0 {
 		page = 1
 	}
@@ -66,10 +66,14 @@ func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int,
 	}
 
 	if len(fetchedPosts) == 0 {
-		return []*postModel.Post{}, nil
+		return &postModel.Posts{
+			Posts: make([]*postModel.Post, 0),
+		}, nil
 	}
 
-	return fetchedPosts, nil
+	return &postModel.Posts{
+		Posts: fetchedPosts,
+	}, nil
 }
 
 func (postRepository *PostRepository) GetPostById(ctx context.Context, postID string) (*postModel.Post, error) {

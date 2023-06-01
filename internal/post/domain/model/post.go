@@ -3,6 +3,11 @@ package model
 import "time"
 
 // [GET].
+type Posts struct {
+	Posts []*Post `json:"posts"`
+}
+
+// [GET].
 type Post struct {
 	PostID    string    `json:"post_id,omitempty" bson:"_id,omitempty" db:"post_id,omitempty"`
 	Title     string    `json:"title,omitempty" bson:"title,omitempty" db:"title,omitempty"`

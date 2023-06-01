@@ -15,11 +15,11 @@ func UserToUserViewMapper(user *model.User) UserView {
 	}
 }
 
-func UsersToUsersViewMapper(user []*model.User) UsersView {
-	userView := &UserView{}
+func UsersToUsersViewMapper(users *model.Users) UsersView {
 	usersView := make([]*UserView, 0, 10)
 
-	for _, user := range user {
+	for _, user := range users.Users {
+		userView := &UserView{}
 		userView.UserID = user.UserID
 		userView.Name = user.Name
 		userView.Email = user.Email

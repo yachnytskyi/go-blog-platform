@@ -26,6 +26,54 @@ func NewUserRepository(collection *mongo.Collection) user.Repository {
 	return &UserRepository{collection: collection}
 }
 
+func (UserRepository *UserRepository) GetAllUsers(ctx context.Context, page int, limit int) ([]*userModel.User, error) {
+	if page == 0 {
+		page = 1
+	}
+
+	if limit == 0 {
+		limit = 10
+	}
+
+	skip := (page - 1) * limit
+
+	option := options.FindOptions{}
+	option.SetLimit(int64(limit))
+	option.SetSkip(int64(skip))
+
+	query := bson.M{}
+	cursor, err := UserRepository.collection.Find(ctx, query, &option)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer cursor.Close(ctx)
+
+	var fetchedUsers []*userModel.User
+
+	for cursor.Next(ctx) {
+		user := &userModel.User{}
+		err := cursor.Decode(user)
+
+		if err != nil {
+			return nil, err
+		}
+
+		fetchedUsers = append(fetchedUsers, user)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+
+	if len(fetchedUsers) == 0 {
+		return []*userModel.User{}, nil
+	}
+
+	return fetchedUsers, nil
+}
+
 func (userRepository *UserRepository) GetUserById(ctx context.Context, userID string) (*userModel.User, error) {
 	userIDMappedToMongoDB, _ := primitive.ObjectIDFromHex(userID)
 

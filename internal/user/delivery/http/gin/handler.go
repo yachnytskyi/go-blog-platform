@@ -289,6 +289,23 @@ func (userHandler *UserHandler) GetMe(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": userViewModel.UserToUserViewMapper(currentUser)}})
 }
 
+func (userHandler *UserHandler) GetUserById(ctx *gin.Context) {
+	userID := ctx.Param("userID")
+
+	fetchedUser, err := userHandler.userUseCase.GetUserById(ctx.Request.Context(), userID)
+
+	if err != nil {
+		if strings.Contains(err.Error(), "Id exists") {
+			ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": userViewModel.UserToUserViewMapper(fetchedUser)}})
+}
+
 func (userHandler *UserHandler) Delete(ctx *gin.Context) {
 	currentUser := ctx.MustGet("currentUser")
 	userID := currentUser.(*userModel.User).UserID

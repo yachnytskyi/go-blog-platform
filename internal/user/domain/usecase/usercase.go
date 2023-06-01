@@ -69,6 +69,12 @@ func (userUseCase *UserUseCase) UpdateUserById(ctx context.Context, userID strin
 	return updatedUser, err
 }
 
+func (userUseCase *UserUseCase) GetAllUsers(ctx context.Context, page int, limit int) ([]*userModel.User, error) {
+	fetchedUsers, err := userUseCase.userRepository.GetAllUsers(ctx, page, limit)
+
+	return fetchedUsers, err
+}
+
 func (userUseCase *UserUseCase) GetUserById(ctx context.Context, userID string) (*userModel.User, error) {
 	fetchedUser, err := userUseCase.userRepository.GetUserById(ctx, userID)
 

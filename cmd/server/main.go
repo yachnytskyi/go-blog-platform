@@ -135,8 +135,8 @@ func main() {
 
 	defer mongoClient.Disconnect(ctx)
 
-	// startGinServer(config)
-	startGrpcServer(config)
+	startGinServer(config)
+	// startGrpcServer(config)
 }
 
 func startGrpcServer(config config.Config) {

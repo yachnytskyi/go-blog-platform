@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
-	userRepositoryModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/model"
+	userRepositoryModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/mongo/model"
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 
 	repositoryUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/utility"
@@ -26,7 +26,7 @@ func NewUserRepository(collection *mongo.Collection) user.Repository {
 	return &UserRepository{collection: collection}
 }
 
-func (UserRepository *UserRepository) GetAllUsers(ctx context.Context, page int, limit int) (*userModel.Users, error) {
+func (userRepository *UserRepository) GetAllUsers(ctx context.Context, page int, limit int) (*userModel.Users, error) {
 	if page == 0 {
 		page = 1
 	}
@@ -42,7 +42,7 @@ func (UserRepository *UserRepository) GetAllUsers(ctx context.Context, page int,
 	option.SetSkip(int64(skip))
 
 	query := bson.M{}
-	cursor, err := UserRepository.collection.Find(ctx, query, &option)
+	cursor, err := userRepository.collection.Find(ctx, query, &option)
 
 	if err != nil {
 		return nil, err
@@ -50,10 +50,10 @@ func (UserRepository *UserRepository) GetAllUsers(ctx context.Context, page int,
 
 	defer cursor.Close(ctx)
 
-	var fetchedUsers []*userModel.User
+	var fetchedUsers []*userRepositoryModel.UserRepository
 
 	for cursor.Next(ctx) {
-		user := &userModel.User{}
+		user := &userRepositoryModel.UserRepository{}
 		err := cursor.Decode(user)
 
 		if err != nil {
@@ -73,15 +73,15 @@ func (UserRepository *UserRepository) GetAllUsers(ctx context.Context, page int,
 		}, nil
 	}
 
-	return &userModel.Users{
-		Users: fetchedUsers,
-	}, nil
+	users := userRepositoryModel.UsersRepositoryToUsersMapper(fetchedUsers)
+
+	return &users, err
 }
 
 func (userRepository *UserRepository) GetUserById(ctx context.Context, userID string) (*userModel.User, error) {
 	userIDMappedToMongoDB, _ := primitive.ObjectIDFromHex(userID)
 
-	var fetchedUser *userModel.User
+	var fetchedUser *userRepositoryModel.UserRepository
 	query := bson.M{"_id": userIDMappedToMongoDB}
 	err := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
 
@@ -92,7 +92,9 @@ func (userRepository *UserRepository) GetUserById(ctx context.Context, userID st
 		return nil, err
 	}
 
-	return fetchedUser, nil
+	user := userRepositoryModel.UserRepositoryToUserMapper(fetchedUser)
+
+	return &user, nil
 }
 
 func (userRepository *UserRepository) GetUserByEmail(ctx context.Context, email string) (*userModel.User, error) {

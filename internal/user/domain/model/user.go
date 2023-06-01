@@ -4,19 +4,18 @@ import "time"
 
 // [GET].
 type Users struct {
-	Users []*User `json:"users"`
+	Users []*User
 }
 
-// [GET].
 type User struct {
-	UserID    string    `json:"user_id" bson:"_id" db:"user_id"`
-	Name      string    `json:"name" bson:"name" db:"name"`
-	Email     string    `json:"email" bson:"email" db:"email"`
-	Password  string    `json:"-" bson:"password" db:"password"`
-	Role      string    `json:"role" bson:"role" db:"role"`
-	Verified  bool      `json:"verified" bson:"verified" db:"verified"`
-	CreatedAt time.Time `json:"created_at" bson:"created_at" db:"created_at"`
-	UpdatedAt time.Time `json:"updated_at" bson:"updated_at" db:"updated_at"`
+	UserID    string
+	Name      string
+	Email     string
+	Password  string
+	Role      string
+	Verified  bool
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 // [POST].

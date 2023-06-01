@@ -1,10 +1,8 @@
 package model
 
-import (
-	"github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
-)
+import userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 
-func UsersToUsersViewMapper(users *model.Users) UsersView {
+func UsersToUsersViewMapper(users *userModel.Users) UsersView {
 	usersView := make([]*UserView, 0, 10)
 
 	for _, user := range users.Users {
@@ -23,7 +21,7 @@ func UsersToUsersViewMapper(users *model.Users) UsersView {
 	}
 }
 
-func UserToUserViewMapper(user *model.User) UserView {
+func UserToUserViewMapper(user *userModel.User) UserView {
 	return UserView{
 		Name:      user.Name,
 		Email:     user.Email,

@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/post"
+	postViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/model"
 	postModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility"
@@ -45,7 +46,7 @@ func (postHandler *PostHandler) GetAllPosts(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": fetchedPosts})
+	ctx.JSON(http.StatusOK, postViewModel.PostsToPostsViewMapper(fetchedPosts))
 }
 
 func (postHandler *PostHandler) GetPostById(ctx *gin.Context) {
@@ -62,7 +63,7 @@ func (postHandler *PostHandler) GetPostById(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": fetchedPost})
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": postViewModel.PostToPostViewMapper(fetchedPost)})
 }
 
 func (postHandler *PostHandler) CreatePost(ctx *gin.Context) {

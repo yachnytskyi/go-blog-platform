@@ -9,6 +9,7 @@ type PostsView struct {
 
 // [GET].
 type PostView struct {
+	PostID    string    `json:"post_id,omitempty" bson:"_id,omitempty" db:"post_id,omitempty"`
 	Title     string    `json:"title,omitempty" bson:"title,omitempty" db:"title,omitempty"`
 	Content   string    `json:"content,omitempty" bson:"content,omitempty" db:"content,omitempty"`
 	Image     string    `json:"image,omitempty" bson:"image,omitempty" db:"image,omitempty"`

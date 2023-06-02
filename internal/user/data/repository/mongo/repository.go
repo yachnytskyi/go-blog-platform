@@ -50,7 +50,7 @@ func (userRepository *UserRepository) GetAllUsers(ctx context.Context, page int,
 
 	defer cursor.Close(ctx)
 
-	var fetchedUsers []*userRepositoryModel.UserRepository
+	var fetchedUsers = make([]*userRepositoryModel.UserRepository, 0, limit)
 
 	for cursor.Next(ctx) {
 		user := &userRepositoryModel.UserRepository{}
@@ -80,8 +80,8 @@ func (userRepository *UserRepository) GetAllUsers(ctx context.Context, page int,
 
 func (userRepository *UserRepository) GetUserById(ctx context.Context, userID string) (*userModel.User, error) {
 	userIDMappedToMongoDB, _ := primitive.ObjectIDFromHex(userID)
-
 	var fetchedUser *userRepositoryModel.UserRepository
+
 	query := bson.M{"_id": userIDMappedToMongoDB}
 	err := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
 
@@ -98,7 +98,7 @@ func (userRepository *UserRepository) GetUserById(ctx context.Context, userID st
 }
 
 func (userRepository *UserRepository) GetUserByEmail(ctx context.Context, email string) (*userModel.User, error) {
-	var fetchedUser *userModel.User
+	var fetchedUser *userRepositoryModel.UserRepository
 
 	query := bson.M{"email": strings.ToLower(email)}
 	err := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
@@ -110,7 +110,9 @@ func (userRepository *UserRepository) GetUserByEmail(ctx context.Context, email 
 		return nil, err
 	}
 
-	return fetchedUser, nil
+	user := userRepositoryModel.UserRepositoryToUserMapper(fetchedUser)
+
+	return &user, nil
 }
 
 func (userRepository *UserRepository) Register(ctx context.Context, user *userModel.UserCreate) (*userModel.User, error) {

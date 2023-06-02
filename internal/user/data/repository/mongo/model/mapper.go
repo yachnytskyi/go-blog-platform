@@ -3,13 +3,14 @@ package model
 import userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 
 func UsersRepositoryToUsersMapper(usersRepository []*UserRepository) userModel.Users {
-	users := make([]*userModel.User, 0, 10)
+	users := make([]*userModel.User, 0)
 
 	for _, userRepository := range usersRepository {
 		user := &userModel.User{}
 		user.UserID = userRepository.UserID
 		user.Name = userRepository.Name
 		user.Email = userRepository.Email
+		user.Password = userRepository.Password
 		user.Role = userRepository.Role
 		user.CreatedAt = userRepository.CreatedAt
 		user.UpdatedAt = userRepository.UpdatedAt
@@ -26,6 +27,7 @@ func UserRepositoryToUserMapper(userRepository *UserRepository) userModel.User {
 		UserID:    userRepository.UserID,
 		Name:      userRepository.Name,
 		Email:     userRepository.Email,
+		Password:  userRepository.Password,
 		Role:      userRepository.Role,
 		CreatedAt: userRepository.CreatedAt,
 		UpdatedAt: userRepository.UpdatedAt,

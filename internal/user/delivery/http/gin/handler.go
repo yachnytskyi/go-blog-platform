@@ -97,6 +97,7 @@ func (userHandler *UserHandler) Login(ctx *gin.Context) {
 	}
 
 	user, err := userHandler.userUseCase.Login(ctx.Request.Context(), credentials)
+	userMappedToView := userViewModel.UserToUserViewMapper(user)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
@@ -106,14 +107,14 @@ func (userHandler *UserHandler) Login(ctx *gin.Context) {
 	config, _ := config.LoadConfig(".")
 
 	// Generate tokens.
-	accessToken, err := httpUtility.CreateToken(config.AccessTokenExpiresIn, user.UserID, config.AccessTokenPrivateKey)
+	accessToken, err := httpUtility.CreateToken(config.AccessTokenExpiresIn, userMappedToView.UserID, config.AccessTokenPrivateKey)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
-	refreshToken, err := httpUtility.CreateToken(config.RefreshTokenExpiresIn, user.UserID, config.RefreshTokenPrivateKey)
+	refreshToken, err := httpUtility.CreateToken(config.RefreshTokenExpiresIn, userMappedToView.UserID, config.RefreshTokenPrivateKey)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})

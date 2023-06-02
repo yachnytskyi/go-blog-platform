@@ -3,7 +3,7 @@ package model
 import userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 
 func UsersToUsersViewMapper(users *userModel.Users) UsersView {
-	usersView := make([]*UserView, 0, 10)
+	usersView := make([]*UserView, 0)
 
 	for _, user := range users.Users {
 		userView := &UserView{}
@@ -23,6 +23,7 @@ func UsersToUsersViewMapper(users *userModel.Users) UsersView {
 
 func UserToUserViewMapper(user *userModel.User) UserView {
 	return UserView{
+		UserID:    user.UserID,
 		Name:      user.Name,
 		Email:     user.Email,
 		Role:      user.Role,

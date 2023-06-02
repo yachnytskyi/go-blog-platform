@@ -27,11 +27,11 @@ func NewUserRepository(collection *mongo.Collection) user.Repository {
 }
 
 func (userRepository *UserRepository) GetAllUsers(ctx context.Context, page int, limit int) (*userModel.Users, error) {
-	if page == 0 {
+	if page == 0 || page < 0 || page > 100 {
 		page = 1
 	}
 
-	if limit == 0 {
+	if limit == 0 || limit < 0 || limit > 100 {
 		limit = 10
 	}
 

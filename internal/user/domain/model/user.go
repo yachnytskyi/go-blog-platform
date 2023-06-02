@@ -5,6 +5,7 @@ import "time"
 // [GET].
 type Users struct {
 	Users []*User
+	Limit int
 }
 
 type User struct {

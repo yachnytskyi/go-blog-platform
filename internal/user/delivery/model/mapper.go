@@ -2,8 +2,8 @@ package model
 
 import userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 
-func UsersToUsersViewMapper(users *userModel.Users) UsersView {
-	usersView := make([]*UserView, 0)
+func UsersToUsersViewMapper(users *userModel.Users, limit int) UsersView {
+	usersView := make([]*UserView, 0, limit)
 
 	for _, user := range users.Users {
 		userView := &UserView{}

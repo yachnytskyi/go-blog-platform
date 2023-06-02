@@ -316,7 +316,7 @@ func (userHandler *UserHandler) GetAllUsers(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, userViewModel.UsersToUsersViewMapper(fetchedUsers))
+	ctx.JSON(http.StatusOK, userViewModel.UsersToUsersViewMapper(fetchedUsers, fetchedUsers.Limit))
 
 }
 

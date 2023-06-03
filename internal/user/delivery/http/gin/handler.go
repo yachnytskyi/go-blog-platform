@@ -30,19 +30,20 @@ func NewUserHandler(userUseCase user.UseCase, template *template.Template) UserH
 }
 
 func (userHandler *UserHandler) Register(ctx *gin.Context) {
-	var createdUserData *userModel.UserCreate = new(userModel.UserCreate)
+	var createdUserViewData *userViewModel.UserCreateView = new(userViewModel.UserCreateView)
 
-	if err := ctx.ShouldBindJSON(&createdUserData); err != nil {
+	if err := ctx.ShouldBindJSON(&createdUserViewData); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
-	if createdUserData.Password != createdUserData.PasswordConfirm {
+	if createdUserViewData.Password != createdUserViewData.PasswordConfirm {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Passwords do not match"})
 		return
 	}
 
-	createdUser, err := userHandler.userUseCase.Register(ctx.Request.Context(), createdUserData)
+	createdUserData := userViewModel.UserCreateViewToUserCreateMapper((*userViewModel.UserCreateView)(createdUserViewData))
+	createdUser, err := userHandler.userUseCase.Register(ctx.Request.Context(), &createdUserData)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "email already exists") {
@@ -97,7 +98,6 @@ func (userHandler *UserHandler) Login(ctx *gin.Context) {
 	}
 
 	user, err := userHandler.userUseCase.Login(ctx.Request.Context(), credentials)
-	userMappedToView := userViewModel.UserToUserViewMapper(user)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
@@ -105,6 +105,7 @@ func (userHandler *UserHandler) Login(ctx *gin.Context) {
 	}
 
 	config, _ := config.LoadConfig(".")
+	userMappedToView := userViewModel.UserToUserViewMapper(user)
 
 	// Generate tokens.
 	accessToken, err := httpUtility.CreateToken(config.AccessTokenExpiresIn, userMappedToView.UserID, config.AccessTokenPrivateKey)

@@ -31,3 +31,15 @@ func UserToUserViewMapper(user *userModel.User) UserView {
 		UpdatedAt: user.UpdatedAt,
 	}
 }
+
+func UserCreateViewToUserCreateMapper(user *UserCreateView) userModel.UserCreate {
+	return userModel.UserCreate{
+		Name:            user.Name,
+		Email:           user.Email,
+		Password:        user.Password,
+		PasswordConfirm: user.PasswordConfirm,
+		Role:            user.Role,
+		CreatedAt:       user.CreatedAt,
+		UpdatedAt:       user.UpdatedAt,
+	}
+}

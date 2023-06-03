@@ -37,8 +37,8 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 		return
 	}
 
-	if createdUserViewData.Password != createdUserViewData.PasswordConfirm {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Passwords do not match"})
+	if err := createdUserViewData.UserCreateViewValidator(); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 

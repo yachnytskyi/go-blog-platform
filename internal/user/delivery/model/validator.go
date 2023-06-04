@@ -6,8 +6,8 @@ import (
 )
 
 func (userCreateView *UserCreateView) UserCreateViewValidator() error {
-	var message string
 	var err error
+	var message string
 
 	if userCreateView.Name == "" {
 		message = "key: `UserCreateView.Name` error: field validation for `name` failed, `name` cannot be empty "

@@ -3,11 +3,12 @@ package model
 import (
 	"fmt"
 	"net/mail"
+	"strings"
 )
 
 func (userCreateView *UserCreateView) UserCreateViewValidator() error {
-	var err error
 	var message string
+	var err error
 
 	if userCreateView.Name == "" {
 		message = "key: `UserCreateView.Name` error: field validation for `name` failed, `name` cannot be empty "
@@ -27,7 +28,7 @@ func (userCreateView *UserCreateView) UserCreateViewValidator() error {
 	}
 
 	if userCreateView.PasswordConfirm == "" {
-		message = message + "key: `UserCreateView.PasswordConfirm` error: field validation for `password_confirm` failed, `password_confirm` cannot be empty"
+		message = message + "key: `UserCreateView.PasswordConfirm` error: field validation for `password_confirm` failed, `password_confirm` cannot be empty "
 		err = fmt.Errorf(message)
 
 	}
@@ -35,17 +36,23 @@ func (userCreateView *UserCreateView) UserCreateViewValidator() error {
 	if userCreateView.Email != "" {
 		_, ok := mail.ParseAddress(userCreateView.Email)
 		if ok != nil {
-			message = message + "key: `UserCreateView.Email` error: field validation for `email` failed, invalid email address"
+			message = message + "key: `UserCreateView.Email` error: field validation for `email` failed, invalid email address "
 			err = fmt.Errorf(message)
 
 		}
 	}
 
 	if userCreateView.Password != "" && userCreateView.PasswordConfirm != "" && userCreateView.Password != userCreateView.PasswordConfirm {
-		message = message + "key: `UserCreateView.PasswordConfirm` error: field validation for `password_confirm` failed, passwords do not match"
+		message = message + "key: `UserCreateView.PasswordConfirm` error: field validation for `password_confirm` failed, passwords do not match "
 		err = fmt.Errorf(message)
-
 	}
 
-	return err
+	if err != nil {
+		message = strings.TrimSpace(message)
+		err = fmt.Errorf(message)
+
+		return err
+	}
+
+	return nil
 }

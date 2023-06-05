@@ -20,6 +20,10 @@ func NewUserUseCase(userRepository user.Repository) user.UseCase {
 }
 
 func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.UserCreate) (*userModel.User, error) {
+	if err := user.UserCreateValidator(); err != nil {
+		return nil, err
+	}
+
 	createdUser, err := userUseCase.userRepository.Register(ctx, user)
 
 	return createdUser, err

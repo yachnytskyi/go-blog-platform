@@ -21,12 +21,8 @@ type UserView struct {
 
 // [POST].
 type UserCreateView struct {
-	Name            string    `json:"name"`
-	Email           string    `json:"email"`
-	Password        string    `json:"password"`
-	PasswordConfirm string    `json:"password_confirm"`
-	Role            string    `json:"role"`
-	Verified        bool      `json:"verifyed"`
-	CreatedAt       time.Time `json:"created_at"`
-	UpdatedAt       time.Time `json:"updated_at"`
+	Name            string `json:"name"`
+	Email           string `json:"email"`
+	Password        string `json:"password"`
+	PasswordConfirm string `json:"password_confirm"`
 }

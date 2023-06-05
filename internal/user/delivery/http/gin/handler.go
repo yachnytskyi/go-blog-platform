@@ -50,7 +50,7 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 			ctx.JSON(http.StatusConflict, gin.H{"status": "error", "message": err.Error()})
 			return
 		}
-		ctx.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": err.Error()})
 		return
 	}
 

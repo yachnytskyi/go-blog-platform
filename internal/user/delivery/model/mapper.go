@@ -38,8 +38,5 @@ func UserCreateViewToUserCreateMapper(user *UserCreateView) userModel.UserCreate
 		Email:           user.Email,
 		Password:        user.Password,
 		PasswordConfirm: user.PasswordConfirm,
-		Role:            user.Role,
-		CreatedAt:       user.CreatedAt,
-		UpdatedAt:       user.UpdatedAt,
 	}
 }

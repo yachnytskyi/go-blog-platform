@@ -22,33 +22,52 @@ To activate email sending features, you need to put your email provider credenti
 
 ## From the project root director, run:
 
-```make up```
+```make up``` if you prefer a shortcut command from Makefile.
+
+```docker-compose up``` if you you prefer to enter a full command on your own.
 
 The API will then be available at  **http://localhost:8080/api/posts and http://localhost:8080/api/users**
 
 You can also find all possible API requests/urls when you launch the project in your server terminal. 
 
-If you need to make rebuild, you have to use this command:
+If you need to make rebuild, you can use these commands:
 
-```docker-compose build``` 
+```make build``` if you prefer a shortcut command from Makefile.
+
+```docker-compose build``` if you you prefer to enter a full command on your own.
   
-After that repeat ```docker-compose up``` or ```make up``` commands for launching the project.
+After that repeat these commands:
+
+```make up``` if you prefer a shortcut command from Makefile.
+
+```docker-compose up``` if you you prefer to enter a full command on your own.
 
 
-## gRPC
+## gRPC server
 
-To launch gRPC server, you need to comment 'Gin server' out and uncomment 'gRPC server' out in `cmd/server/main.go` file. After a successful launch,
-use this command:
+To launch gRPC server, you need to comment `Gin server` out and uncomment `gRPC server` out in `cmd/server/main.go` file. After a successful launch,
+please use this command:
 
 ```evans --host localhost --port 8081 -r repl```
 
-## Run
+If you'd like to return Gin API (or whatever REST API server you'd prefer to use), you should comment `gRPC server` out and uncomment `your server` out (for example our current `Gin server`) in `cmd/server/main.go` file.
+
+## Run server
 
 To run this code, you will need docker and docker-compose installed on your machine. In the project root, run:  
 
 ```make up```    
 
-```make run```
+```make reflex``` (if you'd like to use the reflex hot reload launch mode of the server)
+
+```make run``` (if you'd like to use `the default launch mode` of the server)
+
+## Stop server
+
+```make down``` if you prefer a shortcut command from Makefile.
+
+```docker-compose down``` if you you prefer to enter a full command on your own.
+
   
 # Ways of possible improvements
 I would be grateful for any help you could provide. First of all, I would implement Abstract Factory pattern, to give us an ability to easily switch between repositories and delivery tools. At the current state the settings are hardcoded in `cmd/server/main.go` file, they should be in the config file and defined on first launch of the app. Secondly, add unit and integration tests. Thirdly, fix a bug with launching the application from `Docker Compose`. We have a problem here, that we can't launch the app directly from `Docker Compose`, we need to use `go run main.go` command. I had tried to fix this problem, but haven't had any success. Fourthly, solve a problem with a separated launch of Gin and gRPC servers, we can't launch them simultaneously. Or at least to add a feature of switching between them in the config file. Fifthly, to make a general refactoring of the system.

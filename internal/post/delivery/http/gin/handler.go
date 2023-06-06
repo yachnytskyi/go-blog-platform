@@ -9,8 +9,8 @@ import (
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/post"
 	postViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/model"
 	postModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
+	ginUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin/utility"
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
-	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility"
 )
 
 type PostHandler struct {
@@ -92,7 +92,7 @@ func (postHandler *PostHandler) CreatePost(ctx *gin.Context) {
 
 func (postHandler *PostHandler) UpdatePostById(ctx *gin.Context) {
 	postID := ctx.Param("postID")
-	currentUserID := utility.GetCurrentUserID(ctx)
+	currentUserID := ginUtility.GetCurrentUserID(ctx)
 
 	var updatedPostData *postModel.PostUpdate = new(postModel.PostUpdate)
 
@@ -121,7 +121,7 @@ func (postHandler *PostHandler) UpdatePostById(ctx *gin.Context) {
 
 func (postHandler *PostHandler) DeletePostByID(ctx *gin.Context) {
 	postID := ctx.Param("postID")
-	currentUserID := utility.GetCurrentUserID(ctx)
+	currentUserID := ginUtility.GetCurrentUserID(ctx)
 
 	err := postHandler.postUseCase.DeletePostByID(ctx.Request.Context(), postID, currentUserID)
 

@@ -26,3 +26,9 @@ type UserCreateView struct {
 	Password        string `json:"password"`
 	PasswordConfirm string `json:"password_confirm"`
 }
+
+// [PUT].
+type UserUpdateView struct {
+	Name      string    `json:"name"`
+	UpdatedAt time.Time `json:"updated_at"`
+}

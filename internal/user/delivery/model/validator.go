@@ -56,3 +56,22 @@ func (userCreateView *UserCreateView) UserCreateViewValidator() error {
 
 	return nil
 }
+
+func (userUpdateView *UserUpdateView) UserUpdateViewValidator() error {
+	var message string
+	var err error
+
+	if userUpdateView.Name == "" {
+		message = "key: `UserUpdateView.Name` error: field validation for `name` failed, `name` cannot be empty "
+		err = fmt.Errorf(message)
+	}
+
+	if err != nil {
+		message = strings.TrimSpace(message)
+		err = fmt.Errorf(message)
+
+		return err
+	}
+
+	return nil
+}

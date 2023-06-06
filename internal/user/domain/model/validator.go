@@ -34,3 +34,22 @@ func (userCreate *UserCreate) UserCreateValidator() error {
 	return nil
 
 }
+
+func (userUpdate *UserUpdate) UserUpdateValidator() error {
+	var message string
+	var err error
+
+	if len(userUpdate.Name) < 4 || len(userUpdate.Name) > 40 {
+		message = "key: `UserUpdate.Name` error: field validation for `name` failed, `name` can be between 4 and 40 characters "
+		err = fmt.Errorf(message)
+	}
+
+	if err != nil {
+		message = strings.TrimSpace(message)
+		err = fmt.Errorf(message)
+
+		return err
+	}
+
+	return nil
+}

@@ -40,3 +40,10 @@ func UserCreateViewToUserCreateMapper(user *UserCreateView) userModel.UserCreate
 		PasswordConfirm: user.PasswordConfirm,
 	}
 }
+
+func UserUpdateViewToUserUpdateMapper(user *UserUpdateView) userModel.UserUpdate {
+	return userModel.UserUpdate{
+		Name:      user.Name,
+		UpdatedAt: user.UpdatedAt,
+	}
+}

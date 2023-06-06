@@ -33,8 +33,8 @@ type UserCreate struct {
 
 // [PUT].
 type UserUpdate struct {
-	Name      string    `json:"name" bson:"name" db:"name" binding:"required"`
-	UpdatedAt time.Time `json:"updated_at" bson:"updated_at" db:"updated_at"`
+	Name      string
+	UpdatedAt time.Time
 }
 
 // [POST].

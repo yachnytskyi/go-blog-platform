@@ -9,3 +9,6 @@ run:
 
 reflex:
 	reflex -s go run cmd/server/main.go 
+
+build:
+	docker-compose build

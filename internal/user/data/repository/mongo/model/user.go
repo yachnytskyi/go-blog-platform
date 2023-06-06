@@ -27,6 +27,6 @@ type UserCreateRepository struct {
 
 // [PUT].
 type UserUpdateRepository struct {
-	Name      string    `json:"name" bson:"name" db:"name" binding:"required"`
-	UpdatedAt time.Time `json:"updated_at" bson:"updated_at" db:"updated_at"`
+	Name      string    `bson:"name"`
+	UpdatedAt time.Time `bson:"updated_at"`
 }

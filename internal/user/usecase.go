@@ -12,7 +12,7 @@ type UseCase interface {
 	GetUserById(ctx context.Context, userID string) (*userModel.User, error)
 	GetUserByEmail(ctx context.Context, email string) (*userModel.User, error)
 	Register(ctx context.Context, user *userModel.UserCreate) (*userModel.User, error)
-	Login(ctx context.Context, user *userModel.UserSignIn) (*userModel.User, error)
+	Login(ctx context.Context, user *userModel.UserLogin) (*userModel.User, error)
 	UpdateNewRegisteredUserById(ctx context.Context, userID string, key string, value string) (*userModel.User, error)
 	ResetUserPassword(ctx context.Context, firstKey string, firstValue string, secondKey, passwordKey, password string) error
 	UpdatePasswordResetTokenUserByEmail(ctx context.Context, email string, firstKey string, firstValue string, secondKey string, secondValue time.Time) error

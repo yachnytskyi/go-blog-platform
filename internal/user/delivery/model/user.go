@@ -32,3 +32,9 @@ type UserUpdateView struct {
 	Name      string    `json:"name"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
+
+// [POST].
+type UserLoginView struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}

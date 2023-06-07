@@ -75,3 +75,36 @@ func (userUpdateView *UserUpdateView) UserUpdateViewValidator() error {
 
 	return nil
 }
+
+func (userLoginView *UserLoginView) UserSignInViewValidator() error {
+	var message string
+	var err error
+
+	if userLoginView.Email == "" {
+		message = "key: `UserLogInView.Email` error: field validation for `email` failed, `email` cannot be empty "
+		err = fmt.Errorf(message)
+	}
+
+	if userLoginView.Password == "" {
+		message = message + "key: `UserLogInView.Password` error: field validation for `password` failed, `password` cannot be empty "
+		err = fmt.Errorf(message)
+	}
+
+	if userLoginView.Email != "" {
+		_, ok := mail.ParseAddress(userLoginView.Email)
+		if ok != nil {
+			message = message + "key: `UserCreateView.Email` error: field validation for `email` failed, invalid email address "
+			err = fmt.Errorf(message)
+
+		}
+	}
+
+	if err != nil {
+		message = strings.TrimSpace(message)
+		err = fmt.Errorf(message)
+
+		return err
+	}
+
+	return nil
+}

@@ -128,7 +128,7 @@ func (userRepository *UserRepository) GetAllUsers(ctx context.Context, page int,
 		}, nil
 	}
 
-	users := userRepositoryModel.UsersRepositoryToUsersMapper(fetchedUsers, limit)
+	users := userRepositoryModel.UsersRepositoryToUsersMapper(fetchedUsers)
 	users.Limit = limit
 
 	return &users, err

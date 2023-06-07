@@ -54,7 +54,7 @@ func (userHandler *UserHandler) GetAllUsers(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, userViewModel.UsersToUsersViewMapper(fetchedUsers, fetchedUsers.Limit))
+	ctx.JSON(http.StatusOK, userViewModel.UsersToUsersViewMapper(fetchedUsers))
 }
 
 func (userHandler *UserHandler) GetMe(ctx *gin.Context) {
@@ -180,14 +180,20 @@ func (userHandler *UserHandler) Delete(ctx *gin.Context) {
 }
 
 func (userHandler *UserHandler) Login(ctx *gin.Context) {
-	var credentials *userModel.UserSignIn
+	var userLoginViewData *userViewModel.UserLoginView
 
-	if err := ctx.ShouldBindJSON(&credentials); err != nil {
+	if err := ctx.ShouldBindJSON(&userLoginViewData); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
-	user, err := userHandler.userUseCase.Login(ctx.Request.Context(), credentials)
+	if err := userLoginViewData.UserSignInViewValidator(); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+		return
+	}
+
+	userLoginData := userViewModel.UserLoginViewToUserLoginMapper(userLoginViewData)
+	user, err := userHandler.userUseCase.Login(ctx.Request.Context(), &userLoginData)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})

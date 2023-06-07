@@ -2,18 +2,12 @@ package model
 
 import userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 
-func UsersToUsersViewMapper(users *userModel.Users, limit int) UsersView {
-	usersView := make([]*UserView, 0, limit)
+func UsersToUsersViewMapper(users *userModel.Users) UsersView {
+	usersView := make([]*UserView, 0, len(users.Users))
 
 	for _, user := range users.Users {
-		userView := &UserView{}
-		userView.UserID = user.UserID
-		userView.Name = user.Name
-		userView.Email = user.Email
-		userView.Role = user.Role
-		userView.CreatedAt = user.CreatedAt
-		userView.UpdatedAt = user.UpdatedAt
-		usersView = append(usersView, userView)
+		userView := UserToUserViewMapper(user)
+		usersView = append(usersView, &userView)
 	}
 
 	return UsersView{
@@ -45,5 +39,12 @@ func UserUpdateViewToUserUpdateMapper(user *UserUpdateView) userModel.UserUpdate
 	return userModel.UserUpdate{
 		Name:      user.Name,
 		UpdatedAt: user.UpdatedAt,
+	}
+}
+
+func UserLoginViewToUserLoginMapper(user *UserLoginView) userModel.UserLogin {
+	return userModel.UserLogin{
+		Email:    user.Email,
+		Password: user.Password,
 	}
 }

@@ -2,19 +2,12 @@ package model
 
 import userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 
-func UsersRepositoryToUsersMapper(usersRepository []*UserRepository, limit int) userModel.Users {
-	users := make([]*userModel.User, 0, limit)
+func UsersRepositoryToUsersMapper(usersRepository []*UserRepository) userModel.Users {
+	users := make([]*userModel.User, 0, len(usersRepository))
 
 	for _, userRepository := range usersRepository {
-		user := &userModel.User{}
-		user.UserID = userRepository.UserID
-		user.Name = userRepository.Name
-		user.Email = userRepository.Email
-		user.Password = userRepository.Password
-		user.Role = userRepository.Role
-		user.CreatedAt = userRepository.CreatedAt
-		user.UpdatedAt = userRepository.UpdatedAt
-		users = append(users, user)
+		user := UserRepositoryToUserMapper(userRepository)
+		users = append(users, &user)
 	}
 
 	return userModel.Users{

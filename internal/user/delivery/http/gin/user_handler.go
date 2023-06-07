@@ -193,7 +193,7 @@ func (userHandler *UserHandler) Login(ctx *gin.Context) {
 	}
 
 	userLoginData := userViewModel.UserLoginViewToUserLoginMapper(userLoginViewData)
-	user, err := userHandler.userUseCase.Login(ctx.Request.Context(), &userLoginData)
+	userID, err := userHandler.userUseCase.Login(ctx.Request.Context(), &userLoginData)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
@@ -201,17 +201,16 @@ func (userHandler *UserHandler) Login(ctx *gin.Context) {
 	}
 
 	config, _ := config.LoadConfig(".")
-	userMappedToView := userViewModel.UserToUserViewMapper(user)
 
 	// Generate tokens.
-	accessToken, err := httpUtility.CreateToken(config.AccessTokenExpiresIn, userMappedToView.UserID, config.AccessTokenPrivateKey)
+	accessToken, err := httpUtility.CreateToken(config.AccessTokenExpiresIn, userID, config.AccessTokenPrivateKey)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
-	refreshToken, err := httpUtility.CreateToken(config.RefreshTokenExpiresIn, userMappedToView.UserID, config.RefreshTokenPrivateKey)
+	refreshToken, err := httpUtility.CreateToken(config.RefreshTokenExpiresIn, userID, config.RefreshTokenPrivateKey)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})

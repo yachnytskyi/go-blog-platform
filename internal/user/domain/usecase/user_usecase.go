@@ -63,22 +63,22 @@ func (userUseCase *UserUseCase) DeleteUserById(ctx context.Context, userID strin
 	return deletedUser
 }
 
-func (userUseCase *UserUseCase) Login(ctx context.Context, user *userModel.UserLogin) (*userModel.User, error) {
+func (userUseCase *UserUseCase) Login(ctx context.Context, user *userModel.UserLogin) (string, error) {
 	fetchedUser, err := userUseCase.userRepository.GetUserByEmail(ctx, user.Email)
 
 	// Will return wrong email or password.
 	if err != nil {
-		return nil, fmt.Errorf("invalid email or password")
+		return "", fmt.Errorf("invalid email or password")
 	}
 
 	// Verify password - we previously created this method.
 	matchPasswords := domainUtility.VerifyPassword(fetchedUser.Password, user.Password)
 
 	if matchPasswords != nil {
-		return nil, fmt.Errorf("invalid email or password")
+		return "", fmt.Errorf("invalid email or password")
 	}
 
-	return fetchedUser, err
+	return fetchedUser.UserID, err
 }
 
 func (userUseCase *UserUseCase) UpdateNewRegisteredUserById(ctx context.Context, userID string, key string, value string) (*userModel.User, error) {

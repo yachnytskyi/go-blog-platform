@@ -2,7 +2,6 @@ package model
 
 import "time"
 
-// [GET].
 type UserRepository struct {
 	UserID    string    `bson:"_id"`
 	Name      string    `bson:"name"`
@@ -14,7 +13,6 @@ type UserRepository struct {
 	UpdatedAt time.Time `bson:"updated_at"`
 }
 
-// [POST].
 type UserCreateRepository struct {
 	Name      string    `bson:"name"`
 	Email     string    `bson:"email"`
@@ -25,7 +23,6 @@ type UserCreateRepository struct {
 	UpdatedAt time.Time `bson:"updated_at"`
 }
 
-// [PUT].
 type UserUpdateRepository struct {
 	Name      string    `bson:"name"`
 	UpdatedAt time.Time `bson:"updated_at"`

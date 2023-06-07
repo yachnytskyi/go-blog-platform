@@ -39,12 +39,10 @@ type UserLogin struct {
 	Password string
 }
 
-// [GET].
 type UserForgottenPassword struct {
 	Email string `json:"email" binding:"required"`
 }
 
-// [POST].
 type UserResetPassword struct {
 	Password        string `json:"password" binding:"required"`
 	PasswordConfirm string `json:"passwordConfirm" binding:"required"`

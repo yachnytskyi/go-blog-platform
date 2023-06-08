@@ -38,3 +38,12 @@ type UserLoginView struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
+
+type UserForgottenPasswordView struct {
+	Email string `json:"email"`
+}
+
+type UserResetPasswordView struct {
+	Password        string `json:"password"`
+	PasswordConfirm string `json:"password_confirm"`
+}

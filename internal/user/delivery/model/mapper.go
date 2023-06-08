@@ -48,3 +48,16 @@ func UserLoginViewToUserLoginMapper(user *UserLoginView) userModel.UserLogin {
 		Password: user.Password,
 	}
 }
+
+func UserForgottenPasswordViewToUserForgottenPassword(user *UserForgottenPasswordView) userModel.UserForgottenPassword {
+	return userModel.UserForgottenPassword{
+		Email: user.Email,
+	}
+}
+
+func UserResetPasswordViewToUserResetPassword(user *UserResetPasswordView) userModel.UserResetPassword {
+	return userModel.UserResetPassword{
+		Password:        user.Password,
+		PasswordConfirm: user.PasswordConfirm,
+	}
+}

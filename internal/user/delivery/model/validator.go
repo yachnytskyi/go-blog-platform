@@ -108,3 +108,51 @@ func (userLoginView *UserLoginView) UserSignInViewValidator() error {
 
 	return nil
 }
+
+func (userForgottenPasswordView *UserForgottenPasswordView) UserForgottenPasswordViewValidator() error {
+	var message string
+	var err error
+
+	if userForgottenPasswordView.Email == "" {
+		message = "key: `UserForgottenPasswordView.Email` error: field validation for `email` failed, `email` cannot be empty "
+		err = fmt.Errorf(message)
+	}
+
+	if err != nil {
+		message = strings.TrimSpace(message)
+		err = fmt.Errorf(message)
+
+		return err
+	}
+
+	return nil
+}
+
+func (userResetPasswordView *UserResetPasswordView) UserResetPasswordViewValidator() error {
+	var message string
+	var err error
+
+	if userResetPasswordView.Password == "" {
+		message = "key: `UserResetPasswordView.Password` error: field validation for `password` failed, `password` cannot be empty "
+		err = fmt.Errorf(message)
+	}
+
+	if userResetPasswordView.PasswordConfirm == "" {
+		message = "key: `UserResetPasswordView.PasswordConfirm` error: field validation for `password_confirm` failed, `password_confirm` cannot be empty "
+		err = fmt.Errorf(message)
+	}
+
+	if userResetPasswordView.Password != "" && userResetPasswordView.PasswordConfirm != "" && userResetPasswordView.Password != userResetPasswordView.PasswordConfirm {
+		message = message + "key: `UserResetPasswordView.PasswordConfirm` error: field validation for `password_confirm` failed, passwords do not match "
+		err = fmt.Errorf(message)
+	}
+
+	if err != nil {
+		message = strings.TrimSpace(message)
+		err = fmt.Errorf(message)
+
+		return err
+	}
+
+	return nil
+}

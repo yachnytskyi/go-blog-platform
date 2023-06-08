@@ -26,61 +26,6 @@ func NewUserRepository(collection *mongo.Collection) user.Repository {
 	return &UserRepository{collection: collection}
 }
 
-func (userRepository *UserRepository) UpdateNewRegisteredUserById(ctx context.Context, userID string, key string, value string) (*userModel.User, error) {
-	userIDMappedToMongoDB, _ := primitive.ObjectIDFromHex(userID)
-
-	query := bson.D{{Key: "_id", Value: userIDMappedToMongoDB}}
-	update := bson.D{{Key: "$set", Value: bson.D{{Key: key, Value: value}}}}
-	result, err := userRepository.collection.UpdateOne(ctx, query, update)
-
-	if err != nil {
-		return &userModel.User{}, err
-	}
-
-	if result.ModifiedCount == 0 {
-		return &userModel.User{}, err
-	}
-
-	return &userModel.User{}, nil
-}
-
-func (userRepository *UserRepository) UpdatePasswordResetTokenUserByEmail(ctx context.Context, email string, firstKey string, firstValue string,
-	secondKey string, SecondValue time.Time) error {
-
-	query := bson.D{{Key: "email", Value: strings.ToLower(email)}}
-	update := bson.D{{Key: "$set", Value: bson.D{{Key: firstKey, Value: firstValue}, {Key: secondKey, Value: secondKey}}}}
-	result, err := userRepository.collection.UpdateOne(ctx, query, update)
-
-	if err != nil {
-		return err
-	}
-
-	if result.ModifiedCount == 0 {
-		return err
-	}
-
-	return nil
-}
-
-func (userRepository *UserRepository) ResetUserPassword(ctx context.Context, firstKey string, firstValue string, secondKey string, passwordKey, password string) error {
-	hashedPassword, _ := repositoryUtility.HashPassword(password)
-
-	query := bson.D{{Key: firstKey, Value: firstValue}}
-	update := bson.D{{Key: "$set", Value: bson.D{{Key: passwordKey, Value: hashedPassword}}}, {Key: "$unset", Value: bson.D{{Key: firstKey, Value: ""}, {Key: secondKey, Value: ""}}}}
-
-	result, err := userRepository.collection.UpdateOne(ctx, query, update)
-
-	if err != nil {
-		return err
-	}
-
-	if result.ModifiedCount == 0 {
-		return err
-	}
-
-	return nil
-}
-
 func (userRepository *UserRepository) GetAllUsers(ctx context.Context, page int, limit int) (*userModel.Users, error) {
 	if page == 0 || page < 0 || page > 100 {
 		page = 1
@@ -247,6 +192,61 @@ func (userRepository *UserRepository) DeleteUserById(ctx context.Context, userID
 	}
 
 	if result.DeletedCount == 0 {
+		return err
+	}
+
+	return nil
+}
+
+func (userRepository *UserRepository) UpdateNewRegisteredUserById(ctx context.Context, userID string, key string, value string) (*userModel.User, error) {
+	userIDMappedToMongoDB, _ := primitive.ObjectIDFromHex(userID)
+
+	query := bson.D{{Key: "_id", Value: userIDMappedToMongoDB}}
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: key, Value: value}}}}
+	result, err := userRepository.collection.UpdateOne(ctx, query, update)
+
+	if err != nil {
+		return &userModel.User{}, err
+	}
+
+	if result.ModifiedCount == 0 {
+		return &userModel.User{}, err
+	}
+
+	return &userModel.User{}, nil
+}
+
+func (userRepository *UserRepository) ResetUserPassword(ctx context.Context, firstKey string, firstValue string, secondKey string, passwordKey, password string) error {
+	hashedPassword, _ := repositoryUtility.HashPassword(password)
+
+	query := bson.D{{Key: firstKey, Value: firstValue}}
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: passwordKey, Value: hashedPassword}}}, {Key: "$unset", Value: bson.D{{Key: firstKey, Value: ""}, {Key: secondKey, Value: ""}}}}
+
+	result, err := userRepository.collection.UpdateOne(ctx, query, update)
+
+	if err != nil {
+		return err
+	}
+
+	if result.ModifiedCount == 0 {
+		return err
+	}
+
+	return nil
+}
+
+func (userRepository *UserRepository) UpdatePasswordResetTokenUserByEmail(ctx context.Context, email string, firstKey string, firstValue string,
+	secondKey string, SecondValue time.Time) error {
+
+	query := bson.D{{Key: "email", Value: strings.ToLower(email)}}
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: firstKey, Value: firstValue}, {Key: secondKey, Value: secondKey}}}}
+	result, err := userRepository.collection.UpdateOne(ctx, query, update)
+
+	if err != nil {
+		return err
+	}
+
+	if result.ModifiedCount == 0 {
 		return err
 	}
 

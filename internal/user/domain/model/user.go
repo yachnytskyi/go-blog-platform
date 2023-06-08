@@ -40,10 +40,10 @@ type UserLogin struct {
 }
 
 type UserForgottenPassword struct {
-	Email string `json:"email" binding:"required"`
+	Email string
 }
 
 type UserResetPassword struct {
-	Password        string `json:"password" binding:"required"`
-	PasswordConfirm string `json:"passwordConfirm" binding:"required"`
+	Password        string
+	PasswordConfirm string
 }

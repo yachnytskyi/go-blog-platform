@@ -265,16 +265,21 @@ func (userHandler *UserHandler) RefreshAccessToken(ctx *gin.Context) {
 }
 
 func (userHandler *UserHandler) ForgottenPassword(ctx *gin.Context) {
-	var userEmail *userModel.UserForgottenPassword
+	var userViewEmail *userViewModel.UserForgottenPasswordView
 
-	if err := ctx.ShouldBindJSON(&userEmail); err != nil {
+	if err := ctx.ShouldBindJSON(&userViewEmail); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+		return
+	}
+
+	if err := userViewEmail.UserForgottenPasswordViewValidator(); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
 	message := "We sent you an email with needed instructions"
 
-	fetchedUser, err := userHandler.userUseCase.GetUserByEmail(ctx.Request.Context(), userEmail.Email)
+	fetchedUser, err := userHandler.userUseCase.GetUserByEmail(ctx.Request.Context(), userViewEmail.Email)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": err.Error()})
@@ -327,22 +332,22 @@ func (userHandler *UserHandler) ForgottenPassword(ctx *gin.Context) {
 
 func (userHandler *UserHandler) ResetUserPassword(ctx *gin.Context) {
 	resetToken := ctx.Params.ByName("resetToken")
-	var credentials *userModel.UserResetPassword
+	var userResetPasswordView *userViewModel.UserResetPasswordView
 
-	if err := ctx.ShouldBindJSON(&credentials); err != nil {
+	if err := ctx.ShouldBindJSON(&userResetPasswordView); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
-	if credentials.Password != credentials.PasswordConfirm {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Passwords do not match"})
+	if err := userResetPasswordView.UserResetPasswordViewValidator(); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
 	passwordResetToken := utility.Encode(resetToken)
 
 	// Update the user.
-	err := userHandler.userUseCase.ResetUserPassword(ctx.Request.Context(), "passwordResetToken", passwordResetToken, "passwordResetAt", "password", credentials.Password)
+	err := userHandler.userUseCase.ResetUserPassword(ctx.Request.Context(), "passwordResetToken", passwordResetToken, "passwordResetAt", "password", userResetPasswordView.Password)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})

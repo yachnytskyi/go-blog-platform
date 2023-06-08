@@ -16,7 +16,6 @@ import (
 	httpGinUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin/utility"
 	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
 	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/model"
-	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility"
 )
 
@@ -58,9 +57,9 @@ func (userHandler *UserHandler) GetAllUsers(ctx *gin.Context) {
 }
 
 func (userHandler *UserHandler) GetMe(ctx *gin.Context) {
-	currentUser := ctx.MustGet("currentUser").(*userModel.User)
+	currentUserView := ctx.MustGet("currentUser").(*userViewModel.UserView)
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": userViewModel.UserToUserViewMapper(currentUser)}})
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": currentUserView}})
 }
 
 func (userHandler *UserHandler) GetUserById(ctx *gin.Context) {
@@ -141,8 +140,8 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 }
 
 func (userHandler *UserHandler) UpdateUserById(ctx *gin.Context) {
-	currentUser := ctx.MustGet("currentUser").(*userModel.User)
-	userID := currentUser.UserID
+	currentUserView := ctx.MustGet("currentUser").(*userViewModel.UserView)
+	userID := currentUserView.UserID
 
 	var updatedUserViewData *userViewModel.UserUpdateView = new(userViewModel.UserUpdateView)
 
@@ -158,17 +157,18 @@ func (userHandler *UserHandler) UpdateUserById(ctx *gin.Context) {
 
 	updatedUserData := userViewModel.UserUpdateViewToUserUpdateMapper(updatedUserViewData)
 	updatedUser, err := userHandler.userUseCase.UpdateUserById(ctx.Request.Context(), userID, &updatedUserData)
+	updatedUserView := userViewModel.UserToUserViewMapper(updatedUser)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "You successfully updated your settings!", "data": gin.H{"user": userViewModel.UserToUserViewMapper(updatedUser)}})
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "You successfully updated your settings!", "data": gin.H{"user": &updatedUserView}})
 }
 
 func (userHandler *UserHandler) Delete(ctx *gin.Context) {
 	currentUser := ctx.MustGet("currentUser")
-	userID := currentUser.(*userModel.User).UserID
+	userID := currentUser.(*userViewModel.UserView).UserID
 
 	err := userHandler.userUseCase.DeleteUserById(ctx.Request.Context(), fmt.Sprint(userID))
 
@@ -225,9 +225,9 @@ func (userHandler *UserHandler) Login(ctx *gin.Context) {
 func (userHandler *UserHandler) RefreshAccessToken(ctx *gin.Context) {
 	message := "could not refresh access token"
 
-	currentUser := ctx.MustGet("currentUser").(*userModel.User)
+	currentUserView := ctx.MustGet("currentUser").(*userViewModel.UserView)
 
-	if currentUser == nil {
+	if currentUserView == nil {
 		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": message})
 		return
 	}

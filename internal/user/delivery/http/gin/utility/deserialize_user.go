@@ -10,6 +10,7 @@ import (
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 
 	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
+	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/model"
 )
 
 func DeserializeUser(userUseCase user.UseCase) gin.HandlerFunc {
@@ -48,7 +49,9 @@ func DeserializeUser(userUseCase user.UseCase) gin.HandlerFunc {
 			return
 		}
 
-		ctx.Set("currentUser", user)
+		userMappedToUserView := userViewModel.UserToUserViewMapper(user)
+
+		ctx.Set("currentUser", &userMappedToUserView)
 		ctx.Next()
 	}
 }

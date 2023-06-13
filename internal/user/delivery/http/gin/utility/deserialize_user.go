@@ -9,8 +9,8 @@ import (
 	"github.com/yachnytskyi/golang-mongo-grpc/config"
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 
+	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
 	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
-	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/model"
 )
 
 func DeserializeUser(userUseCase user.UseCase) gin.HandlerFunc {

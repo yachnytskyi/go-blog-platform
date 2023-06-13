@@ -118,6 +118,14 @@ func (userForgottenPasswordView *UserForgottenPasswordView) UserForgottenPasswor
 		err = fmt.Errorf(message)
 	}
 
+	if userForgottenPasswordView.Email != "" {
+		_, ok := mail.ParseAddress(userForgottenPasswordView.Email)
+		if ok != nil {
+			message = message + "key: `UserForgottenPasswordView.Email` error: field validation for `email` failed, invalid email address "
+			err = fmt.Errorf(message)
+		}
+	}
+
 	if err != nil {
 		message = strings.TrimSpace(message)
 		err = fmt.Errorf(message)

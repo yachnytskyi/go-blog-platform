@@ -64,6 +64,10 @@ func (userUseCase *UserUseCase) DeleteUserById(ctx context.Context, userID strin
 }
 
 func (userUseCase *UserUseCase) Login(ctx context.Context, user *userModel.UserLogin) (string, error) {
+	if err := user.UserLoginValidator(); err != nil {
+		return "", err
+	}
+
 	fetchedUser, err := userUseCase.userRepository.GetUserByEmail(ctx, user.Email)
 
 	// Will return wrong email or password.

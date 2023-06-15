@@ -78,3 +78,15 @@ func UserEmailValidator(checkedStringKey string, checkedStringValue string, json
 
 	return message
 }
+
+func UserPasswordMatchValidator(password string, passwordConfirm string) string {
+	var message string
+
+	if password != passwordConfirm {
+		message = "key: `UserCreateView.PasswordConfirm` error: field validation for `password_confirm` failed, passwords do not match "
+
+		return message
+	}
+
+	return message
+}

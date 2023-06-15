@@ -11,6 +11,7 @@ import (
 func (userCreateView *UserCreateView) UserCreateViewValidator() error {
 	var message string
 	var err error
+	passwordsMatch := true
 
 	if checkedString := httpUtilityValidator.UserValidator("UserCreateView.Name", userCreateView.Name, "name"); checkedString != "" {
 		message = checkedString
@@ -20,16 +21,21 @@ func (userCreateView *UserCreateView) UserCreateViewValidator() error {
 		message = message + checkedString
 	}
 
-	if checkedString := httpUtilityValidator.UserPasswordValidator("UserCreateView.Password", userCreateView.Password, "password"); checkedString != "" {
-		message = message + checkedString
+	if checkedString := httpUtilityValidator.UserPasswordMatchValidator(userCreateView.Password, userCreateView.PasswordConfirm); checkedString != "" {
+		message = checkedString
+		passwordsMatch = false
 	}
 
-	if checkedString := httpUtilityValidator.UserPasswordValidator("UserCreateView.PasswordConfirm", userCreateView.PasswordConfirm, "password_confirm"); checkedString != "" {
-		message = message + checkedString
+	if passwordsMatch {
+		if checkedString := httpUtilityValidator.UserPasswordValidator("UserCreateView.Password", userCreateView.Password, "password"); checkedString != "" {
+			message = message + checkedString
+		}
 	}
 
-	if message == "" && userCreateView.Password != userCreateView.PasswordConfirm {
-		message = "key: `UserCreateView.PasswordConfirm` error: field validation for `password_confirm` failed, passwords do not match "
+	if passwordsMatch {
+		if checkedString := httpUtilityValidator.UserPasswordValidator("UserCreateView.PasswordConfirm", userCreateView.PasswordConfirm, "password_confirm"); checkedString != "" {
+			message = message + checkedString
+		}
 	}
 
 	if message != "" {

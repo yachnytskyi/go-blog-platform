@@ -115,5 +115,4 @@ func (userResetPassword *UserResetPassword) UserResetPasswordValidator() error {
 	}
 
 	return nil
-
 }

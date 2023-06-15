@@ -14,8 +14,8 @@ import (
 	"github.com/yachnytskyi/golang-mongo-grpc/config"
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	httpGinUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin/utility"
+	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
 	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
-	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/model"
 	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility"
 )
 

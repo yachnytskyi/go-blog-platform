@@ -5,38 +5,31 @@ import (
 	"net/mail"
 	"strings"
 
-	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
+	httpUtilityValidator "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility/validator"
 )
 
 func (userCreateView *UserCreateView) UserCreateViewValidator() error {
 	var message string
 	var err error
 
-	if checkedString := httpUtility.StringValidator("UserCreateView.Name", userCreateView.Name, "name"); checkedString != "" {
+	if checkedString := httpUtilityValidator.UserValidator("UserCreateView.Name", userCreateView.Name, "name"); checkedString != "" {
 		message = checkedString
 	}
 
-	if checkedString := httpUtility.StringValidator("UserCreateView.Email", userCreateView.Email, "email"); checkedString != "" {
+	if checkedString := httpUtilityValidator.UserEmailValidator("UserCreateView.Email", userCreateView.Email, "email"); checkedString != "" {
 		message = message + checkedString
 	}
 
-	if checkedString := httpUtility.StringValidator("UserCreateView.Password", userCreateView.Password, "password"); checkedString != "" {
+	if checkedString := httpUtilityValidator.UserPasswordValidator("UserCreateView.Password", userCreateView.Password, "password"); checkedString != "" {
 		message = message + checkedString
 	}
 
-	if checkedString := httpUtility.StringValidator("UserCreateView.PasswordConfirm", userCreateView.PasswordConfirm, "password_confirm"); checkedString != "" {
+	if checkedString := httpUtilityValidator.UserPasswordValidator("UserCreateView.PasswordConfirm", userCreateView.PasswordConfirm, "password_confirm"); checkedString != "" {
 		message = message + checkedString
 	}
 
-	if userCreateView.Email != "" {
-		_, ok := mail.ParseAddress(userCreateView.Email)
-		if ok != nil {
-			message = message + "key: `UserCreateView.Email` error: field validation for `email` failed, invalid email address "
-		}
-	}
-
-	if userCreateView.Password != "" && userCreateView.PasswordConfirm != "" && userCreateView.Password != userCreateView.PasswordConfirm {
-		message = message + "key: `UserCreateView.PasswordConfirm` error: field validation for `password_confirm` failed, passwords do not match "
+	if message == "" && userCreateView.Password != userCreateView.PasswordConfirm {
+		message = "key: `UserCreateView.PasswordConfirm` error: field validation for `password_confirm` failed, passwords do not match "
 	}
 
 	if message != "" {
@@ -45,6 +38,11 @@ func (userCreateView *UserCreateView) UserCreateViewValidator() error {
 
 		return err
 	}
+
+	userCreateView.Name = strings.TrimSpace(userCreateView.Name)
+	userCreateView.Email = strings.TrimSpace(userCreateView.Email)
+	userCreateView.Password = strings.TrimSpace(userCreateView.Password)
+	userCreateView.PasswordConfirm = strings.TrimSpace(userCreateView.PasswordConfirm)
 
 	return nil
 }
@@ -80,14 +78,6 @@ func (userLoginView *UserLoginView) UserSignInViewValidator() error {
 	if userLoginView.Password == "" {
 		message = message + "key: `UserLogInView.Password` error: field validation for `password` failed, `password` cannot be empty "
 		err = fmt.Errorf(message)
-	}
-
-	if userLoginView.Email != "" {
-		_, ok := mail.ParseAddress(userLoginView.Email)
-		if ok != nil {
-			message = message + "key: `UserCreateView.Email` error: field validation for `email` failed, invalid email address "
-			err = fmt.Errorf(message)
-		}
 	}
 
 	if err != nil {

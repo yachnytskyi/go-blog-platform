@@ -36,7 +36,7 @@ func ParseTemplateDirectory(directory string) (*template.Template, error) {
 		return nil
 	})
 
-	fmt.Println("parsing templates...")
+	fmt.Println("parsing template...")
 
 	if err != nil {
 		return nil, err
@@ -62,7 +62,7 @@ func SendEmail(user *userModel.User, data *EmailData, templateName string) error
 
 	var body bytes.Buffer
 
-	template, err := ParseTemplateDirectory("internal/user/delivery/http/utility/templates")
+	template, err := ParseTemplateDirectory("internal/user/delivery/http/utility/template")
 
 	if err != nil {
 		log.Fatal("Could not parse template", err)

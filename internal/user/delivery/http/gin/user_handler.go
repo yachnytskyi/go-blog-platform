@@ -87,8 +87,8 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 		return
 	}
 
-	if err := createdUserViewData.UserCreateViewValidator(); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+	if userErrors := createdUserViewData.UserCreateViewValidator(); len(userErrors) != 0 {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "errors": userErrors})
 		return
 	}
 

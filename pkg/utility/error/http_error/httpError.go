@@ -21,7 +21,7 @@ func (err HttpValidationError) Error() string {
 }
 
 type HttpError struct {
-	Notification string `json:"reason"`
+	Notification string `json:"notification"`
 }
 
 func NewHttpError(notification string) error {
@@ -31,5 +31,5 @@ func NewHttpError(notification string) error {
 }
 
 func (err HttpError) Error() string {
-	return fmt.Sprintf("reason: " + err.Notification)
+	return fmt.Sprintf("notification: " + err.Notification)
 }

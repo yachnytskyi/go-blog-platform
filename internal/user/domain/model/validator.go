@@ -19,6 +19,9 @@ const (
 
 	usernameAllowedCharacters = "sorry, only letters (a-z), numbers(0-9) and spaces are allowed"
 	passwordAllowedCharacters = "sorry, only letters (a-z), numbers(0-9), the asterics, hyphen and underscore characters are allowed"
+	invalidEmail              = "invalid email address"
+	invalidEmailDomain        = "email domain does not exist"
+	invalidPassword           = "passwords do not match"
 
 	minLength = 4
 	maxLength = 40
@@ -65,7 +68,7 @@ func (userCreate *UserCreate) UserCreateValidator() []*domainError.DomainValidat
 		userError := &domainError.DomainValidationError{
 			Field:        "email",
 			FieldType:    "required",
-			Notification: "invalid email address",
+			Notification: invalidEmail,
 		}
 
 		userErrors = append(userErrors, userError)
@@ -74,7 +77,7 @@ func (userCreate *UserCreate) UserCreateValidator() []*domainError.DomainValidat
 		userError := &domainError.DomainValidationError{
 			Field:        "email",
 			FieldType:    "required",
-			Notification: "email domain does not exist",
+			Notification: invalidEmailDomain,
 		}
 
 		userErrors = append(userErrors, userError)
@@ -93,7 +96,7 @@ func (userCreate *UserCreate) UserCreateValidator() []*domainError.DomainValidat
 		userError := &domainError.DomainValidationError{
 			Field:        "password",
 			FieldType:    "required",
-			Notification: "passwords do not match",
+			Notification: invalidPassword,
 		}
 
 		userErrors = append(userErrors, userError)

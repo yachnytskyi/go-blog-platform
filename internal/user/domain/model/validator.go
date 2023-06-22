@@ -5,6 +5,7 @@ import (
 	"net"
 	"net/mail"
 	"regexp"
+	"strconv"
 	"strings"
 
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain_error"
@@ -12,145 +13,99 @@ import (
 )
 
 const (
-	emailRegexString = "^(?:(?:(?:(?:[a-zA-Z]|\\d|[\\\\\\-\\/=\\\\_{\\|}]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])+(?:\\.([a-zA-Z]|\\d|[\\\\+\\-\\/=\\\\_{\\|}]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])+)*)|(?:(?:\\x22)(?:(?:(?:(?:\\x20|\\x09)*(?:\\x0d\\x0a))?(?:\\x20|\\x09)+)?(?:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x7f]|\\x21|[\\x23-\\x5b]|[\\x5d-\\x7e]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])|(?:(?:[\\x01-\\x09\\x0b\\x0c\\x0d-\\x7f]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}]))))*(?:(?:(?:\\x20|\\x09)*(?:\\x0d\\x0a))?(\\x20|\\x09)+)?(?:\\x22))))@(?:(?:(?:[a-zA-Z]|\\d|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])|(?:(?:[a-zA-Z]|\\d|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])(?:[a-zA-Z]|\\d|-|\\.||[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])*(?:[a-zA-Z]|\\d|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])))\\.)+(?:(?:[a-zA-Z]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])|(?:(?:[a-zA-Z]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])(?:[a-zA-Z]|\\d|-|\\.||[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])*(?:[a-zA-Z]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])))\\.?$"
+	emailRegex    = "^(?:(?:(?:(?:[a-zA-Z]|\\d|[\\\\\\-\\/=\\\\_{\\|}]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])+(?:\\.([a-zA-Z]|\\d|[\\\\+\\-\\/=\\\\_{\\|}]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])+)*)|(?:(?:\\x22)(?:(?:(?:(?:\\x20|\\x09)*(?:\\x0d\\x0a))?(?:\\x20|\\x09)+)?(?:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x7f]|\\x21|[\\x23-\\x5b]|[\\x5d-\\x7e]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])|(?:(?:[\\x01-\\x09\\x0b\\x0c\\x0d-\\x7f]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}]))))*(?:(?:(?:\\x20|\\x09)*(?:\\x0d\\x0a))?(\\x20|\\x09)+)?(?:\\x22))))@(?:(?:(?:[a-zA-Z]|\\d|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])|(?:(?:[a-zA-Z]|\\d|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])(?:[a-zA-Z]|\\d|-|\\.||[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])*(?:[a-zA-Z]|\\d|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])))\\.)+(?:(?:[a-zA-Z]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])|(?:(?:[a-zA-Z]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])(?:[a-zA-Z]|\\d|-|\\.||[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])*(?:[a-zA-Z]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])))\\.?$"
+	usernameRegex = `^[a-zA-z0-9-_ \t]*$`
+	passwordRegex = `^[a-zA-z0-9-_*,.]*$`
+
+	usernameAllowedCharacters = "sorry, only letters (a-z), numbers(0-9) and spaces are allowed"
+	passwordAllowedCharacters = "sorry, only letters (a-z), numbers(0-9), the asterics, hyphen and underscore characters are allowed"
+
+	minLength = 4
+	maxLength = 40
 )
 
 func (userCreate *UserCreate) UserCreateValidator() []*domainError.DomainValidationError {
 	var userErrors []*domainError.DomainValidationError
-
-	emptyUsername := false
-	emptyEmail := false
-	emptyPassword := false
-	validEmailAddress := true
-	passwordsMatch := true
+	stringAllowedLength := "can be between " + strconv.Itoa(minLength) + " and " + strconv.Itoa(maxLength)
 
 	domainValidatorUtility.SanitizeString(&userCreate.Name)
 	domainValidatorUtility.SanitizeString(&userCreate.Email)
 	domainValidatorUtility.SanitizeString(&userCreate.Password)
 	domainValidatorUtility.SanitizeString(&userCreate.PasswordConfirm)
 
-	if domainValidatorUtility.IsStringNull(userCreate.Name) {
+	if !domainValidatorUtility.IsCorrectLengthText(userCreate.Name, minLength, maxLength) {
 		userError := &domainError.DomainValidationError{
 			Field:        "name",
 			FieldType:    "required",
-			Notification: "cannot be empty",
+			Notification: stringAllowedLength,
 		}
 
-		emptyUsername = true
+		userErrors = append(userErrors, userError)
+
+	} else if domainValidatorUtility.IsStringContainsSpecialCharacters(userCreate.Name, usernameRegex) {
+		userError := &domainError.DomainValidationError{
+			Field:        "name",
+			FieldType:    "required",
+			Notification: usernameAllowedCharacters,
+		}
+
 		userErrors = append(userErrors, userError)
 	}
 
-	if !emptyUsername {
-		if domainValidatorUtility.IsStringLengthExceeded(userCreate.Name) {
-			userError := &domainError.DomainValidationError{
-				Field:        "name",
-				FieldType:    "required",
-				Notification: "cannot be more than 100 characters long",
-			}
-
-			userErrors = append(userErrors, userError)
-		}
-
-		if IsUserNameContainsSpecialCharacters(userCreate.Name) {
-			userError := &domainError.DomainValidationError{
-				Field:        "name",
-				FieldType:    "required",
-				Notification: "sorry, only letters (a-z), numbers(0-9) and spaces are allowed",
-			}
-			userErrors = append(userErrors, userError)
-		}
-	}
-
-	if domainValidatorUtility.IsStringNull(userCreate.Email) {
+	if !domainValidatorUtility.IsCorrectLengthText(userCreate.Email, minLength, maxLength) {
 		userError := &domainError.DomainValidationError{
 			Field:        "email",
 			FieldType:    "required",
-			Notification: "cannot be empty",
+			Notification: stringAllowedLength,
 		}
 
-		emptyEmail = true
+		userErrors = append(userErrors, userError)
+
+	} else if domainValidatorUtility.IsStringContainsSpecialCharacters(userCreate.Email, emailRegex) {
+		userError := &domainError.DomainValidationError{
+			Field:        "email",
+			FieldType:    "required",
+			Notification: "invalid email address",
+		}
+
+		userErrors = append(userErrors, userError)
+
+	} else if !IsEmailDomainValid(userCreate.Email) {
+		userError := &domainError.DomainValidationError{
+			Field:        "email",
+			FieldType:    "required",
+			Notification: "email domain does not exist",
+		}
+
 		userErrors = append(userErrors, userError)
 	}
 
-	if !emptyEmail {
-		if domainValidatorUtility.IsStringLengthExceeded(userCreate.Email) {
-			userError := &domainError.DomainValidationError{
-				Field:        "email",
-				FieldType:    "required",
-				Notification: "cannot be more than 100 characters long",
-			}
-
-			userErrors = append(userErrors, userError)
-		}
-
-		if !IsEmailValid(userCreate.Email) {
-			userError := &domainError.DomainValidationError{
-				Field:        "email",
-				FieldType:    "required",
-				Notification: "invalid email address",
-			}
-
-			validEmailAddress = false
-			userErrors = append(userErrors, userError)
-		}
-	}
-
-	if validEmailAddress {
-		if !IsEmailDomainValid(userCreate.Email) {
-			userError := &domainError.DomainValidationError{
-				Field:        "email",
-				FieldType:    "required",
-				Notification: "email domain does not exist",
-			}
-
-			userErrors = append(userErrors, userError)
-		}
-	}
-
-	if domainValidatorUtility.IsStringNull(userCreate.Password) {
+	if !domainValidatorUtility.IsCorrectLengthText(userCreate.Password, minLength, maxLength) {
 		userError := &domainError.DomainValidationError{
 			Field:        "password",
 			FieldType:    "required",
-			Notification: "cannot be empty",
+			Notification: stringAllowedLength,
 		}
 
-		emptyPassword = true
 		userErrors = append(userErrors, userError)
-	}
 
-	if !emptyPassword {
-		if !PasswordsMatch(userCreate.Password, userCreate.PasswordConfirm) {
-			userError := &domainError.DomainValidationError{
-				Field:        "password",
-				FieldType:    "required",
-				Notification: "passwords do not match",
-			}
-
-			passwordsMatch = false
-			userErrors = append(userErrors, userError)
-		}
-	}
-
-	if passwordsMatch {
-		if domainValidatorUtility.IsStringLengthExceeded(userCreate.Password) {
-			userError := &domainError.DomainValidationError{
-				Field:        "password",
-				FieldType:    "required",
-				Notification: "cannot be more than 100 characters long",
-			}
-
-			userErrors = append(userErrors, userError)
+	} else if !domainValidatorUtility.StringsMatch(userCreate.Password, userCreate.PasswordConfirm) {
+		userError := &domainError.DomainValidationError{
+			Field:        "password",
+			FieldType:    "required",
+			Notification: "passwords do not match",
 		}
 
-		if IsPasswordStringContainsSpecialCharacters(userCreate.Password) {
-			userError := &domainError.DomainValidationError{
-				Field:        "password",
-				FieldType:    "required",
-				Notification: "sorry, only letters (a-z), numbers(0-9), the hyphen and the underscore characters are allowed",
-			}
+		userErrors = append(userErrors, userError)
 
-			userErrors = append(userErrors, userError)
+	} else if domainValidatorUtility.IsStringContainsSpecialCharacters(userCreate.Password, passwordRegex) {
+		userError := &domainError.DomainValidationError{
+			Field:        "password",
+			FieldType:    "required",
+			Notification: passwordAllowedCharacters,
 		}
+
+		userErrors = append(userErrors, userError)
 	}
 
 	return userErrors
@@ -295,26 +250,6 @@ func UserPasswordValidator(checkedStringKey string, checkedStringValue string, j
 	return message
 }
 
-func IsUserNameContainsSpecialCharacters(checkedString string) bool {
-	flag := false
-
-	if !regexp.MustCompile(`^[a-zA-z0-9-_ \t]*$`).MatchString(checkedString) {
-		flag = true
-	}
-
-	return flag
-}
-
-func IsEmailValid(emailString string) bool {
-	flag := true
-
-	if !regexp.MustCompile(emailRegexString).MatchString(emailString) {
-		flag = false
-	}
-
-	return flag
-}
-
 func IsEmailDomainValid(emailString string) bool {
 	flag := true
 
@@ -328,26 +263,6 @@ func IsEmailDomainValid(emailString string) bool {
 
 	if err != nil {
 		flag = false
-	}
-
-	return flag
-}
-
-func PasswordsMatch(password string, passwordConfirm string) bool {
-	flag := true
-
-	if password != passwordConfirm {
-		flag = false
-	}
-
-	return flag
-}
-
-func IsPasswordStringContainsSpecialCharacters(checkedString string) bool {
-	flag := false
-
-	if !regexp.MustCompile(`^[a-zA-z0-9-_,.]*$`).MatchString(checkedString) {
-		flag = true
 	}
 
 	return flag

@@ -9,71 +9,31 @@ func SanitizeString(preparedString *string) {
 	*preparedString = strings.TrimSpace(*preparedString)
 }
 
-func IsStringNull(checkedString string) bool {
+func IsCorrectLengthText(text string, minLength int, maxLength int) bool {
+	flag := true
+
+	if len(text) < minLength || len(text) > maxLength {
+		flag = false
+	}
+
+	return flag
+}
+
+func IsStringContainsSpecialCharacters(checkedString string, regexString string) bool {
 	flag := false
 
-	if checkedString == "" {
+	if !regexp.MustCompile(regexString).MatchString(checkedString) {
 		flag = true
 	}
 
 	return flag
 }
 
-func IsStringLengthExceeded(checkedString string) bool {
-	flag := false
+func StringsMatch(firstString string, secondString string) bool {
+	flag := true
 
-	if len(checkedString) > 100 {
-		flag = true
-	}
-
-	return flag
-}
-
-func IsTextStringLengthExceeded(checkedString string) bool {
-	flag := false
-
-	if len(checkedString) > 10000 {
-		flag = true
-	}
-
-	return flag
-}
-
-func IsLongStringLengthExceeded(checkedString string) bool {
-	flag := false
-
-	if len(checkedString) > 20000 {
-		flag = true
-	}
-
-	return flag
-}
-
-func IsStringContainsSpecialCharacters(checkedString string) bool {
-	flag := false
-
-	if !regexp.MustCompile(`^[a-zA-z0-9 !@#$€%^&*{}|()=/\;:+-_~'"<>,.? \t]*$`).MatchString(checkedString) {
-		flag = true
-	}
-
-	return flag
-}
-
-func IsTitleStringContainsSpecialCharacters(checkedString string) bool {
-	flag := false
-
-	if !regexp.MustCompile(`^[a-zA-z0-9 !()=[]:;+-_~'",.? \t]*$`).MatchString(checkedString) {
-		flag = true
-	}
-
-	return flag
-}
-
-func IsTextStringContainsSpecialCharacters(checkedString string) bool {
-	flag := false
-
-	if !regexp.MustCompile(`^[a-zA-z0-9 !@#$€%^&*{}][|/\()=/\;:+-_~'"<>,.? \t]*$`).MatchString(checkedString) {
-		flag = true
+	if firstString != secondString {
+		flag = false
 	}
 
 	return flag

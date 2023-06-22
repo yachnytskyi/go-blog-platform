@@ -6,6 +6,12 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	StringRegex      = `^[a-zA-z0-9 !@#$€%^&*{}|()=/\;:+-_~'"<>,.? \t]*$`
+	TitleStringRegex = `^[a-zA-z0-9 !()=[]:;+-_~'",.? \t]*$`
+	TextStringRegex  = `^[a-zA-z0-9 !@#$€%^&*{}][|/\()=/\;:+-_~'"<>,.? \t]*$`
+)
+
 type Config struct {
 	MongoURI          string `mapstructure:"MONGODB_LOCAL_URI"`
 	RedisURI          string `mapstructure:"REDIS_URL"`

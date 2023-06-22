@@ -2,11 +2,9 @@ package v1
 
 import (
 	"context"
-	"strings"
 
 	"github.com/thanhpk/randstr"
 	pb "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1/model/pb"
-	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 
 	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility"
@@ -26,14 +24,14 @@ func (userGrpcServer *UserGrpcServer) Register(ctx context.Context, request *pb.
 		PasswordConfirm: request.GetPasswordConfirm(),
 	}
 
-	createdUser, err := userGrpcServer.userUseCase.Register(ctx, &user)
+	createdUser, createdUserError := userGrpcServer.userUseCase.Register(ctx, &user)
 
-	if err != nil {
-		if strings.Contains(err.Error(), "email already exists") {
-			return nil, status.Errorf(codes.AlreadyExists, "%s", err.Error())
+	if createdUserError.Notification == "email already exists" {
+		return nil, status.Errorf(codes.AlreadyExists, "%s", createdUserError.Notification)
+	}
 
-		}
-		return nil, status.Errorf(codes.Internal, "%s", err.Error())
+	if createdUserError.Notification != "" {
+		return nil, status.Errorf(codes.Internal, "%s", createdUserError.Notification)
 	}
 
 	// Generate verification code.
@@ -44,21 +42,21 @@ func (userGrpcServer *UserGrpcServer) Register(ctx context.Context, request *pb.
 	// Update the user in database.
 	userGrpcServer.userUseCase.UpdateNewRegisteredUserById(ctx, createdUser.UserID, "verificationCode", verificationCode)
 
-	var firstName = createdUser.Name
-	firstName = httpUtility.UserFirstName(firstName)
+	// var firstName = createdUser.Name
+	// firstName = httpUtility.UserFirstName(firstName)
 
 	// Send an email.
-	emailData := httpUtility.EmailData{
-		URL:       userGrpcServer.config.Origin + "/verifyemail/" + code,
-		FirstName: firstName,
-		Subject:   "Your account verification code",
-	}
+	// emailData := httpUtility.EmailData{
+	// 	URL:       userGrpcServer.config.Origin + "/verifyemail/" + code,
+	// 	FirstName: firstName,
+	// 	Subject:   "Your account verification code",
+	// }
 
-	err = httpUtility.SendEmail(createdUser, &emailData, "verificationCode.html")
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "There was an error sending email: %s", err.Error())
+	// err = httpUtility.SendEmail(createdUser, &emailData, "verificationCode.html")
+	// if err != nil {
+	// 	return nil, status.Errorf(codes.Internal, "There was an error sending email: %s", err.Error())
 
-	}
+	// }
 
 	message := "We sent an email with a verification code to " + createdUser.Email
 

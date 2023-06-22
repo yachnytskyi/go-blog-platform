@@ -7,6 +7,7 @@ import (
 
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
+	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain_error"
 
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 )
@@ -19,14 +20,10 @@ func NewUserUseCase(userRepository user.Repository) user.UseCase {
 	return &UserUseCase{userRepository: userRepository}
 }
 
-func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.UserCreate) (*userModel.User, error) {
-	if err := user.UserCreateValidator(); err != nil {
-		return nil, err
-	}
+func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.UserCreate) (*userModel.User, domainError.DomainError) {
+	createdUser, userCreateError := userUseCase.userRepository.Register(ctx, user)
 
-	createdUser, err := userUseCase.userRepository.Register(ctx, user)
-
-	return createdUser, err
+	return createdUser, userCreateError
 }
 
 func (userUseCase *UserUseCase) GetAllUsers(ctx context.Context, page int, limit int) (*userModel.Users, error) {

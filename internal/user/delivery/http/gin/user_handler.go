@@ -15,8 +15,10 @@ import (
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	httpGinUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin/utility"
 	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
+
 	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
 	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility"
+	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/http_error"
 )
 
 type UserHandler struct {
@@ -87,20 +89,24 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 		return
 	}
 
-	if userErrors := createdUserViewData.UserCreateViewValidator(); len(userErrors) != 0 {
+	createdUserData := userViewModel.UserCreateViewToUserCreateMapper((*userViewModel.UserCreateView)(createdUserViewData))
+
+	if userErrors := createdUserData.UserCreateValidator(); len(userErrors) != 0 {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "errors": userErrors})
 		return
 	}
 
-	createdUserData := userViewModel.UserCreateViewToUserCreateMapper((*userViewModel.UserCreateView)(createdUserViewData))
-	createdUser, err := userHandler.userUseCase.Register(ctx.Request.Context(), &createdUserData)
+	createdUser, userCreateError := userHandler.userUseCase.Register(ctx.Request.Context(), &createdUserData)
 
-	if err != nil {
-		if strings.Contains(err.Error(), "email already exists") {
-			ctx.JSON(http.StatusConflict, gin.H{"status": "error", "message": err.Error()})
-			return
-		}
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": err.Error()})
+	if strings.Contains(userCreateError.Notification, "email already exists") {
+		userCreateErrorView := httpError.DomainErrorToHttpErrorMapper(&userCreateError)
+		ctx.JSON(http.StatusConflict, gin.H{"status": "error", "error": &userCreateErrorView})
+		return
+	}
+
+	if userCreateError.Notification != "" {
+		userCreateErrorView := httpError.DomainErrorToHttpErrorMapper(&userCreateError)
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "error", "error": &userCreateErrorView})
 		return
 	}
 
@@ -150,11 +156,6 @@ func (userHandler *UserHandler) UpdateUserById(ctx *gin.Context) {
 		return
 	}
 
-	if err := updatedUserViewData.UserUpdateViewValidator(); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
-		return
-	}
-
 	updatedUserData := userViewModel.UserUpdateViewToUserUpdateMapper(updatedUserViewData)
 	updatedUser, err := userHandler.userUseCase.UpdateUserById(ctx.Request.Context(), userID, &updatedUserData)
 	updatedUserView := userViewModel.UserToUserViewMapper(updatedUser)
@@ -183,11 +184,6 @@ func (userHandler *UserHandler) Login(ctx *gin.Context) {
 	var userLoginViewData *userViewModel.UserLoginView
 
 	if err := ctx.ShouldBindJSON(&userLoginViewData); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
-		return
-	}
-
-	if err := userLoginViewData.UserSignInViewValidator(); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
@@ -272,11 +268,6 @@ func (userHandler *UserHandler) ForgottenPassword(ctx *gin.Context) {
 		return
 	}
 
-	if err := userViewEmail.UserForgottenPasswordViewValidator(); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
-		return
-	}
-
 	message := "We sent you an email with needed instructions"
 
 	fetchedUser, err := userHandler.userUseCase.GetUserByEmail(ctx.Request.Context(), userViewEmail.Email)
@@ -335,11 +326,6 @@ func (userHandler *UserHandler) ResetUserPassword(ctx *gin.Context) {
 	var userResetPasswordView *userViewModel.UserResetPasswordView
 
 	if err := ctx.ShouldBindJSON(&userResetPasswordView); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
-		return
-	}
-
-	if err := userResetPasswordView.UserResetPasswordViewValidator(); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}

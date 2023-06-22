@@ -2,16 +2,15 @@ package repository
 
 import (
 	"context"
-	"errors"
 	"strings"
 	"time"
 
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	userRepositoryModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/mongo/model"
-	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
-
 	repositoryUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/utility"
+	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility"
+	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain_error"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -116,7 +115,9 @@ func (userRepository *UserRepository) GetUserByEmail(ctx context.Context, email 
 	return &user, nil
 }
 
-func (userRepository *UserRepository) Register(ctx context.Context, user *userModel.UserCreate) (*userModel.User, error) {
+func (userRepository *UserRepository) Register(ctx context.Context, user *userModel.UserCreate) (*userModel.User, domainError.DomainError) {
+	var userError *domainError.DomainError = new(domainError.DomainError)
+
 	userMappedToRepository := userRepositoryModel.UserCreateToUserCreateRepositoryMapper(user)
 	userMappedToRepository.CreatedAt = time.Now()
 	userMappedToRepository.UpdatedAt = user.CreatedAt
@@ -129,9 +130,19 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *userMo
 
 	if err != nil {
 		if err, ok := err.(mongo.WriteException); ok && err.WriteErrors[0].Code == 11000 {
-			return nil, errors.New("user with this email already exists")
+			userError.Location = "UserCreate.Data.Repository.Register.InsertOne"
+			userError.Reason = err.Error()
+			userError.Notification = "user with this email already exists"
+
+			return nil, *userError
+
 		}
-		return nil, err
+
+		userError.Location = "UserCreate.Data.Repository.Register.InsertOne"
+		userError.Reason = err.Error()
+		userError.Notification = "unknown error, please repeat later"
+
+		return nil, *userError
 	}
 
 	// Create a unique index for the email field.
@@ -140,18 +151,27 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *userMo
 	index := mongo.IndexModel{Keys: bson.M{"email": 1}, Options: option}
 
 	if _, err := userRepository.collection.Indexes().CreateOne(ctx, index); err != nil {
-		return nil, errors.New("could not create an index for an email")
+		userError.Location = "UserCreate.Data.Repository.Register.Indexes.CreateOne"
+		userError.Reason = err.Error()
+		userError.Notification = "could not create an email, probably it's not unique"
+
+		return nil, *userError
 	}
 
 	var createdUser *userModel.User
 	query := bson.M{"_id": result.InsertedID}
 
 	err = userRepository.collection.FindOne(ctx, query).Decode(&createdUser)
+
 	if err != nil {
-		return nil, err
+		userError.Location = "UserCreate.Data.Repository.Register.FindOne"
+		userError.Reason = err.Error()
+		userError.Notification = "unknown error, please repeat later"
+
+		return nil, *userError
 	}
 
-	return createdUser, nil
+	return createdUser, domainError.DomainError{}
 }
 
 func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID string, user *userModel.UserUpdate) (*userModel.User, error) {

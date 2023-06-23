@@ -15,9 +15,3 @@ func ValidationErrorToHttpValidationErrorMapper(domainValidationErrors []*domain
 
 	return httpValidationErrors
 }
-
-func InternalErrorToHttpErrorMapper(domainError *domainError.InternalError) HttpError {
-	return HttpError{
-		Notification: domainError.Notification,
-	}
-}

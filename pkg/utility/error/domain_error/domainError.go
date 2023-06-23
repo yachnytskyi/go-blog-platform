@@ -17,23 +17,21 @@ func NewValidationError(field string, fieldType string, notification string) err
 }
 
 func (err ValidationError) Error() string {
-	return fmt.Sprintf("field: " + err.Field + " " + "type: " + err.FieldType + " reason: " + err.Notification)
+	return fmt.Sprintf("field: " + err.Field + " " + "type: " + err.FieldType + " notification: " + err.Notification)
 }
 
 type InternalError struct {
-	Location     string
-	Reason       string
-	Notification string
+	Location string
+	Reason   string
 }
 
-func NewInternalError(location string, reason string, notification string) error {
+func NewInternalError(location string, reason string) error {
 	return InternalError{
-		Location:     location,
-		Reason:       reason,
-		Notification: notification,
+		Location: location,
+		Reason:   reason,
 	}
 }
 
 func (err InternalError) Error() string {
-	return fmt.Sprintf("field: " + err.Location + " reason: " + err.Reason + " notification " + err.Notification)
+	return fmt.Sprintf("field: " + err.Location + " reason: " + err.Reason)
 }

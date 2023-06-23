@@ -132,7 +132,6 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *userMo
 		if err, ok := err.(mongo.WriteException); ok && err.WriteErrors[0].Code == 11000 {
 			userError.Location = "UserCreate.Data.Repository.Register.InsertOne"
 			userError.Reason = err.Error()
-			userError.Notification = "user with this email already exists"
 
 			return nil, *userError
 
@@ -140,7 +139,6 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *userMo
 
 		userError.Location = "UserCreate.Data.Repository.Register.InsertOne"
 		userError.Reason = err.Error()
-		userError.Notification = "unknown error, please repeat later"
 
 		return nil, *userError
 	}
@@ -153,7 +151,6 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *userMo
 	if _, err := userRepository.collection.Indexes().CreateOne(ctx, index); err != nil {
 		userError.Location = "UserCreate.Data.Repository.Register.Indexes.CreateOne"
 		userError.Reason = err.Error()
-		userError.Notification = "could not create an email, probably it's not unique"
 
 		return nil, *userError
 	}
@@ -166,7 +163,6 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *userMo
 	if err != nil {
 		userError.Location = "UserCreate.Data.Repository.Register.FindOne"
 		userError.Reason = err.Error()
-		userError.Notification = "unknown error, please repeat later"
 
 		return nil, *userError
 	}

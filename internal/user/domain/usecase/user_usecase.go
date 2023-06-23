@@ -20,10 +20,20 @@ func NewUserUseCase(userRepository user.Repository) user.UseCase {
 	return &UserUseCase{userRepository: userRepository}
 }
 
-func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.UserCreate) (*userModel.User, domainError.InternalError) {
+func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.UserCreate) (*userModel.User, []error) {
+	if userCreateValidationErrors := user.UserCreateValidator(); len(userCreateValidationErrors) != 0 {
+		return nil, userCreateValidationErrors
+	}
+
 	createdUser, userCreateError := userUseCase.userRepository.Register(ctx, user)
 
-	return createdUser, userCreateError
+	if userCreateError != (domainError.InternalError{}) {
+		userCreateErrors := []error{userCreateError}
+
+		return nil, userCreateErrors
+	}
+
+	return createdUser, []error{}
 }
 
 func (userUseCase *UserUseCase) GetAllUsers(ctx context.Context, page int, limit int) (*userModel.Users, error) {

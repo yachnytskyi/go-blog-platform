@@ -18,7 +18,8 @@ import (
 
 	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
 	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility"
-	// httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/http_error"
+	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain_error"
+	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/http_error"
 )
 
 type UserHandler struct {
@@ -90,11 +91,23 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 	}
 
 	createdUserData := userViewModel.UserCreateViewToUserCreateMapper((*userViewModel.UserCreateView)(createdUserViewData))
+	createdUser, createdUserErrors := userHandler.userUseCase.Register(ctx.Request.Context(), &createdUserData)
 
-	createdUser, createdUserError := userHandler.userUseCase.Register(ctx.Request.Context(), &createdUserData)
+	if len(createdUserErrors) != 0 {
+		var userCreateErrors []*domain_error.ValidationError
 
-	if len(createdUserError) != 0 {
-		ctx.JSON(http.StatusConflict, gin.H{"status": "error", "error": createdUserError})
+		for _, userCreateErrorType := range createdUserErrors {
+			if userCreateErrorView, ok := userCreateErrorType.(*domain_error.ValidationError); ok {
+				userCreateErrors = append(userCreateErrors, userCreateErrorView)
+
+			} else if _, ok := userCreateErrorType.(domain_error.InternalError); ok {
+				ctx.JSON(http.StatusConflict, gin.H{"status": "error", "notification": "user with this email already exists"})
+				return
+			}
+		}
+
+		userCreateErrorsView := httpError.ValidationErrorToHttpValidationErrorMapper(userCreateErrors)
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "errors": userCreateErrorsView})
 		return
 	}
 

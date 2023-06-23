@@ -1,6 +1,8 @@
 package http_error
 
-import domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain_error"
+import (
+	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain_error"
+)
 
 func ValidationErrorToHttpValidationErrorMapper(domainValidationErrors []*domainError.ValidationError) []*HttpValidationError {
 	httpValidationErrors := make([]*HttpValidationError, 0)

@@ -103,6 +103,8 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 			} else if _, ok := userCreateErrorType.(domain_error.InternalError); ok {
 				ctx.JSON(http.StatusConflict, gin.H{"status": "error", "notification": "user with this email already exists"})
 				return
+			} else {
+				ctx.JSON(http.StatusConflict, gin.H{"status": "error", "notification": "unknown error, please repeat later"})
 			}
 		}
 

@@ -20,7 +20,7 @@ func NewUserUseCase(userRepository user.Repository) user.UseCase {
 	return &UserUseCase{userRepository: userRepository}
 }
 
-func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.UserCreate) (*userModel.User, domainError.DomainError) {
+func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.UserCreate) (*userModel.User, domainError.InternalError) {
 	createdUser, userCreateError := userUseCase.userRepository.Register(ctx, user)
 
 	return createdUser, userCreateError

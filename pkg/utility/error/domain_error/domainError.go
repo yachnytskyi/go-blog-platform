@@ -2,38 +2,38 @@ package domain_error
 
 import "fmt"
 
-type DomainValidationError struct {
+type ValidationError struct {
 	Field        string
 	FieldType    string
 	Notification string
 }
 
-func NewDomainValidationError(field string, fieldType string, notification string) error {
-	return DomainValidationError{
+func NewValidationError(field string, fieldType string, notification string) error {
+	return ValidationError{
 		Field:        field,
 		FieldType:    fieldType,
 		Notification: notification,
 	}
 }
 
-func (err DomainValidationError) Error() string {
+func (err ValidationError) Error() string {
 	return fmt.Sprintf("field: " + err.Field + " " + "type: " + err.FieldType + " reason: " + err.Notification)
 }
 
-type DomainError struct {
+type InternalError struct {
 	Location     string
 	Reason       string
 	Notification string
 }
 
-func NewDomainError(location string, reason string, notification string) error {
-	return DomainError{
+func NewInternalError(location string, reason string, notification string) error {
+	return InternalError{
 		Location:     location,
 		Reason:       reason,
 		Notification: notification,
 	}
 }
 
-func (err DomainError) Error() string {
+func (err InternalError) Error() string {
 	return fmt.Sprintf("field: " + err.Location + " reason: " + err.Reason + " notification " + err.Notification)
 }

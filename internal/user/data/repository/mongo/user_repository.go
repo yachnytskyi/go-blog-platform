@@ -115,8 +115,8 @@ func (userRepository *UserRepository) GetUserByEmail(ctx context.Context, email 
 	return &user, nil
 }
 
-func (userRepository *UserRepository) Register(ctx context.Context, user *userModel.UserCreate) (*userModel.User, domainError.DomainError) {
-	var userError *domainError.DomainError = new(domainError.DomainError)
+func (userRepository *UserRepository) Register(ctx context.Context, user *userModel.UserCreate) (*userModel.User, domainError.InternalError) {
+	var userError *domainError.InternalError = new(domainError.InternalError)
 
 	userMappedToRepository := userRepositoryModel.UserCreateToUserCreateRepositoryMapper(user)
 	userMappedToRepository.CreatedAt = time.Now()
@@ -171,7 +171,7 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *userMo
 		return nil, *userError
 	}
 
-	return createdUser, domainError.DomainError{}
+	return createdUser, domainError.InternalError{}
 }
 
 func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID string, user *userModel.UserUpdate) (*userModel.User, error) {

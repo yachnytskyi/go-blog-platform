@@ -2,7 +2,7 @@ package http_error
 
 import domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain_error"
 
-func DomainValidationErrorToHttpValidationErrorMapper(domainValidationErrors []*domainError.DomainValidationError) []*HttpValidationError {
+func ValidationErrorToHttpValidationErrorMapper(domainValidationErrors []*domainError.ValidationError) []*HttpValidationError {
 	httpValidationErrors := make([]*HttpValidationError, 0)
 
 	for _, domaindomainValidationError := range domainValidationErrors {
@@ -16,7 +16,7 @@ func DomainValidationErrorToHttpValidationErrorMapper(domainValidationErrors []*
 	return httpValidationErrors
 }
 
-func DomainErrorToHttpErrorMapper(domainError *domainError.DomainError) HttpError {
+func InternalErrorToHttpErrorMapper(domainError *domainError.InternalError) HttpError {
 	return HttpError{
 		Notification: domainError.Notification,
 	}

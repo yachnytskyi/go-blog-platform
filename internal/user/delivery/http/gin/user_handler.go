@@ -92,7 +92,7 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 	createdUserData := userViewModel.UserCreateViewToUserCreateMapper((*userViewModel.UserCreateView)(createdUserViewData))
 
 	if userCreateValidationErrors := createdUserData.UserCreateValidator(); len(userCreateValidationErrors) != 0 {
-		userCreateValidationViewErrors := httpError.DomainValidationErrorToHttpValidationErrorMapper(userCreateValidationErrors)
+		userCreateValidationViewErrors := httpError.ValidationErrorToHttpValidationErrorMapper(userCreateValidationErrors)
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "errors": userCreateValidationViewErrors})
 		return
 	}
@@ -100,13 +100,13 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 	createdUser, createdUserError := userHandler.userUseCase.Register(ctx.Request.Context(), &createdUserData)
 
 	if strings.Contains(createdUserError.Notification, "email already exists") {
-		userCreateViewError := httpError.DomainErrorToHttpErrorMapper(&createdUserError)
+		userCreateViewError := httpError.InternalErrorToHttpErrorMapper(&createdUserError)
 		ctx.JSON(http.StatusConflict, gin.H{"status": "error", "error": &userCreateViewError})
 		return
 	}
 
 	if createdUserError.Notification != "" {
-		userCreateViewError := httpError.DomainErrorToHttpErrorMapper(&createdUserError)
+		userCreateViewError := httpError.InternalErrorToHttpErrorMapper(&createdUserError)
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "error", "error": &userCreateViewError})
 		return
 	}

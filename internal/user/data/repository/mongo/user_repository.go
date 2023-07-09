@@ -116,7 +116,7 @@ func (userRepository *UserRepository) GetUserByEmail(ctx context.Context, email 
 }
 
 func (userRepository *UserRepository) Register(ctx context.Context, user *userModel.UserCreate) (*userModel.User, domainError.InternalError) {
-	var userError *domainError.InternalError = new(domainError.InternalError)
+	var userCreateError *domainError.InternalError = new(domainError.InternalError)
 
 	userMappedToRepository := userRepositoryModel.UserCreateToUserCreateRepositoryMapper(user)
 	userMappedToRepository.CreatedAt = time.Now()
@@ -129,18 +129,10 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *userMo
 	result, err := userRepository.collection.InsertOne(ctx, &userMappedToRepository)
 
 	if err != nil {
-		if err, ok := err.(mongo.WriteException); ok && err.WriteErrors[0].Code == 11000 {
-			userError.Location = "UserCreate.Data.Repository.Register.InsertOne"
-			userError.Reason = err.Error()
+		userCreateError.Location = "UserCreate.Data.Repository.Register.InsertOne"
+		userCreateError.Reason = err.Error()
 
-			return nil, *userError
-
-		}
-
-		userError.Location = "UserCreate.Data.Repository.Register.InsertOne"
-		userError.Reason = err.Error()
-
-		return nil, *userError
+		return nil, *userCreateError
 	}
 
 	// Create a unique index for the email field.
@@ -149,10 +141,10 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *userMo
 	index := mongo.IndexModel{Keys: bson.M{"email": 1}, Options: option}
 
 	if _, err := userRepository.collection.Indexes().CreateOne(ctx, index); err != nil {
-		userError.Location = "UserCreate.Data.Repository.Register.Indexes.CreateOne"
-		userError.Reason = err.Error()
+		userCreateError.Location = "UserCreate.Data.Repository.Register.Indexes.CreateOne"
+		userCreateError.Reason = err.Error()
 
-		return nil, *userError
+		return nil, *userCreateError
 	}
 
 	var createdUser *userModel.User
@@ -161,10 +153,10 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *userMo
 	err = userRepository.collection.FindOne(ctx, query).Decode(&createdUser)
 
 	if err != nil {
-		userError.Location = "UserCreate.Data.Repository.Register.FindOne"
-		userError.Reason = err.Error()
+		userCreateError.Location = "UserCreate.Data.Repository.Register.FindOne"
+		userCreateError.Reason = err.Error()
 
-		return nil, *userError
+		return nil, *userCreateError
 	}
 
 	return createdUser, domainError.InternalError{}

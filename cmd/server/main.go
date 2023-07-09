@@ -7,11 +7,9 @@ import (
 	"html/template"
 	"log"
 	"net"
-	"net/http"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/go-redis/redis/v8"
 	"github.com/yachnytskyi/golang-mongo-grpc/config"
 	postProtobufV1 "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/grpc/v1/model/pb"
 	userProtobufV1 "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1/model/pb"
@@ -40,7 +38,6 @@ var (
 	server      *gin.Engine
 	ctx         context.Context
 	mongoClient *mongo.Client
-	redisClient *redis.Client
 
 	userCollection *mongo.Collection
 	userRepository userPackage.Repository
@@ -84,23 +81,6 @@ func init() {
 	}
 
 	fmt.Println("MongoDB successfully connected...")
-
-	// Connect to Redis.
-	redisClient = redis.NewClient(&redis.Options{
-		Addr: config.RedisURI,
-	})
-
-	if _, err := redisClient.Ping(ctx).Result(); err != nil {
-		panic(err)
-	}
-
-	err = redisClient.Set(ctx, "test", "Redis has been launched", 0).Err()
-
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println("Redis client connected successfully...")
 
 	// Collections.
 	userCollection = mongoClient.Database("golang_mongodb").Collection("users")
@@ -178,14 +158,6 @@ func startGrpcServer(config config.Config) {
 }
 
 func startGinServer(config config.Config) {
-	value, err := redisClient.Get(ctx, "test").Result()
-
-	if err == redis.Nil {
-		fmt.Println("key: test does not exist")
-	} else if err != nil {
-		panic(err)
-	}
-
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowOrigins = []string{"http://localhost:8080", "http://localhost:3000"}
 	corsConfig.AllowCredentials = true
@@ -193,9 +165,6 @@ func startGinServer(config config.Config) {
 	server.Use(cors.New(corsConfig))
 
 	router := server.Group("/api")
-	router.GET("/healthchecker", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": value})
-	})
 
 	userRouter.UserRouter(router, userUseCase)
 	postRouter.PostRouter(router, userUseCase)

@@ -12,6 +12,7 @@ type Repository interface {
 	GetAllUsers(ctx context.Context, page int, limit int) (*userModel.Users, error)
 	GetUserById(ctx context.Context, userID string) (*userModel.User, error)
 	GetUserByEmail(ctx context.Context, email string) (*userModel.User, error)
+	CheckEmailDublicate(ctx context.Context, email string) bool
 	Register(ctx context.Context, user *userModel.UserCreate) (*userModel.User, domainError.InternalError)
 	UpdateNewRegisteredUserById(ctx context.Context, userID string, key string, value string) (*userModel.User, error)
 	UpdatePasswordResetTokenUserByEmail(ctx context.Context, email string, firstKey string, firstValue string, secondKey string, secondValue time.Time) error

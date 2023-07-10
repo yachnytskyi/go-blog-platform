@@ -12,6 +12,10 @@ import (
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 )
 
+const (
+	emailAlreadyExists = "user with this email already exists"
+)
+
 type UserUseCase struct {
 	userRepository user.Repository
 }
@@ -21,6 +25,20 @@ func NewUserUseCase(userRepository user.Repository) user.UseCase {
 }
 
 func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.UserCreate) (*userModel.User, []error) {
+	if userUseCase.userRepository.CheckEmailDublicate(ctx, user.Email) {
+		userCreateValidationErrors := []error{}
+
+		userCreateValidationError := &domainError.ValidationError{
+			Field:        "email",
+			FieldType:    "required",
+			Notification: emailAlreadyExists,
+		}
+
+		userCreateValidationErrors = append(userCreateValidationErrors, userCreateValidationError)
+
+		return nil, userCreateValidationErrors
+	}
+
 	if userCreateValidationErrors := user.UserCreateValidator(); len(userCreateValidationErrors) != 0 {
 		return nil, userCreateValidationErrors
 	}

@@ -115,6 +115,23 @@ func (userRepository *UserRepository) GetUserByEmail(ctx context.Context, email 
 	return &user, nil
 }
 
+func (userRepository *UserRepository) CheckEmailDublicate(ctx context.Context, email string) bool {
+	var fetchedUser *userRepositoryModel.UserRepository
+
+	query := bson.M{"email": strings.ToLower(email)}
+	err := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
+
+	if fetchedUser == nil {
+		return false
+	}
+
+	if err != nil {
+		return true
+	}
+
+	return true
+}
+
 func (userRepository *UserRepository) Register(ctx context.Context, user *userModel.UserCreate) (*userModel.User, domainError.InternalError) {
 	var userCreateError *domainError.InternalError = new(domainError.InternalError)
 

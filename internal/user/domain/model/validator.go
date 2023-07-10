@@ -38,78 +38,78 @@ func (userCreate *UserCreate) UserCreateValidator() []error {
 	domainValidatorUtility.SanitizeString(&userCreate.PasswordConfirm)
 
 	if !domainValidatorUtility.IsCorrectLengthText(userCreate.Name, minLength, maxLength) {
-		userError := &domainError.ValidationError{
+		userCreateValidationError := &domainError.ValidationError{
 			Field:        "name",
 			FieldType:    "required",
 			Notification: stringAllowedLength,
 		}
 
-		userCreateValidationErrors = append(userCreateValidationErrors, userError)
+		userCreateValidationErrors = append(userCreateValidationErrors, userCreateValidationError)
 
 	} else if domainValidatorUtility.IsStringContainsSpecialCharacters(userCreate.Name, usernameRegex) {
-		userError := &domainError.ValidationError{
+		userCreateValidationError := &domainError.ValidationError{
 			Field:        "name",
 			FieldType:    "required",
 			Notification: usernameAllowedCharacters,
 		}
 
-		userCreateValidationErrors = append(userCreateValidationErrors, userError)
+		userCreateValidationErrors = append(userCreateValidationErrors, userCreateValidationError)
 	}
 
 	if !domainValidatorUtility.IsCorrectLengthText(userCreate.Email, minLength, maxLength) {
-		userError := &domainError.ValidationError{
+		userCreateValidationError := &domainError.ValidationError{
 			Field:        "email",
 			FieldType:    "required",
 			Notification: stringAllowedLength,
 		}
 
-		userCreateValidationErrors = append(userCreateValidationErrors, userError)
+		userCreateValidationErrors = append(userCreateValidationErrors, userCreateValidationError)
 
 	} else if domainValidatorUtility.IsStringContainsSpecialCharacters(userCreate.Email, emailRegex) {
-		userError := &domainError.ValidationError{
+		userCreateValidationError := &domainError.ValidationError{
 			Field:        "email",
 			FieldType:    "required",
 			Notification: invalidEmail,
 		}
 
-		userCreateValidationErrors = append(userCreateValidationErrors, userError)
+		userCreateValidationErrors = append(userCreateValidationErrors, userCreateValidationError)
 
 	} else if !IsEmailDomainValid(userCreate.Email) {
-		userError := &domainError.ValidationError{
+		userCreateValidationError := &domainError.ValidationError{
 			Field:        "email",
 			FieldType:    "required",
 			Notification: invalidEmailDomain,
 		}
 
-		userCreateValidationErrors = append(userCreateValidationErrors, userError)
+		userCreateValidationErrors = append(userCreateValidationErrors, userCreateValidationError)
 	}
 
 	if !domainValidatorUtility.IsCorrectLengthText(userCreate.Password, minLength, maxLength) {
-		userError := &domainError.ValidationError{
+		userCreateValidationError := &domainError.ValidationError{
 			Field:        "password",
 			FieldType:    "required",
 			Notification: stringAllowedLength,
 		}
 
-		userCreateValidationErrors = append(userCreateValidationErrors, userError)
+		userCreateValidationErrors = append(userCreateValidationErrors, userCreateValidationError)
 
 	} else if !domainValidatorUtility.StringsMatch(userCreate.Password, userCreate.PasswordConfirm) {
-		userError := &domainError.ValidationError{
+		userCreateValidationError := &domainError.ValidationError{
 			Field:        "password",
 			FieldType:    "required",
 			Notification: invalidPassword,
 		}
 
-		userCreateValidationErrors = append(userCreateValidationErrors, userError)
+		userCreateValidationErrors = append(userCreateValidationErrors, userCreateValidationError)
 
 	} else if domainValidatorUtility.IsStringContainsSpecialCharacters(userCreate.Password, passwordRegex) {
-		userError := &domainError.ValidationError{
+		userCreateValidationError := &domainError.ValidationError{
 			Field:        "password",
 			FieldType:    "required",
 			Notification: passwordAllowedCharacters,
 		}
 
-		userCreateValidationErrors = append(userCreateValidationErrors, userError)
+		userCreateValidationErrors = append(userCreateValidationErrors, userCreateValidationError)
 	}
 
 	return userCreateValidationErrors

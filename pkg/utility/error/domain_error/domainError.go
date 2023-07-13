@@ -22,6 +22,7 @@ func (err ValidationError) Error() string {
 
 type InternalError struct {
 	Location string
+	Code     string
 	Reason   string
 }
 

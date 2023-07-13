@@ -7,16 +7,13 @@ import (
 	pb "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1/model/pb"
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 
+	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
 	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility"
+	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain_error"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 func (userGrpcServer *UserGrpcServer) Register(ctx context.Context, request *pb.UserCreate) (*pb.GenericResponse, error) {
-	if request.GetPassword() != request.GetPasswordConfirm() {
-		return nil, status.Errorf(codes.InvalidArgument, "passwords do not match")
-	}
-
 	user := userModel.UserCreate{
 		Name:            request.GetName(),
 		Email:           request.GetEmail(),
@@ -24,14 +21,23 @@ func (userGrpcServer *UserGrpcServer) Register(ctx context.Context, request *pb.
 		PasswordConfirm: request.GetPasswordConfirm(),
 	}
 
-	createdUser, createdUserError := userGrpcServer.userUseCase.Register(ctx, &user)
+	createdUser, createdUserErrors := userGrpcServer.userUseCase.Register(ctx, &user)
 
-	if createdUserError.Notification == "email already exists" {
-		return nil, status.Errorf(codes.AlreadyExists, "%s", createdUserError.Notification)
-	}
+	if len(createdUserErrors) != 0 {
+		for _, userCreateErrorType := range createdUserErrors {
+			if userCreateViewError, ok := userCreateErrorType.(*domainError.ValidationError); ok {
+				return nil, userCreateViewError
 
-	if createdUserError.Notification != "" {
-		return nil, status.Errorf(codes.Internal, "%s", createdUserError.Notification)
+			} else {
+				var userCreateViewError *domainError.InternalError = new(domainError.InternalError)
+
+				userCreateViewError.Location = "UserCreate.Delivery.Grpc.V1.Register.createdUserErrors"
+				userCreateViewError.Code = codes.Internal.String()
+				userCreateViewError.Reason = "reason:" + " something went wrong, please repeat later"
+
+				return nil, userCreateViewError
+			}
+		}
 	}
 
 	// Generate verification code.
@@ -42,21 +48,28 @@ func (userGrpcServer *UserGrpcServer) Register(ctx context.Context, request *pb.
 	// Update the user in database.
 	userGrpcServer.userUseCase.UpdateNewRegisteredUserById(ctx, createdUser.UserID, "verificationCode", verificationCode)
 
-	// var firstName = createdUser.Name
-	// firstName = httpUtility.UserFirstName(firstName)
+	var firstName = createdUser.Name
+	firstName = httpUtility.UserFirstName(firstName)
 
 	// Send an email.
-	// emailData := httpUtility.EmailData{
-	// 	URL:       userGrpcServer.config.Origin + "/verifyemail/" + code,
-	// 	FirstName: firstName,
-	// 	Subject:   "Your account verification code",
-	// }
+	emailData := httpUtility.EmailData{
+		URL:       userGrpcServer.config.Origin + "/verifyemail/" + code,
+		FirstName: firstName,
+		Subject:   "Your account verification code",
+	}
 
-	// err = httpUtility.SendEmail(createdUser, &emailData, "verificationCode.html")
-	// if err != nil {
-	// 	return nil, status.Errorf(codes.Internal, "There was an error sending email: %s", err.Error())
+	err := httpUtility.SendEmail(createdUser, &emailData, "verificationCode.html")
 
-	// }
+	if err != nil {
+		var userCreateViewError *domainError.InternalError = new(domainError.InternalError)
+
+		userCreateViewError.Location = "UserCreate.Delivery.Grpc.V1.Register.createdUserErrors"
+		userCreateViewError.Code = codes.Internal.String()
+		userCreateViewError.Reason = err.Error()
+
+		return nil, userCreateViewError
+
+	}
 
 	message := "We sent an email with a verification code to " + createdUser.Email
 

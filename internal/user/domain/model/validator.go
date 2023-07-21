@@ -43,7 +43,6 @@ func (userCreate *UserCreate) UserCreateValidator() []error {
 			FieldType:    "required",
 			Notification: stringAllowedLength,
 		}
-
 		userCreateValidationErrors = append(userCreateValidationErrors, userCreateValidationError)
 
 	} else if domainValidatorUtility.IsStringContainsSpecialCharacters(userCreate.Name, usernameRegex) {
@@ -52,7 +51,6 @@ func (userCreate *UserCreate) UserCreateValidator() []error {
 			FieldType:    "required",
 			Notification: usernameAllowedCharacters,
 		}
-
 		userCreateValidationErrors = append(userCreateValidationErrors, userCreateValidationError)
 	}
 
@@ -62,7 +60,6 @@ func (userCreate *UserCreate) UserCreateValidator() []error {
 			FieldType:    "required",
 			Notification: stringAllowedLength,
 		}
-
 		userCreateValidationErrors = append(userCreateValidationErrors, userCreateValidationError)
 
 	} else if domainValidatorUtility.IsStringContainsSpecialCharacters(userCreate.Email, emailRegex) {
@@ -71,7 +68,6 @@ func (userCreate *UserCreate) UserCreateValidator() []error {
 			FieldType:    "required",
 			Notification: invalidEmail,
 		}
-
 		userCreateValidationErrors = append(userCreateValidationErrors, userCreateValidationError)
 
 	} else if !IsEmailDomainValid(userCreate.Email) {
@@ -90,7 +86,6 @@ func (userCreate *UserCreate) UserCreateValidator() []error {
 			FieldType:    "required",
 			Notification: stringAllowedLength,
 		}
-
 		userCreateValidationErrors = append(userCreateValidationErrors, userCreateValidationError)
 
 	} else if !domainValidatorUtility.StringsMatch(userCreate.Password, userCreate.PasswordConfirm) {
@@ -99,7 +94,6 @@ func (userCreate *UserCreate) UserCreateValidator() []error {
 			FieldType:    "required",
 			Notification: invalidPassword,
 		}
-
 		userCreateValidationErrors = append(userCreateValidationErrors, userCreateValidationError)
 
 	} else if domainValidatorUtility.IsStringContainsSpecialCharacters(userCreate.Password, passwordRegex) {

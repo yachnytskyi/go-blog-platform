@@ -23,6 +23,7 @@ func DeserializeUser(userUseCase user.UseCase) gin.HandlerFunc {
 
 		if len(fields) != 0 && fields[0] == "Bearer" {
 			accessToken = fields[1]
+
 		} else if err == nil {
 			accessToken = cookie
 		}

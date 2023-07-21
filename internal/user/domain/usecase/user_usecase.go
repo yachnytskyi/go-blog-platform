@@ -12,16 +12,30 @@ import (
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 )
 
-const (
-	emailAlreadyExists = "user with this email already exists"
-)
-
 type UserUseCase struct {
 	userRepository user.Repository
 }
 
 func NewUserUseCase(userRepository user.Repository) user.UseCase {
 	return &UserUseCase{userRepository: userRepository}
+}
+
+func (userUseCase *UserUseCase) GetAllUsers(ctx context.Context, page int, limit int) (*userModel.Users, error) {
+	fetchedUsers, err := userUseCase.userRepository.GetAllUsers(ctx, page, limit)
+
+	return fetchedUsers, err
+}
+
+func (userUseCase *UserUseCase) GetUserById(ctx context.Context, userID string) (*userModel.User, error) {
+	fetchedUser, err := userUseCase.userRepository.GetUserById(ctx, userID)
+
+	return fetchedUser, err
+}
+
+func (userUseCase *UserUseCase) GetUserByEmail(ctx context.Context, email string) (*userModel.User, error) {
+	fetchedUser, err := userUseCase.userRepository.GetUserByEmail(ctx, email)
+
+	return fetchedUser, err
 }
 
 func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.UserCreate) (*userModel.User, []error) {
@@ -31,7 +45,7 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.Us
 		userCreateValidationError := &domainError.ValidationError{
 			Field:        "email",
 			FieldType:    "required",
-			Notification: emailAlreadyExists,
+			Notification: userModel.EmailAlreadyExists,
 		}
 
 		userCreateValidationErrors = append(userCreateValidationErrors, userCreateValidationError)
@@ -54,32 +68,19 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.Us
 	return createdUser, []error{}
 }
 
-func (userUseCase *UserUseCase) GetAllUsers(ctx context.Context, page int, limit int) (*userModel.Users, error) {
-	fetchedUsers, err := userUseCase.userRepository.GetAllUsers(ctx, page, limit)
-
-	return fetchedUsers, err
-}
-
-func (userUseCase *UserUseCase) GetUserById(ctx context.Context, userID string) (*userModel.User, error) {
-	fetchedUser, err := userUseCase.userRepository.GetUserById(ctx, userID)
-
-	return fetchedUser, err
-}
-
-func (userUseCase *UserUseCase) GetUserByEmail(ctx context.Context, email string) (*userModel.User, error) {
-	fetchedUser, err := userUseCase.userRepository.GetUserByEmail(ctx, email)
-
-	return fetchedUser, err
-}
-
-func (userUseCase *UserUseCase) UpdateUserById(ctx context.Context, userID string, user *userModel.UserUpdate) (*userModel.User, error) {
-	if err := user.UserUpdateValidator(); err != nil {
-		return nil, err
+func (userUseCase *UserUseCase) UpdateUserById(ctx context.Context, userID string, user *userModel.UserUpdate) (*userModel.User, []error) {
+	if userUpdateValidationErrors := user.UserUpdateValidator(); len(userUpdateValidationErrors) != 0 {
+		return nil, userUpdateValidationErrors
 	}
 
-	updatedUser, err := userUseCase.userRepository.UpdateUserById(ctx, userID, user)
+	updatedUser, userUpdateError := userUseCase.userRepository.UpdateUserById(ctx, userID, user)
 
-	return updatedUser, err
+	if userUpdateError != (domainError.InternalError{}) {
+		userUpdateErrors := []error{userUpdateError}
+		return nil, userUpdateErrors
+	}
+
+	return updatedUser, []error{}
 }
 
 func (userUseCase *UserUseCase) DeleteUserById(ctx context.Context, userID string) error {

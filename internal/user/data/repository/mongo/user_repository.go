@@ -134,7 +134,6 @@ func (userRepository *UserRepository) CheckEmailDublicate(ctx context.Context, e
 
 func (userRepository *UserRepository) Register(ctx context.Context, user *userModel.UserCreate) (*userModel.User, domainError.InternalError) {
 	var userCreateError *domainError.InternalError = new(domainError.InternalError)
-
 	userMappedToRepository := userRepositoryModel.UserCreateToUserCreateRepositoryMapper(user)
 	userMappedToRepository.CreatedAt = time.Now()
 	userMappedToRepository.UpdatedAt = user.CreatedAt
@@ -148,7 +147,6 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *userMo
 	if err != nil {
 		userCreateError.Location = "UserCreate.Data.Repository.Register.InsertOne"
 		userCreateError.Reason = err.Error()
-
 		return nil, *userCreateError
 	}
 
@@ -166,44 +164,43 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *userMo
 
 	var createdUser *userModel.User
 	query := bson.M{"_id": result.InsertedID}
-
 	err = userRepository.collection.FindOne(ctx, query).Decode(&createdUser)
 
 	if err != nil {
 		userCreateError.Location = "UserCreate.Data.Repository.Register.FindOne"
 		userCreateError.Reason = err.Error()
-
 		return nil, *userCreateError
 	}
 
 	return createdUser, domainError.InternalError{}
 }
 
-func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID string, user *userModel.UserUpdate) (*userModel.User, error) {
+func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID string, user *userModel.UserUpdate) (*userModel.User, domainError.InternalError) {
+	var userUpdateError *domainError.InternalError = new(domainError.InternalError)
 	userMappedToRepository := userRepositoryModel.UserUpdateToUserUpdateRepositoryMapper(user)
 	userMappedToRepository.UpdatedAt = time.Now()
-
 	userMappedToMongoDB, err := utility.MongoMappper(userMappedToRepository)
 
 	if err != nil {
-		return &userModel.User{}, err
+		userUpdateError.Location = "UserCreate.Data.Repository.UpdateUserById.MongoMapper"
+		userUpdateError.Reason = err.Error()
+		return nil, *userUpdateError
 	}
 
 	userIDMappedToMongoDB, _ := primitive.ObjectIDFromHex(userID)
-
 	query := bson.D{{Key: "_id", Value: userIDMappedToMongoDB}}
 	update := bson.D{{Key: "$set", Value: userMappedToMongoDB}}
 	result := userRepository.collection.FindOneAndUpdate(ctx, query, update, options.FindOneAndUpdate().SetReturnDocument(1))
-
 	var updatedUserRepository *userRepositoryModel.UserRepository
 
 	if err := result.Decode(&updatedUserRepository); err != nil {
-		return nil, err
+		userUpdateError.Location = "UserCreate.Data.Repository.UpdateUserById.Decode"
+		userUpdateError.Reason = err.Error()
+		return nil, *userUpdateError
 	}
 
 	updatedUser := userRepositoryModel.UserRepositoryToUserMapper(updatedUserRepository)
-
-	return &updatedUser, nil
+	return &updatedUser, domainError.InternalError{}
 }
 
 func (userRepository *UserRepository) DeleteUserById(ctx context.Context, userID string) error {

@@ -19,9 +19,11 @@ const (
 
 	usernameAllowedCharacters = "sorry, only letters (a-z), numbers(0-9) and spaces are allowed"
 	passwordAllowedCharacters = "sorry, only letters (a-z), numbers(0-9), the asterics, hyphen and underscore characters are allowed"
-	invalidEmail              = "invalid email address"
-	invalidEmailDomain        = "email domain does not exist"
-	invalidPassword           = "passwords do not match"
+
+	EmailAlreadyExists = "user with this email already exists"
+	invalidEmail       = "invalid email address"
+	invalidEmailDomain = "email domain does not exist"
+	invalidPassword    = "passwords do not match"
 
 	minLength = 4
 	maxLength = 40
@@ -29,7 +31,6 @@ const (
 
 func (userCreate *UserCreate) UserCreateValidator() []error {
 	userCreateValidationErrors := []error{}
-
 	stringAllowedLength := "can be between " + strconv.Itoa(minLength) + " and " + strconv.Itoa(maxLength)
 
 	domainValidatorUtility.SanitizeString(&userCreate.Name)
@@ -110,23 +111,30 @@ func (userCreate *UserCreate) UserCreateValidator() []error {
 	return userCreateValidationErrors
 }
 
-func (userUpdate *UserUpdate) UserUpdateValidator() error {
-	var message string
-	var err error
+func (userUpdate *UserUpdate) UserUpdateValidator() []error {
+	userUpdateValidationErrors := []error{}
+	stringAllowedLength := "can be between " + strconv.Itoa(minLength) + " and " + strconv.Itoa(maxLength)
 
-	if userUpdate.Name == "" {
-		message = "key: `UserUpdateView.Name` error: field validation for `name` failed, `name` cannot be empty "
-		err = fmt.Errorf(message)
+	domainValidatorUtility.SanitizeString(&userUpdate.Name)
+
+	if !domainValidatorUtility.IsCorrectLengthText(userUpdate.Name, minLength, maxLength) {
+		userUpdateValidationError := &domainError.ValidationError{
+			Field:        "name",
+			FieldType:    "required",
+			Notification: stringAllowedLength,
+		}
+		userUpdateValidationErrors = append(userUpdateValidationErrors, userUpdateValidationError)
+
+	} else if domainValidatorUtility.IsStringContainsSpecialCharacters(userUpdate.Name, usernameRegex) {
+		userUpdateValidationError := &domainError.ValidationError{
+			Field:        "name",
+			FieldType:    "required",
+			Notification: usernameAllowedCharacters,
+		}
+		userUpdateValidationErrors = append(userUpdateValidationErrors, userUpdateValidationError)
 	}
 
-	if err != nil {
-		message = strings.TrimSpace(message)
-		err = fmt.Errorf(message)
-
-		return err
-	}
-
-	return nil
+	return userUpdateValidationErrors
 }
 
 func (userLogin *UserLogin) UserLoginValidator() error {

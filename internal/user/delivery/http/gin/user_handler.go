@@ -101,7 +101,7 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 				userCreateErrors = append(userCreateErrors, userCreateErrorView)
 
 			} else {
-				ctx.JSON(http.StatusConflict, gin.H{"status": "error", "notification": "something went wrong, please repeat later"})
+				ctx.JSON(http.StatusConflict, gin.H{"status": "error", "notification": httpUtility.InternalErrorNotification})
 			}
 		}
 
@@ -137,11 +137,11 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 	err = httpUtility.SendEmail(createdUser, &emailData, "verificationCode.html")
 
 	if err != nil {
-		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": "Error in sending an email"})
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": httpUtility.EmailErrorNotification})
 		return
 	}
 
-	message := "We sent an email with a verification code to " + createdUserData.Email
+	message := httpUtility.SendingEmailNotification + createdUserData.Email
 	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "message": message})
 }
 
@@ -157,14 +157,27 @@ func (userHandler *UserHandler) UpdateUserById(ctx *gin.Context) {
 	}
 
 	updatedUserData := userViewModel.UserUpdateViewToUserUpdateMapper(updatedUserViewData)
-	updatedUser, err := userHandler.userUseCase.UpdateUserById(ctx.Request.Context(), userID, &updatedUserData)
-	updatedUserView := userViewModel.UserToUserViewMapper(updatedUser)
+	updatedUser, updatedUserErrors := userHandler.userUseCase.UpdateUserById(ctx.Request.Context(), userID, &updatedUserData)
 
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+	if len(updatedUserErrors) != 0 {
+		var userUpdateErrors []*domain_error.ValidationError
+
+		for _, userUpdateErrorType := range updatedUserErrors {
+			if userUpdateErrorView, ok := userUpdateErrorType.(*domain_error.ValidationError); ok {
+				userUpdateErrors = append(userUpdateErrors, userUpdateErrorView)
+
+			} else {
+				ctx.JSON(http.StatusConflict, gin.H{"status": "error", "notification": httpUtility.InternalErrorNotification})
+			}
+		}
+
+		userUpdateErrorsView := httpError.ValidationErrorToHttpValidationErrorMapper(userUpdateErrors)
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "errors": userUpdateErrorsView})
+		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "You successfully updated your settings!", "data": gin.H{"user": &updatedUserView}})
+	updatedUserView := userViewModel.UserToUserViewMapper(updatedUser)
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": httpUtility.SettingsAreSuccessfullyUpdated, "data": gin.H{"user": &updatedUserView}})
 }
 
 func (userHandler *UserHandler) Delete(ctx *gin.Context) {

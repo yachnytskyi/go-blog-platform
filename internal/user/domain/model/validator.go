@@ -36,6 +36,7 @@ func (userCreate *UserCreate) UserCreateValidator() []error {
 	domainValidatorUtility.SanitizeString(&userCreate.Email)
 	domainValidatorUtility.SanitizeString(&userCreate.Password)
 	domainValidatorUtility.SanitizeString(&userCreate.PasswordConfirm)
+	SanitizeEmailString(&userCreate.Email)
 
 	if !domainValidatorUtility.IsCorrectLengthText(userCreate.Name, minLength, maxLength) {
 		userCreateValidationError := &domainError.ValidationError{
@@ -264,4 +265,8 @@ func IsEmailDomainValid(emailString string) bool {
 	}
 
 	return flag
+}
+
+func SanitizeEmailString(preparedString *string) {
+	*preparedString = strings.ToLower(*preparedString)
 }

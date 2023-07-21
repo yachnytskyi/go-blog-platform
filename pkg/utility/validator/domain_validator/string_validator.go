@@ -38,3 +38,23 @@ func StringsMatch(firstString string, secondString string) bool {
 
 	return flag
 }
+
+func CheckOptionalStringIsCorrectLengthText(text string, minLength int, maxLength int) bool {
+	flag := true
+
+	if len(text) < minLength || len(text) > maxLength {
+		flag = false
+	}
+
+	return flag
+}
+
+func CheckOptionalStringIsStringContainsSpecialCharacters(checkedString string, regexString string) bool {
+	flag := false
+
+	if !regexp.MustCompile(regexString).MatchString(checkedString) {
+		flag = true
+	}
+
+	return flag
+}

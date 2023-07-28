@@ -36,3 +36,34 @@ func NewInternalError(location string, reason string) error {
 func (err InternalError) Error() string {
 	return fmt.Sprintf("field: " + err.Location + " reason: " + err.Reason)
 }
+
+type EntityNotFoundError struct {
+	Location string
+	Code     string
+	Reason   string
+}
+
+func NewEntityNotFoundError(location string, reason string) error {
+	return EntityNotFoundError{
+		Location: location,
+		Reason:   reason,
+	}
+}
+
+func (err EntityNotFoundError) Error() string {
+	return fmt.Sprintf("field: " + err.Location + " reason: " + err.Reason)
+}
+
+type ErrorMessage struct {
+	Notification string
+}
+
+func NewErrorMessage(notification string) error {
+	return ErrorMessage{
+		Notification: notification,
+	}
+}
+
+func (err ErrorMessage) Error() string {
+	return fmt.Sprintf("notification: " + err.Notification)
+}

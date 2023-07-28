@@ -20,33 +20,16 @@ func (err HttpValidationErrorView) Error() string {
 	return fmt.Sprintf("field: " + err.Field + " " + "type: " + err.FieldType + " notification: " + err.Notification)
 }
 
-type EntityNotFoundErrorView struct {
-	Location string
-	Code     string
-	Reason   string
-}
-
-func NewEntityNotFoundError(location string, reason string) error {
-	return EntityNotFoundErrorView{
-		Location: location,
-		Reason:   reason,
-	}
-}
-
-func (err EntityNotFoundErrorView) Error() string {
-	return fmt.Sprintf("field: " + err.Location + " reason: " + err.Reason)
-}
-
-type ErrorMessage struct {
+type ErrorMessageView struct {
 	Notification string
 }
 
 func NewErrorMessage(notification string) error {
-	return ErrorMessage{
+	return ErrorMessageView{
 		Notification: notification,
 	}
 }
 
-func (err ErrorMessage) Error() string {
+func (err ErrorMessageView) Error() string {
 	return fmt.Sprintf("notification: " + err.Notification)
 }

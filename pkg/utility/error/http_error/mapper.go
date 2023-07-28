@@ -17,3 +17,9 @@ func ValidationErrorToHttpValidationErrorViewMapper(domainValidationErrors []*do
 
 	return httpValidationErrors
 }
+
+func ErrorMessageToErrorMessageView(entity *domainError.ErrorMessage) *ErrorMessageView {
+	return &ErrorMessageView{
+		Notification: entity.Notification,
+	}
+}

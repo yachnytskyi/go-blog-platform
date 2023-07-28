@@ -4,7 +4,7 @@ import (
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain_error"
 )
 
-func ValidationErrorToHttpValidationErrorMapper(domainValidationErrors []*domainError.ValidationError) []*HttpValidationErrorView {
+func ValidationErrorToHttpValidationErrorViewMapper(domainValidationErrors []*domainError.ValidationError) []*HttpValidationErrorView {
 	httpValidationErrors := make([]*HttpValidationErrorView, 0)
 
 	for _, domaindomainValidationError := range domainValidationErrors {

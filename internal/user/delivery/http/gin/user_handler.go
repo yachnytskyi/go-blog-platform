@@ -105,7 +105,7 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 			}
 		}
 
-		userCreateErrorsView := httpError.ValidationErrorToHttpValidationErrorMapper(userCreateErrors)
+		userCreateErrorsView := httpError.ValidationErrorToHttpValidationErrorViewMapper(userCreateErrors)
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "errors": userCreateErrorsView})
 		return
 	}
@@ -171,7 +171,7 @@ func (userHandler *UserHandler) UpdateUserById(ctx *gin.Context) {
 			}
 		}
 
-		userUpdateErrorsView := httpError.ValidationErrorToHttpValidationErrorMapper(userUpdateErrors)
+		userUpdateErrorsView := httpError.ValidationErrorToHttpValidationErrorViewMapper(userUpdateErrors)
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "errors": userUpdateErrorsView})
 		return
 	}

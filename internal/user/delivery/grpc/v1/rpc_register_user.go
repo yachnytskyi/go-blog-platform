@@ -25,17 +25,17 @@ func (userGrpcServer *UserGrpcServer) Register(ctx context.Context, request *pb.
 
 	if len(createdUserErrors) != 0 {
 		for _, userCreateErrorType := range createdUserErrors {
-			if userCreateViewError, ok := userCreateErrorType.(*domainError.ValidationError); ok {
-				return nil, userCreateViewError
+			if userCreateErrorView, ok := userCreateErrorType.(*domainError.ValidationError); ok {
+				return nil, userCreateErrorView
 
 			} else {
-				var userCreateViewError *domainError.InternalError = new(domainError.InternalError)
+				var userCreateErrorView *domainError.InternalError = new(domainError.InternalError)
 
-				userCreateViewError.Location = "UserCreate.Delivery.Grpc.V1.Register.createdUserErrors"
-				userCreateViewError.Code = codes.Internal.String()
-				userCreateViewError.Reason = "reason:" + " something went wrong, please repeat later"
+				userCreateErrorView.Location = "UserCreate.Delivery.Grpc.V1.Register.createdUserErrors"
+				userCreateErrorView.Code = codes.Internal.String()
+				userCreateErrorView.Reason = "reason:" + " something went wrong, please repeat later"
 
-				return nil, userCreateViewError
+				return nil, userCreateErrorView
 			}
 		}
 	}
@@ -61,13 +61,13 @@ func (userGrpcServer *UserGrpcServer) Register(ctx context.Context, request *pb.
 	err := httpUtility.SendEmail(createdUser, &emailData, "verificationCode.html")
 
 	if err != nil {
-		var userCreateViewError *domainError.InternalError = new(domainError.InternalError)
+		var userCreateErrorView *domainError.InternalError = new(domainError.InternalError)
 
-		userCreateViewError.Location = "UserCreate.Delivery.Grpc.V1.Register.createdUserErrors"
-		userCreateViewError.Code = codes.Internal.String()
-		userCreateViewError.Reason = err.Error()
+		userCreateErrorView.Location = "UserCreate.Delivery.Grpc.V1.Register.createdUserErrors"
+		userCreateErrorView.Code = codes.Internal.String()
+		userCreateErrorView.Reason = err.Error()
 
-		return nil, userCreateViewError
+		return nil, userCreateErrorView
 
 	}
 

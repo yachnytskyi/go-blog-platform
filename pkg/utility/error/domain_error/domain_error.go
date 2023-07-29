@@ -20,23 +20,6 @@ func (err ValidationError) Error() string {
 	return fmt.Sprintf("field: " + err.Field + " " + "type: " + err.FieldType + " notification: " + err.Notification)
 }
 
-type InternalError struct {
-	Location string
-	Code     string
-	Reason   string
-}
-
-func NewInternalError(location string, reason string) error {
-	return InternalError{
-		Location: location,
-		Reason:   reason,
-	}
-}
-
-func (err InternalError) Error() string {
-	return fmt.Sprintf("field: " + err.Location + " reason: " + err.Reason)
-}
-
 type EntityNotFoundError struct {
 	Location string
 	Code     string
@@ -51,6 +34,23 @@ func NewEntityNotFoundError(location string, reason string) error {
 }
 
 func (err EntityNotFoundError) Error() string {
+	return fmt.Sprintf("field: " + err.Location + " reason: " + err.Reason)
+}
+
+type InternalError struct {
+	Location string
+	Code     string
+	Reason   string
+}
+
+func NewInternalError(location string, reason string) error {
+	return InternalError{
+		Location: location,
+		Reason:   reason,
+	}
+}
+
+func (err InternalError) Error() string {
 	return fmt.Sprintf("field: " + err.Location + " reason: " + err.Reason)
 }
 

@@ -93,20 +93,8 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 	createdUserData := userViewModel.UserCreateViewToUserCreateMapper((*userViewModel.UserCreateView)(createdUserViewData))
 	createdUser, createdUserErrors := userHandler.userUseCase.Register(ctx.Request.Context(), &createdUserData)
 
-	if len(createdUserErrors) != 0 {
-		var userCreateErrors []*domain_error.ValidationError
-
-		for _, userCreateErrorType := range createdUserErrors {
-			if userCreateErrorView, ok := userCreateErrorType.(*domain_error.ValidationError); ok {
-				userCreateErrors = append(userCreateErrors, userCreateErrorView)
-
-			} else {
-				ctx.JSON(http.StatusConflict, gin.H{"status": "error", "notification": httpUtility.InternalErrorNotification})
-			}
-		}
-
-		userCreateErrorsView := httpError.ValidationErrorToHttpValidationErrorViewMapper(userCreateErrors)
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "errors": userCreateErrorsView})
+	if createdUserErrors != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "errors": httpUtility.ErrorSliceToErrorSliceViewMapper(createdUserErrors)})
 		return
 	}
 
@@ -171,7 +159,7 @@ func (userHandler *UserHandler) UpdateUserById(ctx *gin.Context) {
 			}
 		}
 
-		userUpdateErrorsView := httpError.ValidationErrorToHttpValidationErrorViewMapper(userUpdateErrors)
+		userUpdateErrorsView := httpError.ValidationErrorSliceToHttpValidationErrorSliceViewMapper(userUpdateErrors)
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "errors": userUpdateErrorsView})
 		return
 	}

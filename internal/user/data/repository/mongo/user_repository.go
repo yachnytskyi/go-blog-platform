@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
@@ -132,8 +133,10 @@ func (userRepository *UserRepository) CheckEmailDublicate(ctx context.Context, e
 	return true
 }
 
-func (userRepository *UserRepository) Register(ctx context.Context, user *userModel.UserCreate) (*userModel.User, domainError.InternalError) {
-	var userCreateError *domainError.InternalError = new(domainError.InternalError)
+func (userRepository *UserRepository) Register(ctx context.Context, user *userModel.UserCreate) (*userModel.User, error) {
+	var userCreateInternalError *domainError.InternalError = new(domainError.InternalError)
+	var userCreateEntityNotFoundError *domainError.InternalError = new(domainError.InternalError)
+
 	userMappedToRepository := userRepositoryModel.UserCreateToUserCreateRepositoryMapper(user)
 	userMappedToRepository.CreatedAt = time.Now()
 	userMappedToRepository.UpdatedAt = user.CreatedAt
@@ -141,13 +144,13 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *userMo
 	userMappedToRepository.Verified = true
 	userMappedToRepository.Role = "user"
 	userMappedToRepository.Password, _ = repositoryUtility.HashPassword(user.Password)
-
 	result, err := userRepository.collection.InsertOne(ctx, &userMappedToRepository)
 
 	if err != nil {
-		userCreateError.Location = "UserCreate.Data.Repository.Register.InsertOne"
-		userCreateError.Reason = err.Error()
-		return nil, *userCreateError
+		userCreateInternalError.Location = "UserCreate.Data.Repository.Register.InsertOne"
+		userCreateInternalError.Reason = err.Error()
+		fmt.Println(userCreateInternalError)
+		return nil, *userCreateInternalError
 	}
 
 	// Create a unique index for the email field.
@@ -156,10 +159,11 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *userMo
 	index := mongo.IndexModel{Keys: bson.M{"email": 1}, Options: option}
 
 	if _, err := userRepository.collection.Indexes().CreateOne(ctx, index); err != nil {
-		userCreateError.Location = "UserCreate.Data.Repository.Register.Indexes.CreateOne"
-		userCreateError.Reason = err.Error()
+		userCreateInternalError.Location = "UserCreate.Data.Repository.Register.Indexes.CreateOne"
+		userCreateInternalError.Reason = err.Error()
+		fmt.Println(userCreateInternalError)
 
-		return nil, *userCreateError
+		return nil, *userCreateInternalError
 	}
 
 	var createdUser *userModel.User
@@ -167,12 +171,13 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *userMo
 	err = userRepository.collection.FindOne(ctx, query).Decode(&createdUser)
 
 	if err != nil {
-		userCreateError.Location = "UserCreate.Data.Repository.Register.FindOne"
-		userCreateError.Reason = err.Error()
-		return nil, *userCreateError
+		userCreateEntityNotFoundError.Location = "UserCreate.Data.Repository.Register.FindOne"
+		userCreateEntityNotFoundError.Reason = err.Error()
+		fmt.Println(userCreateEntityNotFoundError)
+		return nil, *userCreateEntityNotFoundError
 	}
 
-	return createdUser, domainError.InternalError{}
+	return createdUser, nil
 }
 
 func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID string, user *userModel.UserUpdate) (*userModel.User, domainError.InternalError) {

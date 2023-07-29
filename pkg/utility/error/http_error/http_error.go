@@ -20,16 +20,16 @@ func (err HttpValidationErrorView) Error() string {
 	return fmt.Sprintf("field: " + err.Field + " " + "type: " + err.FieldType + " notification: " + err.Notification)
 }
 
-type ErrorMessageView struct {
+type HttpErrorMessageView struct {
 	Notification string
 }
 
 func NewErrorMessage(notification string) error {
-	return ErrorMessageView{
+	return HttpErrorMessageView{
 		Notification: notification,
 	}
 }
 
-func (err ErrorMessageView) Error() string {
+func (err HttpErrorMessageView) Error() string {
 	return fmt.Sprintf("notification: " + err.Notification)
 }

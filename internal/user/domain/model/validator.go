@@ -21,7 +21,7 @@ const (
 	passwordAllowedCharacters = "sorry, only letters (a-z), numbers(0-9), the asterics, hyphen and underscore characters are allowed"
 
 	EmailAlreadyExists = "user with this email already exists"
-	invalidEmail       = "invalid email address"
+	invalidEmail       = "sorry, only letters (a-z), numbers(0-9) and periods (.) are allowed, you cannot use a period in the end and more than one in a row"
 	invalidEmailDomain = "email domain does not exist"
 	invalidPassword    = "passwords do not match"
 

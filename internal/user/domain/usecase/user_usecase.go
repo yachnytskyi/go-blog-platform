@@ -6,10 +6,9 @@ import (
 	"time"
 
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
+	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain_error"
-
-	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 )
 
 type UserUseCase struct {
@@ -59,13 +58,13 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.Us
 
 	createdUser, userCreateError := userUseCase.userRepository.Register(ctx, user)
 
-	if userCreateError != (domainError.InternalError{}) {
+	if userCreateError != nil {
 		userCreateErrors := []error{userCreateError}
 
 		return nil, userCreateErrors
 	}
 
-	return createdUser, []error{}
+	return createdUser, nil
 }
 
 func (userUseCase *UserUseCase) UpdateUserById(ctx context.Context, userID string, user *userModel.UserUpdate) (*userModel.User, []error) {

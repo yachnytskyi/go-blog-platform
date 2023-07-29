@@ -4,22 +4,30 @@ import (
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain_error"
 )
 
-func ValidationErrorToHttpValidationErrorViewMapper(domainValidationErrors []*domainError.ValidationError) []*HttpValidationErrorView {
+func ValidationErrorSliceToHttpValidationErrorSliceViewMapper(validationErrors []*domainError.ValidationError) []*HttpValidationErrorView {
 	httpValidationErrors := make([]*HttpValidationErrorView, 0)
 
-	for _, domaindomainValidationError := range domainValidationErrors {
+	for _, validationError := range validationErrors {
 		httpValidationError := &HttpValidationErrorView{}
-		httpValidationError.Field = domaindomainValidationError.Field
-		httpValidationError.FieldType = domaindomainValidationError.FieldType
-		httpValidationError.Notification = domaindomainValidationError.Notification
+		httpValidationError.Field = validationError.Field
+		httpValidationError.FieldType = validationError.FieldType
+		httpValidationError.Notification = validationError.Notification
 		httpValidationErrors = append(httpValidationErrors, httpValidationError)
 	}
 
 	return httpValidationErrors
 }
 
-func ErrorMessageToErrorMessageView(entity *domainError.ErrorMessage) *ErrorMessageView {
-	return &ErrorMessageView{
-		Notification: entity.Notification,
+func ValidationErrorToHttpValidationErrorViewMapper(validationError *domainError.ValidationError) *HttpValidationErrorView {
+	return &HttpValidationErrorView{
+		Field:        validationError.Field,
+		FieldType:    validationError.FieldType,
+		Notification: validationError.Notification,
+	}
+}
+
+func ErrorMessageToErrorMessageViewMapper(errorMessage *domainError.ErrorMessage) *HttpErrorMessageView {
+	return &HttpErrorMessageView{
+		Notification: errorMessage.Notification,
 	}
 }

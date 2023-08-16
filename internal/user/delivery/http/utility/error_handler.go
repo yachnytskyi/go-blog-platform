@@ -18,7 +18,7 @@ func ErrorToErrorViewMapper(err error) error {
 	}
 }
 
-func ErrorSliceToErrorSliceViewMapper(errors []error) []error {
+func ErrorsToErrorsViewMapper(errors []error) []error {
 	for index, errorType := range errors {
 		if validationError, ok := errorType.(*domainError.ValidationError); ok {
 			validationErrorView := httpError.ValidationErrorToHttpValidationErrorViewMapper(validationError)

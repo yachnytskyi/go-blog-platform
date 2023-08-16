@@ -94,7 +94,7 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 	createdUser, createdUserErrors := userHandler.userUseCase.Register(ctx.Request.Context(), &createdUserData)
 
 	if createdUserErrors != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "errors": httpUtility.ErrorSliceToErrorSliceViewMapper(createdUserErrors)})
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "errors": httpUtility.ErrorsToErrorsViewMapper(createdUserErrors)})
 		return
 	}
 
@@ -159,7 +159,7 @@ func (userHandler *UserHandler) UpdateUserById(ctx *gin.Context) {
 			}
 		}
 
-		userUpdateErrorsView := httpError.ValidationErrorSliceToHttpValidationErrorSliceViewMapper(userUpdateErrors)
+		userUpdateErrorsView := httpError.ValidationErrorsToHttpValidationErrorsViewMapper(userUpdateErrors)
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "errors": userUpdateErrorsView})
 		return
 	}

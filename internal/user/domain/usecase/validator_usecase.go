@@ -1,4 +1,4 @@
-package model
+package usecase
 
 import (
 	"fmt"
@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain_error"
 	domainValidatorUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator/domain_validator"
 )
@@ -29,7 +30,7 @@ const (
 	maxLength = 40
 )
 
-func (userCreate *UserCreate) UserCreateValidator() []error {
+func UserCreateValidator(userCreate *userModel.UserCreate) []error {
 	userCreateValidationErrors := []error{}
 	stringAllowedLength := "can be between " + strconv.Itoa(minLength) + " and " + strconv.Itoa(maxLength)
 
@@ -37,7 +38,7 @@ func (userCreate *UserCreate) UserCreateValidator() []error {
 	domainValidatorUtility.SanitizeString(&userCreate.Email)
 	domainValidatorUtility.SanitizeString(&userCreate.Password)
 	domainValidatorUtility.SanitizeString(&userCreate.PasswordConfirm)
-	SanitizeEmailString(&userCreate.Email)
+	domainValidatorUtility.StringToLower(&userCreate.Email)
 
 	if !domainValidatorUtility.IsCorrectLengthText(userCreate.Name, minLength, maxLength) {
 		userCreateValidationError := &domainError.ValidationError{
@@ -111,7 +112,7 @@ func (userCreate *UserCreate) UserCreateValidator() []error {
 	return userCreateValidationErrors
 }
 
-func (userUpdate *UserUpdate) UserUpdateValidator() []error {
+func UserUpdateValidator(userUpdate *userModel.UserUpdate) []error {
 	userUpdateValidationErrors := []error{}
 	stringAllowedLength := "can be between " + strconv.Itoa(minLength) + " and " + strconv.Itoa(maxLength)
 
@@ -137,7 +138,7 @@ func (userUpdate *UserUpdate) UserUpdateValidator() []error {
 	return userUpdateValidationErrors
 }
 
-func (userLogin *UserLogin) UserLoginValidator() error {
+func UserLoginValidator(userLogin *userModel.UserLogin) error {
 	var message string
 	var err error
 
@@ -161,7 +162,7 @@ func (userLogin *UserLogin) UserLoginValidator() error {
 	return nil
 }
 
-func (userForgottenPassword *UserForgottenPassword) UserForgottenPasswordValidator() error {
+func UserForgottenPasswordValidator(userForgottenPassword *userModel.UserForgottenPassword) error {
 	var message string
 	var err error
 
@@ -188,7 +189,7 @@ func (userForgottenPassword *UserForgottenPassword) UserForgottenPasswordValidat
 	return nil
 }
 
-func (userResetPassword *UserResetPassword) UserResetPasswordValidator() error {
+func UserResetPasswordValidator(userResetPassword *userModel.UserResetPassword) error {
 	var message string
 	var err error
 
@@ -259,13 +260,7 @@ func UserPasswordValidator(checkedStringKey string, checkedStringValue string, j
 
 func IsEmailDomainValid(emailString string) bool {
 	flag := true
-
-	if len(emailString) == 0 {
-		return true
-	}
-
 	host := strings.Split(emailString, "@")[1]
-
 	_, err := net.LookupMX(host)
 
 	if err != nil {
@@ -273,8 +268,4 @@ func IsEmailDomainValid(emailString string) bool {
 	}
 
 	return flag
-}
-
-func SanitizeEmailString(preparedString *string) {
-	*preparedString = strings.ToLower(*preparedString)
 }

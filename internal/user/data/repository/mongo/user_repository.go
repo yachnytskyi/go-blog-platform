@@ -127,7 +127,7 @@ func (userRepository *UserRepository) CheckEmailDublicate(ctx context.Context, e
 	}
 
 	if err != nil {
-		return true
+		return false
 	}
 
 	return true

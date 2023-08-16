@@ -44,7 +44,7 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.Us
 		userCreateValidationError := &domainError.ValidationError{
 			Field:        "email",
 			FieldType:    "required",
-			Notification: userModel.EmailAlreadyExists,
+			Notification: EmailAlreadyExists,
 		}
 
 		userCreateValidationErrors = append(userCreateValidationErrors, userCreateValidationError)
@@ -52,7 +52,7 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.Us
 		return nil, userCreateValidationErrors
 	}
 
-	if userCreateValidationErrors := user.UserCreateValidator(); len(userCreateValidationErrors) != 0 {
+	if userCreateValidationErrors := UserCreateValidator(user); len(userCreateValidationErrors) != 0 {
 		return nil, userCreateValidationErrors
 	}
 
@@ -68,7 +68,7 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.Us
 }
 
 func (userUseCase *UserUseCase) UpdateUserById(ctx context.Context, userID string, user *userModel.UserUpdate) (*userModel.User, []error) {
-	if userUpdateValidationErrors := user.UserUpdateValidator(); len(userUpdateValidationErrors) != 0 {
+	if userUpdateValidationErrors := UserUpdateValidator(user); len(userUpdateValidationErrors) != 0 {
 		return nil, userUpdateValidationErrors
 	}
 
@@ -89,7 +89,7 @@ func (userUseCase *UserUseCase) DeleteUserById(ctx context.Context, userID strin
 }
 
 func (userUseCase *UserUseCase) Login(ctx context.Context, user *userModel.UserLogin) (string, error) {
-	if err := user.UserLoginValidator(); err != nil {
+	if err := UserLoginValidator(user); err != nil {
 		return "", err
 	}
 

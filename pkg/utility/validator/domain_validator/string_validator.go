@@ -9,6 +9,10 @@ func SanitizeString(preparedString *string) {
 	*preparedString = strings.TrimSpace(*preparedString)
 }
 
+func StringToLower(preparedString *string) {
+	*preparedString = strings.ToLower(*preparedString)
+}
+
 func IsCorrectLengthText(text string, minLength int, maxLength int) bool {
 	flag := true
 

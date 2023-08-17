@@ -91,46 +91,19 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 	}
 
 	createdUserData := userViewModel.UserCreateViewToUserCreateMapper((*userViewModel.UserCreateView)(createdUserViewData))
-	createdUser, createdUserErrors := userHandler.userUseCase.Register(ctx.Request.Context(), &createdUserData)
+	_, createdUserErrors := userHandler.userUseCase.Register(ctx.Request.Context(), &createdUserData)
 
 	if createdUserErrors != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "errors": httpUtility.ErrorsToErrorsViewMapper(createdUserErrors)})
 		return
 	}
 
-	config, err := config.LoadConfig(".")
-
-	if err != nil {
-		log.Fatal("could not load the config", err)
+	welcomeMessage := &userViewModel.UserWelcomeMessageView{
+		Message: httpUtility.SendingEmailNotification + createdUserData.Email,
+		Status:  "success",
 	}
 
-	// Generate verification code.
-	code := randstr.String(20)
-
-	verificationCode := utility.Encode(code)
-
-	// Update the user in Database.
-	userHandler.userUseCase.UpdateNewRegisteredUserById(ctx.Request.Context(), createdUser.UserID, "verificationCode", verificationCode)
-
-	firstName := createdUser.Name
-	firstName = httpUtility.UserFirstName(firstName)
-
-	// Send an email.
-	emailData := httpUtility.EmailData{
-		URL:       config.Origin + "/verifyemail/" + code,
-		FirstName: firstName,
-		Subject:   "Your account verification code",
-	}
-
-	err = httpUtility.SendEmail(createdUser, &emailData, "verificationCode.html")
-
-	if err != nil {
-		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": httpUtility.EmailErrorNotification})
-		return
-	}
-
-	message := httpUtility.SendingEmailNotification + createdUserData.Email
-	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "message": message})
+	ctx.JSON(http.StatusCreated, welcomeMessage)
 }
 
 func (userHandler *UserHandler) UpdateUserById(ctx *gin.Context) {

@@ -10,6 +10,9 @@ const (
 	StringRegex      = `^[a-zA-z0-9 !@#$€%^&*{}|()=/\;:+-_~'"<>,.? \t]*$`
 	TitleStringRegex = `^[a-zA-z0-9 !()=[]:;+-_~'",.? \t]*$`
 	TextStringRegex  = `^[a-zA-z0-9 !@#$€%^&*{}][|/\()=/\;:+-_~'"<>,.? \t]*$`
+
+	SendingEmailNotification = "We sent an email with a verification code to "
+	TemplateName             = "verificationCode.html"
 )
 
 type Config struct {

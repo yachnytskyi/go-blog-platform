@@ -7,7 +7,9 @@ import (
 	"time"
 
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
+	userRepositoryMail "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/external/mail"
 	userRepositoryModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/mongo/model"
+
 	repositoryUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/utility"
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility"
@@ -133,10 +135,21 @@ func (userRepository *UserRepository) CheckEmailDublicate(ctx context.Context, e
 	return true
 }
 
-func (userRepository *UserRepository) Register(ctx context.Context, user *userModel.UserCreate) (*userModel.User, error) {
-	var userCreateInternalError *domainError.InternalError = new(domainError.InternalError)
-	var userCreateEntityNotFoundError *domainError.InternalError = new(domainError.InternalError)
+func (userRepository *UserRepository) SendEmailVerificationMessage(user *userModel.User, data *userModel.EmailData, templateName string) error {
+	err := userRepositoryMail.SendEmail(user, data, templateName)
 
+	if err != nil {
+		var sendEmailInternalError *domainError.InternalError = new(domainError.InternalError)
+		sendEmailInternalError.Location = "User.Data.Repository.SendEmailVerificationMessage.SendEmail"
+		sendEmailInternalError.Reason = err.Error()
+		fmt.Println(sendEmailInternalError)
+		return sendEmailInternalError
+	}
+
+	return nil
+}
+
+func (userRepository *UserRepository) Register(ctx context.Context, user *userModel.UserCreate) (*userModel.User, error) {
 	userMappedToRepository := userRepositoryModel.UserCreateToUserCreateRepositoryMapper(user)
 	userMappedToRepository.CreatedAt = time.Now()
 	userMappedToRepository.UpdatedAt = user.CreatedAt
@@ -147,7 +160,8 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *userMo
 	result, err := userRepository.collection.InsertOne(ctx, &userMappedToRepository)
 
 	if err != nil {
-		userCreateInternalError.Location = "UserCreate.Data.Repository.Register.InsertOne"
+		var userCreateInternalError *domainError.InternalError = new(domainError.InternalError)
+		userCreateInternalError.Location = "User.Data.Repository.Register.InsertOne"
 		userCreateInternalError.Reason = err.Error()
 		fmt.Println(userCreateInternalError)
 		return nil, *userCreateInternalError
@@ -159,10 +173,10 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *userMo
 	index := mongo.IndexModel{Keys: bson.M{"email": 1}, Options: option}
 
 	if _, err := userRepository.collection.Indexes().CreateOne(ctx, index); err != nil {
-		userCreateInternalError.Location = "UserCreate.Data.Repository.Register.Indexes.CreateOne"
+		var userCreateInternalError *domainError.InternalError = new(domainError.InternalError)
+		userCreateInternalError.Location = "User.Data.Repository.Register.Indexes.CreateOne"
 		userCreateInternalError.Reason = err.Error()
 		fmt.Println(userCreateInternalError)
-
 		return nil, *userCreateInternalError
 	}
 
@@ -171,7 +185,8 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *userMo
 	err = userRepository.collection.FindOne(ctx, query).Decode(&createdUser)
 
 	if err != nil {
-		userCreateEntityNotFoundError.Location = "UserCreate.Data.Repository.Register.FindOne"
+		var userCreateEntityNotFoundError *domainError.EntityNotFoundError = new(domainError.EntityNotFoundError)
+		userCreateEntityNotFoundError.Location = "User.Data.Repository.Register.FindOne"
 		userCreateEntityNotFoundError.Reason = err.Error()
 		fmt.Println(userCreateEntityNotFoundError)
 		return nil, *userCreateEntityNotFoundError
@@ -181,13 +196,13 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *userMo
 }
 
 func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID string, user *userModel.UserUpdate) (*userModel.User, domainError.InternalError) {
-	var userUpdateError *domainError.InternalError = new(domainError.InternalError)
 	userMappedToRepository := userRepositoryModel.UserUpdateToUserUpdateRepositoryMapper(user)
 	userMappedToRepository.UpdatedAt = time.Now()
 	userMappedToMongoDB, err := utility.MongoMappper(userMappedToRepository)
 
 	if err != nil {
-		userUpdateError.Location = "UserCreate.Data.Repository.UpdateUserById.MongoMapper"
+		var userUpdateError *domainError.InternalError = new(domainError.InternalError)
+		userUpdateError.Location = "User.Data.Repository.UpdateUserById.MongoMapper"
 		userUpdateError.Reason = err.Error()
 		return nil, *userUpdateError
 	}
@@ -199,7 +214,8 @@ func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID
 	var updatedUserRepository *userRepositoryModel.UserRepository
 
 	if err := result.Decode(&updatedUserRepository); err != nil {
-		userUpdateError.Location = "UserCreate.Data.Repository.UpdateUserById.Decode"
+		var userUpdateError *domainError.InternalError = new(domainError.InternalError)
+		userUpdateError.Location = "User.Data.Repository.UpdateUserById.Decode"
 		userUpdateError.Reason = err.Error()
 		return nil, *userUpdateError
 	}

@@ -13,6 +13,7 @@ type Repository interface {
 	GetUserById(ctx context.Context, userID string) (*userModel.User, error)
 	GetUserByEmail(ctx context.Context, email string) (*userModel.User, error)
 	CheckEmailDublicate(ctx context.Context, email string) bool
+	SendEmailVerificationMessage(user *userModel.User, data *userModel.EmailData, templateName string) error
 	Register(ctx context.Context, user *userModel.UserCreate) (*userModel.User, error)
 	UpdateUserById(ctx context.Context, userID string, user *userModel.UserUpdate) (*userModel.User, domainError.InternalError)
 	DeleteUserById(ctx context.Context, userID string) error

@@ -3,11 +3,15 @@ package usecase
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
+	"github.com/thanhpk/randstr"
+	"github.com/yachnytskyi/golang-mongo-grpc/config"
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
+	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain_error"
 )
 
@@ -48,11 +52,12 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.Us
 		}
 
 		userCreateValidationErrors = append(userCreateValidationErrors, userCreateValidationError)
-
+		userCreateValidationErrors = domainError.ErrorsHandler(userCreateValidationErrors)
 		return nil, userCreateValidationErrors
 	}
 
 	if userCreateValidationErrors := UserCreateValidator(user); len(userCreateValidationErrors) != 0 {
+		userCreateValidationErrors = domainError.ErrorsHandler(userCreateValidationErrors)
 		return nil, userCreateValidationErrors
 	}
 
@@ -60,8 +65,45 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.Us
 
 	if userCreateError != nil {
 		userCreateErrors := []error{userCreateError}
-
+		userCreateErrors = domainError.ErrorsHandler(userCreateErrors)
 		return nil, userCreateErrors
+	}
+
+	// Generate verification code.
+	code := randstr.String(20)
+	verificationCode := utility.Encode(code)
+
+	_, userUpdateError := userUseCase.userRepository.UpdateNewRegisteredUserById(ctx, createdUser.UserID, "verificationCode", verificationCode)
+
+	if userUpdateError != nil {
+		userUpdateErrors := []error{userUpdateError}
+		userUpdateErrors = domainError.ErrorsHandler(userUpdateErrors)
+		return nil, userUpdateErrors
+	}
+
+	// Send an email.
+	configLoad, err := config.LoadConfig(".")
+
+	if err != nil {
+		log.Fatal("could not load the config", err)
+	}
+
+	firstName := domainUtility.UserFirstName(createdUser.Name)
+	emailData := userModel.EmailData{
+		URL:       configLoad.Origin + "/verifyemail/" + code,
+		FirstName: firstName,
+		Subject:   "Your account verification code",
+	}
+
+	if userUseCase.userRepository.SendEmailVerificationMessage(createdUser, &emailData, config.TemplateName) != nil {
+		userCreateErrorMessages := []error{}
+		userCreateErrorMessage := &domainError.ValidationError{
+			Notification: domainError.InternalErrorNotification,
+		}
+
+		userCreateErrorMessages = append(userCreateErrorMessages, userCreateErrorMessage)
+		userCreateErrorMessages = domainError.ErrorsHandler(userCreateErrorMessages)
+		return nil, userCreateErrorMessages
 	}
 
 	return createdUser, nil

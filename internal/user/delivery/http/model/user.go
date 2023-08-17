@@ -39,11 +39,19 @@ type UserLoginView struct {
 	Password string `json:"password"`
 }
 
+// [POST].
 type UserForgottenPasswordView struct {
 	Email string `json:"email"`
 }
 
+// [POST].
 type UserResetPasswordView struct {
 	Password        string `json:"password"`
 	PasswordConfirm string `json:"password_confirm"`
+}
+
+// [GET].
+type UserWelcomeMessageView struct {
+	Message string `json:"message"`
+	Status  string `json:"status"`
 }

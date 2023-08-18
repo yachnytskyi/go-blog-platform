@@ -12,7 +12,7 @@ import (
 	"github.com/k3a/html2text"
 	"github.com/yachnytskyi/golang-mongo-grpc/config"
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain_error"
+	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain_error"
 	"gopkg.in/gomail.v2"
 )
 
@@ -22,7 +22,7 @@ func ParseTemplateDirectory(directory string) (*template.Template, error) {
 
 	err := filepath.Walk(directory, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			var sendEmailInternalError *domain_error.InternalError = new(domain_error.InternalError)
+			var sendEmailInternalError *domainError.InternalError = new(domainError.InternalError)
 			sendEmailInternalError.Location = "User.Data.Repository.External.Mail.ParseTemplateDirectory.Walk"
 			sendEmailInternalError.Reason = err.Error()
 			fmt.Println(sendEmailInternalError)
@@ -38,7 +38,7 @@ func ParseTemplateDirectory(directory string) (*template.Template, error) {
 	fmt.Println("parsing template...")
 
 	if err != nil {
-		var sendEmailInternalError *domain_error.InternalError = new(domain_error.InternalError)
+		var sendEmailInternalError *domainError.InternalError = new(domainError.InternalError)
 		sendEmailInternalError.Location = "User.Data.Repository.External.Mail.SendEmail.parsing template"
 		sendEmailInternalError.Reason = err.Error()
 		fmt.Println(sendEmailInternalError)
@@ -52,7 +52,7 @@ func SendEmail(user *userModel.User, data *userModel.EmailData, templateName str
 	config, err := config.LoadConfig(".")
 
 	if err != nil {
-		var sendEmailInternalError *domain_error.InternalError = new(domain_error.InternalError)
+		var sendEmailInternalError *domainError.InternalError = new(domainError.InternalError)
 		sendEmailInternalError.Location = "User.Data.Repository.External.Mail.SendEmail.LoadConfig"
 		sendEmailInternalError.Reason = err.Error()
 		fmt.Println(sendEmailInternalError)
@@ -71,7 +71,7 @@ func SendEmail(user *userModel.User, data *userModel.EmailData, templateName str
 	template, err := ParseTemplateDirectory("internal/user/delivery/http/utility/template")
 
 	if err != nil {
-		var sendEmailInternalError *domain_error.InternalError = new(domain_error.InternalError)
+		var sendEmailInternalError *domainError.InternalError = new(domainError.InternalError)
 		sendEmailInternalError.Location = "User.Data.Repository.External.Mail.SendEmail.ParseTemplateDirectory"
 		sendEmailInternalError.Reason = "could not parse template"
 		fmt.Println(sendEmailInternalError)
@@ -92,7 +92,7 @@ func SendEmail(user *userModel.User, data *userModel.EmailData, templateName str
 
 	// Send an email.
 	if err := dialer.DialAndSend(message); err != nil {
-		var sendEmailInternalError *domain_error.InternalError = new(domain_error.InternalError)
+		var sendEmailInternalError *domainError.InternalError = new(domainError.InternalError)
 		sendEmailInternalError.Location = "User.Data.Repository.External.Mail.SendEmail.DialAndSend"
 		sendEmailInternalError.Reason = err.Error()
 		fmt.Println(sendEmailInternalError)

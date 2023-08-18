@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/thanhpk/randstr"
@@ -85,7 +84,13 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.Us
 	configLoad, err := config.LoadConfig(".")
 
 	if err != nil {
-		log.Fatal("could not load the config", err)
+		var sendEmailInternalError *domainError.InternalError = new(domainError.InternalError)
+		sendEmailInternalError.Location = "User.Data.Repository.External.Mail.SendEmail.LoadConfig"
+		sendEmailInternalError.Reason = err.Error()
+		fmt.Println(sendEmailInternalError)
+		sendEmailErrors := []error{sendEmailInternalError}
+		sendEmailErrors = domainError.ErrorsHandler(sendEmailErrors)
+		return nil, sendEmailErrors
 	}
 
 	firstName := domainUtility.UserFirstName(createdUser.Name)

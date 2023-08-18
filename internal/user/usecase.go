@@ -5,7 +5,6 @@ import (
 	"time"
 
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
-	// domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain_error"
 )
 
 type UseCase interface {

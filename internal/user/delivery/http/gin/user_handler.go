@@ -116,10 +116,10 @@ func (userHandler *UserHandler) UpdateUserById(ctx *gin.Context) {
 	}
 
 	updatedUserData := userViewModel.UserUpdateViewToUserUpdateMapper(updatedUserViewData)
-	updatedUser, updatedUserErrors := userHandler.userUseCase.UpdateUserById(ctx.Request.Context(), userID, &updatedUserData)
+	updatedUser, updatedUserError := userHandler.userUseCase.UpdateUserById(ctx.Request.Context(), userID, &updatedUserData)
 
-	if updatedUserErrors != nil {
-		ctx.JSON(http.StatusBadRequest, httpUtility.ErrorToErrorViewMapper(updatedUserErrors))
+	if updatedUserError != nil {
+		ctx.JSON(http.StatusBadRequest, httpUtility.ErrorToErrorViewMapper(updatedUserError))
 	}
 
 	ctx.JSON(http.StatusOK, userViewModel.UserToUserViewMapper(updatedUser))

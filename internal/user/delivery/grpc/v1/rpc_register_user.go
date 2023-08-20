@@ -21,11 +21,11 @@ func (userGrpcServer *UserGrpcServer) Register(ctx context.Context, request *pb.
 		PasswordConfirm: request.GetPasswordConfirm(),
 	}
 
-	createdUser, createdUserErrors := userGrpcServer.userUseCase.Register(ctx, &user)
+	createdUser, createdUserError := userGrpcServer.userUseCase.Register(ctx, &user)
 
-	if createdUserErrors != nil {
+	if createdUserError != nil {
 
-		switch errorType := createdUserErrors.(type) {
+		switch errorType := createdUserError.(type) {
 		case *domainError.ValidationError:
 			return nil, errorType
 		case *domainError.ErrorMessage:
@@ -61,7 +61,7 @@ func (userGrpcServer *UserGrpcServer) Register(ctx context.Context, request *pb.
 	if err != nil {
 		var userCreateErrorView *domainError.InternalError = new(domainError.InternalError)
 
-		userCreateErrorView.Location = "UserCreate.Delivery.Grpc.V1.Register.createdUserErrors"
+		userCreateErrorView.Location = "UserCreate.Delivery.Grpc.V1.Register.createdUserError"
 		userCreateErrorView.Code = codes.Internal.String()
 		userCreateErrorView.Reason = err.Error()
 

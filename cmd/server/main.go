@@ -42,7 +42,7 @@ var (
 	userCollection *mongo.Collection
 	userRepository userPackage.Repository
 	userUseCase    userPackage.UseCase
-	userHandler    userHttpGinPackage.UserHandler
+	userHandler    userHttpGinPackage.UserController
 	userRouter     userHttpGinPackage.UserRouter
 
 	postCollection *mongo.Collection

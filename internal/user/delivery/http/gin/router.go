@@ -7,30 +7,28 @@ import (
 )
 
 type UserRouter struct {
-	userHandler UserHandler
+	userController UserController
 }
 
-func NewUserRouter(userHandler UserHandler) UserRouter {
-	return UserRouter{userHandler: userHandler}
+func NewUserRouter(userController UserController) UserRouter {
+	return UserRouter{userController: userController}
 }
 
 func (userRouter *UserRouter) UserRouter(routerGroup *gin.RouterGroup, userUseCase user.UseCase) {
 	router := routerGroup.Group("/users")
 
-	router.POST("/register", userRouter.userHandler.Register)
-	router.POST("/login", userRouter.userHandler.Login)
-
-	router.GET("/", userRouter.userHandler.GetAllUsers)
-	router.GET("/:userID", userRouter.userHandler.GetUserById)
+	router.POST("/register", userRouter.userController.Register)
+	router.POST("/login", userRouter.userController.Login)
+	router.GET("/", userRouter.userController.GetAllUsers)
+	router.GET("/:userID", userRouter.userController.GetUserById)
 
 	router.Use(httpGinUtility.DeserializeUser(userUseCase))
-	router.POST("/forgotten-password", userRouter.userHandler.ForgottenPassword)
-	router.PATCH("/reset-password/:resetToken", userRouter.userHandler.ResetUserPassword)
+	router.GET("/me", userRouter.userController.GetMe)
+	router.PUT("/update", userRouter.userController.UpdateUserById)
+	router.DELETE("/delete", userRouter.userController.Delete)
+	router.GET("/refresh", userRouter.userController.RefreshAccessToken)
+	router.GET("/logout", userRouter.userController.Logout)
+	router.POST("/forgotten-password", userRouter.userController.ForgottenPassword)
+	router.PATCH("/reset-password/:resetToken", userRouter.userController.ResetUserPassword)
 
-	router.GET("/refresh", userRouter.userHandler.RefreshAccessToken)
-	router.GET("/logout", userRouter.userHandler.Logout)
-
-	router.GET("/me", userRouter.userHandler.GetMe)
-	router.PUT("/update", userRouter.userHandler.UpdateUserById)
-	router.DELETE("/delete", userRouter.userHandler.Delete)
 }

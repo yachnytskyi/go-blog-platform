@@ -4,7 +4,6 @@ import userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/
 
 func UsersToUsersViewMapper(users *userModel.Users) *UsersView {
 	usersView := make([]*UserView, 0, len(users.Users))
-
 	for _, user := range users.Users {
 		userView := UserToUserViewMapper(user)
 		usersView = append(usersView, userView)

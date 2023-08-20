@@ -4,7 +4,6 @@ import userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/
 
 func UsersRepositoryToUsersMapper(usersRepository []*UserRepository) userModel.Users {
 	users := make([]*userModel.User, 0, len(usersRepository))
-
 	for _, userRepository := range usersRepository {
 		user := UserRepositoryToUserMapper(userRepository)
 		users = append(users, &user)

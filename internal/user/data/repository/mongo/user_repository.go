@@ -53,7 +53,6 @@ func (userRepository *UserRepository) GetAllUsers(ctx context.Context, page int,
 	defer cursor.Close(ctx)
 
 	var fetchedUsers = make([]*userRepositoryModel.UserRepository, 0, limit)
-
 	for cursor.Next(ctx) {
 		user := &userRepositoryModel.UserRepository{}
 		err := cursor.Decode(user)

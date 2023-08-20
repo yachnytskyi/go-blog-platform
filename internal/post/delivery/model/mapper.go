@@ -6,7 +6,6 @@ import (
 
 func PostsToPostsViewMapper(posts *model.Posts) PostsView {
 	postsView := make([]*PostView, 0, 10)
-
 	for _, post := range posts.Posts {
 		postView := &PostView{}
 		postView.PostID = post.PostID

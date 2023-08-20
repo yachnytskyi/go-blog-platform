@@ -30,10 +30,9 @@ const (
 	maxLength = 40
 )
 
-func UserCreateValidator(userCreate *userModel.UserCreate) []error {
-	userCreateValidationErrors := []error{}
+func UserCreateValidator(userCreate *userModel.UserCreate) error {
+	userCreateValidationErrors := &domainError.ValidationErrors{}
 	stringAllowedLength := "can be between " + strconv.Itoa(minLength) + " and " + strconv.Itoa(maxLength)
-
 	domainValidatorUtility.SanitizeString(&userCreate.Name)
 	domainValidatorUtility.SanitizeString(&userCreate.Email)
 	domainValidatorUtility.SanitizeString(&userCreate.Password)
@@ -46,7 +45,7 @@ func UserCreateValidator(userCreate *userModel.UserCreate) []error {
 			FieldType:    "required",
 			Notification: stringAllowedLength,
 		}
-		userCreateValidationErrors = append(userCreateValidationErrors, userCreateValidationError)
+		userCreateValidationErrors.ValidationErrors = append(userCreateValidationErrors.ValidationErrors, userCreateValidationError)
 
 	} else if domainValidatorUtility.IsStringContainsSpecialCharacters(userCreate.Name, usernameRegex) {
 		userCreateValidationError := &domainError.ValidationError{
@@ -54,7 +53,7 @@ func UserCreateValidator(userCreate *userModel.UserCreate) []error {
 			FieldType:    "required",
 			Notification: usernameAllowedCharacters,
 		}
-		userCreateValidationErrors = append(userCreateValidationErrors, userCreateValidationError)
+		userCreateValidationErrors.ValidationErrors = append(userCreateValidationErrors.ValidationErrors, userCreateValidationError)
 	}
 
 	if !domainValidatorUtility.IsCorrectLengthText(userCreate.Email, minLength, maxLength) {
@@ -63,7 +62,8 @@ func UserCreateValidator(userCreate *userModel.UserCreate) []error {
 			FieldType:    "required",
 			Notification: stringAllowedLength,
 		}
-		userCreateValidationErrors = append(userCreateValidationErrors, userCreateValidationError)
+
+		userCreateValidationErrors.ValidationErrors = append(userCreateValidationErrors.ValidationErrors, userCreateValidationError)
 
 	} else if domainValidatorUtility.IsStringContainsSpecialCharacters(userCreate.Email, emailRegex) {
 		userCreateValidationError := &domainError.ValidationError{
@@ -71,7 +71,7 @@ func UserCreateValidator(userCreate *userModel.UserCreate) []error {
 			FieldType:    "required",
 			Notification: invalidEmail,
 		}
-		userCreateValidationErrors = append(userCreateValidationErrors, userCreateValidationError)
+		userCreateValidationErrors.ValidationErrors = append(userCreateValidationErrors.ValidationErrors, userCreateValidationError)
 
 	} else if !IsEmailDomainValid(userCreate.Email) {
 		userCreateValidationError := &domainError.ValidationError{
@@ -80,7 +80,7 @@ func UserCreateValidator(userCreate *userModel.UserCreate) []error {
 			Notification: invalidEmailDomain,
 		}
 
-		userCreateValidationErrors = append(userCreateValidationErrors, userCreateValidationError)
+		userCreateValidationErrors.ValidationErrors = append(userCreateValidationErrors.ValidationErrors, userCreateValidationError)
 	}
 
 	if !domainValidatorUtility.IsCorrectLengthText(userCreate.Password, minLength, maxLength) {
@@ -89,7 +89,7 @@ func UserCreateValidator(userCreate *userModel.UserCreate) []error {
 			FieldType:    "required",
 			Notification: stringAllowedLength,
 		}
-		userCreateValidationErrors = append(userCreateValidationErrors, userCreateValidationError)
+		userCreateValidationErrors.ValidationErrors = append(userCreateValidationErrors.ValidationErrors, userCreateValidationError)
 
 	} else if !domainValidatorUtility.StringsMatch(userCreate.Password, userCreate.PasswordConfirm) {
 		userCreateValidationError := &domainError.ValidationError{
@@ -97,7 +97,7 @@ func UserCreateValidator(userCreate *userModel.UserCreate) []error {
 			FieldType:    "required",
 			Notification: invalidPassword,
 		}
-		userCreateValidationErrors = append(userCreateValidationErrors, userCreateValidationError)
+		userCreateValidationErrors.ValidationErrors = append(userCreateValidationErrors.ValidationErrors, userCreateValidationError)
 
 	} else if domainValidatorUtility.IsStringContainsSpecialCharacters(userCreate.Password, passwordRegex) {
 		userCreateValidationError := &domainError.ValidationError{
@@ -106,16 +106,19 @@ func UserCreateValidator(userCreate *userModel.UserCreate) []error {
 			Notification: passwordAllowedCharacters,
 		}
 
-		userCreateValidationErrors = append(userCreateValidationErrors, userCreateValidationError)
+		userCreateValidationErrors.ValidationErrors = append(userCreateValidationErrors.ValidationErrors, userCreateValidationError)
 	}
 
-	return userCreateValidationErrors
+	if len(userCreateValidationErrors.ValidationErrors) != 0 {
+		return userCreateValidationErrors
+	}
+
+	return nil
 }
 
-func UserUpdateValidator(userUpdate *userModel.UserUpdate) []error {
-	userUpdateValidationErrors := []error{}
+func UserUpdateValidator(userUpdate *userModel.UserUpdate) error {
+	userUpdateValidationErrors := &domainError.ValidationErrors{}
 	stringAllowedLength := "can be between " + strconv.Itoa(minLength) + " and " + strconv.Itoa(maxLength)
-
 	domainValidatorUtility.SanitizeString(&userUpdate.Name)
 
 	if !domainValidatorUtility.IsCorrectLengthText(userUpdate.Name, minLength, maxLength) {
@@ -124,7 +127,7 @@ func UserUpdateValidator(userUpdate *userModel.UserUpdate) []error {
 			FieldType:    "required",
 			Notification: stringAllowedLength,
 		}
-		userUpdateValidationErrors = append(userUpdateValidationErrors, userUpdateValidationError)
+		userUpdateValidationErrors.ValidationErrors = append(userUpdateValidationErrors.ValidationErrors, userUpdateValidationError)
 
 	} else if domainValidatorUtility.IsStringContainsSpecialCharacters(userUpdate.Name, usernameRegex) {
 		userUpdateValidationError := &domainError.ValidationError{
@@ -132,10 +135,14 @@ func UserUpdateValidator(userUpdate *userModel.UserUpdate) []error {
 			FieldType:    "required",
 			Notification: usernameAllowedCharacters,
 		}
-		userUpdateValidationErrors = append(userUpdateValidationErrors, userUpdateValidationError)
+		userUpdateValidationErrors.ValidationErrors = append(userUpdateValidationErrors.ValidationErrors, userUpdateValidationError)
 	}
 
-	return userUpdateValidationErrors
+	if len(userUpdateValidationErrors.ValidationErrors) != 0 {
+		return userUpdateValidationErrors
+	}
+
+	return nil
 }
 
 func UserLoginValidator(userLogin *userModel.UserLogin) error {

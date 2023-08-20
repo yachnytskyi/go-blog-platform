@@ -6,38 +6,18 @@ const (
 )
 
 func ErrorHandler(err error) error {
-	var errorMessage *ErrorMessage = new(ErrorMessage)
-
-	switch err.(type) {
+	switch errorType := err.(type) {
 	case *ValidationError:
-		return errorMessage
+		return errorType
+	case *ValidationErrors:
+		return errorType
 	case *EntityNotFoundError:
+		var errorMessage *ErrorMessage = new(ErrorMessage)
 		errorMessage.Notification = EntityNotFoundErrorNotification
 		return errorMessage
 	default:
+		var errorMessage *ErrorMessage = new(ErrorMessage)
 		errorMessage.Notification = InternalErrorNotification
 		return errorMessage
 	}
-}
-
-func ErrorsHandler(errors []error) []error {
-	var errorMessage *ErrorMessage = new(ErrorMessage)
-
-	for index, errorType := range errors {
-		if _, ok := errorType.(*ValidationError); ok {
-			continue
-
-		} else if _, ok := errorType.(*EntityNotFoundError); ok {
-			errorMessage.Notification = EntityNotFoundErrorNotification
-			errors[index] = errorMessage
-			return errors
-
-		} else {
-			errorMessage.Notification = InternalErrorNotification
-			errors[index] = errorMessage
-			return errors
-		}
-	}
-
-	return errors
 }

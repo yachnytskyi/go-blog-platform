@@ -1,6 +1,9 @@
 package domain_error
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type ValidationError struct {
 	Field        string
@@ -20,6 +23,26 @@ func (err ValidationError) Error() string {
 	return fmt.Sprintf("field: " + err.Field + " " + "type: " + err.FieldType + " notification: " + err.Notification)
 }
 
+type ValidationErrors struct {
+	ValidationErrors []*ValidationError
+}
+
+func NewValidationErrors(validationErrors []*ValidationError) error {
+	return &ValidationErrors{
+		ValidationErrors: validationErrors,
+	}
+}
+
+func (validationErrors *ValidationErrors) Error() string {
+	var result strings.Builder
+	for _, vavalidationError := range validationErrors.ValidationErrors {
+		result.WriteString("field: " + vavalidationError.Field + " " + "type: " + vavalidationError.FieldType + " notification: " + vavalidationError.Notification)
+
+	}
+
+	return result.String()
+}
+
 type EntityNotFoundError struct {
 	Location string
 	Code     string
@@ -27,13 +50,13 @@ type EntityNotFoundError struct {
 }
 
 func NewEntityNotFoundError(location string, reason string) error {
-	return EntityNotFoundError{
+	return &EntityNotFoundError{
 		Location: location,
 		Reason:   reason,
 	}
 }
 
-func (err EntityNotFoundError) Error() string {
+func (err *EntityNotFoundError) Error() string {
 	return fmt.Sprintf("field: " + err.Location + " reason: " + err.Reason)
 }
 
@@ -44,13 +67,13 @@ type InternalError struct {
 }
 
 func NewInternalError(location string, reason string) error {
-	return InternalError{
+	return &InternalError{
 		Location: location,
 		Reason:   reason,
 	}
 }
 
-func (err InternalError) Error() string {
+func (err *InternalError) Error() string {
 	return fmt.Sprintf("field: " + err.Location + " reason: " + err.Reason)
 }
 
@@ -59,11 +82,11 @@ type ErrorMessage struct {
 }
 
 func NewErrorMessage(notification string) error {
-	return ErrorMessage{
+	return &ErrorMessage{
 		Notification: notification,
 	}
 }
 
-func (err ErrorMessage) Error() string {
+func (err *ErrorMessage) Error() string {
 	return fmt.Sprintf("notification: " + err.Notification)
 }

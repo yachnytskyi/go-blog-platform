@@ -1,6 +1,9 @@
 package http_error
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type HttpValidationErrorView struct {
 	Field        string `json:"field"`
@@ -18,6 +21,26 @@ func NewHttpValidationError(field string, fieldType string, notification string)
 
 func (err HttpValidationErrorView) Error() string {
 	return fmt.Sprintf("field: " + err.Field + " " + "type: " + err.FieldType + " notification: " + err.Notification)
+}
+
+type HttpValidationErrorsView struct {
+	HttpValidationErrorsView []*HttpValidationErrorView `json:"errors"`
+}
+
+func NewHttpValidationErrorsView(httpValidationErrorsView []*HttpValidationErrorView) error {
+	return &HttpValidationErrorsView{
+		HttpValidationErrorsView: httpValidationErrorsView,
+	}
+}
+
+func (httpValidationErrorsView *HttpValidationErrorsView) Error() string {
+	var result strings.Builder
+	for _, vavalidationError := range httpValidationErrorsView.HttpValidationErrorsView {
+		result.WriteString("field: " + vavalidationError.Field + " " + "type: " + vavalidationError.FieldType + " notification: " + vavalidationError.Notification)
+
+	}
+
+	return result.String()
 }
 
 type HttpErrorMessageView struct {

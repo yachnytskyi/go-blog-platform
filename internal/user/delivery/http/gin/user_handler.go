@@ -18,8 +18,6 @@ import (
 
 	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
 	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain_error"
-	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/http_error"
 )
 
 type UserHandler struct {
@@ -91,10 +89,10 @@ func (userHandler *UserHandler) Register(ctx *gin.Context) {
 	}
 
 	createdUserData := userViewModel.UserCreateViewToUserCreateMapper((*userViewModel.UserCreateView)(createdUserViewData))
-	_, createdUserErrors := userHandler.userUseCase.Register(ctx.Request.Context(), &createdUserData)
+	_, createdUserError := userHandler.userUseCase.Register(ctx.Request.Context(), createdUserData)
 
-	if createdUserErrors != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "errors": httpUtility.ErrorsToErrorsViewMapper(createdUserErrors)})
+	if createdUserError != nil {
+		ctx.JSON(http.StatusBadRequest, httpUtility.ErrorToErrorViewMapper(createdUserError))
 		return
 	}
 
@@ -120,25 +118,11 @@ func (userHandler *UserHandler) UpdateUserById(ctx *gin.Context) {
 	updatedUserData := userViewModel.UserUpdateViewToUserUpdateMapper(updatedUserViewData)
 	updatedUser, updatedUserErrors := userHandler.userUseCase.UpdateUserById(ctx.Request.Context(), userID, &updatedUserData)
 
-	if len(updatedUserErrors) != 0 {
-		var userUpdateErrors []*domain_error.ValidationError
-
-		for _, userUpdateErrorType := range updatedUserErrors {
-			if userUpdateErrorView, ok := userUpdateErrorType.(*domain_error.ValidationError); ok {
-				userUpdateErrors = append(userUpdateErrors, userUpdateErrorView)
-
-			} else {
-				ctx.JSON(http.StatusConflict, gin.H{"status": "error", "notification": httpUtility.InternalErrorNotification})
-			}
-		}
-
-		userUpdateErrorsView := httpError.ValidationErrorsToHttpValidationErrorsViewMapper(userUpdateErrors)
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "errors": userUpdateErrorsView})
-		return
+	if updatedUserErrors != nil {
+		ctx.JSON(http.StatusBadRequest, httpUtility.ErrorToErrorViewMapper(updatedUserErrors))
 	}
 
-	updatedUserView := userViewModel.UserToUserViewMapper(updatedUser)
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": httpUtility.SettingsAreSuccessfullyUpdated, "data": gin.H{"user": &updatedUserView}})
+	ctx.JSON(http.StatusOK, userViewModel.UserToUserViewMapper(updatedUser))
 }
 
 func (userHandler *UserHandler) Delete(ctx *gin.Context) {

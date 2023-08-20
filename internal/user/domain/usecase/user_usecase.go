@@ -40,32 +40,28 @@ func (userUseCase *UserUseCase) GetUserByEmail(ctx context.Context, email string
 	return fetchedUser, err
 }
 
-func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.UserCreate) (*userModel.User, []error) {
+func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.UserCreate) (*userModel.User, error) {
 	if userUseCase.userRepository.CheckEmailDublicate(ctx, user.Email) {
-		userCreateValidationErrors := []error{}
-
 		userCreateValidationError := &domainError.ValidationError{
 			Field:        "email",
 			FieldType:    "required",
 			Notification: EmailAlreadyExists,
 		}
 
-		userCreateValidationErrors = append(userCreateValidationErrors, userCreateValidationError)
-		userCreateValidationErrors = domainError.ErrorsHandler(userCreateValidationErrors)
-		return nil, userCreateValidationErrors
+		domainError.ErrorHandler(*userCreateValidationError)
+		return nil, userCreateValidationError
 	}
 
-	if userCreateValidationErrors := UserCreateValidator(user); len(userCreateValidationErrors) != 0 {
-		userCreateValidationErrors = domainError.ErrorsHandler(userCreateValidationErrors)
+	if userCreateValidationErrors := UserCreateValidator(user); userCreateValidationErrors != nil {
+		userCreateValidationErrors = domainError.ErrorHandler(userCreateValidationErrors)
 		return nil, userCreateValidationErrors
 	}
 
 	createdUser, userCreateError := userUseCase.userRepository.Register(ctx, user)
 
 	if userCreateError != nil {
-		userCreateErrors := []error{userCreateError}
-		userCreateErrors = domainError.ErrorsHandler(userCreateErrors)
-		return nil, userCreateErrors
+		userCreateError = domainError.ErrorHandler(userCreateError)
+		return nil, userCreateError
 	}
 
 	// Generate verification code.
@@ -75,9 +71,8 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.Us
 	_, userUpdateError := userUseCase.userRepository.UpdateNewRegisteredUserById(ctx, createdUser.UserID, "verificationCode", verificationCode)
 
 	if userUpdateError != nil {
-		userUpdateErrors := []error{userUpdateError}
-		userUpdateErrors = domainError.ErrorsHandler(userUpdateErrors)
-		return nil, userUpdateErrors
+		userUpdateError = domainError.ErrorHandler(userUpdateError)
+		return nil, userUpdateError
 	}
 
 	// Send an email.
@@ -88,9 +83,8 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.Us
 		sendEmailInternalError.Location = "User.Data.Repository.External.Mail.SendEmail.LoadConfig"
 		sendEmailInternalError.Reason = err.Error()
 		fmt.Println(sendEmailInternalError)
-		sendEmailErrors := []error{sendEmailInternalError}
-		sendEmailErrors = domainError.ErrorsHandler(sendEmailErrors)
-		return nil, sendEmailErrors
+		domainError.ErrorHandler(sendEmailInternalError)
+		return nil, sendEmailInternalError
 	}
 
 	firstName := domainUtility.UserFirstName(createdUser.Name)
@@ -101,32 +95,29 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.Us
 	}
 
 	if userUseCase.userRepository.SendEmailVerificationMessage(createdUser, &emailData, config.TemplateName) != nil {
-		userCreateErrorMessages := []error{}
 		userCreateErrorMessage := &domainError.ValidationError{
-			Notification: domainError.InternalErrorNotification,
+			Notification: "domainError.InternalErrorNotification",
 		}
 
-		userCreateErrorMessages = append(userCreateErrorMessages, userCreateErrorMessage)
-		userCreateErrorMessages = domainError.ErrorsHandler(userCreateErrorMessages)
-		return nil, userCreateErrorMessages
+		domainError.ErrorHandler(*userCreateErrorMessage)
+		return nil, userCreateErrorMessage
 	}
 
 	return createdUser, nil
 }
 
-func (userUseCase *UserUseCase) UpdateUserById(ctx context.Context, userID string, user *userModel.UserUpdate) (*userModel.User, []error) {
-	if userUpdateValidationErrors := UserUpdateValidator(user); len(userUpdateValidationErrors) != 0 {
+func (userUseCase *UserUseCase) UpdateUserById(ctx context.Context, userID string, user *userModel.UserUpdate) (*userModel.User, error) {
+	if userUpdateValidationErrors := UserUpdateValidator(user); userUpdateValidationErrors != nil {
 		return nil, userUpdateValidationErrors
 	}
 
 	updatedUser, userUpdateError := userUseCase.userRepository.UpdateUserById(ctx, userID, user)
 
-	if userUpdateError != (domainError.InternalError{}) {
-		userUpdateErrors := []error{userUpdateError}
-		return nil, userUpdateErrors
+	if userUpdateError != nil {
+		return nil, userUpdateError
 	}
 
-	return updatedUser, []error{}
+	return updatedUser, nil
 }
 
 func (userUseCase *UserUseCase) DeleteUserById(ctx context.Context, userID string) error {

@@ -11,8 +11,8 @@ type UseCase interface {
 	GetAllUsers(ctx context.Context, page int, limit int) (*userModel.Users, error)
 	GetUserById(ctx context.Context, userID string) (*userModel.User, error)
 	GetUserByEmail(ctx context.Context, email string) (*userModel.User, error)
-	Register(ctx context.Context, user *userModel.UserCreate) (*userModel.User, []error)
-	UpdateUserById(ctx context.Context, userID string, user *userModel.UserUpdate) (*userModel.User, []error)
+	Register(ctx context.Context, user *userModel.UserCreate) (*userModel.User, error)
+	UpdateUserById(ctx context.Context, userID string, user *userModel.UserUpdate) (*userModel.User, error)
 	DeleteUserById(ctx context.Context, userID string) error
 	Login(ctx context.Context, user *userModel.UserLogin) (string, error)
 	UpdateNewRegisteredUserById(ctx context.Context, userID string, key string, value string) (*userModel.User, error)

@@ -164,7 +164,7 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *userMo
 		userCreateInternalError.Location = "User.Data.Repository.Register.InsertOne"
 		userCreateInternalError.Reason = err.Error()
 		fmt.Println(userCreateInternalError)
-		return nil, *userCreateInternalError
+		return nil, userCreateInternalError
 	}
 
 	// Create a unique index for the email field.
@@ -177,7 +177,7 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *userMo
 		userCreateInternalError.Location = "User.Data.Repository.Register.Indexes.CreateOne"
 		userCreateInternalError.Reason = err.Error()
 		fmt.Println(userCreateInternalError)
-		return nil, *userCreateInternalError
+		return nil, userCreateInternalError
 	}
 
 	var createdUser *userModel.User
@@ -189,13 +189,13 @@ func (userRepository *UserRepository) Register(ctx context.Context, user *userMo
 		userCreateEntityNotFoundError.Location = "User.Data.Repository.Register.FindOne"
 		userCreateEntityNotFoundError.Reason = err.Error()
 		fmt.Println(userCreateEntityNotFoundError)
-		return nil, *userCreateEntityNotFoundError
+		return nil, userCreateEntityNotFoundError
 	}
 
 	return createdUser, nil
 }
 
-func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID string, user *userModel.UserUpdate) (*userModel.User, domainError.InternalError) {
+func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID string, user *userModel.UserUpdate) (*userModel.User, error) {
 	userMappedToRepository := userRepositoryModel.UserUpdateToUserUpdateRepositoryMapper(user)
 	userMappedToRepository.UpdatedAt = time.Now()
 	userMappedToMongoDB, err := utility.MongoMappper(userMappedToRepository)
@@ -204,7 +204,7 @@ func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID
 		var userUpdateError *domainError.InternalError = new(domainError.InternalError)
 		userUpdateError.Location = "User.Data.Repository.UpdateUserById.MongoMapper"
 		userUpdateError.Reason = err.Error()
-		return nil, *userUpdateError
+		return nil, userUpdateError
 	}
 
 	userIDMappedToMongoDB, _ := primitive.ObjectIDFromHex(userID)
@@ -217,11 +217,11 @@ func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID
 		var userUpdateError *domainError.InternalError = new(domainError.InternalError)
 		userUpdateError.Location = "User.Data.Repository.UpdateUserById.Decode"
 		userUpdateError.Reason = err.Error()
-		return nil, *userUpdateError
+		return nil, userUpdateError
 	}
 
 	updatedUser := userRepositoryModel.UserRepositoryToUserMapper(updatedUserRepository)
-	return &updatedUser, domainError.InternalError{}
+	return &updatedUser, nil
 }
 
 func (userRepository *UserRepository) DeleteUserById(ctx context.Context, userID string) error {

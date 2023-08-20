@@ -5,7 +5,6 @@ import (
 	"time"
 
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
-	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain_error"
 )
 
 type Repository interface {
@@ -15,7 +14,7 @@ type Repository interface {
 	CheckEmailDublicate(ctx context.Context, email string) bool
 	SendEmailVerificationMessage(user *userModel.User, data *userModel.EmailData, templateName string) error
 	Register(ctx context.Context, user *userModel.UserCreate) (*userModel.User, error)
-	UpdateUserById(ctx context.Context, userID string, user *userModel.UserUpdate) (*userModel.User, domainError.InternalError)
+	UpdateUserById(ctx context.Context, userID string, user *userModel.UserUpdate) (*userModel.User, error)
 	DeleteUserById(ctx context.Context, userID string) error
 	UpdateNewRegisteredUserById(ctx context.Context, userID string, key string, value string) (*userModel.User, error)
 	UpdatePasswordResetTokenUserByEmail(ctx context.Context, email string, firstKey string, firstValue string, secondKey string, secondValue time.Time) error

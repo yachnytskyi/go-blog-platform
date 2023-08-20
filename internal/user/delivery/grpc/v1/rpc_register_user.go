@@ -23,21 +23,19 @@ func (userGrpcServer *UserGrpcServer) Register(ctx context.Context, request *pb.
 
 	createdUser, createdUserErrors := userGrpcServer.userUseCase.Register(ctx, &user)
 
-	if len(createdUserErrors) != 0 {
-		for _, userCreateErrorType := range createdUserErrors {
-			if userCreateErrorView, ok := userCreateErrorType.(*domainError.ValidationError); ok {
-				return nil, userCreateErrorView
+	if createdUserErrors != nil {
 
-			} else {
-				var userCreateErrorView *domainError.InternalError = new(domainError.InternalError)
-
-				userCreateErrorView.Location = "UserCreate.Delivery.Grpc.V1.Register.createdUserErrors"
-				userCreateErrorView.Code = codes.Internal.String()
-				userCreateErrorView.Reason = "reason:" + " something went wrong, please repeat later"
-
-				return nil, userCreateErrorView
-			}
+		switch errorType := createdUserErrors.(type) {
+		case *domainError.ValidationError:
+			return nil, errorType
+		case *domainError.ErrorMessage:
+			return nil, errorType
+		default:
+			var defaultError *domainError.ErrorMessage = new(domainError.ErrorMessage)
+			defaultError.Notification = "reason:" + " something went wrong, please repeat later"
+			return nil, errorType
 		}
+
 	}
 
 	// Generate verification code.

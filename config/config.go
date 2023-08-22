@@ -13,6 +13,9 @@ const (
 
 	SendingEmailNotification = "We sent an email with a verification code to "
 	TemplateName             = "verificationCode.html"
+
+	InternalErrorNotification                  = "something went wrong, please repeat later"
+	SendingEmailWithIntstructionsNotifications = "We sent you an email with needed instructions"
 )
 
 type Config struct {

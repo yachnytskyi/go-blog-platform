@@ -94,7 +94,7 @@ func (userController *UserController) Register(ctx *gin.Context) {
 	}
 
 	welcomeMessage := &userViewModel.UserWelcomeMessageView{
-		Message: httpUtility.SendingEmailNotification + createdUserData.Email,
+		Message: config.SendingEmailNotification + createdUserData.Email,
 		Status:  "success",
 	}
 
@@ -223,7 +223,7 @@ func (userController *UserController) ForgottenPassword(ctx *gin.Context) {
 		return
 	}
 
-	message := httpUtility.SendingEmailWithIntstructionsNotifications
+	message := config.SendingEmailWithIntstructionsNotifications
 	fetchedUser, err := userController.userUseCase.GetUserByEmail(ctx.Request.Context(), userViewEmail.Email)
 
 	if err != nil {

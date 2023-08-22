@@ -52,7 +52,7 @@ func DeserializeUser(userUseCase user.UseCase) gin.HandlerFunc {
 
 		userMappedToUserView := userViewModel.UserToUserViewMapper(user)
 
-		ctx.Set("currentUser", &userMappedToUserView)
+		ctx.Set("currentUser", userMappedToUserView)
 		ctx.Next()
 	}
 }

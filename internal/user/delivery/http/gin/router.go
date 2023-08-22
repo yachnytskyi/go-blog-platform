@@ -16,11 +16,12 @@ func NewUserRouter(userController UserController) UserRouter {
 
 func (userRouter *UserRouter) UserRouter(routerGroup *gin.RouterGroup, userUseCase user.UseCase) {
 	router := routerGroup.Group("/users")
-
-	router.POST("/register", userRouter.userController.Register)
-	router.POST("/login", userRouter.userController.Login)
 	router.GET("/", userRouter.userController.GetAllUsers)
 	router.GET("/:userID", userRouter.userController.GetUserById)
+	router.POST("/login", userRouter.userController.Login)
+	router.POST("/register", userRouter.userController.Register)
+	router.POST("/forgotten-password", userRouter.userController.ForgottenPassword)
+	router.PATCH("/reset-password/:resetToken", userRouter.userController.ResetUserPassword)
 
 	router.Use(httpGinUtility.DeserializeUser(userUseCase))
 	router.GET("/me", userRouter.userController.GetMe)
@@ -28,7 +29,5 @@ func (userRouter *UserRouter) UserRouter(routerGroup *gin.RouterGroup, userUseCa
 	router.DELETE("/delete", userRouter.userController.Delete)
 	router.GET("/refresh", userRouter.userController.RefreshAccessToken)
 	router.GET("/logout", userRouter.userController.Logout)
-	router.POST("/forgotten-password", userRouter.userController.ForgottenPassword)
-	router.PATCH("/reset-password/:resetToken", userRouter.userController.ResetUserPassword)
 
 }

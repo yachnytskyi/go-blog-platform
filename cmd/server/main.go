@@ -4,7 +4,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"html/template"
 	"log"
 	"net"
 
@@ -28,6 +27,8 @@ import (
 	userHttpGinPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin"
 	userUseCasePackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
 
+	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain_error"
+
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -42,7 +43,7 @@ var (
 	userCollection *mongo.Collection
 	userRepository userPackage.Repository
 	userUseCase    userPackage.UseCase
-	userHandler    userHttpGinPackage.UserController
+	userController userHttpGinPackage.UserController
 	userRouter     userHttpGinPackage.UserRouter
 
 	postCollection *mongo.Collection
@@ -51,25 +52,27 @@ var (
 	postHandler    postHttpGinPackage.PostHandler
 	postRouter     postHttpGinPackage.PostRouter
 
-	templateInstance *template.Template
+	// templateInstance *template.Template
 )
 
 // Init function that will run before the "main" function.
 func init() {
 
 	// Load the .env variables.
-	templateInstance = template.Must(template.ParseGlob("internal/user/delivery/http/utility/template/*.html"))
-	config, err := config.LoadConfig(".")
-
-	if err != nil {
-		log.Fatal("Could not load environment variables", err)
+	loadConfig, loadConfigError := config.LoadConfig(".")
+	if loadConfigError != nil {
+		var loadConfigInternalError *domainError.InternalError = new(domainError.InternalError)
+		loadConfigInternalError.Location = "cmd.server.init.LoadConfig"
+		loadConfigInternalError.Reason = loadConfigError.Error()
+		fmt.Println(loadConfigInternalError)
+		log.Fatal("Could not load config")
 	}
 
 	// Create a context.
 	ctx = context.TODO()
 
 	// Connect to MongoDB.
-	mongoconn := options.Client().ApplyURI(config.MongoURI)
+	mongoconn := options.Client().ApplyURI(loadConfig.MongoURI)
 	mongoClient, err := mongo.Connect(ctx, mongoconn)
 
 	if err != nil {
@@ -95,11 +98,11 @@ func init() {
 	postUseCase = postUseCasePackage.NewPostUseCase(postRepository)
 
 	// Handlers
-	userHandler = userHttpGinPackage.NewUserHandler(userUseCase, templateInstance)
+	userController = userHttpGinPackage.NewUserController(userUseCase)
 	postHandler = postHttpGinPackage.NewPostHandler(postUseCase)
 
 	// Routers.
-	userRouter = userHttpGinPackage.NewUserRouter(userHandler)
+	userRouter = userHttpGinPackage.NewUserRouter(userController)
 	postRouter = postHttpGinPackage.NewPostRouter(postHandler)
 
 	// Create the Gin Engine instance.

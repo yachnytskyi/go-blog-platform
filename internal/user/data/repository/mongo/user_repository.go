@@ -101,7 +101,6 @@ func (userRepository *UserRepository) GetUserById(ctx context.Context, userID st
 
 func (userRepository *UserRepository) GetUserByEmail(ctx context.Context, email string) (*userModel.User, error) {
 	var fetchedUser *userRepositoryModel.UserRepository
-
 	query := bson.M{"email": strings.ToLower(email)}
 	err := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
 
@@ -135,12 +134,26 @@ func (userRepository *UserRepository) CheckEmailDublicate(ctx context.Context, e
 }
 
 func (userRepository *UserRepository) SendEmailVerificationMessage(user *userModel.User, data *userModel.EmailData, templateName string) error {
-	err := userRepositoryMail.SendEmail(user, data, templateName)
+	sendEmailError := userRepositoryMail.SendEmail(user, data, templateName)
 
-	if err != nil {
+	if sendEmailError != nil {
 		var sendEmailInternalError *domainError.InternalError = new(domainError.InternalError)
 		sendEmailInternalError.Location = "User.Data.Repository.SendEmailVerificationMessage.SendEmail"
-		sendEmailInternalError.Reason = err.Error()
+		sendEmailInternalError.Reason = sendEmailError.Error()
+		fmt.Println(sendEmailInternalError)
+		return sendEmailInternalError
+	}
+
+	return nil
+}
+
+func (userRepository *UserRepository) SendEmailForgottenPasswordMessage(user *userModel.User, data *userModel.EmailData, templateName string) error {
+	sendEmailError := userRepositoryMail.SendEmail(user, data, templateName)
+
+	if sendEmailError != nil {
+		var sendEmailInternalError *domainError.InternalError = new(domainError.InternalError)
+		sendEmailInternalError.Location = "User.Data.Repository.ForgottenPasswordMessage.SendEmail"
+		sendEmailInternalError.Reason = sendEmailError.Error()
 		fmt.Println(sendEmailInternalError)
 		return sendEmailInternalError
 	}

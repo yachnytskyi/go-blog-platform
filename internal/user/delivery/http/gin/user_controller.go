@@ -2,8 +2,6 @@ package gin
 
 import (
 	"fmt"
-	"html/template"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -22,14 +20,13 @@ import (
 
 type UserController struct {
 	userUseCase user.UseCase
-	template    *template.Template
 }
 
-func NewUserHandler(userUseCase user.UseCase, template *template.Template) UserController {
-	return UserController{userUseCase: userUseCase, template: template}
+func NewUserController(userUseCase user.UseCase) UserController {
+	return UserController{userUseCase: userUseCase}
 }
 
-func (userHandler *UserController) GetAllUsers(ctx *gin.Context) {
+func (userController *UserController) GetAllUsers(ctx *gin.Context) {
 	page := ctx.DefaultQuery("page", "1")
 	limit := ctx.DefaultQuery("limit", "10")
 
@@ -47,7 +44,7 @@ func (userHandler *UserController) GetAllUsers(ctx *gin.Context) {
 		return
 	}
 
-	fetchedUsers, err := userHandler.userUseCase.GetAllUsers(ctx.Request.Context(), intPage, intLimit)
+	fetchedUsers, err := userController.userUseCase.GetAllUsers(ctx.Request.Context(), intPage, intLimit)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
@@ -57,16 +54,16 @@ func (userHandler *UserController) GetAllUsers(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, userViewModel.UsersToUsersViewMapper(fetchedUsers))
 }
 
-func (userHandler *UserController) GetMe(ctx *gin.Context) {
+func (userController *UserController) GetMe(ctx *gin.Context) {
 	currentUserView := ctx.MustGet("currentUser").(*userViewModel.UserView)
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": currentUserView}})
 }
 
-func (userHandler *UserController) GetUserById(ctx *gin.Context) {
+func (userController *UserController) GetUserById(ctx *gin.Context) {
 	userID := ctx.Param("userID")
 
-	fetchedUser, err := userHandler.userUseCase.GetUserById(ctx.Request.Context(), userID)
+	fetchedUser, err := userController.userUseCase.GetUserById(ctx.Request.Context(), userID)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "Id exists") {
@@ -80,7 +77,7 @@ func (userHandler *UserController) GetUserById(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": userViewModel.UserToUserViewMapper(fetchedUser)}})
 }
 
-func (userHandler *UserController) Register(ctx *gin.Context) {
+func (userController *UserController) Register(ctx *gin.Context) {
 	var createdUserViewData *userViewModel.UserCreateView = new(userViewModel.UserCreateView)
 
 	if err := ctx.ShouldBindJSON(&createdUserViewData); err != nil {
@@ -89,7 +86,7 @@ func (userHandler *UserController) Register(ctx *gin.Context) {
 	}
 
 	createdUserData := userViewModel.UserCreateViewToUserCreateMapper((*userViewModel.UserCreateView)(createdUserViewData))
-	_, createdUserError := userHandler.userUseCase.Register(ctx.Request.Context(), createdUserData)
+	_, createdUserError := userController.userUseCase.Register(ctx.Request.Context(), createdUserData)
 
 	if createdUserError != nil {
 		ctx.JSON(http.StatusBadRequest, httpUtility.ErrorToErrorViewMapper(createdUserError))
@@ -104,7 +101,7 @@ func (userHandler *UserController) Register(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, welcomeMessage)
 }
 
-func (userHandler *UserController) UpdateUserById(ctx *gin.Context) {
+func (userController *UserController) UpdateUserById(ctx *gin.Context) {
 	currentUserView := ctx.MustGet("currentUser").(*userViewModel.UserView)
 	userID := currentUserView.UserID
 
@@ -116,7 +113,7 @@ func (userHandler *UserController) UpdateUserById(ctx *gin.Context) {
 	}
 
 	updatedUserData := userViewModel.UserUpdateViewToUserUpdateMapper(updatedUserViewData)
-	updatedUser, updatedUserError := userHandler.userUseCase.UpdateUserById(ctx.Request.Context(), userID, &updatedUserData)
+	updatedUser, updatedUserError := userController.userUseCase.UpdateUserById(ctx.Request.Context(), userID, &updatedUserData)
 
 	if updatedUserError != nil {
 		ctx.JSON(http.StatusBadRequest, httpUtility.ErrorToErrorViewMapper(updatedUserError))
@@ -125,11 +122,11 @@ func (userHandler *UserController) UpdateUserById(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, userViewModel.UserToUserViewMapper(updatedUser))
 }
 
-func (userHandler *UserController) Delete(ctx *gin.Context) {
+func (userController *UserController) Delete(ctx *gin.Context) {
 	currentUser := ctx.MustGet("currentUser")
 	userID := currentUser.(*userViewModel.UserView).UserID
 
-	err := userHandler.userUseCase.DeleteUserById(ctx.Request.Context(), fmt.Sprint(userID))
+	err := userController.userUseCase.DeleteUserById(ctx.Request.Context(), fmt.Sprint(userID))
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
@@ -138,7 +135,7 @@ func (userHandler *UserController) Delete(ctx *gin.Context) {
 	ctx.JSON(http.StatusNoContent, nil)
 }
 
-func (userHandler *UserController) Login(ctx *gin.Context) {
+func (userController *UserController) Login(ctx *gin.Context) {
 	var userLoginViewData *userViewModel.UserLoginView
 
 	if err := ctx.ShouldBindJSON(&userLoginViewData); err != nil {
@@ -147,7 +144,7 @@ func (userHandler *UserController) Login(ctx *gin.Context) {
 	}
 
 	userLoginData := userViewModel.UserLoginViewToUserLoginMapper(userLoginViewData)
-	userID, err := userHandler.userUseCase.Login(ctx.Request.Context(), &userLoginData)
+	userID, err := userController.userUseCase.Login(ctx.Request.Context(), &userLoginData)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
@@ -176,7 +173,7 @@ func (userHandler *UserController) Login(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
 }
 
-func (userHandler *UserController) RefreshAccessToken(ctx *gin.Context) {
+func (userController *UserController) RefreshAccessToken(ctx *gin.Context) {
 	message := "could not refresh access token"
 
 	currentUserView := ctx.MustGet("currentUser").(*userViewModel.UserView)
@@ -218,7 +215,7 @@ func (userHandler *UserController) RefreshAccessToken(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
 }
 
-func (userHandler *UserController) ForgottenPassword(ctx *gin.Context) {
+func (userController *UserController) ForgottenPassword(ctx *gin.Context) {
 	var userViewEmail *userViewModel.UserForgottenPasswordView
 
 	if err := ctx.ShouldBindJSON(&userViewEmail); err != nil {
@@ -226,24 +223,12 @@ func (userHandler *UserController) ForgottenPassword(ctx *gin.Context) {
 		return
 	}
 
-	message := "We sent you an email with needed instructions"
-
-	fetchedUser, err := userHandler.userUseCase.GetUserByEmail(ctx.Request.Context(), userViewEmail.Email)
+	message := httpUtility.SendingEmailWithIntstructionsNotifications
+	fetchedUser, err := userController.userUseCase.GetUserByEmail(ctx.Request.Context(), userViewEmail.Email)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": err.Error()})
 		return
-	}
-
-	if !fetchedUser.Verified {
-		ctx.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": "Please verify you account"})
-		return
-	}
-
-	config, err := config.LoadConfig(".")
-
-	if err != nil {
-		log.Fatal("Could not load config", err)
 	}
 
 	// Generate verification code.
@@ -252,34 +237,17 @@ func (userHandler *UserController) ForgottenPassword(ctx *gin.Context) {
 	passwordResetAt := time.Now().Add(time.Minute * 15)
 
 	// Update the user.
-	err = userHandler.userUseCase.UpdatePasswordResetTokenUserByEmail(ctx.Request.Context(), fetchedUser.Email, "passwordResetToken", passwordResetToken, "passwordResetAt", passwordResetAt)
+	err = userController.userUseCase.UpdatePasswordResetTokenUserByEmail(ctx.Request.Context(), fetchedUser.Email, "passwordResetToken", passwordResetToken, "passwordResetAt", passwordResetAt)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "success", "message": err.Error()})
 		return
 	}
 
-	firstName := fetchedUser.Name
-	firstName = httpUtility.UserFirstName(firstName)
-
-	// Send an email.
-	emailData := httpUtility.EmailData{
-		URL:       config.Origin + "/reset-password/" + resetToken,
-		FirstName: firstName,
-		Subject:   "Your password reset token (it is valid for 15 minutes)",
-	}
-
-	err = httpUtility.SendEmail(fetchedUser, &emailData, "resetPassword.html")
-
-	if err != nil {
-		ctx.JSON(http.StatusBadGateway, gin.H{"status": "success", "message": "Error in sending an email"})
-		return
-	}
-
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
 }
 
-func (userHandler *UserController) ResetUserPassword(ctx *gin.Context) {
+func (userController *UserController) ResetUserPassword(ctx *gin.Context) {
 	resetToken := ctx.Params.ByName("resetToken")
 	var userResetPasswordView *userViewModel.UserResetPasswordView
 
@@ -291,20 +259,18 @@ func (userHandler *UserController) ResetUserPassword(ctx *gin.Context) {
 	passwordResetToken := utility.Encode(resetToken)
 
 	// Update the user.
-	err := userHandler.userUseCase.ResetUserPassword(ctx.Request.Context(), "passwordResetToken", passwordResetToken, "passwordResetAt", "password", userResetPasswordView.Password)
+	err := userController.userUseCase.ResetUserPassword(ctx.Request.Context(), "passwordResetToken", passwordResetToken, "passwordResetAt", "password", userResetPasswordView.Password)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 	}
 
 	httpGinUtility.ResetUserPasswordSetCookies(ctx)
-
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "Congratulations! Your password was updated successfully! Please sign in again."})
 
 }
 
-func (userHandler *UserController) Logout(ctx *gin.Context) {
+func (userController *UserController) Logout(ctx *gin.Context) {
 	httpGinUtility.LogoutSetCookies(ctx)
-
 	ctx.JSON(http.StatusOK, gin.H{"status": "success"})
 }

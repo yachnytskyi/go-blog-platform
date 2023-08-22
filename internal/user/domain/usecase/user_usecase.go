@@ -76,31 +76,31 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.Us
 	}
 
 	// Send an email.
-	configLoad, err := config.LoadConfig(".")
+	loadConfig, loadConfigError := config.LoadConfig(".")
 
-	if err != nil {
-		var sendEmailInternalError *domainError.InternalError = new(domainError.InternalError)
-		sendEmailInternalError.Location = "User.Data.Repository.External.Mail.SendEmail.LoadConfig"
-		sendEmailInternalError.Reason = err.Error()
-		fmt.Println(sendEmailInternalError)
-		domainError.ErrorHandler(sendEmailInternalError)
-		return nil, sendEmailInternalError
+	if loadConfigError != nil {
+		var loadConfigInternalError *domainError.InternalError = new(domainError.InternalError)
+		loadConfigInternalError.Location = "User.Domain.UserUseCase.Registration.LoadConfig"
+		loadConfigInternalError.Reason = loadConfigError.Error()
+		fmt.Println(loadConfigInternalError)
+		domainError.ErrorHandler(loadConfigInternalError)
+		return nil, loadConfigInternalError
 	}
 
-	firstName := domainUtility.UserFirstName(createdUser.Name)
+	userFirstName := domainUtility.UserFirstName(createdUser.Name)
 	emailData := userModel.EmailData{
-		URL:       configLoad.Origin + "/verifyemail/" + code,
-		FirstName: firstName,
+		URL:       loadConfig.Origin + "/verifyemail/" + code,
+		FirstName: userFirstName,
 		Subject:   "Your account verification code",
 	}
 
 	if userUseCase.userRepository.SendEmailVerificationMessage(createdUser, &emailData, config.TemplateName) != nil {
-		userCreateErrorMessage := &domainError.ValidationError{
+		sendEmailVerificationMessageError := &domainError.ValidationError{
 			Notification: "domainError.InternalErrorNotification",
 		}
 
-		domainError.ErrorHandler(*userCreateErrorMessage)
-		return nil, userCreateErrorMessage
+		domainError.ErrorHandler(sendEmailVerificationMessageError)
+		return nil, sendEmailVerificationMessageError
 	}
 
 	return createdUser, nil
@@ -156,9 +156,63 @@ func (userUseCase *UserUseCase) UpdateNewRegisteredUserById(ctx context.Context,
 
 func (userUseCase *UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.Context, email string, firstKey string, firstValue string,
 	secondKey string, secondValue time.Time) error {
-	updatedUser := userUseCase.userRepository.UpdatePasswordResetTokenUserByEmail(ctx, email, firstKey, firstValue, secondKey, secondValue)
+	updatedUserError := userUseCase.userRepository.UpdatePasswordResetTokenUserByEmail(ctx, email, firstKey, firstValue, secondKey, secondValue)
 
-	return updatedUser
+	if updatedUserError != nil {
+		updatedUserError = domainError.ErrorHandler(updatedUserError)
+		return updatedUserError
+	}
+
+	// Generate verification code.
+	resetToken := randstr.String(20)
+	passwordResetToken := utility.Encode(resetToken)
+	passwordResetAt := time.Now().Add(time.Minute * 15)
+
+	// Update the user.
+	fetchedUser, fetchedUserError := userUseCase.GetUserByEmail(ctx, email)
+
+	if fetchedUserError != nil {
+		fetchedUserError = domainError.ErrorHandler(fetchedUserError)
+		return fetchedUserError
+	}
+
+	updatedUserPasswordError := userUseCase.userRepository.UpdatePasswordResetTokenUserByEmail(ctx, fetchedUser.Email, "passwordResetToken", passwordResetToken, "passwordResetAt", passwordResetAt)
+
+	if updatedUserPasswordError != nil {
+		updatedUserPasswordError = domainError.ErrorHandler(updatedUserPasswordError)
+		return updatedUserPasswordError
+	}
+
+	userFirstName := domainUtility.UserFirstName(fetchedUser.Name)
+
+	// Send an email.
+	loadConfig, loadConfigError := config.LoadConfig(".")
+
+	if loadConfigError != nil {
+		var sendEmailInternalError *domainError.InternalError = new(domainError.InternalError)
+		sendEmailInternalError.Location = "User.Domain.UserUseCase.UpdatePasswordResetTokenUserByEmail.LoadConfig"
+		sendEmailInternalError.Reason = loadConfigError.Error()
+		fmt.Println(sendEmailInternalError)
+		domainError.ErrorHandler(sendEmailInternalError)
+		return sendEmailInternalError
+	}
+
+	emailData := userModel.EmailData{
+		URL:       loadConfig.Origin + "/reset-password/" + resetToken,
+		FirstName: userFirstName,
+		Subject:   "Your password reset token (it is valid for 15 minutes)",
+	}
+
+	if userUseCase.userRepository.SendEmailForgottenPasswordMessage(fetchedUser, &emailData, config.TemplateName) != nil {
+		sendEmailForgottenPasswordMessage := &domainError.ValidationError{
+			Notification: "domainError.InternalErrorNotification",
+		}
+
+		domainError.ErrorHandler(sendEmailForgottenPasswordMessage)
+		return sendEmailForgottenPasswordMessage
+	}
+
+	return nil
 }
 
 func (userUseCase *UserUseCase) ResetUserPassword(ctx context.Context, firstKey string, firstValue string, secondKey string, passwordKey, password string) error {

@@ -37,6 +37,8 @@ type Config struct {
 	SMTPPassword string `mapstructure:"SMTP_PASSWORD"`
 	SMTPPort     int    `mapstructure:"SMTP_PORT"`
 	SMTPUser     string `mapstructure:"SMTP_USER"`
+
+	UserEmailTemplatePath string `mapstructure:"USER_EMAIL_TEMPLATE_PATH"`
 }
 
 func LoadConfig(path string) (config Config, err error) {

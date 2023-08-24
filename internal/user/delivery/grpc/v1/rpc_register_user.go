@@ -17,7 +17,7 @@ func (userGrpcServer *UserGrpcServer) Register(ctx context.Context, request *pb.
 		PasswordConfirm: request.GetPasswordConfirm(),
 	}
 
-	createdUser, createdUserError := userGrpcServer.userUseCase.Register(ctx, &user)
+	createdUserError := userGrpcServer.userUseCase.Register(ctx, &user)
 
 	if createdUserError != nil {
 
@@ -34,7 +34,7 @@ func (userGrpcServer *UserGrpcServer) Register(ctx context.Context, request *pb.
 
 	}
 
-	message := "We sent an email with a verification code to " + createdUser.Email
+	message := "We sent an email with a verification code to " + user.Email
 	response := &pb.GenericResponse{
 		Status:  "success",
 		Message: message,

@@ -40,7 +40,7 @@ func (userUseCase *UserUseCase) GetUserByEmail(ctx context.Context, email string
 	return fetchedUser, err
 }
 
-func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.UserCreate) (*userModel.User, error) {
+func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.UserCreate) error {
 	if userUseCase.userRepository.CheckEmailDublicate(ctx, user.Email) {
 		userCreateValidationError := &domainError.ValidationError{
 			Field:        "email",
@@ -48,20 +48,20 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.Us
 			Notification: EmailAlreadyExists,
 		}
 
-		domainError.ErrorHandler(*userCreateValidationError)
-		return nil, userCreateValidationError
+		domainError.ErrorHandler(userCreateValidationError)
+		return userCreateValidationError
 	}
 
 	if userCreateValidationErrors := UserCreateValidator(user); userCreateValidationErrors != nil {
 		userCreateValidationErrors = domainError.ErrorHandler(userCreateValidationErrors)
-		return nil, userCreateValidationErrors
+		return userCreateValidationErrors
 	}
 
 	createdUser, userCreateError := userUseCase.userRepository.Register(ctx, user)
 
 	if userCreateError != nil {
 		userCreateError = domainError.ErrorHandler(userCreateError)
-		return nil, userCreateError
+		return userCreateError
 	}
 
 	// Generate verification code.
@@ -72,7 +72,7 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.Us
 
 	if userUpdateError != nil {
 		userUpdateError = domainError.ErrorHandler(userUpdateError)
-		return nil, userUpdateError
+		return userUpdateError
 	}
 
 	// Send an email.
@@ -84,7 +84,7 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.Us
 		loadConfigInternalError.Reason = loadConfigError.Error()
 		fmt.Println(loadConfigInternalError)
 		domainError.ErrorHandler(loadConfigInternalError)
-		return nil, loadConfigInternalError
+		return loadConfigInternalError
 	}
 
 	userFirstName := domainUtility.UserFirstName(createdUser.Name)
@@ -100,10 +100,10 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.Us
 		}
 
 		domainError.ErrorHandler(sendEmailVerificationMessageError)
-		return nil, sendEmailVerificationMessageError
+		return sendEmailVerificationMessageError
 	}
 
-	return createdUser, nil
+	return nil
 }
 
 func (userUseCase *UserUseCase) UpdateUserById(ctx context.Context, userID string, user *userModel.UserUpdate) (*userModel.User, error) {

@@ -12,14 +12,14 @@ type ValidationError struct {
 }
 
 func NewValidationError(field string, fieldType string, notification string) error {
-	return ValidationError{
+	return &ValidationError{
 		Field:        field,
 		FieldType:    fieldType,
 		Notification: notification,
 	}
 }
 
-func (err ValidationError) Error() string {
+func (err *ValidationError) Error() string {
 	return fmt.Sprintf("field: " + err.Field + " " + "type: " + err.FieldType + " notification: " + err.Notification)
 }
 

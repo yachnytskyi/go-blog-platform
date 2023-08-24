@@ -6,26 +6,27 @@ import (
 
 func ValidationErrorToHttpValidationErrorViewMapper(validationError *domainError.ValidationError) *HttpValidationErrorView {
 	return &HttpValidationErrorView{
-		Field:        validationError.Field,
-		FieldType:    validationError.FieldType,
-		Notification: validationError.Notification,
+		HttpValidationErrorView: &HttpValidationBaseErrorView{validationError.Field, validationError.FieldType, validationError.Notification, "fail"},
 	}
 }
 
 func ValidationErrorsToHttpValidationErrorsViewMapper(validationErrors *domainError.ValidationErrors) *HttpValidationErrorsView {
-	httpValidationErrors := make([]*HttpValidationErrorView, 0, len(validationErrors.ValidationErrors))
+	httpValidationErrorsView := make([]*HttpValidationBaseErrorView, 0, len(validationErrors.ValidationErrors))
 	for _, validationError := range validationErrors.ValidationErrors {
-		httpValidationErrorView := ValidationErrorToHttpValidationErrorViewMapper(validationError)
-		httpValidationErrors = append(httpValidationErrors, httpValidationErrorView)
+		httpValidationErrorView := &HttpValidationBaseErrorView{}
+		httpValidationErrorView.Field = validationError.Field
+		httpValidationErrorView.FieldType = validationError.FieldType
+		httpValidationErrorView.Notification = validationError.Notification
+		httpValidationErrorsView = append(httpValidationErrorsView, httpValidationErrorView)
 	}
 
 	return &HttpValidationErrorsView{
-		HttpValidationErrorsView: httpValidationErrors,
+		HttpValidationErrorsView: httpValidationErrorsView, Status: "fail",
 	}
 }
 
 func ErrorMessageToErrorMessageViewMapper(errorMessage *domainError.ErrorMessage) *HttpErrorMessageView {
 	return &HttpErrorMessageView{
-		Notification: errorMessage.Notification,
+		HttpErrorMessageView: &HttpBaseErrorMessageView{errorMessage.Notification, "fail"},
 	}
 }

@@ -5,29 +5,47 @@ import (
 	"strings"
 )
 
-type HttpValidationErrorView struct {
+type HttpValidationBaseErrorView struct {
 	Field        string `json:"field"`
 	FieldType    string `json:"type"`
 	Notification string `json:"notification"`
+	Status       string `json:"status,omitempty"`
 }
 
 func NewHttpValidationError(field string, fieldType string, notification string) error {
-	return HttpValidationErrorView{
+	return &HttpValidationBaseErrorView{
 		Field:        field,
 		FieldType:    fieldType,
 		Notification: notification,
 	}
 }
 
-func (err HttpValidationErrorView) Error() string {
-	return fmt.Sprintf("field: " + err.Field + " " + "type: " + err.FieldType + " notification: " + err.Notification)
+func (httpValidationBaseErrorView *HttpValidationBaseErrorView) Error() string {
+	return fmt.Sprintf("field: " + httpValidationBaseErrorView.Field + " " + "type: " +
+		httpValidationBaseErrorView.FieldType + " notification: " + httpValidationBaseErrorView.Notification + httpValidationBaseErrorView.Status)
+}
+
+type HttpValidationErrorView struct {
+	HttpValidationErrorView *HttpValidationBaseErrorView `json:"error"`
+}
+
+func NewHttpValidationBaseError(httpValidationBaseErrorView *HttpValidationBaseErrorView) error {
+	return &HttpValidationErrorView{
+		HttpValidationErrorView: httpValidationBaseErrorView,
+	}
+}
+
+func (httpValidationErrorView *HttpValidationErrorView) Error() string {
+	return fmt.Sprintf("field: " + httpValidationErrorView.HttpValidationErrorView.Field + " " + "type: " +
+		httpValidationErrorView.HttpValidationErrorView.FieldType + " notification: " + httpValidationErrorView.HttpValidationErrorView.Notification)
 }
 
 type HttpValidationErrorsView struct {
-	HttpValidationErrorsView []*HttpValidationErrorView `json:"errors"`
+	HttpValidationErrorsView []*HttpValidationBaseErrorView `json:"errors"`
+	Status                   string                         `json:"status"`
 }
 
-func NewHttpValidationErrorsView(httpValidationErrorsView []*HttpValidationErrorView) error {
+func NewHttpValidationErrorsView(httpValidationErrorsView []*HttpValidationBaseErrorView) error {
 	return &HttpValidationErrorsView{
 		HttpValidationErrorsView: httpValidationErrorsView,
 	}
@@ -43,16 +61,31 @@ func (httpValidationErrorsView *HttpValidationErrorsView) Error() string {
 	return result.String()
 }
 
-type HttpErrorMessageView struct {
-	Notification string
+type HttpBaseErrorMessageView struct {
+	Notification string `json:"error"`
+	Status       string `json:"status,omitempty"`
 }
 
-func NewErrorMessage(notification string) error {
-	return HttpErrorMessageView{
+func NewHttpBaseErrorMessage(notification string) error {
+	return &HttpBaseErrorMessageView{
 		Notification: notification,
 	}
 }
 
-func (err HttpErrorMessageView) Error() string {
-	return fmt.Sprintf("notification: " + err.Notification)
+func (httpMessageErrorView *HttpBaseErrorMessageView) Error() string {
+	return fmt.Sprintf("notification: " + httpMessageErrorView.Notification + httpMessageErrorView.Status)
+}
+
+type HttpErrorMessageView struct {
+	HttpErrorMessageView *HttpBaseErrorMessageView `json:"error"`
+}
+
+func NewHttpErrorMessage(httpBaseErrorMessageView *HttpBaseErrorMessageView) error {
+	return &HttpErrorMessageView{
+		HttpErrorMessageView: httpBaseErrorMessageView,
+	}
+}
+
+func (httpMessageErrorView *HttpErrorMessageView) Error() string {
+	return fmt.Sprintf("notification: " + httpMessageErrorView.HttpErrorMessageView.Notification)
 }

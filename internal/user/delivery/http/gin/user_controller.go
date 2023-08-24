@@ -62,7 +62,6 @@ func (userController *UserController) GetMe(ctx *gin.Context) {
 
 func (userController *UserController) GetUserById(ctx *gin.Context) {
 	userID := ctx.Param("userID")
-
 	fetchedUser, err := userController.userUseCase.GetUserById(ctx.Request.Context(), userID)
 
 	if err != nil {
@@ -85,8 +84,8 @@ func (userController *UserController) Register(ctx *gin.Context) {
 		return
 	}
 
-	createdUserData := userViewModel.UserCreateViewToUserCreateMapper((*userViewModel.UserCreateView)(createdUserViewData))
-	_, createdUserError := userController.userUseCase.Register(ctx.Request.Context(), createdUserData)
+	createdUserData := userViewModel.UserCreateViewToUserCreateMapper(createdUserViewData)
+	createdUserError := userController.userUseCase.Register(ctx.Request.Context(), createdUserData)
 
 	if createdUserError != nil {
 		ctx.JSON(http.StatusBadRequest, httpUtility.ErrorToErrorViewMapper(createdUserError))
@@ -104,7 +103,6 @@ func (userController *UserController) Register(ctx *gin.Context) {
 func (userController *UserController) UpdateUserById(ctx *gin.Context) {
 	currentUserView := ctx.MustGet("currentUser").(*userViewModel.UserView)
 	userID := currentUserView.UserID
-
 	var updatedUserViewData *userViewModel.UserUpdateView = new(userViewModel.UserUpdateView)
 
 	if err := ctx.ShouldBindJSON(&updatedUserViewData); err != nil {
@@ -125,7 +123,6 @@ func (userController *UserController) UpdateUserById(ctx *gin.Context) {
 func (userController *UserController) Delete(ctx *gin.Context) {
 	currentUser := ctx.MustGet("currentUser")
 	userID := currentUser.(*userViewModel.UserView).UserID
-
 	err := userController.userUseCase.DeleteUserById(ctx.Request.Context(), fmt.Sprint(userID))
 
 	if err != nil {
@@ -169,13 +166,11 @@ func (userController *UserController) Login(ctx *gin.Context) {
 	}
 
 	httpGinUtility.LoginSetCookies(ctx, accessToken, config.AccessTokenMaxAge*60, refreshToken, config.RefreshTokenMaxAge*60)
-
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
 }
 
 func (userController *UserController) RefreshAccessToken(ctx *gin.Context) {
 	message := "could not refresh access token"
-
 	currentUserView := ctx.MustGet("currentUser").(*userViewModel.UserView)
 
 	if currentUserView == nil {
@@ -211,7 +206,6 @@ func (userController *UserController) RefreshAccessToken(ctx *gin.Context) {
 	}
 
 	httpGinUtility.RefreshAccessTokenSetCookies(ctx, accessToken, config.AccessTokenMaxAge*60)
-
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
 }
 

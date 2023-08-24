@@ -1,5 +1,6 @@
 up:
 	docker-compose up -d
+	reflex -s go run cmd/server/main.go 
 
 down:
 	docker-compose down

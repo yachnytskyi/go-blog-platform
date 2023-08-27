@@ -53,5 +53,4 @@ type UserResetPasswordView struct {
 // [GET].
 type UserWelcomeMessageView struct {
 	Message string `json:"message"`
-	Status  string `json:"status"`
 }

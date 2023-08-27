@@ -1,11 +1,11 @@
-package domain_error
+package domain
 
 const (
 	InternalErrorNotification       = "something went wrong, please repeat later"
 	EntityNotFoundErrorNotification = "please repeat it later"
 )
 
-func ErrorHandler(err error) error {
+func HandleError(err error) error {
 	switch errorType := err.(type) {
 	case *ValidationError:
 		return errorType

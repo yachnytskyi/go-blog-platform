@@ -15,7 +15,10 @@ import (
 	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
 
 	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
+	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/http"
+
 	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility"
+	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/model/http"
 )
 
 type UserController struct {
@@ -51,7 +54,10 @@ func (userController *UserController) GetAllUsers(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, userViewModel.UsersToUsersViewMapper(fetchedUsers))
+	jsonResponse := httpModel.NewJsonResponse(userViewModel.UsersToUsersViewMapper(fetchedUsers))
+	httpModel.SetStatus(jsonResponse)
+	ctx.JSON(http.StatusOK, jsonResponse)
+
 }
 
 func (userController *UserController) GetMe(ctx *gin.Context) {
@@ -88,16 +94,18 @@ func (userController *UserController) Register(ctx *gin.Context) {
 	createdUserError := userController.userUseCase.Register(ctx.Request.Context(), createdUserData)
 
 	if createdUserError != nil {
-		ctx.JSON(http.StatusBadRequest, httpUtility.ErrorToErrorViewMapper(createdUserError))
+		jsonResponse := httpError.HandleError(createdUserError)
+		httpModel.SetStatus(jsonResponse)
+		ctx.JSON(http.StatusBadRequest, jsonResponse)
 		return
 	}
 
 	welcomeMessage := &userViewModel.UserWelcomeMessageView{
 		Message: config.SendingEmailNotification + createdUserData.Email,
-		Status:  "success",
 	}
-
-	ctx.JSON(http.StatusCreated, welcomeMessage)
+	jsonResponse := httpModel.NewJsonResponse(welcomeMessage)
+	httpModel.SetStatus(jsonResponse)
+	ctx.JSON(http.StatusCreated, jsonResponse)
 }
 
 func (userController *UserController) UpdateUserById(ctx *gin.Context) {
@@ -114,7 +122,7 @@ func (userController *UserController) UpdateUserById(ctx *gin.Context) {
 	updatedUser, updatedUserError := userController.userUseCase.UpdateUserById(ctx.Request.Context(), userID, &updatedUserData)
 
 	if updatedUserError != nil {
-		ctx.JSON(http.StatusBadRequest, httpUtility.ErrorToErrorViewMapper(updatedUserError))
+		ctx.JSON(http.StatusBadRequest, httpError.HandleError(updatedUserError))
 	}
 
 	ctx.JSON(http.StatusOK, userViewModel.UserToUserViewMapper(updatedUser))

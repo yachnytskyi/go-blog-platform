@@ -1,4 +1,4 @@
-package domain_error
+package domain
 
 import (
 	"fmt"

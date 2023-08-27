@@ -13,7 +13,7 @@ import (
 	repositoryUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/utility"
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility"
-	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain_error"
+	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"

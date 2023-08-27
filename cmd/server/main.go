@@ -27,7 +27,7 @@ import (
 	userHttpGinPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin"
 	userUseCasePackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
 
-	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain_error"
+	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -49,7 +49,7 @@ var (
 	postCollection *mongo.Collection
 	postRepository postPackage.Repository
 	postUseCase    postPackage.UseCase
-	postHandler    postHttpGinPackage.PostHandler
+	postController postHttpGinPackage.PostHandler
 	postRouter     postHttpGinPackage.PostRouter
 
 	// templateInstance *template.Template
@@ -99,11 +99,11 @@ func init() {
 
 	// Handlers
 	userController = userHttpGinPackage.NewUserController(userUseCase)
-	postHandler = postHttpGinPackage.NewPostHandler(postUseCase)
+	postController = postHttpGinPackage.NewPostHandler(postUseCase)
 
 	// Routers.
 	userRouter = userHttpGinPackage.NewUserRouter(userController)
-	postRouter = postHttpGinPackage.NewPostRouter(postHandler)
+	postRouter = postHttpGinPackage.NewPostRouter(postController)
 
 	// Create the Gin Engine instance.
 	server = gin.Default()

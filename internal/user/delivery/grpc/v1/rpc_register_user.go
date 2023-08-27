@@ -6,7 +6,7 @@ import (
 	pb "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1/model/pb"
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 
-	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain_error"
+	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain"
 )
 
 func (userGrpcServer *UserGrpcServer) Register(ctx context.Context, request *pb.UserCreate) (*pb.GenericResponse, error) {

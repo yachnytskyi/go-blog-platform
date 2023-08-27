@@ -11,7 +11,7 @@ import (
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility"
-	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain_error"
+	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain"
 )
 
 type UserUseCase struct {
@@ -48,19 +48,19 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.Us
 			Notification: EmailAlreadyExists,
 		}
 
-		domainError.ErrorHandler(userCreateValidationError)
+		domainError.HandleError(userCreateValidationError)
 		return userCreateValidationError
 	}
 
 	if userCreateValidationErrors := UserCreateValidator(user); userCreateValidationErrors != nil {
-		userCreateValidationErrors = domainError.ErrorHandler(userCreateValidationErrors)
+		userCreateValidationErrors = domainError.HandleError(userCreateValidationErrors)
 		return userCreateValidationErrors
 	}
 
 	createdUser, userCreateError := userUseCase.userRepository.Register(ctx, user)
 
 	if userCreateError != nil {
-		userCreateError = domainError.ErrorHandler(userCreateError)
+		userCreateError = domainError.HandleError(userCreateError)
 		return userCreateError
 	}
 
@@ -71,7 +71,7 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.Us
 	_, userUpdateError := userUseCase.userRepository.UpdateNewRegisteredUserById(ctx, createdUser.UserID, "verificationCode", verificationCode)
 
 	if userUpdateError != nil {
-		userUpdateError = domainError.ErrorHandler(userUpdateError)
+		userUpdateError = domainError.HandleError(userUpdateError)
 		return userUpdateError
 	}
 
@@ -83,7 +83,7 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.Us
 		loadConfigInternalError.Location = "User.Domain.UserUseCase.Registration.LoadConfig"
 		loadConfigInternalError.Reason = loadConfigError.Error()
 		fmt.Println(loadConfigInternalError)
-		domainError.ErrorHandler(loadConfigInternalError)
+		domainError.HandleError(loadConfigInternalError)
 		return loadConfigInternalError
 	}
 
@@ -99,7 +99,7 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.Us
 			Notification: "domainError.InternalErrorNotification",
 		}
 
-		domainError.ErrorHandler(sendEmailVerificationMessageError)
+		domainError.HandleError(sendEmailVerificationMessageError)
 		return sendEmailVerificationMessageError
 	}
 
@@ -159,7 +159,7 @@ func (userUseCase *UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.
 	updatedUserError := userUseCase.userRepository.UpdatePasswordResetTokenUserByEmail(ctx, email, firstKey, firstValue, secondKey, secondValue)
 
 	if updatedUserError != nil {
-		updatedUserError = domainError.ErrorHandler(updatedUserError)
+		updatedUserError = domainError.HandleError(updatedUserError)
 		return updatedUserError
 	}
 
@@ -172,14 +172,14 @@ func (userUseCase *UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.
 	fetchedUser, fetchedUserError := userUseCase.GetUserByEmail(ctx, email)
 
 	if fetchedUserError != nil {
-		fetchedUserError = domainError.ErrorHandler(fetchedUserError)
+		fetchedUserError = domainError.HandleError(fetchedUserError)
 		return fetchedUserError
 	}
 
 	updatedUserPasswordError := userUseCase.userRepository.UpdatePasswordResetTokenUserByEmail(ctx, fetchedUser.Email, "passwordResetToken", passwordResetToken, "passwordResetAt", passwordResetAt)
 
 	if updatedUserPasswordError != nil {
-		updatedUserPasswordError = domainError.ErrorHandler(updatedUserPasswordError)
+		updatedUserPasswordError = domainError.HandleError(updatedUserPasswordError)
 		return updatedUserPasswordError
 	}
 
@@ -193,7 +193,7 @@ func (userUseCase *UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.
 		sendEmailInternalError.Location = "User.Domain.UserUseCase.UpdatePasswordResetTokenUserByEmail.LoadConfig"
 		sendEmailInternalError.Reason = loadConfigError.Error()
 		fmt.Println(sendEmailInternalError)
-		domainError.ErrorHandler(sendEmailInternalError)
+		domainError.HandleError(sendEmailInternalError)
 		return sendEmailInternalError
 	}
 
@@ -208,7 +208,7 @@ func (userUseCase *UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.
 			Notification: "domainError.InternalErrorNotification",
 		}
 
-		domainError.ErrorHandler(sendEmailForgottenPasswordMessage)
+		domainError.HandleError(sendEmailForgottenPasswordMessage)
 		return sendEmailForgottenPasswordMessage
 	}
 

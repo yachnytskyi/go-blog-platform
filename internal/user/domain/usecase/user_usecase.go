@@ -40,8 +40,8 @@ func (userUseCase *UserUseCase) GetUserByEmail(ctx context.Context, email string
 	return fetchedUser, err
 }
 
-func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.UserCreate) error {
-	if userUseCase.userRepository.CheckEmailDublicate(ctx, user.Email) {
+func (userUseCase *UserUseCase) Register(ctx context.Context, userCreate *userModel.UserCreate) error {
+	if userUseCase.userRepository.CheckEmailDublicate(ctx, userCreate.Email) {
 		userCreateValidationError := &domainError.ValidationError{
 			Field:        "email",
 			FieldType:    "required",
@@ -52,12 +52,14 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, user *userModel.Us
 		return userCreateValidationError
 	}
 
-	if userCreateValidationErrors := UserCreateValidator(user); userCreateValidationErrors != nil {
+	if userCreateValidationErrors := UserCreateValidator(userCreate); userCreateValidationErrors != nil {
 		userCreateValidationErrors = domainError.HandleError(userCreateValidationErrors)
 		return userCreateValidationErrors
 	}
 
-	createdUser, userCreateError := userUseCase.userRepository.Register(ctx, user)
+	userCreate.Verified = true
+	userCreate.Role = "user"
+	createdUser, userCreateError := userUseCase.userRepository.Register(ctx, userCreate)
 
 	if userCreateError != nil {
 		userCreateError = domainError.HandleError(userCreateError)

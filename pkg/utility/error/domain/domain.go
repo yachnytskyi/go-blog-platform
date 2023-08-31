@@ -45,7 +45,6 @@ func (validationErrors *ValidationErrors) Error() string {
 
 type EntityNotFoundError struct {
 	Location string
-	Code     string
 	Reason   string
 }
 
@@ -62,7 +61,6 @@ func (err *EntityNotFoundError) Error() string {
 
 type InternalError struct {
 	Location string
-	Code     string
 	Reason   string
 }
 

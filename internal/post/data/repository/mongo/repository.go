@@ -61,7 +61,8 @@ func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int,
 		fetchedPosts = append(fetchedPosts, post)
 	}
 
-	if err := cursor.Err(); err != nil {
+	err = cursor.Err()
+	if err != nil {
 		return nil, err
 	}
 
@@ -83,7 +84,8 @@ func (postRepository *PostRepository) GetPostById(ctx context.Context, postID st
 
 	var fetchedPost *postModel.Post
 
-	if err := postRepository.collection.FindOne(ctx, query).Decode(&fetchedPost); err != nil {
+	err := postRepository.collection.FindOne(ctx, query).Decode(&fetchedPost)
+	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return nil, errors.New("no document with that Id exists")
 		}
@@ -102,7 +104,8 @@ func (postRepository *PostRepository) CreatePost(ctx context.Context, post *post
 	result, err := postRepository.collection.InsertOne(ctx, postMappedToRepository)
 
 	if err != nil {
-		if er, ok := err.(mongo.WriteException); ok && er.WriteErrors[0].Code == 11000 {
+		er, ok := err.(mongo.WriteException)
+		if ok && er.WriteErrors[0].Code == 11000 {
 			return nil, errors.New("post with that title already exists")
 		}
 		return nil, err
@@ -113,14 +116,16 @@ func (postRepository *PostRepository) CreatePost(ctx context.Context, post *post
 
 	index := mongo.IndexModel{Keys: bson.M{"title": 1}, Options: option}
 
-	if _, err := postRepository.collection.Indexes().CreateOne(ctx, index); err != nil {
+	_, err = postRepository.collection.Indexes().CreateOne(ctx, index)
+	if err != nil {
 		return nil, errors.New("could not create an index for a title")
 	}
 
 	var createdPost *postModel.Post
 	query := bson.M{"_id": result.InsertedID}
 
-	if err = postRepository.collection.FindOne(ctx, query).Decode(&createdPost); err != nil {
+	err = postRepository.collection.FindOne(ctx, query).Decode(&createdPost)
+	if err != nil {
 		return nil, err
 	}
 
@@ -144,7 +149,8 @@ func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID
 
 	var updatedPost *postModel.Post
 
-	if err := result.Decode(&updatedPost); err != nil {
+	err = result.Decode(&updatedPost)
+	if err != nil {
 		return nil, errors.New("sorry, but this title already exists. Please choose another one")
 	}
 

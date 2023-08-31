@@ -23,7 +23,8 @@ func (userGrpcServer *UserGrpcServer) Login(ctx context.Context, request *pb.Log
 		return nil, status.Errorf(codes.PermissionDenied, "You are not verified, please verify your email to login")
 	}
 
-	if err := domainUtility.VerifyPassword(user.Password, request.GetPassword()); err != nil {
+	err = domainUtility.VerifyPassword(user.Password, request.GetPassword())
+	if err != nil {
 
 		return nil, status.Errorf(codes.InvalidArgument, "Invalid email or Password")
 	}

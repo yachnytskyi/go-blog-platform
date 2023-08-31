@@ -2,7 +2,7 @@ package http
 
 type JsonResponse struct {
 	Data   any    `json:"data,omitempty"`
-	Error  error  `json:"error,omitempty"`
+	Error  any    `json:"error,omitempty"`
 	Errors any    `json:"errors,omitempty"`
 	Status string `json:"status"`
 }
@@ -13,17 +13,24 @@ func NewJsonResponse(data any) *JsonResponse {
 	}
 }
 
-func NewJsonResponseWithError(err error) *JsonResponse {
-	return &JsonResponse{
-		Error: err,
+func NewJsonResponseWithError(err any) *JsonResponse {
+	_, ok := err.(error)
+	if ok {
+		return &JsonResponse{
+			Error: err,
+		}
+	} else {
+		return &JsonResponse{
+			Errors: err,
+		}
 	}
 }
 
-func NewJsonResponseWithErrors(errors any) *JsonResponse {
-	return &JsonResponse{
-		Errors: errors,
-	}
-}
+// func NewJsonResponseWithErrors(errors any) *JsonResponse {
+// 	return &JsonResponse{
+// 		Errors: errors,
+// 	}
+// }
 
 func SetStatus(jsonResponse *JsonResponse) *JsonResponse {
 	if jsonResponse.Data != nil {

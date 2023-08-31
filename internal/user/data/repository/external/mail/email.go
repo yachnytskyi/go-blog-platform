@@ -44,7 +44,6 @@ func ParseTemplateDirectory(directory string) (*template.Template, error) {
 		fmt.Println(sendEmailInternalError)
 		return nil, sendEmailInternalError
 	}
-
 	return template.ParseFiles(paths...)
 }
 
@@ -92,13 +91,13 @@ func SendEmail(user *userModel.User, data *userModel.EmailData, templateName str
 	dialer.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 
 	// Send an email.
-	if dialAndSendError := dialer.DialAndSend(message); dialAndSendError != nil {
+	dialAndSendError := dialer.DialAndSend(message)
+	if dialAndSendError != nil {
 		var sendEmailInternalError *domainError.InternalError = new(domainError.InternalError)
 		sendEmailInternalError.Location = "User.Data.Repository.External.Mail.SendEmail.DialAndSend"
 		sendEmailInternalError.Reason = dialAndSendError.Error()
 		fmt.Println(sendEmailInternalError)
 		return sendEmailInternalError
 	}
-
 	return nil
 }

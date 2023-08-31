@@ -43,7 +43,8 @@ func (postUseCase *PostUseCase) UpdatePostById(ctx context.Context, postID strin
 
 	userID := fetchedPost.UserID
 
-	if err := utility.IsUserOwner(currentUserID, userID); err != nil {
+	err = utility.IsUserOwner(currentUserID, userID)
+	if err != nil {
 		return nil, err
 	}
 
@@ -61,7 +62,8 @@ func (postUseCase *PostUseCase) DeletePostByID(ctx context.Context, postID strin
 
 	userID := fetchedPost.UserID
 
-	if err := utility.IsUserOwner(currentUserID, userID); err != nil {
+	err = utility.IsUserOwner(currentUserID, userID)
+	if err != nil {
 		return err
 	}
 

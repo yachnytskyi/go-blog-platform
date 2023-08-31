@@ -38,9 +38,7 @@ func (httpValidationErrorsView *HttpValidationErrorsView) Error() string {
 	var result strings.Builder
 	for _, validationError := range httpValidationErrorsView.HttpValidationErrorsView {
 		result.WriteString("field: " + validationError.Field + " " + "type: " + validationError.FieldType + " notification: " + validationError.Notification)
-
 	}
-
 	return result.String()
 }
 

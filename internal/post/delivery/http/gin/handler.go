@@ -72,7 +72,8 @@ func (postHandler *PostHandler) CreatePost(ctx *gin.Context) {
 	createdPostData.User = currentUser.Name
 	createdPostData.UserID = currentUser.UserID
 
-	if err := ctx.ShouldBindJSON(&createdPostData); err != nil {
+	err := ctx.ShouldBindJSON(&createdPostData)
+	if err != nil {
 		ctx.JSON(http.StatusBadRequest, err.Error())
 	}
 
@@ -96,7 +97,8 @@ func (postHandler *PostHandler) UpdatePostById(ctx *gin.Context) {
 
 	var updatedPostData *postModel.PostUpdate = new(postModel.PostUpdate)
 
-	if err := ctx.ShouldBindJSON(&updatedPostData); err != nil {
+	err := ctx.ShouldBindJSON(&updatedPostData)
+	if err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}

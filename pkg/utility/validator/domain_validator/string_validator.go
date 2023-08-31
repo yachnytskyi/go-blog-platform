@@ -13,52 +13,72 @@ func StringToLower(preparedString *string) {
 	*preparedString = strings.ToLower(*preparedString)
 }
 
-func IsCorrectLengthText(text string, minLength int, maxLength int) bool {
-	flag := true
-
+func CheckCorrectLengthString(text string, minLength int, maxLength int) bool {
 	if len(text) < minLength || len(text) > maxLength {
-		flag = false
+		return false
 	}
-
-	return flag
+	return true
 }
 
-func IsStringContainsSpecialCharacters(checkedString string, regexString string) bool {
-	flag := false
-
+func CheckSpecialCharactersString(checkedString string, regexString string) bool {
 	if !regexp.MustCompile(regexString).MatchString(checkedString) {
-		flag = true
+		return true
 	}
-
-	return flag
+	return false
 }
 
-func StringsMatch(firstString string, secondString string) bool {
-	flag := true
-
+func CheckMatchStrings(firstString string, secondString string) bool {
 	if firstString != secondString {
-		flag = false
+		return false
 	}
-
-	return flag
+	return true
 }
 
-func CheckOptionalStringIsCorrectLengthText(text string, minLength int, maxLength int) bool {
-	flag := true
-
+func CheckCorrectLengthOptionalString(text string, minLength int, maxLength int) bool {
 	if len(text) < minLength || len(text) > maxLength {
-		flag = false
+		return false
 	}
-
-	return flag
+	return true
 }
 
-func CheckOptionalStringIsStringContainsSpecialCharacters(checkedString string, regexString string) bool {
-	flag := false
-
+func CheckSpecialCharactersOptionalString(checkedString string, regexString string) bool {
 	if !regexp.MustCompile(regexString).MatchString(checkedString) {
-		flag = true
+		return true
 	}
+	return false
+}
 
-	return flag
+func CheckIncorrectLengthString(text string, minLength int, maxLength int) bool {
+	if len(text) < minLength || len(text) > maxLength {
+		return true
+	}
+	return false
+}
+
+func CheckNoSpecialCharactersString(checkedString string, regexString string) bool {
+	if !regexp.MustCompile(regexString).MatchString(checkedString) {
+		return false
+	}
+	return true
+}
+
+func CheckNoMatchStrings(firstString string, secondString string) bool {
+	if firstString != secondString {
+		return true
+	}
+	return false
+}
+
+func CheckIncorrectLengthOptionalString(text string, minLength int, maxLength int) bool {
+	if len(text) < minLength || len(text) > maxLength {
+		return true
+	}
+	return false
+}
+
+func CheckNoSpecialCharactersOptionalString(checkedString string, regexString string) bool {
+	if !regexp.MustCompile(regexString).MatchString(checkedString) {
+		return false
+	}
+	return true
 }

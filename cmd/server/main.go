@@ -79,7 +79,8 @@ func init() {
 		panic(err)
 	}
 
-	if err := mongoClient.Ping(ctx, readpref.Primary()); err != nil {
+	err = mongoClient.Ping(ctx, readpref.Primary())
+	if err != nil {
 		panic(err)
 	}
 

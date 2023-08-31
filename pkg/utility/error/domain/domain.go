@@ -56,7 +56,7 @@ func NewEntityNotFoundError(location string, reason string) error {
 }
 
 func (err *EntityNotFoundError) Error() string {
-	return fmt.Sprintf("field: " + err.Location + " reason: " + err.Reason)
+	return fmt.Sprintf("location: " + err.Location + " reason: " + err.Reason)
 }
 
 type InternalError struct {
@@ -72,7 +72,7 @@ func NewInternalError(location string, reason string) error {
 }
 
 func (err *InternalError) Error() string {
-	return fmt.Sprintf("field: " + err.Location + " reason: " + err.Reason)
+	return fmt.Sprintf("location: " + err.Location + " reason: " + err.Reason)
 }
 
 type ErrorMessage struct {

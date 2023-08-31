@@ -21,6 +21,7 @@ func UserRepositoryToUserMapper(userRepository *UserRepository) *userModel.User 
 		Email:     userRepository.Email,
 		Password:  userRepository.Password,
 		Role:      userRepository.Role,
+		Verified:  userRepository.Verified,
 		CreatedAt: userRepository.CreatedAt,
 		UpdatedAt: userRepository.UpdatedAt,
 	}
@@ -31,6 +32,7 @@ func UserCreateToUserCreateRepositoryMapper(user *userModel.UserCreate) *UserCre
 		Name:      user.Name,
 		Email:     user.Email,
 		Password:  user.Password,
+		Role:      user.Role,
 		Verified:  user.Verified,
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,

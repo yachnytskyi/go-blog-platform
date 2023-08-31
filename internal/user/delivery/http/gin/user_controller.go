@@ -19,6 +19,7 @@ import (
 
 	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility"
 	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/model/http"
+	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
 type UserController struct {
@@ -34,22 +35,19 @@ func (userController *UserController) GetAllUsers(ctx *gin.Context) {
 	limit := ctx.DefaultQuery("limit", "10")
 
 	intPage, err := strconv.Atoi(page)
-
-	if err != nil {
+	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
 	intLimit, err := strconv.Atoi(limit)
-
-	if err != nil {
+	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
 	fetchedUsers, err := userController.userUseCase.GetAllUsers(ctx.Request.Context(), intPage, intLimit)
-
-	if err != nil {
+	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
@@ -69,8 +67,7 @@ func (userController *UserController) GetMe(ctx *gin.Context) {
 func (userController *UserController) GetUserById(ctx *gin.Context) {
 	userID := ctx.Param("userID")
 	fetchedUser, err := userController.userUseCase.GetUserById(ctx.Request.Context(), userID)
-
-	if err != nil {
+	if validator.IsErrorNotNil(err) {
 		if strings.Contains(err.Error(), "Id exists") {
 			ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": err.Error()})
 			return
@@ -85,7 +82,8 @@ func (userController *UserController) GetUserById(ctx *gin.Context) {
 func (userController *UserController) Register(ctx *gin.Context) {
 	var createdUserViewData *userViewModel.UserCreateView = new(userViewModel.UserCreateView)
 
-	if err := ctx.ShouldBindJSON(&createdUserViewData); err != nil {
+	err := ctx.ShouldBindJSON(&createdUserViewData)
+	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
@@ -113,7 +111,8 @@ func (userController *UserController) UpdateUserById(ctx *gin.Context) {
 	userID := currentUserView.UserID
 	var updatedUserViewData *userViewModel.UserUpdateView = new(userViewModel.UserUpdateView)
 
-	if err := ctx.ShouldBindJSON(&updatedUserViewData); err != nil {
+	err := ctx.ShouldBindJSON(&updatedUserViewData)
+	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
@@ -133,7 +132,7 @@ func (userController *UserController) Delete(ctx *gin.Context) {
 	userID := currentUser.(*userViewModel.UserView).UserID
 	err := userController.userUseCase.DeleteUserById(ctx.Request.Context(), fmt.Sprint(userID))
 
-	if err != nil {
+	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 	}
 
@@ -143,7 +142,8 @@ func (userController *UserController) Delete(ctx *gin.Context) {
 func (userController *UserController) Login(ctx *gin.Context) {
 	var userLoginViewData *userViewModel.UserLoginView
 
-	if err := ctx.ShouldBindJSON(&userLoginViewData); err != nil {
+	err := ctx.ShouldBindJSON(&userLoginViewData)
+	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
@@ -151,7 +151,7 @@ func (userController *UserController) Login(ctx *gin.Context) {
 	userLoginData := userViewModel.UserLoginViewToUserLoginMapper(userLoginViewData)
 	userID, err := userController.userUseCase.Login(ctx.Request.Context(), &userLoginData)
 
-	if err != nil {
+	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
@@ -161,14 +161,14 @@ func (userController *UserController) Login(ctx *gin.Context) {
 	// Generate tokens.
 	accessToken, err := httpUtility.CreateToken(config.AccessTokenExpiresIn, userID, config.AccessTokenPrivateKey)
 
-	if err != nil {
+	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
 	refreshToken, err := httpUtility.CreateToken(config.RefreshTokenExpiresIn, userID, config.RefreshTokenPrivateKey)
 
-	if err != nil {
+	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
@@ -188,7 +188,7 @@ func (userController *UserController) RefreshAccessToken(ctx *gin.Context) {
 
 	cookie, err := ctx.Cookie("refresh_token")
 
-	if err != nil {
+	if validator.IsErrorNotNil(err) {
 		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": message})
 		return
 	}
@@ -197,18 +197,18 @@ func (userController *UserController) RefreshAccessToken(ctx *gin.Context) {
 
 	userID, err := httpUtility.ValidateToken(cookie, config.RefreshTokenPublicKey)
 
-	if err != nil {
+	if validator.IsErrorNotNil(err) {
 		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
-	if err != nil {
+	if validator.IsErrorNotNil(err) {
 		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": "the user is belonged to this token no longer exists "})
 	}
 
 	accessToken, err := httpUtility.CreateToken(config.AccessTokenExpiresIn, userID, config.AccessTokenPrivateKey)
 
-	if err != nil {
+	if validator.IsErrorNotNil(err) {
 		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
@@ -220,7 +220,8 @@ func (userController *UserController) RefreshAccessToken(ctx *gin.Context) {
 func (userController *UserController) ForgottenPassword(ctx *gin.Context) {
 	var userViewEmail *userViewModel.UserForgottenPasswordView
 
-	if err := ctx.ShouldBindJSON(&userViewEmail); err != nil {
+	err := ctx.ShouldBindJSON(&userViewEmail)
+	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
@@ -228,7 +229,7 @@ func (userController *UserController) ForgottenPassword(ctx *gin.Context) {
 	message := config.SendingEmailWithIntstructionsNotifications
 	fetchedUser, err := userController.userUseCase.GetUserByEmail(ctx.Request.Context(), userViewEmail.Email)
 
-	if err != nil {
+	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": err.Error()})
 		return
 	}
@@ -241,7 +242,7 @@ func (userController *UserController) ForgottenPassword(ctx *gin.Context) {
 	// Update the user.
 	err = userController.userUseCase.UpdatePasswordResetTokenUserByEmail(ctx.Request.Context(), fetchedUser.Email, "passwordResetToken", passwordResetToken, "passwordResetAt", passwordResetAt)
 
-	if err != nil {
+	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "success", "message": err.Error()})
 		return
 	}
@@ -253,7 +254,8 @@ func (userController *UserController) ResetUserPassword(ctx *gin.Context) {
 	resetToken := ctx.Params.ByName("resetToken")
 	var userResetPasswordView *userViewModel.UserResetPasswordView
 
-	if err := ctx.ShouldBindJSON(&userResetPasswordView); err != nil {
+	err := ctx.ShouldBindJSON(&userResetPasswordView)
+	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
@@ -261,9 +263,9 @@ func (userController *UserController) ResetUserPassword(ctx *gin.Context) {
 	passwordResetToken := utility.Encode(resetToken)
 
 	// Update the user.
-	err := userController.userUseCase.ResetUserPassword(ctx.Request.Context(), "passwordResetToken", passwordResetToken, "passwordResetAt", "password", userResetPasswordView.Password)
+	err = userController.userUseCase.ResetUserPassword(ctx.Request.Context(), "passwordResetToken", passwordResetToken, "passwordResetAt", "password", userResetPasswordView.Password)
 
-	if err != nil {
+	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 	}
 

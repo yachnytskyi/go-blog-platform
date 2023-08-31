@@ -12,7 +12,7 @@ func HandleError(err error) *httpModel.JsonResponse {
 		return httpModel.NewJsonResponseWithError(ValidationErrorToHttpValidationErrorViewMapper(errorType))
 	case *domainError.ValidationErrors:
 		httpValidationErrors := ValidationErrorsToHttpValidationErrorsViewMapper(errorType)
-		return httpModel.NewJsonResponseWithErrors(httpValidationErrors.HttpValidationErrorsView)
+		return httpModel.NewJsonResponseWithError(httpValidationErrors.HttpValidationErrorsView)
 	case *domainError.ErrorMessage:
 		return &httpModel.JsonResponse{Error: ErrorMessageToErrorMessageViewMapper(errorType)}
 	default:

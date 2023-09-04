@@ -96,7 +96,8 @@ func (postHandler *PostHandler) UpdatePostById(ctx *gin.Context) {
 	currentUserID := ginUtility.GetCurrentUserID(ctx)
 
 	var updatedPostData *postModel.PostUpdate = new(postModel.PostUpdate)
-
+	updatedPostData.PostID = ctx.Param("postID")
+	updatedPostData.UserID = ginUtility.GetCurrentUserID(ctx)
 	err := ctx.ShouldBindJSON(&updatedPostData)
 	if err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
@@ -104,7 +105,6 @@ func (postHandler *PostHandler) UpdatePostById(ctx *gin.Context) {
 	}
 
 	updatedPost, err := postHandler.postUseCase.UpdatePostById(ctx.Request.Context(), postID, updatedPostData, currentUserID)
-
 	if err != nil {
 		if strings.Contains(err.Error(), "Id exists") {
 			ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": err.Error()})
@@ -117,7 +117,6 @@ func (postHandler *PostHandler) UpdatePostById(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
-
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": updatedPost})
 }
 

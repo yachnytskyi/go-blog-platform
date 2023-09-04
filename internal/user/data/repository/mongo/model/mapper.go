@@ -16,7 +16,7 @@ func UsersRepositoryToUsersMapper(usersRepository []*UserRepository) *userModel.
 
 func UserRepositoryToUserMapper(userRepository *UserRepository) *userModel.User {
 	return &userModel.User{
-		UserID:    userRepository.UserID,
+		UserID:    userRepository.UserID.Hex(),
 		Name:      userRepository.Name,
 		Email:     userRepository.Email,
 		Password:  userRepository.Password,

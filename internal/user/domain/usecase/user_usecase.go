@@ -24,21 +24,18 @@ func NewUserUseCase(userRepository user.Repository) user.UseCase {
 }
 
 func (userUseCase *UserUseCase) GetAllUsers(ctx context.Context, page int, limit int) (*userModel.Users, error) {
-	fetchedUsers, err := userUseCase.userRepository.GetAllUsers(ctx, page, limit)
-
-	return fetchedUsers, err
+	fetchedUsers, getAllUsers := userUseCase.userRepository.GetAllUsers(ctx, page, limit)
+	return fetchedUsers, getAllUsers
 }
 
 func (userUseCase *UserUseCase) GetUserById(ctx context.Context, userID string) (*userModel.User, error) {
-	fetchedUser, err := userUseCase.userRepository.GetUserById(ctx, userID)
-
-	return fetchedUser, err
+	fetchedUser, getUserByIdError := userUseCase.userRepository.GetUserById(ctx, userID)
+	return fetchedUser, getUserByIdError
 }
 
 func (userUseCase *UserUseCase) GetUserByEmail(ctx context.Context, email string) (*userModel.User, error) {
-	fetchedUser, err := userUseCase.userRepository.GetUserByEmail(ctx, email)
-
-	return fetchedUser, err
+	fetchedUser, getUserByEmailError := userUseCase.userRepository.GetUserByEmail(ctx, email)
+	return fetchedUser, getUserByEmailError
 }
 
 func (userUseCase *UserUseCase) Register(ctx context.Context, userCreate *userModel.UserCreate) error {
@@ -123,31 +120,29 @@ func (userUseCase *UserUseCase) DeleteUserById(ctx context.Context, userID strin
 	return deletedUser
 }
 
-func (userUseCase *UserUseCase) Login(ctx context.Context, user *userModel.UserLogin) (string, error) {
-	err := UserLoginValidator(user)
-	if validator.IsErrorNotNil(err) {
-		return "", err
+func (userUseCase *UserUseCase) Login(ctx context.Context, userLogin *userModel.UserLogin) (string, error) {
+	userLoginValidationErrors := UserLoginValidator(userLogin)
+	if validator.IsErrorNotNil(userLoginValidationErrors) {
+		return "", userLoginValidationErrors
 	}
-
-	fetchedUser, err := userUseCase.userRepository.GetUserByEmail(ctx, user.Email)
+	fetchedUser, getUserByEmailError := userUseCase.userRepository.GetUserByEmail(ctx, userLogin.Email)
 
 	// Will return wrong email or password.
-	if validator.IsErrorNotNil(err) {
+	if validator.IsErrorNotNil(getUserByEmailError) {
 		return "", fmt.Errorf("invalid email or password")
 	}
 
 	// Verify password - we previously created this method.
-	matchPasswords := domainUtility.VerifyPassword(fetchedUser.Password, user.Password)
+	matchPasswords := domainUtility.VerifyPassword(fetchedUser.Password, userLogin.Password)
 	if validator.IsErrorNotNil(matchPasswords) {
 		return "", fmt.Errorf("invalid email or password")
 	}
-	return fetchedUser.UserID, err
+	return fetchedUser.UserID, nil
 }
 
 func (userUseCase *UserUseCase) UpdateNewRegisteredUserById(ctx context.Context, userID string, key string, value string) (*userModel.User, error) {
-	updatedUser, err := userUseCase.userRepository.UpdateNewRegisteredUserById(ctx, userID, key, value)
-
-	return updatedUser, err
+	updatedUser, updateNewRegisteredUserById := userUseCase.userRepository.UpdateNewRegisteredUserById(ctx, userID, key, value)
+	return updatedUser, updateNewRegisteredUserById
 }
 
 func (userUseCase *UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.Context, email string, firstKey string, firstValue string,

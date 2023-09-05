@@ -27,13 +27,6 @@ func CheckSpecialCharactersString(checkedString string, regexString string) bool
 	return false
 }
 
-func CheckMatchStrings(firstString string, secondString string) bool {
-	if firstString != secondString {
-		return false
-	}
-	return true
-}
-
 func CheckCorrectLengthOptionalString(text string, minLength int, maxLength int) bool {
 	if len(text) < minLength || len(text) > maxLength {
 		return false

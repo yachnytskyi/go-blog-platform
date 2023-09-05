@@ -8,50 +8,50 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/yachnytskyi/golang-mongo-grpc/config"
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
+	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 
 	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
 	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
 )
 
+const (
+	accessToToken = "access_token"
+	authorization = "Authorization"
+	bearer        = "Bearer"
+)
+
 func DeserializeUser(userUseCase user.UseCase) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var accessToken string
-		cookie, err := ctx.Cookie("access_token")
-
-		authorizationHeader := ctx.Request.Header.Get("Authorization")
+		cookie, cookieError := ctx.Cookie(accessToToken)
+		authorizationHeader := ctx.Request.Header.Get(authorization)
 		fields := strings.Fields(authorizationHeader)
-
-		if len(fields) != 0 && fields[0] == "Bearer" {
+		if validator.IsSliceNotEmpty(fields) && validator.CheckMatchStrings(fields[0], bearer) {
 			accessToken = fields[1]
-
-		} else if err == nil {
+		} else if validator.IsErrorNil(cookieError) {
 			accessToken = cookie
 		}
-
-		if accessToken == "" {
+		if validator.IsStringEmpty(accessToken) {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": "fail", "message": "You are not logged in"})
 			return
 		}
 
 		config, _ := config.LoadConfig(".")
-
-		userID, err := httpUtility.ValidateToken(accessToken, config.AccessTokenPublicKey)
-
-		if err != nil {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": "fail", "message": err.Error()})
+		userID, validateTokenError := httpUtility.ValidateToken(accessToken, config.AccessTokenPublicKey)
+		if validator.IsErrorNotNil(validateTokenError) {
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": "fail", "message": validateTokenError.Error()})
 			return
 		}
+
 		context := ctx.Request.Context()
+		user, getUSerByIdError := userUseCase.GetUserById(context, fmt.Sprint(userID))
+		if validator.IsErrorNotNil(getUSerByIdError) {
 
-		user, err := userUseCase.GetUserById(context, fmt.Sprint(userID))
-
-		if err != nil {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": "fail", "message": "You are not logged in"})
 			return
 		}
 
 		userMappedToUserView := userViewModel.UserToUserViewMapper(user)
-
 		ctx.Set("currentUser", userMappedToUserView)
 		ctx.Next()
 	}

@@ -3,13 +3,12 @@ package usecase
 import (
 	"fmt"
 	"net"
-	"net/mail"
-	"regexp"
 	"strconv"
 	"strings"
 
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain"
+	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator/domain"
 )
 
@@ -39,7 +38,7 @@ func UserCreateValidator(userCreate *userModel.UserCreate) error {
 	domainUtility.SanitizeString(&userCreate.PasswordConfirm)
 	domainUtility.StringToLower(&userCreate.Email)
 
-	if !domainUtility.CheckCorrectLengthString(userCreate.Name, minLength, maxLength) {
+	if validator.IsBooleanNotTrue(domainUtility.CheckCorrectLengthString(userCreate.Name, minLength, maxLength)) {
 		userCreateValidationError := &domainError.ValidationError{
 			Field:        "name",
 			FieldType:    "required",
@@ -56,7 +55,7 @@ func UserCreateValidator(userCreate *userModel.UserCreate) error {
 		userCreateValidationErrors.ValidationErrors = append(userCreateValidationErrors.ValidationErrors, userCreateValidationError)
 	}
 
-	if !domainUtility.CheckCorrectLengthString(userCreate.Email, minLength, maxLength) {
+	if validator.IsBooleanNotTrue(domainUtility.CheckCorrectLengthString(userCreate.Email, minLength, maxLength)) {
 		userCreateValidationError := &domainError.ValidationError{
 			Field:        "email",
 			FieldType:    "required",
@@ -73,7 +72,7 @@ func UserCreateValidator(userCreate *userModel.UserCreate) error {
 		}
 		userCreateValidationErrors.ValidationErrors = append(userCreateValidationErrors.ValidationErrors, userCreateValidationError)
 
-	} else if !IsEmailDomainValid(userCreate.Email) {
+	} else if validator.IsBooleanNotTrue(IsEmailDomainValid(userCreate.Email)) {
 		userCreateValidationError := &domainError.ValidationError{
 			Field:        "email",
 			FieldType:    "required",
@@ -83,7 +82,7 @@ func UserCreateValidator(userCreate *userModel.UserCreate) error {
 		userCreateValidationErrors.ValidationErrors = append(userCreateValidationErrors.ValidationErrors, userCreateValidationError)
 	}
 
-	if !domainUtility.CheckCorrectLengthString(userCreate.Password, minLength, maxLength) {
+	if validator.IsBooleanNotTrue(domainUtility.CheckCorrectLengthString(userCreate.Password, minLength, maxLength)) {
 		userCreateValidationError := &domainError.ValidationError{
 			Field:        "password",
 			FieldType:    "required",
@@ -91,7 +90,7 @@ func UserCreateValidator(userCreate *userModel.UserCreate) error {
 		}
 		userCreateValidationErrors.ValidationErrors = append(userCreateValidationErrors.ValidationErrors, userCreateValidationError)
 
-	} else if !domainUtility.CheckMatchStrings(userCreate.Password, userCreate.PasswordConfirm) {
+	} else if validator.IsBooleanNotTrue(validator.CheckMatchStrings(userCreate.Password, userCreate.PasswordConfirm)) {
 		userCreateValidationError := &domainError.ValidationError{
 			Field:        "password",
 			FieldType:    "required",
@@ -105,14 +104,11 @@ func UserCreateValidator(userCreate *userModel.UserCreate) error {
 			FieldType:    "required",
 			Notification: passwordAllowedCharacters,
 		}
-
 		userCreateValidationErrors.ValidationErrors = append(userCreateValidationErrors.ValidationErrors, userCreateValidationError)
 	}
-
-	if len(userCreateValidationErrors.ValidationErrors) != 0 {
+	if validator.IsSliceNotEmpty(userCreateValidationErrors.ValidationErrors) {
 		return userCreateValidationErrors
 	}
-
 	return nil
 }
 
@@ -120,8 +116,7 @@ func UserUpdateValidator(userUpdate *userModel.UserUpdate) error {
 	userUpdateValidationErrors := &domainError.ValidationErrors{}
 	stringAllowedLength := "can be between " + strconv.Itoa(minLength) + " and " + strconv.Itoa(maxLength)
 	domainUtility.SanitizeString(&userUpdate.Name)
-
-	if !domainUtility.CheckCorrectLengthString(userUpdate.Name, minLength, maxLength) {
+	if validator.IsBooleanNotTrue(domainUtility.CheckCorrectLengthString(userUpdate.Name, minLength, maxLength)) {
 		userUpdateValidationError := &domainError.ValidationError{
 			Field:        "name",
 			FieldType:    "required",
@@ -137,11 +132,9 @@ func UserUpdateValidator(userUpdate *userModel.UserUpdate) error {
 		}
 		userUpdateValidationErrors.ValidationErrors = append(userUpdateValidationErrors.ValidationErrors, userUpdateValidationError)
 	}
-
-	if len(userUpdateValidationErrors.ValidationErrors) != 0 {
+	if validator.IsSliceNotEmpty(userUpdateValidationErrors.ValidationErrors) {
 		return userUpdateValidationErrors
 	}
-
 	return nil
 }
 
@@ -159,111 +152,109 @@ func UserLoginValidator(userLogin *userModel.UserLogin) error {
 		err = fmt.Errorf(message)
 	}
 
-	if err != nil {
+	if validator.IsErrorNotNil(err) {
 		message = strings.TrimSpace(message)
 		err = fmt.Errorf(message)
-
 		return err
 	}
-
 	return nil
 }
 
-func UserForgottenPasswordValidator(userForgottenPassword *userModel.UserForgottenPassword) error {
-	var message string
-	var err error
+// func UserForgottenPasswordValidator(userForgottenPassword *userModel.UserForgottenPassword) error {
+// 	var message string
+// 	var err error
 
-	if userForgottenPassword.Email == "" {
-		message = "key: `UserForgottenPasswordView.Email` error: field validation for `email` failed, `email` cannot be empty "
-		err = fmt.Errorf(message)
-	}
+// 	if userForgottenPassword.Email == "" {
+// 		message = "key: `UserForgottenPasswordView.Email` error: field validation for `email` failed, `email` cannot be empty "
+// 		err = fmt.Errorf(message)
+// 	}
 
-	if userForgottenPassword.Email != "" {
-		_, ok := mail.ParseAddress(userForgottenPassword.Email)
-		if ok != nil {
-			message = message + "key: `UserForgottenPasswordView.Email` error: field validation for `email` failed, invalid email address "
-			err = fmt.Errorf(message)
-		}
-	}
+// 	if validator.IsStringNotEmpty(userForgottenPassword.Email) {
+// 		_, ok := mail.ParseAddress(userForgottenPassword.Email)
+// 		if validator.IsErrorNotNil(ok) {
+// 			message = message + "key: `UserForgottenPasswordView.Email` error: field validation for `email` failed, invalid email address "
+// 			err = fmt.Errorf(message)
+// 		}
+// 	}
 
-	if err != nil {
-		message = strings.TrimSpace(message)
-		err = fmt.Errorf(message)
+// 	if validator.IsErrorNotNil(err) {
+// 		message = strings.TrimSpace(message)
+// 		err = fmt.Errorf(message)
 
-		return err
-	}
+// 		return err
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
-func UserResetPasswordValidator(userResetPassword *userModel.UserResetPassword) error {
-	var message string
-	var err error
+// func UserResetPasswordValidator(userResetPassword *userModel.UserResetPassword) error {
+// 	var message string
+// 	var err error
 
-	if userResetPassword.Password == "" {
-		message = "key: `UserResetPasswordView.Password` error: field validation for `password` failed, `password` cannot be empty "
-		err = fmt.Errorf(message)
-	}
+// 	if userResetPassword.Password == "" {
+// 		message = "key: `UserResetPasswordView.Password` error: field validation for `password` failed, `password` cannot be empty "
+// 		err = fmt.Errorf(message)
+// 	}
 
-	if userResetPassword.PasswordConfirm == "" {
-		message = "key: `UserResetPasswordView.PasswordConfirm` error: field validation for `password_confirm` failed, `password_confirm` cannot be empty "
-		err = fmt.Errorf(message)
-	}
+// 	if userResetPassword.PasswordConfirm == "" {
+// 		message = "key: `UserResetPasswordView.PasswordConfirm` error: field validation for `password_confirm` failed, `password_confirm` cannot be empty "
+// 		err = fmt.Errorf(message)
+// 	}
 
-	if userResetPassword.Password != "" && userResetPassword.PasswordConfirm != "" && userResetPassword.Password != userResetPassword.PasswordConfirm {
-		message = message + "key: `UserResetPasswordView.PasswordConfirm` error: field validation for `password_confirm` failed, passwords do not match "
-		err = fmt.Errorf(message)
-	}
+// 	if userResetPassword.Password != "" && userResetPassword.PasswordConfirm != "" && userResetPassword.Password != userResetPassword.PasswordConfirm {
+// 		message = message + "key: `UserResetPasswordView.PasswordConfirm` error: field validation for `password_confirm` failed, passwords do not match "
+// 		err = fmt.Errorf(message)
+// 	}
 
-	if err != nil {
-		message = strings.TrimSpace(message)
-		err = fmt.Errorf(message)
+// 	if err != nil {
+// 		message = strings.TrimSpace(message)
+// 		err = fmt.Errorf(message)
 
-		return err
-	}
+// 		return err
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
-func UserValidator(checkedStringKey string, checkedStringValue string, jsonStringKey string) string {
-	var message string
+// func UserValidator(checkedStringKey string, checkedStringValue string, jsonStringKey string) string {
+// 	var message string
 
-	if checkedStringValue == "" {
-		message = "key: " + "`" + checkedStringKey + "`" + " error: field validation for " + "`" + jsonStringKey + "`" + " failed, " + "'" + jsonStringKey + "'" + " cannot be empty "
-	}
+// 	if checkedStringValue == "" {
+// 		message = "key: " + "`" + checkedStringKey + "`" + " error: field validation for " + "`" + jsonStringKey + "`" + " failed, " + "'" + jsonStringKey + "'" + " cannot be empty "
+// 	}
 
-	if len(checkedStringValue) > 100 {
-		message = "key: " + "`" + checkedStringKey + "`" + " error: field validation for " + "`" + jsonStringKey + "`" + " failed, " + "'" + jsonStringKey + "'" + " cannot be more than 100 characters long "
-	}
+// 	if len(checkedStringValue) > 100 {
+// 		message = "key: " + "`" + checkedStringKey + "`" + " error: field validation for " + "`" + jsonStringKey + "`" + " failed, " + "'" + jsonStringKey + "'" + " cannot be more than 100 characters long "
+// 	}
 
-	if !regexp.MustCompile(`^[a-zA-z0-9- \t]*$`).MatchString(checkedStringValue) {
-		message = "key: " + "`" + checkedStringKey + "`" + " error: field validation for " + "`" + jsonStringKey + "`" + " failed, " + "'" + jsonStringKey + "'" +
-			" can use only letters, numbers, spaces, the hyphen or underscore character "
-	}
+// 	if !regexp.MustCompile(`^[a-zA-z0-9- \t]*$`).MatchString(checkedStringValue) {
+// 		message = "key: " + "`" + checkedStringKey + "`" + " error: field validation for " + "`" + jsonStringKey + "`" + " failed, " + "'" + jsonStringKey + "'" +
+// 			" can use only letters, numbers, spaces, the hyphen or underscore character "
+// 	}
 
-	return message
-}
+// 	return message
+// }
 
-func UserPasswordValidator(checkedStringKey string, checkedStringValue string, jsonStringKey string) string {
-	var message string
+// func UserPasswordValidator(checkedStringKey string, checkedStringValue string, jsonStringKey string) string {
+// 	var message string
 
-	if checkedStringValue == "" {
-		message = "key: " + "`" + checkedStringKey + "`" + " error: field validation for " + "`" + jsonStringKey + "`" + " failed, " + "'" + jsonStringKey + "'" +
-			" cannot be empty "
-	}
+// 	if checkedStringValue == "" {
+// 		message = "key: " + "`" + checkedStringKey + "`" + " error: field validation for " + "`" + jsonStringKey + "`" + " failed, " + "'" + jsonStringKey + "'" +
+// 			" cannot be empty "
+// 	}
 
-	if len(checkedStringValue) > 100 {
-		message = "key: " + "`" + checkedStringKey + "`" + " error: field validation for " + "`" + jsonStringKey + "`" + " failed, " + "'" + jsonStringKey + "'" +
-			" cannot be more than 100 characters long "
-	}
+// 	if len(checkedStringValue) > 100 {
+// 		message = "key: " + "`" + checkedStringKey + "`" + " error: field validation for " + "`" + jsonStringKey + "`" + " failed, " + "'" + jsonStringKey + "'" +
+// 			" cannot be more than 100 characters long "
+// 	}
 
-	if !regexp.MustCompile(`^[a-zA-z0-9-]*$`).MatchString(checkedStringValue) {
-		message = "key: " + "`" + checkedStringKey + "`" + " error: field validation for " + "`" + jsonStringKey + "`" + " failed, " + "'" + jsonStringKey + "'" +
-			" can use only letters, numbers, the hyphen or underscore character "
-	}
+// 	if !regexp.MustCompile(`^[a-zA-z0-9-]*$`).MatchString(checkedStringValue) {
+// 		message = "key: " + "`" + checkedStringKey + "`" + " error: field validation for " + "`" + jsonStringKey + "`" + " failed, " + "'" + jsonStringKey + "'" +
+// 			" can use only letters, numbers, the hyphen or underscore character "
+// 	}
 
-	return message
-}
+// 	return message
+// }
 
 func IsEmailDomainValid(emailString string) bool {
 	host := strings.Split(emailString, "@")[1]

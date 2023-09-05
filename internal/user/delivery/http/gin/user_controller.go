@@ -17,7 +17,7 @@ import (
 	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/http"
 
-	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility"
+	mongoUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/data/repository/mongo"
 	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/model/http"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
@@ -236,7 +236,7 @@ func (userController *UserController) ForgottenPassword(ctx *gin.Context) {
 
 	// Generate verification code.
 	resetToken := randstr.String(20)
-	passwordResetToken := utility.Encode(resetToken)
+	passwordResetToken := mongoUtility.Encode(resetToken)
 	passwordResetAt := time.Now().Add(time.Minute * 15)
 
 	// Update the user.
@@ -260,7 +260,7 @@ func (userController *UserController) ResetUserPassword(ctx *gin.Context) {
 		return
 	}
 
-	passwordResetToken := utility.Encode(resetToken)
+	passwordResetToken := mongoUtility.Encode(resetToken)
 
 	// Update the user.
 	err = userController.userUseCase.ResetUserPassword(ctx.Request.Context(), "passwordResetToken", passwordResetToken, "passwordResetAt", "password", userResetPasswordView.Password)

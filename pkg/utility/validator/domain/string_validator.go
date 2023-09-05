@@ -1,4 +1,4 @@
-package domain_validator
+package domain
 
 import (
 	"regexp"

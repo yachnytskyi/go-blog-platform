@@ -10,7 +10,7 @@ import (
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility"
+	mongoUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/data/repository/mongo"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
@@ -68,7 +68,7 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, userCreate *userMo
 
 	// Generate verification code.
 	code := randstr.String(20)
-	verificationCode := utility.Encode(code)
+	verificationCode := mongoUtility.Encode(code)
 
 	_, userUpdateError := userUseCase.userRepository.UpdateNewRegisteredUserById(ctx, createdUser.UserID, "verificationCode", verificationCode)
 	if validator.IsErrorNotNil(userUpdateError) {
@@ -160,7 +160,7 @@ func (userUseCase *UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.
 
 	// Generate verification code.
 	resetToken := randstr.String(20)
-	passwordResetToken := utility.Encode(resetToken)
+	passwordResetToken := mongoUtility.Encode(resetToken)
 	passwordResetAt := time.Now().Add(time.Minute * 15)
 
 	// Update the user.

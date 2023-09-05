@@ -10,7 +10,7 @@ import (
 	userRepositoryModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/mongo/model"
 
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
-	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility"
+	mongoUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/data/repository/mongo"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 
@@ -187,7 +187,7 @@ func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID
 	userUpdateRepository := userRepositoryModel.UserUpdateToUserUpdateRepositoryMapper(user)
 	userUpdateRepository.UpdatedAt = time.Now()
 
-	userUpdateRepositoryMappedToMongoDB, mongoMapperError := utility.MongoMappper(userUpdateRepository)
+	userUpdateRepositoryMappedToMongoDB, mongoMapperError := mongoUtility.MongoMappper(userUpdateRepository)
 	if validator.IsErrorNotNil(mongoMapperError) {
 		userUpdateError := domainError.NewInternalError(updateUserByIdMongoMapper, mongoMapperError.Error())
 		logging.Logger(userUpdateError)

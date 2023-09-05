@@ -1,4 +1,4 @@
-package utility
+package mongo
 
 import (
 	"encoding/base64"

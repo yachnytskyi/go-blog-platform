@@ -12,6 +12,7 @@ import (
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	mongoUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/data/repository/mongo"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
+	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/model/common"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain"
@@ -146,7 +147,7 @@ func (userRepository *UserRepository) CheckEmailDublicate(ctx context.Context, e
 	return true
 }
 
-func (userRepository *UserRepository) Register(ctx context.Context, userCreate *userModel.UserCreate) (*userModel.User, error) {
+func (userRepository *UserRepository) Register(ctx context.Context, userCreate *userModel.UserCreate) *common.Result[*userModel.User] {
 	userCreateRepository := userRepositoryModel.UserCreateToUserCreateRepositoryMapper(userCreate)
 	userCreateRepository.CreatedAt = time.Now()
 	userCreateRepository.UpdatedAt = userCreate.CreatedAt
@@ -155,7 +156,7 @@ func (userRepository *UserRepository) Register(ctx context.Context, userCreate *
 	if validator.IsErrorNotNil(insertOneResultError) {
 		userCreateInternalError := domainError.NewInternalError(registerInsertOne, insertOneResultError.Error())
 		logging.Logger(userCreateInternalError)
-		return nil, userCreateInternalError
+		return common.NewResultWithError[*userModel.User](userCreateInternalError)
 	}
 
 	// Create a unique index for the email field.
@@ -167,7 +168,7 @@ func (userRepository *UserRepository) Register(ctx context.Context, userCreate *
 	if validator.IsErrorNotNil(userIndexesCreateOneError) {
 		userCreateInternalError := domainError.NewInternalError(registerIndexesCreateOne, userIndexesCreateOneError.Error())
 		logging.Logger(userCreateInternalError)
-		return nil, userCreateInternalError
+		return common.NewResultWithError[*userModel.User](userCreateInternalError)
 	}
 
 	var createdUserRepository *userRepositoryModel.UserRepository
@@ -176,11 +177,11 @@ func (userRepository *UserRepository) Register(ctx context.Context, userCreate *
 	if validator.IsErrorNotNil(userFindOneError) {
 		userCreateEntityNotFoundError := domainError.NewEntityNotFoundError(registerFindOne, userFindOneError.Error())
 		logging.Logger(userCreateEntityNotFoundError)
-		return nil, userCreateEntityNotFoundError
+		return common.NewResultWithError[*userModel.User](userCreateEntityNotFoundError)
 	}
 
 	createdUser := userRepositoryModel.UserRepositoryToUserMapper(createdUserRepository)
-	return createdUser, nil
+	return common.NewResultWithData[*userModel.User](createdUser)
 }
 
 func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID string, user *userModel.UserUpdate) (*userModel.User, error) {

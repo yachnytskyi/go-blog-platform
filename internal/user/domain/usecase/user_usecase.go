@@ -57,17 +57,17 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, userCreate *userMo
 	userCreate.Verified = true
 	userCreate.Role = "user"
 	userCreate.Password, _ = domainUtility.HashPassword(userCreate.Password)
-	createdUser, userCreateError := userUseCase.userRepository.Register(ctx, userCreate)
-	if validator.IsErrorNotNil(userCreateError) {
-		userCreateError = domainError.HandleError(userCreateError)
-		return userCreateError
+	createdUser := userUseCase.userRepository.Register(ctx, userCreate)
+	if validator.IsErrorNotNil(createdUser.Error) {
+		createdUser.Error = domainError.HandleError(createdUser.Error)
+		return createdUser.Error
 	}
 
 	// Generate verification code.
 	code := randstr.String(20)
 	verificationCode := mongoUtility.Encode(code)
 
-	_, userUpdateError := userUseCase.userRepository.UpdateNewRegisteredUserById(ctx, createdUser.UserID, "verificationCode", verificationCode)
+	_, userUpdateError := userUseCase.userRepository.UpdateNewRegisteredUserById(ctx, createdUser.Data.UserID, "verificationCode", verificationCode)
 	if validator.IsErrorNotNil(userUpdateError) {
 		userUpdateError = domainError.HandleError(userUpdateError)
 		return userUpdateError
@@ -82,22 +82,19 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, userCreate *userMo
 		domainError.HandleError(loadConfigInternalError)
 		return loadConfigInternalError
 	}
-
-	userFirstName := domainUtility.UserFirstName(createdUser.Name)
+	userFirstName := domainUtility.UserFirstName(createdUser.Data.Name)
 	emailData := userModel.EmailData{
 		URL:       loadConfig.Origin + "/verifyemail/" + code,
 		FirstName: userFirstName,
 		Subject:   "Your account verification code",
 	}
-
-	if validator.IsErrorNotNil(userUseCase.userRepository.SendEmailVerificationMessage(createdUser, &emailData, config.TemplateName)) {
+	if validator.IsErrorNotNil(userUseCase.userRepository.SendEmailVerificationMessage(createdUser.Data, &emailData, config.TemplateName)) {
 		sendEmailVerificationMessageError := &domainError.ValidationError{
 			Notification: "domainError.InternalErrorNotification",
 		}
 		domainError.HandleError(sendEmailVerificationMessageError)
 		return sendEmailVerificationMessageError
 	}
-
 	return nil
 }
 

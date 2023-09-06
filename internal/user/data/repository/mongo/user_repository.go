@@ -23,9 +23,7 @@ import (
 )
 
 const (
-	sendEmailVerificationMessageSendEmail            = "User.Data.Repository.MongoDB.SendEmailVerificationMessage.SendEmail"
-	forgottenPasswordMessageSendEmail                = "User.Data.Repository.MongoDB.ForgottenPasswordMessage.SendEmail"
-	getAllUsersFind                                  = "User.Data.Repository.MongoDB.GetAllUsers.Find"
+	getAllUsersLocation                              = "User.Data.Repository.MongoDB.GetAllUsers."
 	getAllUsersCursorDecode                          = "User.Data.Repository.MongoDB.GetAllUsers.cursor.decode"
 	getAllUsersCursor                                = "User.Data.Repository.MongoDB.GetAllUsers.cursor.Err"
 	getUserByIdFindOne                               = "User.Data.Repository.MongoDB.GetUserById.FindOne"
@@ -70,7 +68,7 @@ func (userRepository *UserRepository) GetAllUsers(ctx context.Context, page int,
 	query := bson.M{}
 	cursor, cursorFindError := userRepository.collection.Find(ctx, query, &option)
 	if validator.IsErrorNotNil(cursorFindError) {
-		getAllUsersEntityNotFoundError := domainError.NewEntityNotFoundError(getAllUsersFind, cursorFindError.Error())
+		getAllUsersEntityNotFoundError := domainError.NewEntityNotFoundError(getAllUsersLocation+"Find", cursorFindError.Error())
 		logging.Logger(getAllUsersEntityNotFoundError)
 		return nil, getAllUsersEntityNotFoundError
 	}
@@ -230,19 +228,17 @@ func (userRepository *UserRepository) DeleteUserById(ctx context.Context, userID
 	return nil
 }
 
-func (userRepository *UserRepository) SendEmailVerificationMessage(user *userModel.User, data *userModel.EmailData, templateName string) error {
-	sendEmailError := userRepositoryMail.SendEmail(user, data, templateName)
+func (userRepository *UserRepository) SendEmailVerificationMessage(user *userModel.User, data *userModel.EmailData) error {
+	sendEmailError := userRepositoryMail.SendEmail(user, data)
 	if validator.IsErrorNotNil(sendEmailError) {
-		logging.Logger(domainError.NewInternalError(sendEmailVerificationMessageSendEmail, sendEmailError.Error()))
 		return sendEmailError
 	}
 	return nil
 }
 
-func (userRepository *UserRepository) SendEmailForgottenPasswordMessage(user *userModel.User, data *userModel.EmailData, templateName string) error {
-	sendEmailError := userRepositoryMail.SendEmail(user, data, templateName)
+func (userRepository *UserRepository) SendEmailForgottenPasswordMessage(user *userModel.User, data *userModel.EmailData) error {
+	sendEmailError := userRepositoryMail.SendEmail(user, data)
 	if validator.IsErrorNotNil(sendEmailError) {
-		logging.Logger(domainError.NewInternalError(forgottenPasswordMessageSendEmail, sendEmailError.Error()))
 		return sendEmailError
 	}
 	return nil

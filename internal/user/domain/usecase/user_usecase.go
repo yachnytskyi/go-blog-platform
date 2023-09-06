@@ -88,7 +88,7 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, userCreate *userMo
 		FirstName: userFirstName,
 		Subject:   "Your account verification code",
 	}
-	if validator.IsErrorNotNil(userUseCase.userRepository.SendEmailVerificationMessage(createdUser.Data, &emailData, config.TemplateName)) {
+	if validator.IsErrorNotNil(userUseCase.userRepository.SendEmailVerificationMessage(createdUser.Data, &emailData)) {
 		sendEmailVerificationMessageError := &domainError.ValidationError{
 			Notification: "domainError.InternalErrorNotification",
 		}
@@ -185,7 +185,7 @@ func (userUseCase *UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.
 		Subject:   "Your password reset token (it is valid for 15 minutes)",
 	}
 
-	if validator.IsErrorNotNil(userUseCase.userRepository.SendEmailForgottenPasswordMessage(fetchedUser, &emailData, config.TemplateName)) {
+	if validator.IsErrorNotNil(userUseCase.userRepository.SendEmailForgottenPasswordMessage(fetchedUser, &emailData)) {
 		sendEmailForgottenPasswordMessage := &domainError.ValidationError{
 			Notification: "domainError.InternalErrorNotification",
 		}

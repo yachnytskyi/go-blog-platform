@@ -12,7 +12,6 @@ const (
 	TextStringRegex  = `^[a-zA-z0-9 !@#$€%^&*{}][|/\()=/\;:+-_~'"<>,.? \t]*$`
 
 	SendingEmailNotification = "We sent an email with a verification code to "
-	TemplateName             = "verificationCode.html"
 
 	InternalErrorNotification                  = "something went wrong, please repeat later"
 	SendingEmailWithIntstructionsNotifications = "We sent you an email with needed instructions"
@@ -42,6 +41,7 @@ type Config struct {
 	SMTPUser     string `mapstructure:"SMTP_USER"`
 
 	UserEmailTemplatePath string `mapstructure:"USER_EMAIL_TEMPLATE_PATH"`
+	UserEmailTemplateName string `mapstructure:"USER_EMAIL_TEMPLATE_NAME"`
 }
 
 func LoadConfig(path string) (config Config, err error) {

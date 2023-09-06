@@ -14,14 +14,14 @@ func NewJsonResponse(data any) *JsonResponse {
 }
 
 func NewJsonResponseWithError(err any) *JsonResponse {
-	_, ok := err.(error)
-	if ok {
+	switch errorType := err.(type) {
+	case error:
 		return &JsonResponse{
-			Error: err,
+			Error: errorType,
 		}
-	} else {
+	default:
 		return &JsonResponse{
-			Errors: err,
+			Errors: errorType,
 		}
 	}
 }

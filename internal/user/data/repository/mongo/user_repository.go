@@ -106,7 +106,6 @@ func (userRepository *UserRepository) GetUserById(ctx context.Context, userID st
 func (userRepository *UserRepository) GetUserByEmail(ctx context.Context, email string) (*userModel.User, error) {
 	var fetchedUser *userRepositoryModel.UserRepository
 	query := bson.M{"email": strings.ToLower(email)}
-
 	userFindOneError := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
 	if validator.IsValueNotNil(userFindOneError) {
 		userFindOneEntityNotFoundError := domainError.NewEntityNotFoundError(location+"GetUserByEmail.FindOne.Decode", userFindOneError.Error())
@@ -130,7 +129,6 @@ func (userRepository *UserRepository) CheckEmailDublicate(ctx context.Context, e
 		logging.Logger(userFindOneInternalError)
 		return userFindOneInternalError
 	}
-
 	userFindOneValidationError := domainError.NewValidationError("email", "required", domainUseCaseValidator.EmailAlreadyExists)
 	logging.Logger(userFindOneValidationError)
 	return userFindOneValidationError
@@ -189,7 +187,6 @@ func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID
 	update := bson.D{{Key: "$set", Value: userUpdateRepositoryMappedToMongoDB}}
 	result := userRepository.collection.FindOneAndUpdate(ctx, query, update, options.FindOneAndUpdate().SetReturnDocument(1))
 	var updatedUserRepository *userRepositoryModel.UserRepository
-
 	updateUserRepositoryDecodeError := result.Decode(&updatedUserRepository)
 	if validator.IsValueNotNil(updateUserRepositoryDecodeError) {
 		userUpdateError := domainError.NewInternalError(location+"UpdateUserById.Decode", updateUserRepositoryDecodeError.Error())
@@ -205,7 +202,6 @@ func (userRepository *UserRepository) DeleteUserById(ctx context.Context, userID
 	userIDMappedToMongoDB, _ := primitive.ObjectIDFromHex(userID)
 	query := bson.M{"_id": userIDMappedToMongoDB}
 	result, userDeleteOneError := userRepository.collection.DeleteOne(ctx, query)
-
 	if validator.IsValueNotNil(userDeleteOneError) {
 		deletedUserError := domainError.NewInternalError(location+"Delete.DeleteOne", userDeleteOneError.Error())
 		logging.Logger(deletedUserError)
@@ -240,7 +236,6 @@ func (userRepository *UserRepository) UpdateNewRegisteredUserById(ctx context.Co
 	query := bson.D{{Key: "_id", Value: userIDMappedToMongoDB}}
 	update := bson.D{{Key: "$set", Value: bson.D{{Key: key, Value: value}}}}
 	result, userUpdateUpdateOneError := userRepository.collection.UpdateOne(ctx, query, update)
-
 	if validator.IsValueNotNil(userUpdateUpdateOneError) {
 		updatedUserError := domainError.NewInternalError(location+"UpdateNewRegisteredUserById.UpdateOne", userUpdateUpdateOneError.Error())
 		logging.Logger(updatedUserError)
@@ -258,7 +253,6 @@ func (userRepository *UserRepository) ResetUserPassword(ctx context.Context, fir
 	query := bson.D{{Key: firstKey, Value: firstValue}}
 	update := bson.D{{Key: "$set", Value: bson.D{{Key: passwordKey, Value: password}}}, {Key: "$unset", Value: bson.D{{Key: firstKey, Value: ""}, {Key: secondKey, Value: ""}}}}
 	result, updateUserPasswordUpdateOneError := userRepository.collection.UpdateOne(ctx, query, update)
-
 	if validator.IsValueNotNil(updateUserPasswordUpdateOneError) {
 		updatedUserPasswordError := domainError.NewInternalError(location+"ResetUserPassword.UpdateOne", updateUserPasswordUpdateOneError.Error())
 		logging.Logger(updatedUserPasswordError)
@@ -278,7 +272,6 @@ func (userRepository *UserRepository) UpdatePasswordResetTokenUserByEmail(ctx co
 	query := bson.D{{Key: "email", Value: strings.ToLower(email)}}
 	update := bson.D{{Key: "$set", Value: bson.D{{Key: firstKey, Value: firstValue}, {Key: secondKey, Value: secondKey}}}}
 	result, updateUserResetTokenUpdateOneError := userRepository.collection.UpdateOne(ctx, query, update)
-
 	if validator.IsValueNotNil(updateUserResetTokenUpdateOneError) {
 		updatedUserResetTokenError := domainError.NewInternalError(location+"UpdatePasswordResetTokenUserByEmail.UpdateOne", updateUserResetTokenUpdateOneError.Error())
 		logging.Logger(updatedUserResetTokenError)

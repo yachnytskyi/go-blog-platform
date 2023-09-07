@@ -38,7 +38,7 @@ func ParseTemplateDirectory(directory string) (*template.Template, error) {
 	})
 	fmt.Println(printlnMessage)
 	if validator.IsErrorNotNil(filePathWalkError) {
-		sendEmailInternalError := domainError.NewInternalError(location+"ParseTemplateDirectory.parsing template", filePathWalkError.Error())
+		sendEmailInternalError := domainError.NewInternalError(location+"ParseTemplateDirectory."+printlnMessage, filePathWalkError.Error())
 		// logging.Logger(sendEmailInternalError)
 		return nil, sendEmailInternalError
 	}

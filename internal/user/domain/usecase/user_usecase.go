@@ -39,18 +39,13 @@ func (userUseCase *UserUseCase) GetUserByEmail(ctx context.Context, email string
 }
 
 func (userUseCase *UserUseCase) Register(ctx context.Context, userCreate *userModel.UserCreate) error {
-	if userUseCase.userRepository.CheckEmailDublicate(ctx, userCreate.Email) {
-		userCreateValidationError := &domainError.ValidationError{
-			Field:        "email",
-			FieldType:    "required",
-			Notification: EmailAlreadyExists,
-		}
-
-		domainError.HandleError(userCreateValidationError)
-		return userCreateValidationError
+	checkEmailDublicateError := userUseCase.userRepository.CheckEmailDublicate(ctx, userCreate.Email)
+	if validator.IsValueNotNil(checkEmailDublicateError) {
+		domainError.HandleError(checkEmailDublicateError)
+		return checkEmailDublicateError
 	}
 	userCreateValidationErrors := UserCreateValidator(userCreate)
-	if validator.IsErrorNotNil(userCreateValidationErrors) {
+	if validator.IsValueNotNil(userCreateValidationErrors) {
 		userCreateValidationErrors = domainError.HandleError(userCreateValidationErrors)
 		return userCreateValidationErrors
 	}
@@ -58,7 +53,7 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, userCreate *userMo
 	userCreate.Role = "user"
 	userCreate.Password, _ = domainUtility.HashPassword(userCreate.Password)
 	createdUser := userUseCase.userRepository.Register(ctx, userCreate)
-	if validator.IsErrorNotNil(createdUser.Error) {
+	if validator.IsValueNotNil(createdUser.Error) {
 		createdUser.Error = domainError.HandleError(createdUser.Error)
 		return createdUser.Error
 	}
@@ -68,14 +63,14 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, userCreate *userMo
 	verificationCode := mongoUtility.Encode(code)
 
 	_, userUpdateError := userUseCase.userRepository.UpdateNewRegisteredUserById(ctx, createdUser.Data.UserID, "verificationCode", verificationCode)
-	if validator.IsErrorNotNil(userUpdateError) {
+	if validator.IsValueNotNil(userUpdateError) {
 		userUpdateError = domainError.HandleError(userUpdateError)
 		return userUpdateError
 	}
 
 	// Send an email.
 	loadConfig, loadConfigError := config.LoadConfig(".")
-	if validator.IsErrorNotNil(loadConfigError) {
+	if validator.IsValueNotNil(loadConfigError) {
 		var loadConfigInternalError *domainError.InternalError = new(domainError.InternalError)
 		loadConfigInternalError.Location = "User.Domain.UserUseCase.Registration.LoadConfig"
 		loadConfigInternalError.Reason = loadConfigError.Error()
@@ -88,7 +83,7 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, userCreate *userMo
 		FirstName: userFirstName,
 		Subject:   "Your account verification code",
 	}
-	if validator.IsErrorNotNil(userUseCase.userRepository.SendEmailVerificationMessage(createdUser.Data, &emailData)) {
+	if validator.IsValueNotNil(userUseCase.userRepository.SendEmailVerificationMessage(createdUser.Data, &emailData)) {
 		sendEmailVerificationMessageError := &domainError.ValidationError{
 			Notification: "domainError.InternalErrorNotification",
 		}
@@ -100,12 +95,12 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, userCreate *userMo
 
 func (userUseCase *UserUseCase) UpdateUserById(ctx context.Context, userID string, user *userModel.UserUpdate) (*userModel.User, error) {
 	userUpdateValidationErrors := UserUpdateValidator(user)
-	if validator.IsErrorNotNil(userUpdateValidationErrors) {
+	if validator.IsValueNotNil(userUpdateValidationErrors) {
 		return nil, userUpdateValidationErrors
 	}
 
 	updatedUser, userUpdateError := userUseCase.userRepository.UpdateUserById(ctx, userID, user)
-	if validator.IsErrorNotNil(userUpdateError) {
+	if validator.IsValueNotNil(userUpdateError) {
 		return nil, userUpdateError
 	}
 	return updatedUser, nil
@@ -119,19 +114,19 @@ func (userUseCase *UserUseCase) DeleteUserById(ctx context.Context, userID strin
 
 func (userUseCase *UserUseCase) Login(ctx context.Context, userLogin *userModel.UserLogin) (string, error) {
 	userLoginValidationErrors := UserLoginValidator(userLogin)
-	if validator.IsErrorNotNil(userLoginValidationErrors) {
+	if validator.IsValueNotNil(userLoginValidationErrors) {
 		return "", userLoginValidationErrors
 	}
 	fetchedUser, getUserByEmailError := userUseCase.userRepository.GetUserByEmail(ctx, userLogin.Email)
 
 	// Will return wrong email or password.
-	if validator.IsErrorNotNil(getUserByEmailError) {
+	if validator.IsValueNotNil(getUserByEmailError) {
 		return "", fmt.Errorf("invalid email or password")
 	}
 
 	// Verify password - we previously created this method.
 	matchPasswords := domainUtility.VerifyPassword(fetchedUser.Password, userLogin.Password)
-	if validator.IsErrorNotNil(matchPasswords) {
+	if validator.IsValueNotNil(matchPasswords) {
 		return "", fmt.Errorf("invalid email or password")
 	}
 	return fetchedUser.UserID, nil
@@ -145,7 +140,7 @@ func (userUseCase *UserUseCase) UpdateNewRegisteredUserById(ctx context.Context,
 func (userUseCase *UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.Context, email string, firstKey string, firstValue string,
 	secondKey string, secondValue time.Time) error {
 	updatedUserError := userUseCase.userRepository.UpdatePasswordResetTokenUserByEmail(ctx, email, firstKey, firstValue, secondKey, secondValue)
-	if validator.IsErrorNotNil(updatedUserError) {
+	if validator.IsValueNotNil(updatedUserError) {
 		updatedUserError = domainError.HandleError(updatedUserError)
 		return updatedUserError
 	}
@@ -157,13 +152,13 @@ func (userUseCase *UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.
 
 	// Update the user.
 	fetchedUser, fetchedUserError := userUseCase.GetUserByEmail(ctx, email)
-	if validator.IsErrorNotNil(fetchedUserError) {
+	if validator.IsValueNotNil(fetchedUserError) {
 		fetchedUserError = domainError.HandleError(fetchedUserError)
 		return fetchedUserError
 	}
 
 	updatedUserPasswordError := userUseCase.userRepository.UpdatePasswordResetTokenUserByEmail(ctx, fetchedUser.Email, "passwordResetToken", passwordResetToken, "passwordResetAt", passwordResetAt)
-	if validator.IsErrorNotNil(updatedUserPasswordError) {
+	if validator.IsValueNotNil(updatedUserPasswordError) {
 		updatedUserPasswordError = domainError.HandleError(updatedUserPasswordError)
 		return updatedUserPasswordError
 	}
@@ -171,7 +166,7 @@ func (userUseCase *UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.
 
 	// Send an email.
 	loadConfig, loadConfigError := config.LoadConfig(".")
-	if validator.IsErrorNotNil(loadConfigError) {
+	if validator.IsValueNotNil(loadConfigError) {
 		var sendEmailInternalError *domainError.InternalError = new(domainError.InternalError)
 		sendEmailInternalError.Location = "User.Domain.UserUseCase.UpdatePasswordResetTokenUserByEmail.LoadConfig"
 		sendEmailInternalError.Reason = loadConfigError.Error()
@@ -185,7 +180,7 @@ func (userUseCase *UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.
 		Subject:   "Your password reset token (it is valid for 15 minutes)",
 	}
 
-	if validator.IsErrorNotNil(userUseCase.userRepository.SendEmailForgottenPasswordMessage(fetchedUser, &emailData)) {
+	if validator.IsValueNotNil(userUseCase.userRepository.SendEmailForgottenPasswordMessage(fetchedUser, &emailData)) {
 		sendEmailForgottenPasswordMessage := &domainError.ValidationError{
 			Notification: "domainError.InternalErrorNotification",
 		}

@@ -152,7 +152,7 @@ func UserLoginValidator(userLogin *userModel.UserLogin) error {
 		err = fmt.Errorf(message)
 	}
 
-	if validator.IsErrorNotNil(err) {
+	if validator.IsValueNotNil(err) {
 		message = strings.TrimSpace(message)
 		err = fmt.Errorf(message)
 		return err
@@ -171,13 +171,13 @@ func UserLoginValidator(userLogin *userModel.UserLogin) error {
 
 // 	if validator.IsStringNotEmpty(userForgottenPassword.Email) {
 // 		_, ok := mail.ParseAddress(userForgottenPassword.Email)
-// 		if validator.IsErrorNotNil(ok) {
+// 		if validator.IsValueNotNil(ok) {
 // 			message = message + "key: `UserForgottenPasswordView.Email` error: field validation for `email` failed, invalid email address "
 // 			err = fmt.Errorf(message)
 // 		}
 // 	}
 
-// 	if validator.IsErrorNotNil(err) {
+// 	if validator.IsValueNotNil(err) {
 // 		message = strings.TrimSpace(message)
 // 		err = fmt.Errorf(message)
 

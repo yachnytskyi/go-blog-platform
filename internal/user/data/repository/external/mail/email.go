@@ -26,7 +26,7 @@ const (
 func ParseTemplateDirectory(directory string) (*template.Template, error) {
 	var paths []string
 	filePathWalkError := filepath.Walk(directory, func(path string, info os.FileInfo, walkError error) error {
-		if validator.IsErrorNotNil(walkError) {
+		if validator.IsValueNotNil(walkError) {
 			sendEmailInternalError := domainError.NewInternalError(location+"ParseTemplateDirectory.Walk", walkError.Error())
 			// logging.Logger(sendEmailInternalError)
 			return sendEmailInternalError
@@ -37,7 +37,7 @@ func ParseTemplateDirectory(directory string) (*template.Template, error) {
 		return nil
 	})
 	fmt.Println(printlnMessage)
-	if validator.IsErrorNotNil(filePathWalkError) {
+	if validator.IsValueNotNil(filePathWalkError) {
 		sendEmailInternalError := domainError.NewInternalError(location+"ParseTemplateDirectory."+printlnMessage, filePathWalkError.Error())
 		// logging.Logger(sendEmailInternalError)
 		return nil, sendEmailInternalError
@@ -47,7 +47,7 @@ func ParseTemplateDirectory(directory string) (*template.Template, error) {
 
 func SendEmail(user *userModel.User, data *userModel.EmailData) error {
 	loadConfig, loadConfigError := config.LoadConfig(".")
-	if validator.IsErrorNotNil(loadConfigError) {
+	if validator.IsValueNotNil(loadConfigError) {
 		loadConfigInternalError := domainError.NewInternalError(location+"SendEmail.LoadConfig", loadConfigError.Error())
 		logging.Logger(loadConfigInternalError)
 		return loadConfigInternalError
@@ -63,7 +63,7 @@ func SendEmail(user *userModel.User, data *userModel.EmailData) error {
 
 	// var body bytes.Buffer
 	// template, parseTemplateDirectoryError := ParseTemplateDirectory(loadConfig.UserEmailTemplatePath)
-	// if validator.IsErrorNotNil(parseTemplateDirectoryError) {
+	// if validator.IsValueNotNil(parseTemplateDirectoryError) {
 	// 	logging.Logger(parseTemplateDirectoryError)
 	// 	return parseTemplateDirectoryError
 	// }
@@ -82,12 +82,12 @@ func SendEmail(user *userModel.User, data *userModel.EmailData) error {
 
 	// Send an email.
 	message, prepareSendMessageError := PrepareSendMessage(&loadConfig, user.Email, data)
-	if validator.IsErrorNotNil(prepareSendMessageError) {
+	if validator.IsValueNotNil(prepareSendMessageError) {
 		logging.Logger(prepareSendMessageError)
 		return prepareSendMessageError
 	}
 	dialAndSendError := dialer.DialAndSend(message)
-	if validator.IsErrorNotNil(dialAndSendError) {
+	if validator.IsValueNotNil(dialAndSendError) {
 		sendEmailInternalError := domainError.NewInternalError(location+"SendEmail.DialAndSend", dialAndSendError.Error())
 		logging.Logger(sendEmailInternalError)
 		return sendEmailInternalError
@@ -103,7 +103,7 @@ func PrepareSendMessage(loadConfig *config.Config, userEmail string, data *userM
 
 	var body bytes.Buffer
 	template, parseTemplateDirectoryError := ParseTemplateDirectory(loadConfig.UserEmailTemplatePath)
-	if validator.IsErrorNotNil(parseTemplateDirectoryError) {
+	if validator.IsValueNotNil(parseTemplateDirectoryError) {
 		return nil, parseTemplateDirectoryError
 	}
 

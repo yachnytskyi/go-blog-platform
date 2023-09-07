@@ -8,9 +8,10 @@ func IsValueNil[T comparable](data T) bool {
 	return false
 }
 
-func IsValueNotNil(data any) bool {
-	if data == nil {
-		return false
+func IsValueNotNil[T comparable](data T) bool {
+	var t T
+	if data == t {
+		return false 
 	}
 	return true
 }

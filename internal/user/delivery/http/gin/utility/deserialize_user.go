@@ -28,7 +28,7 @@ func DeserializeUser(userUseCase user.UseCase) gin.HandlerFunc {
 		fields := strings.Fields(authorizationHeader)
 		if validator.IsSliceNotEmpty(fields) && validator.CheckMatchStrings(fields[0], bearer) {
 			accessToken = fields[1]
-		} else if validator.IsValueNil(cookieError) {
+		} else if validator.IsErrorNil(cookieError) {
 			accessToken = cookie
 		}
 		if validator.IsStringEmpty(accessToken) {
@@ -38,14 +38,14 @@ func DeserializeUser(userUseCase user.UseCase) gin.HandlerFunc {
 
 		config, _ := config.LoadConfig(".")
 		userID, validateTokenError := httpUtility.ValidateToken(accessToken, config.AccessTokenPublicKey)
-		if validator.IsValueNotNil(validateTokenError) {
+		if validator.IsErrorNotNil(validateTokenError) {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": "fail", "message": validateTokenError.Error()})
 			return
 		}
 
 		context := ctx.Request.Context()
 		user, getUSerByIdError := userUseCase.GetUserById(context, fmt.Sprint(userID))
-		if validator.IsValueNotNil(getUSerByIdError) {
+		if validator.IsErrorNotNil(getUSerByIdError) {
 
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": "fail", "message": "You are not logged in"})
 			return

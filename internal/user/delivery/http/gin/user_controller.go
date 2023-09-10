@@ -17,7 +17,7 @@ import (
 	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/http"
 
-	mongoUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/data/repository/mongo"
+	commonUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
 	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/model/http"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
@@ -35,19 +35,19 @@ func (userController *UserController) GetAllUsers(ctx *gin.Context) {
 	limit := ctx.DefaultQuery("limit", "10")
 
 	intPage, err := strconv.Atoi(page)
-	if validator.IsValueNotNil(err) {
+	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
 	intLimit, err := strconv.Atoi(limit)
-	if validator.IsValueNotNil(err) {
+	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
 	fetchedUsers, err := userController.userUseCase.GetAllUsers(ctx.Request.Context(), intPage, intLimit)
-	if validator.IsValueNotNil(err) {
+	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
@@ -67,7 +67,7 @@ func (userController *UserController) GetMe(ctx *gin.Context) {
 func (userController *UserController) GetUserById(ctx *gin.Context) {
 	userID := ctx.Param("userID")
 	fetchedUser, err := userController.userUseCase.GetUserById(ctx.Request.Context(), userID)
-	if validator.IsValueNotNil(err) {
+	if validator.IsErrorNotNil(err) {
 		if strings.Contains(err.Error(), "Id exists") {
 			ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": err.Error()})
 			return
@@ -83,7 +83,7 @@ func (userController *UserController) Register(ctx *gin.Context) {
 	var createdUserViewData *userViewModel.UserCreateView = new(userViewModel.UserCreateView)
 
 	err := ctx.ShouldBindJSON(&createdUserViewData)
-	if validator.IsValueNotNil(err) {
+	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
@@ -112,7 +112,7 @@ func (userController *UserController) UpdateUserById(ctx *gin.Context) {
 	var updatedUserViewData *userViewModel.UserUpdateView = new(userViewModel.UserUpdateView)
 
 	err := ctx.ShouldBindJSON(&updatedUserViewData)
-	if validator.IsValueNotNil(err) {
+	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
@@ -132,7 +132,7 @@ func (userController *UserController) Delete(ctx *gin.Context) {
 	userID := currentUser.(*userViewModel.UserView).UserID
 	err := userController.userUseCase.DeleteUserById(ctx.Request.Context(), fmt.Sprint(userID))
 
-	if validator.IsValueNotNil(err) {
+	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 	}
 
@@ -143,7 +143,7 @@ func (userController *UserController) Login(ctx *gin.Context) {
 	var userLoginViewData *userViewModel.UserLoginView
 
 	err := ctx.ShouldBindJSON(&userLoginViewData)
-	if validator.IsValueNotNil(err) {
+	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
@@ -151,7 +151,7 @@ func (userController *UserController) Login(ctx *gin.Context) {
 	userLoginData := userViewModel.UserLoginViewToUserLoginMapper(userLoginViewData)
 	userID, err := userController.userUseCase.Login(ctx.Request.Context(), &userLoginData)
 
-	if validator.IsValueNotNil(err) {
+	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
@@ -161,14 +161,14 @@ func (userController *UserController) Login(ctx *gin.Context) {
 	// Generate tokens.
 	accessToken, err := httpUtility.CreateToken(config.AccessTokenExpiresIn, userID, config.AccessTokenPrivateKey)
 
-	if validator.IsValueNotNil(err) {
+	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
 	refreshToken, err := httpUtility.CreateToken(config.RefreshTokenExpiresIn, userID, config.RefreshTokenPrivateKey)
 
-	if validator.IsValueNotNil(err) {
+	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
@@ -188,7 +188,7 @@ func (userController *UserController) RefreshAccessToken(ctx *gin.Context) {
 
 	cookie, err := ctx.Cookie("refresh_token")
 
-	if validator.IsValueNotNil(err) {
+	if validator.IsErrorNotNil(err) {
 		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": message})
 		return
 	}
@@ -197,18 +197,18 @@ func (userController *UserController) RefreshAccessToken(ctx *gin.Context) {
 
 	userID, err := httpUtility.ValidateToken(cookie, config.RefreshTokenPublicKey)
 
-	if validator.IsValueNotNil(err) {
+	if validator.IsErrorNotNil(err) {
 		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
-	if validator.IsValueNotNil(err) {
+	if validator.IsErrorNotNil(err) {
 		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": "the user is belonged to this token no longer exists "})
 	}
 
 	accessToken, err := httpUtility.CreateToken(config.AccessTokenExpiresIn, userID, config.AccessTokenPrivateKey)
 
-	if validator.IsValueNotNil(err) {
+	if validator.IsErrorNotNil(err) {
 		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
@@ -221,7 +221,7 @@ func (userController *UserController) ForgottenPassword(ctx *gin.Context) {
 	var userViewEmail *userViewModel.UserForgottenPasswordView
 
 	err := ctx.ShouldBindJSON(&userViewEmail)
-	if validator.IsValueNotNil(err) {
+	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
@@ -229,20 +229,20 @@ func (userController *UserController) ForgottenPassword(ctx *gin.Context) {
 	message := config.SendingEmailWithIntstructionsNotifications
 	fetchedUser, err := userController.userUseCase.GetUserByEmail(ctx.Request.Context(), userViewEmail.Email)
 
-	if validator.IsValueNotNil(err) {
+	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": err.Error()})
 		return
 	}
 
 	// Generate verification code.
 	resetToken := randstr.String(20)
-	passwordResetToken := mongoUtility.Encode(resetToken)
+	passwordResetToken := commonUtility.Encode(resetToken)
 	passwordResetAt := time.Now().Add(time.Minute * 15)
 
 	// Update the user.
 	err = userController.userUseCase.UpdatePasswordResetTokenUserByEmail(ctx.Request.Context(), fetchedUser.Email, "passwordResetToken", passwordResetToken, "passwordResetAt", passwordResetAt)
 
-	if validator.IsValueNotNil(err) {
+	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "success", "message": err.Error()})
 		return
 	}
@@ -255,17 +255,17 @@ func (userController *UserController) ResetUserPassword(ctx *gin.Context) {
 	var userResetPasswordView *userViewModel.UserResetPasswordView
 
 	err := ctx.ShouldBindJSON(&userResetPasswordView)
-	if validator.IsValueNotNil(err) {
+	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
-	passwordResetToken := mongoUtility.Encode(resetToken)
+	passwordResetToken := commonUtility.Encode(resetToken)
 
 	// Update the user.
 	err = userController.userUseCase.ResetUserPassword(ctx.Request.Context(), "passwordResetToken", passwordResetToken, "passwordResetAt", "password", userResetPasswordView.Password)
 
-	if validator.IsValueNotNil(err) {
+	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 	}
 

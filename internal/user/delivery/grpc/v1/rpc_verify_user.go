@@ -5,7 +5,7 @@ import (
 	"time"
 
 	pb "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1/model/pb"
-	mongoUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/data/repository/mongo"
+	commonUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
 	"go.mongodb.org/mongo-driver/bson"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -14,7 +14,7 @@ import (
 func (userGrpcServer *UserGrpcServer) VerifyEmail(ctx context.Context, request *pb.VerifyEmailRequest) (*pb.GenericResponse, error) {
 	code := request.GetVerificationCode()
 
-	verificationCode := mongoUtility.Encode(code)
+	verificationCode := commonUtility.Encode(code)
 
 	query := bson.D{{Key: "verificationCode", Value: verificationCode}}
 	update := bson.D{{Key: "$set", Value: bson.D{{Key: "verified", Value: true}, {Key: "updated_at", Value: time.Now()}}}, {Key: "$unset", Value: bson.D{{Key: "verificationCode", Value: ""}}}}

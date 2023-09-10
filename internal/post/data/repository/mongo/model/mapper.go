@@ -28,7 +28,7 @@ func PostRepositoryToPostMapper(postRepository *PostRepository) *postModel.Post 
 
 func PostCreateToPostCreateRepositoryMapper(postCreate *postModel.PostCreate) (*PostCreateRepository, error) {
 	userObjectID, objectIDFromHexError := primitive.ObjectIDFromHex(postCreate.UserID)
-	if validator.IsValueNotNil(objectIDFromHexError) {
+	if validator.IsErrorNotNil(objectIDFromHexError) {
 		objectIDFromHexErrorInternalError := domainError.NewInternalError(createRepositoryMapperObjectIDFromHex, objectIDFromHexError.Error())
 		logging.Logger(objectIDFromHexErrorInternalError)
 		return nil, objectIDFromHexErrorInternalError
@@ -46,14 +46,14 @@ func PostCreateToPostCreateRepositoryMapper(postCreate *postModel.PostCreate) (*
 
 func PostUpdateToPostUpdateRepositoryMapper(postUpdate *postModel.PostUpdate) (*PostUpdateRepository, error) {
 	postObjectID, objectIDFromHexError := primitive.ObjectIDFromHex(postUpdate.PostID)
-	if validator.IsValueNotNil(objectIDFromHexError) {
+	if validator.IsErrorNotNil(objectIDFromHexError) {
 		objectIDFromHexErrorInternalError := domainError.NewInternalError(updateRepositoryMapperObjectIDFromHex, objectIDFromHexError.Error())
 		logging.Logger(objectIDFromHexErrorInternalError)
 		return nil, objectIDFromHexErrorInternalError
 	}
 
 	userObjectID, objectIDFromHexError := primitive.ObjectIDFromHex(postUpdate.UserID)
-	if validator.IsValueNotNil(objectIDFromHexError) {
+	if validator.IsErrorNotNil(objectIDFromHexError) {
 		objectIDFromHexErrorInternalError := domainError.NewInternalError(createRepositoryMapperObjectIDFromHex, objectIDFromHexError.Error())
 		logging.Logger(objectIDFromHexErrorInternalError)
 		return nil, objectIDFromHexErrorInternalError

@@ -11,7 +11,11 @@ const (
 	TitleStringRegex = `^[a-zA-z0-9 !()=[]:;+-_~'",.? \t]*$`
 	TextStringRegex  = `^[a-zA-z0-9 !@#$€%^&*{}][|/\()=/\;:+-_~'"<>,.? \t]*$`
 
-	SendingEmailNotification = "We sent an email with a verification code to "
+	SendingEmailNotification           = "We sent an email with a verification code to "
+	UserConfirmationEmailTemplateName  = "verificationCode.html"
+	UserConfirmationEmailTemplatePath  = "internal/user/data/repository/external/mail/template"
+	ForgottenPasswordEmailTemplateName = "resetPassword.html"
+	ForgottenPasswordEmailTemplatePath = "internal/user/data/repository/external/mail/template"
 
 	InternalErrorNotification                  = "something went wrong, please repeat later"
 	SendingEmailWithIntstructionsNotifications = "We sent you an email with needed instructions"
@@ -32,16 +36,13 @@ type Config struct {
 	AccessTokenMaxAge      int           `mapstructure:"ACCESS_TOKEN_MAXAGE"`
 	RefreshTokenMaxAge     int           `mapstructure:"REFRESH_TOKEN_MAXAGE"`
 
-	Origin string `mapstructure:"CLIENT_ORIGIN"`
+	ClientOriginUrl string `mapstructure:"CLIENT_ORIGIN_URL"`
 
 	EmailFrom    string `mapstructure:"EMAIL_FROM"`
 	SMTPHost     string `mapstructure:"SMTP_HOST"`
 	SMTPPassword string `mapstructure:"SMTP_PASSWORD"`
 	SMTPPort     int    `mapstructure:"SMTP_PORT"`
 	SMTPUser     string `mapstructure:"SMTP_USER"`
-
-	UserEmailTemplatePath string `mapstructure:"USER_EMAIL_TEMPLATE_PATH"`
-	UserEmailTemplateName string `mapstructure:"USER_EMAIL_TEMPLATE_NAME"`
 }
 
 func LoadConfig(path string) (config Config, err error) {

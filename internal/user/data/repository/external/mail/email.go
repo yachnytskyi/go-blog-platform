@@ -23,9 +23,9 @@ const (
 )
 
 // Email template parser.
-func ParseTemplateDirectory(directory string) (*template.Template, error) {
+func ParseTemplateDirectory(templatePath string) (*template.Template, error) {
 	var paths []string
-	filePathWalkError := filepath.Walk(directory, func(path string, info os.FileInfo, walkError error) error {
+	filePathWalkError := filepath.Walk(templatePath, func(path string, info os.FileInfo, walkError error) error {
 		if validator.IsErrorNotNil(walkError) {
 			sendEmailInternalError := domainError.NewInternalError(location+"ParseTemplateDirectory.Walk", walkError.Error())
 			return sendEmailInternalError
@@ -49,7 +49,6 @@ func SendEmail(ctx context.Context, user *userModel.User, data *userModel.EmailD
 		loadConfigInternalError := domainError.NewInternalError(location+"SendEmail.LoadConfig", loadConfigError.Error())
 		return loadConfigInternalError
 	}
-
 	smtpPass := loadConfig.SMTPPassword
 	smtpUser := loadConfig.SMTPUser
 	smtpHost := loadConfig.SMTPHost
@@ -73,20 +72,18 @@ func SendEmail(ctx context.Context, user *userModel.User, data *userModel.EmailD
 
 func PrepareSendMessage(ctx context.Context, loadConfig *config.Config, userEmail string, data *userModel.EmailData) (*gomail.Message, error) {
 	// Prepare data.
-	templateName := loadConfig.UserEmailTemplateName
 	from := loadConfig.EmailFrom
 	to := userEmail
 
 	var body bytes.Buffer
-	template, parseTemplateDirectoryError := ParseTemplateDirectory(loadConfig.UserEmailTemplatePath)
+	template, parseTemplateDirectoryError := ParseTemplateDirectory(data.TemplatePath)
 	if validator.IsErrorNotNil(parseTemplateDirectoryError) {
 		parseTemplateDirectoryInternalError := domainError.NewInternalError(location+"SendEmail.PrepareSendMessage.ParseTemplateDirectory", parseTemplateDirectoryError.Error())
 		return nil, parseTemplateDirectoryInternalError
 	}
 
-	template = template.Lookup(templateName)
+	template = template.Lookup(data.TemplateName)
 	template.Execute(&body, &data)
-	fmt.Println(template.Name())
 	message := gomail.NewMessage()
 	message.SetHeader("From", from)
 	message.SetHeader("To", to)

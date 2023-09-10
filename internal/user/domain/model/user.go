@@ -49,7 +49,9 @@ type UserResetPassword struct {
 }
 
 type EmailData struct {
-	URL       string
-	FirstName string
-	Subject   string
+	URL          string
+	TemplateName string
+	TemplatePath string
+	FirstName    string
+	Subject      string
 }

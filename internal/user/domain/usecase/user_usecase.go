@@ -19,8 +19,8 @@ import (
 const (
 	verificationCodeLength   int    = 20
 	resetTokenLength         int    = 20
-	emailConfirmationUrl     string = "/verifyemail/"
-	forgottenPasswordUrl     string = "/reset-password/"
+	emailConfirmationUrl     string = "users/verifyemail/"
+	forgottenPasswordUrl     string = "users/reset-password/"
 	emailConfirmationSubject string = "Your account verification code"
 	forgottenPasswordSubject string = "Your password reset token (it is valid for 15 minutes)"
 )
@@ -75,8 +75,10 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, userCreate *userMo
 		domainError.HandleError(userUpdateError)
 		return userUpdateError
 	}
+	templateName := config.UserConfirmationEmailTemplateName
+	templatePath := config.UserConfirmationEmailTemplatePath
 
-	emailData, prepareEmailDataError := PrepareEmailData(ctx, createdUser.Data.Name, forgottenPasswordUrl, emailConfirmationSubject, tokenValue)
+	emailData, prepareEmailDataError := PrepareEmailData(ctx, createdUser.Data.Name, emailConfirmationUrl, emailConfirmationSubject, tokenValue, templateName, templatePath)
 	if validator.IsErrorNotNil(prepareEmailDataError) {
 		logging.Logger(prepareEmailDataError)
 		domainError.HandleError(prepareEmailDataError)
@@ -162,19 +164,19 @@ func (userUseCase *UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.
 		return updatedUserPasswordError
 	}
 
-	emailData, prepareEmailDataError := PrepareEmailData(ctx, fetchedUser.Name, forgottenPasswordUrl, forgottenPasswordSubject, tokenValue)
+	templateName := config.ForgottenPasswordEmailTemplateName
+	templatePath := config.ForgottenPasswordEmailTemplatePath
+	emailData, prepareEmailDataError := PrepareEmailData(ctx, fetchedUser.Name, forgottenPasswordUrl, forgottenPasswordSubject, tokenValue, templateName, templatePath)
 	if validator.IsErrorNotNil(prepareEmailDataError) {
 		logging.Logger(prepareEmailDataError)
 		domainError.HandleError(prepareEmailDataError)
 		return prepareEmailDataError
 	}
 
-	if validator.IsErrorNotNil(userUseCase.userRepository.SendEmailForgottenPasswordMessage(ctx, fetchedUser, emailData)) {
-		sendEmailForgottenPasswordMessage := &domainError.ValidationError{
-			Notification: "domainError.InternalErrorNotification",
-		}
-		domainError.HandleError(sendEmailForgottenPasswordMessage)
-		return sendEmailForgottenPasswordMessage
+	sendEmailForgottenPasswordMessageError := userUseCase.userRepository.SendEmailForgottenPasswordMessage(ctx, fetchedUser, emailData)
+	if validator.IsErrorNotNil(sendEmailForgottenPasswordMessageError) {
+		sendEmailForgottenPasswordMessageInternalError := domainError.HandleError(sendEmailForgottenPasswordMessageError)
+		return sendEmailForgottenPasswordMessageInternalError
 	}
 	return nil
 }
@@ -184,7 +186,8 @@ func (userUseCase *UserUseCase) ResetUserPassword(ctx context.Context, firstKey 
 	return updatedUser
 }
 
-func PrepareEmailData(ctx context.Context, userName string, emailUrl string, subject string, tokenValue string) (*userModel.EmailData, error) {
+func PrepareEmailData(ctx context.Context, userName string, emailUrl string, subject string,
+	tokenValue string, templateName string, templatePath string) (*userModel.EmailData, error) {
 	loadConfig, loadConfigError := config.LoadConfig(".")
 	if validator.IsErrorNotNil(loadConfigError) {
 		var loadConfigInternalError *domainError.InternalError = new(domainError.InternalError)
@@ -194,9 +197,11 @@ func PrepareEmailData(ctx context.Context, userName string, emailUrl string, sub
 	}
 	userFirstName := domainUtility.UserFirstName(userName)
 	emailData := &userModel.EmailData{
-		URL:       loadConfig.Origin + emailUrl + tokenValue,
-		FirstName: userFirstName,
-		Subject:   subject,
+		URL:          loadConfig.ClientOriginUrl + emailUrl + tokenValue,
+		TemplateName: templateName,
+		TemplatePath: templatePath,
+		FirstName:    userFirstName,
+		Subject:      subject,
 	}
 	return emailData, nil
 }

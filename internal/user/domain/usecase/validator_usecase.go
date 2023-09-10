@@ -259,7 +259,7 @@ func UserLoginValidator(userLogin *userModel.UserLogin) error {
 func IsEmailDomainValid(emailString string) bool {
 	host := strings.Split(emailString, "@")[1]
 	_, err := net.LookupMX(host)
-	if err != nil {
+	if validator.IsErrorNotNil(err) {
 		return false
 	}
 	return true

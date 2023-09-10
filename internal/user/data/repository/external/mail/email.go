@@ -50,35 +50,16 @@ func SendEmail(ctx context.Context, user *userModel.User, data *userModel.EmailD
 		return loadConfigInternalError
 	}
 
-	// Send data.
-	// from := loadConfig.EmailFrom
 	smtpPass := loadConfig.SMTPPassword
 	smtpUser := loadConfig.SMTPUser
-	// to := user.Email
 	smtpHost := loadConfig.SMTPHost
 	smtpPort := loadConfig.SMTPPort
 
-	// var body bytes.Buffer
-	// template, parseTemplateDirectoryError := ParseTemplateDirectory(loadConfig.UserEmailTemplatePath)
-	// if validator.IsErrorNotNil(parseTemplateDirectoryError) {
-	// 	logging.Logger(parseTemplateDirectoryError)
-	// 	return parseTemplateDirectoryError
-	// }
-
-	// template = template.Lookup(templateName)
-	// template.Execute(&body, &data)
-	// fmt.Println(template.Name())
-	// message := gomail.NewMessage()
-	// message.SetHeader("From", from)
-	// message.SetHeader("To", to)
-	// message.SetHeader("Subject", data.Subject)
-	// message.SetBody("text/html", body.String())
-	// message.AddAlternative("text/plain", html2text.HTML2Text(body.String()))
 	dialer := gomail.NewDialer(smtpHost, smtpPort, smtpUser, smtpPass)
 	dialer.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 
 	// Send an email.
-	message, prepareSendMessageError := PrepareSendMessage(&loadConfig, user.Email, data)
+	message, prepareSendMessageError := PrepareSendMessage(ctx, &loadConfig, user.Email, data)
 	if validator.IsErrorNotNil(prepareSendMessageError) {
 		return prepareSendMessageError
 	}
@@ -90,7 +71,7 @@ func SendEmail(ctx context.Context, user *userModel.User, data *userModel.EmailD
 	return nil
 }
 
-func PrepareSendMessage(loadConfig *config.Config, userEmail string, data *userModel.EmailData) (*gomail.Message, error) {
+func PrepareSendMessage(ctx context.Context, loadConfig *config.Config, userEmail string, data *userModel.EmailData) (*gomail.Message, error) {
 	// Prepare data.
 	templateName := loadConfig.UserEmailTemplateName
 	from := loadConfig.EmailFrom

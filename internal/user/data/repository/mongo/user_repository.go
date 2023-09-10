@@ -12,7 +12,9 @@ import (
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	domainUseCaseValidator "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
 
+	repositoryUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/utility"
 	mongoUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/data/repository/mongo"
+
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/model/common"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -136,6 +138,8 @@ func (userRepository *UserRepository) CheckEmailDublicate(ctx context.Context, e
 
 func (userRepository *UserRepository) Register(ctx context.Context, userCreate *userModel.UserCreate) *common.Result[*userModel.User] {
 	userCreateRepository := userRepositoryModel.UserCreateToUserCreateRepositoryMapper(userCreate)
+	userCreateRepository.Password, _ = repositoryUtility.HashPassword(userCreate.Password)
+
 	userCreateRepository.CreatedAt = time.Now()
 	userCreateRepository.UpdatedAt = userCreate.CreatedAt
 
@@ -234,8 +238,9 @@ func (userRepository *UserRepository) UpdateNewRegisteredUserById(ctx context.Co
 }
 
 func (userRepository *UserRepository) ResetUserPassword(ctx context.Context, firstKey string, firstValue string, secondKey string, passwordKey, password string) error {
+	hashedPassword, _ := repositoryUtility.HashPassword(password)
 	query := bson.D{{Key: firstKey, Value: firstValue}}
-	update := bson.D{{Key: "$set", Value: bson.D{{Key: passwordKey, Value: password}}}, {Key: "$unset", Value: bson.D{{Key: firstKey, Value: ""}, {Key: secondKey, Value: ""}}}}
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: passwordKey, Value: hashedPassword}}}, {Key: "$unset", Value: bson.D{{Key: firstKey, Value: ""}, {Key: secondKey, Value: ""}}}}
 	result, updateUserPasswordUpdateOneError := userRepository.collection.UpdateOne(ctx, query, update)
 	if validator.IsErrorNotNil(updateUserPasswordUpdateOneError) {
 		updatedUserPasswordError := domainError.NewInternalError(location+"ResetUserPassword.UpdateOne", updateUserPasswordUpdateOneError.Error())

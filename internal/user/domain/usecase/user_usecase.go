@@ -61,7 +61,6 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, userCreate *userMo
 	}
 	userCreate.Verified = true
 	userCreate.Role = "user"
-	userCreate.Password, _ = domainUtility.HashPassword(userCreate.Password)
 	createdUser := userUseCase.userRepository.Register(ctx, userCreate)
 	if validator.IsErrorNotNil(createdUser.Error) {
 		createdUser.Error = domainError.HandleError(createdUser.Error)
@@ -181,8 +180,7 @@ func (userUseCase *UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.
 }
 
 func (userUseCase *UserUseCase) ResetUserPassword(ctx context.Context, firstKey string, firstValue string, secondKey string, passwordKey, password string) error {
-	hashedPassword, _ := domainUtility.HashPassword(password)
-	updatedUser := userUseCase.userRepository.ResetUserPassword(ctx, firstKey, firstValue, secondKey, passwordKey, hashedPassword)
+	updatedUser := userUseCase.userRepository.ResetUserPassword(ctx, firstKey, firstValue, secondKey, passwordKey, password)
 	return updatedUser
 }
 

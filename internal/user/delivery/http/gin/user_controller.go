@@ -30,7 +30,7 @@ func NewUserController(userUseCase user.UseCase) UserController {
 	return UserController{userUseCase: userUseCase}
 }
 
-func (userController *UserController) GetAllUsers(ctx *gin.Context) {
+func (userController UserController) GetAllUsers(ctx *gin.Context) {
 	page := ctx.DefaultQuery("page", "1")
 	limit := ctx.DefaultQuery("limit", "10")
 
@@ -58,13 +58,13 @@ func (userController *UserController) GetAllUsers(ctx *gin.Context) {
 
 }
 
-func (userController *UserController) GetMe(ctx *gin.Context) {
-	currentUserView := ctx.MustGet("currentUser").(*userViewModel.UserView)
+func (userController UserController) GetMe(ctx *gin.Context) {
+	currentUserView := ctx.MustGet("currentUser").(userViewModel.UserView)
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": currentUserView}})
 }
 
-func (userController *UserController) GetUserById(ctx *gin.Context) {
+func (userController UserController) GetUserById(ctx *gin.Context) {
 	userID := ctx.Param("userID")
 	fetchedUser, err := userController.userUseCase.GetUserById(ctx.Request.Context(), userID)
 	if validator.IsErrorNotNil(err) {
@@ -79,9 +79,8 @@ func (userController *UserController) GetUserById(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": userViewModel.UserToUserViewMapper(fetchedUser)}})
 }
 
-func (userController *UserController) Register(ctx *gin.Context) {
-	var createdUserViewData *userViewModel.UserCreateView = new(userViewModel.UserCreateView)
-
+func (userController UserController) Register(ctx *gin.Context) {
+	var createdUserViewData userViewModel.UserCreateView
 	err := ctx.ShouldBindJSON(&createdUserViewData)
 	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
@@ -106,10 +105,10 @@ func (userController *UserController) Register(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, jsonResponse)
 }
 
-func (userController *UserController) UpdateUserById(ctx *gin.Context) {
-	currentUserView := ctx.MustGet("currentUser").(*userViewModel.UserView)
+func (userController UserController) UpdateUserById(ctx *gin.Context) {
+	currentUserView := ctx.MustGet("currentUser").(userViewModel.UserView)
 	userID := currentUserView.UserID
-	var updatedUserViewData *userViewModel.UserUpdateView = new(userViewModel.UserUpdateView)
+	var updatedUserViewData userViewModel.UserUpdateView
 
 	err := ctx.ShouldBindJSON(&updatedUserViewData)
 	if validator.IsErrorNotNil(err) {
@@ -118,7 +117,7 @@ func (userController *UserController) UpdateUserById(ctx *gin.Context) {
 	}
 
 	updatedUserData := userViewModel.UserUpdateViewToUserUpdateMapper(updatedUserViewData)
-	updatedUser, updatedUserError := userController.userUseCase.UpdateUserById(ctx.Request.Context(), userID, &updatedUserData)
+	updatedUser, updatedUserError := userController.userUseCase.UpdateUserById(ctx.Request.Context(), userID, updatedUserData)
 
 	if updatedUserError != nil {
 		ctx.JSON(http.StatusBadRequest, httpError.HandleError(updatedUserError))
@@ -127,9 +126,9 @@ func (userController *UserController) UpdateUserById(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, userViewModel.UserToUserViewMapper(updatedUser))
 }
 
-func (userController *UserController) Delete(ctx *gin.Context) {
+func (userController UserController) Delete(ctx *gin.Context) {
 	currentUser := ctx.MustGet("currentUser")
-	userID := currentUser.(*userViewModel.UserView).UserID
+	userID := currentUser.(userViewModel.UserView).UserID
 	err := userController.userUseCase.DeleteUserById(ctx.Request.Context(), fmt.Sprint(userID))
 
 	if validator.IsErrorNotNil(err) {
@@ -139,8 +138,8 @@ func (userController *UserController) Delete(ctx *gin.Context) {
 	ctx.JSON(http.StatusNoContent, nil)
 }
 
-func (userController *UserController) Login(ctx *gin.Context) {
-	var userLoginViewData *userViewModel.UserLoginView
+func (userController UserController) Login(ctx *gin.Context) {
+	var userLoginViewData userViewModel.UserLoginView
 
 	err := ctx.ShouldBindJSON(&userLoginViewData)
 	if validator.IsErrorNotNil(err) {
@@ -149,7 +148,7 @@ func (userController *UserController) Login(ctx *gin.Context) {
 	}
 
 	userLoginData := userViewModel.UserLoginViewToUserLoginMapper(userLoginViewData)
-	userID, err := userController.userUseCase.Login(ctx.Request.Context(), &userLoginData)
+	userID, err := userController.userUseCase.Login(ctx.Request.Context(), userLoginData)
 
 	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
@@ -177,11 +176,11 @@ func (userController *UserController) Login(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
 }
 
-func (userController *UserController) RefreshAccessToken(ctx *gin.Context) {
+func (userController UserController) RefreshAccessToken(ctx *gin.Context) {
 	message := "could not refresh access token"
-	currentUserView := ctx.MustGet("currentUser").(*userViewModel.UserView)
+	currentUserView := ctx.MustGet("currentUser").(userViewModel.UserView)
 
-	if currentUserView == nil {
+	if validator.IsValueNil(currentUserView) {
 		ctx.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": message})
 		return
 	}
@@ -217,8 +216,8 @@ func (userController *UserController) RefreshAccessToken(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
 }
 
-func (userController *UserController) ForgottenPassword(ctx *gin.Context) {
-	var userViewEmail *userViewModel.UserForgottenPasswordView
+func (userController UserController) ForgottenPassword(ctx *gin.Context) {
+	var userViewEmail userViewModel.UserForgottenPasswordView
 
 	err := ctx.ShouldBindJSON(&userViewEmail)
 	if validator.IsErrorNotNil(err) {
@@ -250,9 +249,9 @@ func (userController *UserController) ForgottenPassword(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
 }
 
-func (userController *UserController) ResetUserPassword(ctx *gin.Context) {
+func (userController UserController) ResetUserPassword(ctx *gin.Context) {
 	resetToken := ctx.Params.ByName("resetToken")
-	var userResetPasswordView *userViewModel.UserResetPasswordView
+	var userResetPasswordView userViewModel.UserResetPasswordView
 
 	err := ctx.ShouldBindJSON(&userResetPasswordView)
 	if validator.IsErrorNotNil(err) {
@@ -274,7 +273,7 @@ func (userController *UserController) ResetUserPassword(ctx *gin.Context) {
 
 }
 
-func (userController *UserController) Logout(ctx *gin.Context) {
+func (userController UserController) Logout(ctx *gin.Context) {
 	httpGinUtility.LogoutSetCookies(ctx)
 	ctx.JSON(http.StatusOK, gin.H{"status": "success"})
 }

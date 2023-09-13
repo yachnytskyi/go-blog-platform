@@ -2,20 +2,19 @@ package model
 
 import userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 
-func UsersRepositoryToUsersMapper(usersRepository []*UserRepository) *userModel.Users {
-	users := make([]*userModel.User, 0, len(usersRepository))
+func UsersRepositoryToUsersMapper(usersRepository []UserRepository) userModel.Users {
+	users := make([]userModel.User, 0, len(usersRepository))
 	for _, userRepository := range usersRepository {
 		user := UserRepositoryToUserMapper(userRepository)
 		users = append(users, user)
 	}
-
-	return &userModel.Users{
+	return userModel.Users{
 		Users: users,
 	}
 }
 
-func UserRepositoryToUserMapper(userRepository *UserRepository) *userModel.User {
-	return &userModel.User{
+func UserRepositoryToUserMapper(userRepository UserRepository) userModel.User {
+	return userModel.User{
 		UserID:    userRepository.UserID.Hex(),
 		Name:      userRepository.Name,
 		Email:     userRepository.Email,
@@ -27,8 +26,8 @@ func UserRepositoryToUserMapper(userRepository *UserRepository) *userModel.User 
 	}
 }
 
-func UserCreateToUserCreateRepositoryMapper(user *userModel.UserCreate) *UserCreateRepository {
-	return &UserCreateRepository{
+func UserCreateToUserCreateRepositoryMapper(user userModel.UserCreate) UserCreateRepository {
+	return UserCreateRepository{
 		Name:      user.Name,
 		Email:     user.Email,
 		Password:  user.Password,
@@ -39,8 +38,8 @@ func UserCreateToUserCreateRepositoryMapper(user *userModel.UserCreate) *UserCre
 	}
 }
 
-func UserUpdateToUserUpdateRepositoryMapper(user *userModel.UserUpdate) *UserUpdateRepository {
-	return &UserUpdateRepository{
+func UserUpdateToUserUpdateRepositoryMapper(user userModel.UserUpdate) UserUpdateRepository {
+	return UserUpdateRepository{
 		Name:      user.Name,
 		UpdatedAt: user.UpdatedAt,
 	}

@@ -3,7 +3,7 @@ package model
 import "time"
 
 type Users struct {
-	Users []*User
+	Users []User
 	Limit int
 }
 

@@ -5,12 +5,12 @@ import (
 	"strings"
 )
 
-func SanitizeString(preparedString *string) {
-	*preparedString = strings.TrimSpace(*preparedString)
+func SanitizeString(preparedString string) string {
+	return strings.TrimSpace(preparedString)
 }
 
-func StringToLower(preparedString *string) {
-	*preparedString = strings.ToLower(*preparedString)
+func StringToLower(preparedString string) string {
+	return strings.ToLower(preparedString)
 }
 
 func CheckCorrectLengthString(text string, minLength int, maxLength int) bool {

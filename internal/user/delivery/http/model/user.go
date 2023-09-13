@@ -6,7 +6,7 @@ import (
 
 // [GET].
 type UsersView struct {
-	UsersView []*UserView `json:"users"`
+	UsersView []UserView `json:"users"`
 }
 
 // [GET].

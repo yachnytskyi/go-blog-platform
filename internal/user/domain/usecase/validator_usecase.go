@@ -24,58 +24,58 @@ const (
 	invalidEmailDomain        = "email domain does not exist"
 	invalidPassword           = "passwords do not match"
 	nameField                 = "name"
-	emailField                = "email"
+	EmailField                = "email"
 	passwordField             = "password"
-	typeRequired              = "required"
+	TypeRequired              = "required"
 	typeOptional              = "optional"
 )
 
-func UserCreateValidator(userCreate *userModel.UserCreate) error {
+func UserCreateValidator(userCreate userModel.UserCreate) (userModel.UserCreate, error) {
 	stringAllowedLength := "can be between " + strconv.Itoa(minLength) + " and " + strconv.Itoa(maxLength)
 	userCreateValidationErrors := &domainError.ValidationErrors{}
-	domainUtility.SanitizeString(&userCreate.Name)
-	domainUtility.SanitizeString(&userCreate.Email)
-	domainUtility.SanitizeString(&userCreate.Password)
-	domainUtility.SanitizeString(&userCreate.PasswordConfirm)
-	domainUtility.StringToLower(&userCreate.Email)
+	userCreate.Name = domainUtility.SanitizeString(userCreate.Name)
+	userCreate.Email = domainUtility.SanitizeString(userCreate.Email)
+	userCreate.Password = domainUtility.SanitizeString(userCreate.Password)
+	userCreate.PasswordConfirm = domainUtility.SanitizeString(userCreate.PasswordConfirm)
+	userCreate.Email = domainUtility.StringToLower(userCreate.Email)
 
 	if validator.IsBooleanNotTrue(domainUtility.CheckCorrectLengthString(userCreate.Name, minLength, maxLength)) {
-		userCreateValidationError := domainError.NewValidationError(nameField, typeRequired, nameField+" "+stringAllowedLength)
+		userCreateValidationError := domainError.NewValidationError(nameField, TypeRequired, nameField+" "+stringAllowedLength)
 		userCreateValidationErrors.ValidationErrors = append(userCreateValidationErrors.ValidationErrors, userCreateValidationError)
 	} else if domainUtility.CheckSpecialCharactersString(userCreate.Name, usernameRegex) {
-		userCreateValidationError := domainError.NewValidationError(nameField, typeRequired, usernameAllowedCharacters)
+		userCreateValidationError := domainError.NewValidationError(nameField, TypeRequired, usernameAllowedCharacters)
 		userCreateValidationErrors.ValidationErrors = append(userCreateValidationErrors.ValidationErrors, userCreateValidationError)
 	}
 	if validator.IsBooleanNotTrue(domainUtility.CheckCorrectLengthString(userCreate.Email, minLength, maxLength)) {
-		userCreateValidationError := domainError.NewValidationError(emailField, typeRequired, emailField+" "+stringAllowedLength)
+		userCreateValidationError := domainError.NewValidationError(EmailField, TypeRequired, EmailField+" "+stringAllowedLength)
 		userCreateValidationErrors.ValidationErrors = append(userCreateValidationErrors.ValidationErrors, userCreateValidationError)
 	} else if domainUtility.CheckSpecialCharactersString(userCreate.Email, emailRegex) {
-		userCreateValidationError := domainError.NewValidationError(emailField, typeRequired, invalidEmail)
+		userCreateValidationError := domainError.NewValidationError(EmailField, TypeRequired, invalidEmail)
 		userCreateValidationErrors.ValidationErrors = append(userCreateValidationErrors.ValidationErrors, userCreateValidationError)
 	} else if validator.IsBooleanNotTrue(IsEmailDomainValid(userCreate.Email)) {
-		userCreateValidationError := domainError.NewValidationError(emailField, typeRequired, invalidEmailDomain)
+		userCreateValidationError := domainError.NewValidationError(EmailField, TypeRequired, invalidEmailDomain)
 		userCreateValidationErrors.ValidationErrors = append(userCreateValidationErrors.ValidationErrors, userCreateValidationError)
 	}
 	if validator.IsBooleanNotTrue(domainUtility.CheckCorrectLengthString(userCreate.Password, minLength, maxLength)) {
-		userCreateValidationError := domainError.NewValidationError(passwordField, typeRequired, passwordField+" "+stringAllowedLength)
+		userCreateValidationError := domainError.NewValidationError(passwordField, TypeRequired, passwordField+" "+stringAllowedLength)
 		userCreateValidationErrors.ValidationErrors = append(userCreateValidationErrors.ValidationErrors, userCreateValidationError)
 	} else if validator.IsBooleanNotTrue(validator.CheckMatchStrings(userCreate.Password, userCreate.PasswordConfirm)) {
-		userCreateValidationError := domainError.NewValidationError(passwordField, typeRequired, invalidPassword)
+		userCreateValidationError := domainError.NewValidationError(passwordField, TypeRequired, invalidPassword)
 		userCreateValidationErrors.ValidationErrors = append(userCreateValidationErrors.ValidationErrors, userCreateValidationError)
 	} else if domainUtility.CheckSpecialCharactersString(userCreate.Password, passwordRegex) {
-		userCreateValidationError := domainError.NewValidationError(passwordField, typeRequired, passwordAllowedCharacters)
+		userCreateValidationError := domainError.NewValidationError(passwordField, TypeRequired, passwordAllowedCharacters)
 		userCreateValidationErrors.ValidationErrors = append(userCreateValidationErrors.ValidationErrors, userCreateValidationError)
 	}
 	if validator.IsSliceNotEmpty(userCreateValidationErrors.ValidationErrors) {
-		return userCreateValidationErrors
+		return userModel.UserCreate{}, userCreateValidationErrors
 	}
-	return nil
+	return userCreate, nil
 }
 
-func UserUpdateValidator(userUpdate *userModel.UserUpdate) error {
+func UserUpdateValidator(userUpdate userModel.UserUpdate) error {
 	userUpdateValidationErrors := &domainError.ValidationErrors{}
 	stringAllowedLength := "can be between " + strconv.Itoa(minLength) + " and " + strconv.Itoa(maxLength)
-	domainUtility.SanitizeString(&userUpdate.Name)
+	userUpdate.Name = domainUtility.SanitizeString(userUpdate.Name)
 	if validator.IsBooleanNotTrue(domainUtility.CheckCorrectLengthString(userUpdate.Name, minLength, maxLength)) {
 		userUpdateValidationError := domainError.ValidationError{
 			Field:        "name",
@@ -98,9 +98,10 @@ func UserUpdateValidator(userUpdate *userModel.UserUpdate) error {
 	return nil
 }
 
-func UserLoginValidator(userLogin *userModel.UserLogin) error {
+func UserLoginValidator(userLogin userModel.UserLogin) (userModel.UserLogin, error) {
 	var message string
 	var err error
+	userLogin.Email = domainUtility.StringToLower(userLogin.Email)
 
 	if userLogin.Email == "" {
 		message = "key: `UserLogInView.Email` error: field validation for `email` failed, `email` cannot be empty "
@@ -115,9 +116,9 @@ func UserLoginValidator(userLogin *userModel.UserLogin) error {
 	if validator.IsValueNotNil(err) {
 		message = strings.TrimSpace(message)
 		err = fmt.Errorf(message)
-		return err
+		return userModel.UserLogin{}, err
 	}
-	return nil
+	return userLogin, nil
 }
 
 // func UserForgottenPasswordValidator(userForgottenPassword *userModel.UserForgottenPassword) error {

@@ -33,31 +33,31 @@ func NewUserUseCase(userRepository user.Repository) user.UseCase {
 	return &UserUseCase{userRepository: userRepository}
 }
 
-func (userUseCase *UserUseCase) GetAllUsers(ctx context.Context, page int, limit int) (*userModel.Users, error) {
+func (userUseCase UserUseCase) GetAllUsers(ctx context.Context, page int, limit int) (userModel.Users, error) {
 	fetchedUsers, getAllUsers := userUseCase.userRepository.GetAllUsers(ctx, page, limit)
 	return fetchedUsers, getAllUsers
 }
 
-func (userUseCase *UserUseCase) GetUserById(ctx context.Context, userID string) (*userModel.User, error) {
+func (userUseCase UserUseCase) GetUserById(ctx context.Context, userID string) (userModel.User, error) {
 	fetchedUser, getUserByIdError := userUseCase.userRepository.GetUserById(ctx, userID)
 	return fetchedUser, getUserByIdError
 }
 
-func (userUseCase *UserUseCase) GetUserByEmail(ctx context.Context, email string) (*userModel.User, error) {
+func (userUseCase UserUseCase) GetUserByEmail(ctx context.Context, email string) (userModel.User, error) {
 	fetchedUser, getUserByEmailError := userUseCase.userRepository.GetUserByEmail(ctx, email)
 	return fetchedUser, getUserByEmailError
 }
 
-func (userUseCase *UserUseCase) Register(ctx context.Context, userCreate *userModel.UserCreate) error {
+func (userUseCase UserUseCase) Register(ctx context.Context, userCreate userModel.UserCreate) error {
+	userCreate, userCreateValidationErrors := UserCreateValidator(userCreate)
+	if validator.IsErrorNotNil(userCreateValidationErrors) {
+		userCreateValidationErrors = domainError.HandleError(userCreateValidationErrors)
+		return userCreateValidationErrors
+	}
 	checkEmailDublicateError := userUseCase.userRepository.CheckEmailDublicate(ctx, userCreate.Email)
 	if validator.IsErrorNotNil(checkEmailDublicateError) {
 		checkEmailDublicateError = domainError.HandleError(checkEmailDublicateError)
 		return checkEmailDublicateError
-	}
-	userCreateValidationErrors := UserCreateValidator(userCreate)
-	if validator.IsErrorNotNil(userCreateValidationErrors) {
-		userCreateValidationErrors = domainError.HandleError(userCreateValidationErrors)
-		return userCreateValidationErrors
 	}
 	userCreate.Verified = true
 	userCreate.Role = "user"
@@ -92,32 +92,33 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, userCreate *userMo
 	return nil
 }
 
-func (userUseCase *UserUseCase) UpdateUserById(ctx context.Context, userID string, user *userModel.UserUpdate) (*userModel.User, error) {
+func (userUseCase UserUseCase) UpdateUserById(ctx context.Context, userID string, user userModel.UserUpdate) (userModel.User, error) {
 	userUpdateValidationErrors := UserUpdateValidator(user)
 	if validator.IsErrorNotNil(userUpdateValidationErrors) {
 		userUpdateValidationErrors = domainError.HandleError(userUpdateValidationErrors)
-		return nil, userUpdateValidationErrors
+		return userModel.User{}, userUpdateValidationErrors
 	}
 
 	updatedUser, userUpdateError := userUseCase.userRepository.UpdateUserById(ctx, userID, user)
 	if validator.IsErrorNotNil(userUpdateError) {
 		userUpdateError = domainError.HandleError(userUpdateError)
-		return nil, userUpdateError
+		return userModel.User{}, userUpdateError
 	}
 	return updatedUser, nil
 }
 
-func (userUseCase *UserUseCase) DeleteUserById(ctx context.Context, userID string) error {
+func (userUseCase UserUseCase) DeleteUserById(ctx context.Context, userID string) error {
 	deletedUser := userUseCase.userRepository.DeleteUserById(ctx, userID)
 	return deletedUser
 }
 
-func (userUseCase *UserUseCase) Login(ctx context.Context, userLogin *userModel.UserLogin) (string, error) {
-	userLoginValidationErrors := UserLoginValidator(userLogin)
+func (userUseCase UserUseCase) Login(ctx context.Context, userLogin userModel.UserLogin) (string, error) {
+	userLogin, userLoginValidationErrors := UserLoginValidator(userLogin)
 	if validator.IsErrorNotNil(userLoginValidationErrors) {
 		userLoginValidationErrors = domainError.HandleError(userLoginValidationErrors)
 		return "", userLoginValidationErrors
 	}
+
 	fetchedUser, getUserByEmailError := userUseCase.userRepository.GetUserByEmail(ctx, userLogin.Email)
 
 	// Will return wrong email or password.
@@ -133,12 +134,12 @@ func (userUseCase *UserUseCase) Login(ctx context.Context, userLogin *userModel.
 	return fetchedUser.UserID, nil
 }
 
-func (userUseCase *UserUseCase) UpdateNewRegisteredUserById(ctx context.Context, userID string, key string, value string) (*userModel.User, error) {
+func (userUseCase UserUseCase) UpdateNewRegisteredUserById(ctx context.Context, userID string, key string, value string) (userModel.User, error) {
 	updatedUser, updateNewRegisteredUserById := userUseCase.userRepository.UpdateNewRegisteredUserById(ctx, userID, key, value)
 	return updatedUser, updateNewRegisteredUserById
 }
 
-func (userUseCase *UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.Context, email string, firstKey string, firstValue string,
+func (userUseCase UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.Context, email string, firstKey string, firstValue string,
 	secondKey string, secondValue time.Time) error {
 	updatedUserError := userUseCase.userRepository.UpdatePasswordResetTokenUserByEmail(ctx, email, firstKey, firstValue, secondKey, secondValue)
 	if validator.IsErrorNotNil(updatedUserError) {
@@ -180,22 +181,22 @@ func (userUseCase *UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.
 	return nil
 }
 
-func (userUseCase *UserUseCase) ResetUserPassword(ctx context.Context, firstKey string, firstValue string, secondKey string, passwordKey, password string) error {
+func (userUseCase UserUseCase) ResetUserPassword(ctx context.Context, firstKey string, firstValue string, secondKey string, passwordKey, password string) error {
 	updatedUser := userUseCase.userRepository.ResetUserPassword(ctx, firstKey, firstValue, secondKey, passwordKey, password)
 	return updatedUser
 }
 
 func PrepareEmailData(ctx context.Context, userName string, emailUrl string, subject string,
-	tokenValue string, templateName string, templatePath string) (*userModel.EmailData, error) {
+	tokenValue string, templateName string, templatePath string) (userModel.EmailData, error) {
 	loadConfig, loadConfigError := config.LoadConfig(".")
 	if validator.IsErrorNotNil(loadConfigError) {
-		var loadConfigInternalError *domainError.InternalError = new(domainError.InternalError)
+		var loadConfigInternalError domainError.InternalError
 		loadConfigInternalError.Location = "User.Domain.UserUseCase.Registration.PrepareEmailData.LoadConfig"
 		loadConfigInternalError.Reason = loadConfigError.Error()
-		return nil, loadConfigInternalError
+		return userModel.EmailData{}, loadConfigInternalError
 	}
 	userFirstName := domainUtility.UserFirstName(userName)
-	emailData := &userModel.EmailData{
+	emailData := userModel.EmailData{
 		URL:          loadConfig.ClientOriginUrl + emailUrl + tokenValue,
 		TemplateName: templateName,
 		TemplatePath: templatePath,

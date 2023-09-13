@@ -28,6 +28,7 @@ import (
 	userUseCasePackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
 
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -55,17 +56,18 @@ var (
 	// templateInstance *template.Template
 )
 
+const (
+	location = "cmd.server.init."
+)
+
 // Init function that will run before the "main" function.
 func init() {
 
 	// Load the .env variables.
 	loadConfig, loadConfigError := config.LoadConfig(".")
 	if loadConfigError != nil {
-		var loadConfigInternalError *domainError.InternalError = new(domainError.InternalError)
-		loadConfigInternalError.Location = "cmd.server.init.LoadConfig"
-		loadConfigInternalError.Reason = loadConfigError.Error()
-		fmt.Println(loadConfigInternalError)
-		log.Fatal("Could not load config")
+		loadConfigInternalError := domainError.NewInternalError(location+"init.LoadConfig", loadConfigError.Error())
+		logging.Logger(loadConfigInternalError)
 	}
 
 	// Create a context.

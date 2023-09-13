@@ -12,14 +12,14 @@ type Result[T any] struct {
 // 	}
 // }
 
-func NewResultWithData[T any](data T) *Result[T] {
-	return &Result[T]{
+func NewResultWithData[T any](data T) Result[T] {
+	return Result[T]{
 		Data: data,
 	}
 }
 
-func NewResultWithError[T any](err error) *Result[T] {
-	return &Result[T]{
+func NewResultWithError[T any](err error) Result[T] {
+	return Result[T]{
 		Error: err,
 	}
 }

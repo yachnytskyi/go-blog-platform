@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
-	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain"
+	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator/domain"
 )

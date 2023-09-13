@@ -1,7 +1,7 @@
 package http
 
 import (
-	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain"
+	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
 
 func ValidationErrorToHttpValidationErrorViewMapper(validationError *domainError.ValidationError) *HttpValidationErrorView {

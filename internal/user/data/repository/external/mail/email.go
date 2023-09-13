@@ -12,7 +12,7 @@ import (
 	"github.com/k3a/html2text"
 	"github.com/yachnytskyi/golang-mongo-grpc/config"
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
-	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain"
+	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	"gopkg.in/gomail.v2"
 )

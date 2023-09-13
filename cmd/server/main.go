@@ -27,7 +27,7 @@ import (
 	userHttpGinPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin"
 	userUseCasePackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
 
-	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain"
+	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

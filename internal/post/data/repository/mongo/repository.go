@@ -9,8 +9,8 @@ import (
 	postRepositoryModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/data/repository/mongo/model"
 	postModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
 
-	mongoUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/data/repository/mongo"
-	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain"
+	mongoModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
+	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	"go.mongodb.org/mongo-driver/bson"
@@ -144,7 +144,7 @@ func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID
 		return nil, postUpdateToPostUpdateRepositoryMapper
 	}
 	postUpdateRepository.UpdatedAt = time.Now()
-	postMappedToMongoDB, mongoMapperError := mongoUtility.MongoMappper(postUpdateRepository)
+	postMappedToMongoDB, mongoMapperError := mongoModel.MongoMappper(postUpdateRepository)
 	if validator.IsErrorNotNil(mongoMapperError) {
 		return nil, mongoMapperError
 	}

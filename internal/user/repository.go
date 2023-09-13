@@ -5,7 +5,7 @@ import (
 	"time"
 
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/model/common"
+	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 )
 
 type Repository interface {
@@ -15,7 +15,7 @@ type Repository interface {
 	CheckEmailDublicate(ctx context.Context, email string) error
 	SendEmailVerificationMessage(ctx context.Context, user *userModel.User, data *userModel.EmailData) error
 	SendEmailForgottenPasswordMessage(ctx context.Context, user *userModel.User, data *userModel.EmailData) error
-	Register(ctx context.Context, user *userModel.UserCreate) *common.Result[*userModel.User]
+	Register(ctx context.Context, user *userModel.UserCreate) *commonModel.Result[*userModel.User]
 
 	UpdateUserById(ctx context.Context, userID string, user *userModel.UserUpdate) (*userModel.User, error)
 	DeleteUserById(ctx context.Context, userID string) error

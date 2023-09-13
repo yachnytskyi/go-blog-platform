@@ -15,10 +15,10 @@ import (
 	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
 
 	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
-	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/http"
+	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/http"
 
-	commonUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
-	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/model/http"
+	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/http"
+	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
@@ -236,7 +236,7 @@ func (userController *UserController) ForgottenPassword(ctx *gin.Context) {
 
 	// Generate verification code.
 	resetToken := randstr.String(20)
-	passwordResetToken := commonUtility.Encode(resetToken)
+	passwordResetToken := common.Encode(resetToken)
 	passwordResetAt := time.Now().Add(time.Minute * 15)
 
 	// Update the user.
@@ -260,7 +260,7 @@ func (userController *UserController) ResetUserPassword(ctx *gin.Context) {
 		return
 	}
 
-	passwordResetToken := commonUtility.Encode(resetToken)
+	passwordResetToken := common.Encode(resetToken)
 
 	// Update the user.
 	err = userController.userUseCase.ResetUserPassword(ctx.Request.Context(), "passwordResetToken", passwordResetToken, "passwordResetAt", "password", userResetPasswordView.Password)

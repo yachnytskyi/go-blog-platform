@@ -13,13 +13,13 @@ import (
 	domainUseCaseValidator "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
 
 	repositoryUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/utility"
-	mongoUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/data/repository/mongo"
+	mongoMapper "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
 
+	"github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/model/common"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 
-	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain"
+	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -179,7 +179,7 @@ func (userRepository *UserRepository) UpdateUserById(ctx context.Context, userID
 	userUpdateRepository := userRepositoryModel.UserUpdateToUserUpdateRepositoryMapper(user)
 	userUpdateRepository.UpdatedAt = time.Now()
 
-	userUpdateRepositoryMappedToMongoDB, mongoMapperError := mongoUtility.MongoMappper(userUpdateRepository)
+	userUpdateRepositoryMappedToMongoDB, mongoMapperError := mongoMapper.MongoMappper(userUpdateRepository)
 	if validator.IsErrorNotNil(mongoMapperError) {
 		userUpdateError := domainError.NewInternalError(location+"UpdateUserById.MongoMapper", mongoMapperError.Error())
 		logging.Logger(userUpdateError)

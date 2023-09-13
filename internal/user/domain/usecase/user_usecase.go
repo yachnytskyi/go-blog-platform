@@ -10,8 +10,8 @@ import (
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
+	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	commonUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
-	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/error/domain"
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
@@ -51,12 +51,12 @@ func (userUseCase *UserUseCase) GetUserByEmail(ctx context.Context, email string
 func (userUseCase *UserUseCase) Register(ctx context.Context, userCreate *userModel.UserCreate) error {
 	checkEmailDublicateError := userUseCase.userRepository.CheckEmailDublicate(ctx, userCreate.Email)
 	if validator.IsErrorNotNil(checkEmailDublicateError) {
-		domainError.HandleError(checkEmailDublicateError)
+		checkEmailDublicateError = domainError.HandleError(checkEmailDublicateError)
 		return checkEmailDublicateError
 	}
 	userCreateValidationErrors := UserCreateValidator(userCreate)
 	if validator.IsErrorNotNil(userCreateValidationErrors) {
-		domainError.HandleError(userCreateValidationErrors)
+		userCreateValidationErrors = domainError.HandleError(userCreateValidationErrors)
 		return userCreateValidationErrors
 	}
 	userCreate.Verified = true
@@ -72,7 +72,7 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, userCreate *userMo
 	encodedTokenValue := commonUtility.Encode(tokenValue)
 	_, userUpdateError := userUseCase.userRepository.UpdateNewRegisteredUserById(ctx, createdUser.Data.UserID, "verificationCode", encodedTokenValue)
 	if validator.IsErrorNotNil(userUpdateError) {
-		domainError.HandleError(userUpdateError)
+		userUpdateError = domainError.HandleError(userUpdateError)
 		return userUpdateError
 	}
 	templateName := config.UserConfirmationEmailTemplateName
@@ -81,12 +81,12 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, userCreate *userMo
 	emailData, prepareEmailDataError := PrepareEmailData(ctx, createdUser.Data.Name, emailConfirmationUrl, emailConfirmationSubject, tokenValue, templateName, templatePath)
 	if validator.IsErrorNotNil(prepareEmailDataError) {
 		logging.Logger(prepareEmailDataError)
-		domainError.HandleError(prepareEmailDataError)
+		prepareEmailDataError = domainError.HandleError(prepareEmailDataError)
 		return prepareEmailDataError
 	}
 	sendEmailVerificationMessageError := userUseCase.userRepository.SendEmailVerificationMessage(ctx, createdUser.Data, emailData)
 	if validator.IsErrorNotNil(sendEmailVerificationMessageError) {
-		domainError.HandleError(sendEmailVerificationMessageError)
+		sendEmailVerificationMessageError = domainError.HandleError(sendEmailVerificationMessageError)
 		return sendEmailVerificationMessageError
 	}
 	return nil
@@ -95,13 +95,13 @@ func (userUseCase *UserUseCase) Register(ctx context.Context, userCreate *userMo
 func (userUseCase *UserUseCase) UpdateUserById(ctx context.Context, userID string, user *userModel.UserUpdate) (*userModel.User, error) {
 	userUpdateValidationErrors := UserUpdateValidator(user)
 	if validator.IsErrorNotNil(userUpdateValidationErrors) {
-		domainError.HandleError(userUpdateValidationErrors)
+		userUpdateValidationErrors = domainError.HandleError(userUpdateValidationErrors)
 		return nil, userUpdateValidationErrors
 	}
 
 	updatedUser, userUpdateError := userUseCase.userRepository.UpdateUserById(ctx, userID, user)
 	if validator.IsErrorNotNil(userUpdateError) {
-		domainError.HandleError(userUpdateError)
+		userUpdateError = domainError.HandleError(userUpdateError)
 		return nil, userUpdateError
 	}
 	return updatedUser, nil
@@ -109,14 +109,13 @@ func (userUseCase *UserUseCase) UpdateUserById(ctx context.Context, userID strin
 
 func (userUseCase *UserUseCase) DeleteUserById(ctx context.Context, userID string) error {
 	deletedUser := userUseCase.userRepository.DeleteUserById(ctx, userID)
-
 	return deletedUser
 }
 
 func (userUseCase *UserUseCase) Login(ctx context.Context, userLogin *userModel.UserLogin) (string, error) {
 	userLoginValidationErrors := UserLoginValidator(userLogin)
 	if validator.IsErrorNotNil(userLoginValidationErrors) {
-		domainError.HandleError(userLoginValidationErrors)
+		userLoginValidationErrors = domainError.HandleError(userLoginValidationErrors)
 		return "", userLoginValidationErrors
 	}
 	fetchedUser, getUserByEmailError := userUseCase.userRepository.GetUserByEmail(ctx, userLogin.Email)
@@ -169,14 +168,14 @@ func (userUseCase *UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.
 	emailData, prepareEmailDataError := PrepareEmailData(ctx, fetchedUser.Name, forgottenPasswordUrl, forgottenPasswordSubject, tokenValue, templateName, templatePath)
 	if validator.IsErrorNotNil(prepareEmailDataError) {
 		logging.Logger(prepareEmailDataError)
-		domainError.HandleError(prepareEmailDataError)
+		prepareEmailDataError = domainError.HandleError(prepareEmailDataError)
 		return prepareEmailDataError
 	}
 
 	sendEmailForgottenPasswordMessageError := userUseCase.userRepository.SendEmailForgottenPasswordMessage(ctx, fetchedUser, emailData)
 	if validator.IsErrorNotNil(sendEmailForgottenPasswordMessageError) {
-		sendEmailForgottenPasswordMessageInternalError := domainError.HandleError(sendEmailForgottenPasswordMessageError)
-		return sendEmailForgottenPasswordMessageInternalError
+		sendEmailForgottenPasswordMessageError = domainError.HandleError(sendEmailForgottenPasswordMessageError)
+		return sendEmailForgottenPasswordMessageError
 	}
 	return nil
 }

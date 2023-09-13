@@ -11,29 +11,29 @@ type ValidationError struct {
 	Notification string
 }
 
-func NewValidationError(field string, fieldType string, notification string) error {
-	return &ValidationError{
+func NewValidationError(field string, fieldType string, notification string) ValidationError {
+	return ValidationError{
 		Field:        field,
 		FieldType:    fieldType,
 		Notification: notification,
 	}
 }
 
-func (err *ValidationError) Error() string {
+func (err ValidationError) Error() string {
 	return fmt.Sprintf("field: " + err.Field + " " + "type: " + err.FieldType + " notification: " + err.Notification)
 }
 
 type ValidationErrors struct {
-	ValidationErrors []*ValidationError
+	ValidationErrors []ValidationError
 }
 
-func NewValidationErrors(validationErrors []*ValidationError) error {
-	return &ValidationErrors{
+func NewValidationErrors(validationErrors []ValidationError) ValidationErrors {
+	return ValidationErrors{
 		ValidationErrors: validationErrors,
 	}
 }
 
-func (validationErrors *ValidationErrors) Error() string {
+func (validationErrors ValidationErrors) Error() string {
 	var result strings.Builder
 	for _, vavalidationError := range validationErrors.ValidationErrors {
 		result.WriteString("field: " + vavalidationError.Field + " " + "type: " + vavalidationError.FieldType + " notification: " + vavalidationError.Notification)
@@ -48,14 +48,14 @@ type EntityNotFoundError struct {
 	Reason   string
 }
 
-func NewEntityNotFoundError(location string, reason string) error {
-	return &EntityNotFoundError{
+func NewEntityNotFoundError(location string, reason string) EntityNotFoundError {
+	return EntityNotFoundError{
 		Location: location,
 		Reason:   reason,
 	}
 }
 
-func (err *EntityNotFoundError) Error() string {
+func (err EntityNotFoundError) Error() string {
 	return fmt.Sprintf("location: " + err.Location + " reason: " + err.Reason)
 }
 
@@ -64,14 +64,14 @@ type InternalError struct {
 	Reason   string
 }
 
-func NewInternalError(location string, reason string) error {
-	return &InternalError{
+func NewInternalError(location string, reason string) InternalError {
+	return InternalError{
 		Location: location,
 		Reason:   reason,
 	}
 }
 
-func (err *InternalError) Error() string {
+func (err InternalError) Error() string {
 	return fmt.Sprintf("location: " + err.Location + " reason: " + err.Reason)
 }
 
@@ -79,12 +79,12 @@ type ErrorMessage struct {
 	Notification string
 }
 
-func NewErrorMessage(notification string) error {
-	return &ErrorMessage{
+func NewErrorMessage(notification string) ErrorMessage {
+	return ErrorMessage{
 		Notification: notification,
 	}
 }
 
-func (err *ErrorMessage) Error() string {
+func (err ErrorMessage) Error() string {
 	return fmt.Sprintf("notification: " + err.Notification)
 }

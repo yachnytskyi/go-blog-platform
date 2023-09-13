@@ -6,7 +6,7 @@ import (
 	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/http"
 )
 
-func HandleError(err error) *httpModel.JsonResponse {
+func HandleError(err error) httpModel.JsonResponse {
 	switch errorType := err.(type) {
 	case *domainError.ValidationError:
 		return httpModel.NewJsonResponseWithError(ValidationErrorToHttpValidationErrorViewMapper(errorType))
@@ -14,10 +14,8 @@ func HandleError(err error) *httpModel.JsonResponse {
 		httpValidationErrors := ValidationErrorsToHttpValidationErrorsViewMapper(errorType)
 		return httpModel.NewJsonResponseWithError(httpValidationErrors.HttpValidationErrorsView)
 	case *domainError.ErrorMessage:
-		return &httpModel.JsonResponse{Error: ErrorMessageToErrorMessageViewMapper(errorType)}
+		return httpModel.JsonResponse{Error: ErrorMessageToErrorMessageViewMapper(errorType)}
 	default:
-		var defaultError *domainError.ErrorMessage = new(domainError.ErrorMessage)
-		defaultError.Notification = config.InternalErrorNotification
-		return &httpModel.JsonResponse{Error: ErrorMessageToErrorMessageViewMapper(defaultError)}
+		return httpModel.JsonResponse{Error: NewHttpErrorMessage(config.InternalErrorNotification)}
 	}
 }

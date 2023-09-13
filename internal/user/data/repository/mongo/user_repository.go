@@ -5,12 +5,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/yachnytskyi/golang-mongo-grpc/config"
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	userRepositoryMail "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/external/mail"
 	userRepositoryModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/mongo/model"
 
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
-	domainUseCaseValidator "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
 
 	repositoryUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/utility"
 	mongoMapper "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
@@ -30,6 +30,8 @@ const (
 	location                = "User.Data.Repository.MongoDB."
 	updateIsNotSuccessful   = "update was not successful"
 	delitionIsNotSuccessful = "delition was not successful"
+	emailField              = "email"
+	typeRequired            = "required"
 )
 
 type UserRepository struct {
@@ -131,9 +133,9 @@ func (userRepository *UserRepository) CheckEmailDublicate(ctx context.Context, e
 		logging.Logger(userFindOneInternalError)
 		return userFindOneInternalError
 	}
-	userFindOneValidationError := domainError.NewValidationError("email", "required", domainUseCaseValidator.EmailAlreadyExists)
+	userFindOneValidationError := domainError.NewValidationError(emailField, typeRequired, config.EmailAlreadyExists)
 	logging.Logger(userFindOneValidationError)
-	return userFindOneValidationError
+	return &userFindOneValidationError
 }
 
 func (userRepository *UserRepository) Register(ctx context.Context, userCreate *userModel.UserCreate) *common.Result[*userModel.User] {

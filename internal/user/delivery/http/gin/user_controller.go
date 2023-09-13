@@ -53,7 +53,7 @@ func (userController *UserController) GetAllUsers(ctx *gin.Context) {
 	}
 
 	jsonResponse := httpModel.NewJsonResponse(userViewModel.UsersToUsersViewMapper(fetchedUsers))
-	httpModel.SetStatus(jsonResponse)
+	httpModel.SetStatus(&jsonResponse)
 	ctx.JSON(http.StatusOK, jsonResponse)
 
 }
@@ -93,7 +93,7 @@ func (userController *UserController) Register(ctx *gin.Context) {
 
 	if createdUserError != nil {
 		jsonResponse := httpError.HandleError(createdUserError)
-		httpModel.SetStatus(jsonResponse)
+		httpModel.SetStatus(&jsonResponse)
 		ctx.JSON(http.StatusBadRequest, jsonResponse)
 		return
 	}
@@ -102,7 +102,7 @@ func (userController *UserController) Register(ctx *gin.Context) {
 		Message: config.SendingEmailNotification + createdUserData.Email,
 	}
 	jsonResponse := httpModel.NewJsonResponse(welcomeMessage)
-	httpModel.SetStatus(jsonResponse)
+	httpModel.SetStatus(&jsonResponse)
 	ctx.JSON(http.StatusCreated, jsonResponse)
 }
 

@@ -9,8 +9,7 @@ import (
 )
 
 const (
-	createRepositoryMapperObjectIDFromHex = "Post.Data.Repository.MongoDB.PostCreateToPostCreateRepositoryMapper.ObjectIDFromHex"
-	updateRepositoryMapperObjectIDFromHex = "Post.Data.Repository.MongoDB.PostUpdateToPostUpdateRepositoryMapper.ObjectIDFromHex"
+	location = "Post.Data.Repository.MongoDB."
 )
 
 func PostRepositoryToPostMapper(postRepository *PostRepository) *postModel.Post {
@@ -29,7 +28,7 @@ func PostRepositoryToPostMapper(postRepository *PostRepository) *postModel.Post 
 func PostCreateToPostCreateRepositoryMapper(postCreate *postModel.PostCreate) (*PostCreateRepository, error) {
 	userObjectID, objectIDFromHexError := primitive.ObjectIDFromHex(postCreate.UserID)
 	if validator.IsErrorNotNil(objectIDFromHexError) {
-		objectIDFromHexErrorInternalError := domainError.NewInternalError(createRepositoryMapperObjectIDFromHex, objectIDFromHexError.Error())
+		objectIDFromHexErrorInternalError := domainError.NewInternalError(location+"PostCreateToPostCreateRepositoryMapper.ObjectIDFromHex", objectIDFromHexError.Error())
 		logging.Logger(objectIDFromHexErrorInternalError)
 		return nil, objectIDFromHexErrorInternalError
 	}
@@ -47,14 +46,14 @@ func PostCreateToPostCreateRepositoryMapper(postCreate *postModel.PostCreate) (*
 func PostUpdateToPostUpdateRepositoryMapper(postUpdate *postModel.PostUpdate) (*PostUpdateRepository, error) {
 	postObjectID, objectIDFromHexError := primitive.ObjectIDFromHex(postUpdate.PostID)
 	if validator.IsErrorNotNil(objectIDFromHexError) {
-		objectIDFromHexErrorInternalError := domainError.NewInternalError(updateRepositoryMapperObjectIDFromHex, objectIDFromHexError.Error())
+		objectIDFromHexErrorInternalError := domainError.NewInternalError(location+"PostCreateToPostCreateRepositoryMapper.PostID.ObjectIDFromHex", objectIDFromHexError.Error())
 		logging.Logger(objectIDFromHexErrorInternalError)
 		return nil, objectIDFromHexErrorInternalError
 	}
 
 	userObjectID, objectIDFromHexError := primitive.ObjectIDFromHex(postUpdate.UserID)
 	if validator.IsErrorNotNil(objectIDFromHexError) {
-		objectIDFromHexErrorInternalError := domainError.NewInternalError(createRepositoryMapperObjectIDFromHex, objectIDFromHexError.Error())
+		objectIDFromHexErrorInternalError := domainError.NewInternalError("location+PostCreateToPostCreateRepositoryMapper.UserID.ObjectIDFromHex", objectIDFromHexError.Error())
 		logging.Logger(objectIDFromHexErrorInternalError)
 		return nil, objectIDFromHexErrorInternalError
 	}

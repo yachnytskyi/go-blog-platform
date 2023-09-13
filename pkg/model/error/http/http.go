@@ -11,30 +11,30 @@ type HttpValidationErrorView struct {
 	Notification string `json:"notification"`
 }
 
-func NewHttpValidationError(field string, fieldType string, notification string) error {
-	return &HttpValidationErrorView{
+func NewHttpValidationError(field string, fieldType string, notification string) HttpValidationErrorView {
+	return HttpValidationErrorView{
 		Field:        field,
 		FieldType:    fieldType,
 		Notification: notification,
 	}
 }
 
-func (httpValidationErrorView *HttpValidationErrorView) Error() string {
+func (httpValidationErrorView HttpValidationErrorView) Error() string {
 	return fmt.Sprintf("field: " + httpValidationErrorView.Field + " " + "type: " +
 		httpValidationErrorView.FieldType + " notification: " + httpValidationErrorView.Notification)
 }
 
 type HttpValidationErrorsView struct {
-	HttpValidationErrorsView []*HttpValidationErrorView `json:"errors"`
+	HttpValidationErrorsView []HttpValidationErrorView `json:"errors"`
 }
 
-func NewHttpValidationErrorsView(httpValidationErrorsView []*HttpValidationErrorView) error {
-	return &HttpValidationErrorsView{
+func NewHttpValidationErrorsView(httpValidationErrorsView []HttpValidationErrorView) HttpValidationErrorsView {
+	return HttpValidationErrorsView{
 		HttpValidationErrorsView: httpValidationErrorsView,
 	}
 }
 
-func (httpValidationErrorsView *HttpValidationErrorsView) Error() string {
+func (httpValidationErrorsView HttpValidationErrorsView) Error() string {
 	var result strings.Builder
 	for _, validationError := range httpValidationErrorsView.HttpValidationErrorsView {
 		result.WriteString("field: " + validationError.Field + " " + "type: " + validationError.FieldType + " notification: " + validationError.Notification)
@@ -46,12 +46,12 @@ type HttpErrorMessageView struct {
 	Notification string `json:"notification"`
 }
 
-func NewHttpErrorMessage(notification string) error {
-	return &HttpErrorMessageView{
+func NewHttpErrorMessage(notification string) HttpErrorMessageView {
+	return HttpErrorMessageView{
 		Notification: notification,
 	}
 }
 
-func (httpMessageErrorView *HttpErrorMessageView) Error() string {
+func (httpMessageErrorView HttpErrorMessageView) Error() string {
 	return fmt.Sprintf("notification: " + httpMessageErrorView.Notification)
 }

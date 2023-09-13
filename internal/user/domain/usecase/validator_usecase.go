@@ -13,25 +13,26 @@ import (
 )
 
 const (
-	emailRegex    = "^(?:(?:(?:(?:[a-zA-Z]|\\d|[\\\\\\\\/=\\\\{\\|}]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])+(?:\\.([a-zA-Z]|\\d|[\\\\+\\-\\/=\\\\_{\\|}]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])+)*)|(?:(?:\\x22)(?:(?:(?:(?:\\x20|\\x09)*(?:\\x0d\\x0a))?(?:\\x20|\\x09)+)?(?:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x7f]|\\x21|[\\x23-\\x5b]|[\\x5d-\\x7e]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])|(?:(?:[\\x01-\\x09\\x0b\\x0c\\x0d-\\x7f]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}]))))*(?:(?:(?:\\x20|\\x09)*(?:\\x0d\\x0a))?(\\x20|\\x09)+)?(?:\\x22))))@(?:(?:(?:[a-zA-Z]|\\d|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])|(?:(?:[a-zA-Z]|\\d|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])(?:[a-zA-Z]|\\d|-|\\.||[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])*(?:[a-zA-Z]|\\d|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])))\\.)+(?:(?:[a-zA-Z]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])|(?:(?:[a-zA-Z]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])(?:[a-zA-Z]|\\d|-|\\.||[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])*(?:[a-zA-Z]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])))\\.?$"
-	usernameRegex = `^[a-zA-z0-9-_ \t]*$`
-	passwordRegex = `^[a-zA-z0-9-_*,.]*$`
-
+	emailRegex                = "^(?:(?:(?:(?:[a-zA-Z]|\\d|[\\\\\\\\/=\\\\{\\|}]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])+(?:\\.([a-zA-Z]|\\d|[\\\\+\\-\\/=\\\\_{\\|}]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])+)*)|(?:(?:\\x22)(?:(?:(?:(?:\\x20|\\x09)*(?:\\x0d\\x0a))?(?:\\x20|\\x09)+)?(?:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x7f]|\\x21|[\\x23-\\x5b]|[\\x5d-\\x7e]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])|(?:(?:[\\x01-\\x09\\x0b\\x0c\\x0d-\\x7f]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}]))))*(?:(?:(?:\\x20|\\x09)*(?:\\x0d\\x0a))?(\\x20|\\x09)+)?(?:\\x22))))@(?:(?:(?:[a-zA-Z]|\\d|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])|(?:(?:[a-zA-Z]|\\d|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])(?:[a-zA-Z]|\\d|-|\\.||[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])*(?:[a-zA-Z]|\\d|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])))\\.)+(?:(?:[a-zA-Z]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])|(?:(?:[a-zA-Z]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])(?:[a-zA-Z]|\\d|-|\\.||[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])*(?:[a-zA-Z]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])))\\.?$"
+	usernameRegex             = `^[a-zA-z0-9-_ \t]*$`
+	passwordRegex             = `^[a-zA-z0-9-_*,.]*$`
+	minLength                 = 4
+	maxLength                 = 40
 	usernameAllowedCharacters = "sorry, only letters (a-z), numbers(0-9) and spaces are allowed"
 	passwordAllowedCharacters = "sorry, only letters (a-z), numbers(0-9), the asterics, hyphen and underscore characters are allowed"
-
-	EmailAlreadyExists = "user with this email already exists"
-	invalidEmail       = "sorry, only letters (a-z), numbers(0-9) and periods (.) are allowed, you cannot use a period in the end and more than one in a row"
-	invalidEmailDomain = "email domain does not exist"
-	invalidPassword    = "passwords do not match"
-
-	minLength = 4
-	maxLength = 40
+	invalidEmail              = "sorry, only letters (a-z), numbers(0-9) and periods (.) are allowed, you cannot use a period in the end and more than one in a row"
+	invalidEmailDomain        = "email domain does not exist"
+	invalidPassword           = "passwords do not match"
+	nameField                 = "name"
+	emailField                = "email"
+	passwordField             = "password"
+	typeRequired              = "required"
+	typeOptional              = "optional"
 )
 
 func UserCreateValidator(userCreate *userModel.UserCreate) error {
-	userCreateValidationErrors := &domainError.ValidationErrors{}
 	stringAllowedLength := "can be between " + strconv.Itoa(minLength) + " and " + strconv.Itoa(maxLength)
+	userCreateValidationErrors := &domainError.ValidationErrors{}
 	domainUtility.SanitizeString(&userCreate.Name)
 	domainUtility.SanitizeString(&userCreate.Email)
 	domainUtility.SanitizeString(&userCreate.Password)
@@ -39,71 +40,30 @@ func UserCreateValidator(userCreate *userModel.UserCreate) error {
 	domainUtility.StringToLower(&userCreate.Email)
 
 	if validator.IsBooleanNotTrue(domainUtility.CheckCorrectLengthString(userCreate.Name, minLength, maxLength)) {
-		userCreateValidationError := &domainError.ValidationError{
-			Field:        "name",
-			FieldType:    "required",
-			Notification: stringAllowedLength,
-		}
+		userCreateValidationError := domainError.NewValidationError(nameField, typeRequired, nameField+" "+stringAllowedLength)
 		userCreateValidationErrors.ValidationErrors = append(userCreateValidationErrors.ValidationErrors, userCreateValidationError)
-
 	} else if domainUtility.CheckSpecialCharactersString(userCreate.Name, usernameRegex) {
-		userCreateValidationError := &domainError.ValidationError{
-			Field:        "name",
-			FieldType:    "required",
-			Notification: usernameAllowedCharacters,
-		}
+		userCreateValidationError := domainError.NewValidationError(nameField, typeRequired, usernameAllowedCharacters)
 		userCreateValidationErrors.ValidationErrors = append(userCreateValidationErrors.ValidationErrors, userCreateValidationError)
 	}
-
 	if validator.IsBooleanNotTrue(domainUtility.CheckCorrectLengthString(userCreate.Email, minLength, maxLength)) {
-		userCreateValidationError := &domainError.ValidationError{
-			Field:        "email",
-			FieldType:    "required",
-			Notification: stringAllowedLength,
-		}
-
+		userCreateValidationError := domainError.NewValidationError(emailField, typeRequired, emailField+" "+stringAllowedLength)
 		userCreateValidationErrors.ValidationErrors = append(userCreateValidationErrors.ValidationErrors, userCreateValidationError)
-
 	} else if domainUtility.CheckSpecialCharactersString(userCreate.Email, emailRegex) {
-		userCreateValidationError := &domainError.ValidationError{
-			Field:        "email",
-			FieldType:    "required",
-			Notification: invalidEmail,
-		}
+		userCreateValidationError := domainError.NewValidationError(emailField, typeRequired, invalidEmail)
 		userCreateValidationErrors.ValidationErrors = append(userCreateValidationErrors.ValidationErrors, userCreateValidationError)
-
 	} else if validator.IsBooleanNotTrue(IsEmailDomainValid(userCreate.Email)) {
-		userCreateValidationError := &domainError.ValidationError{
-			Field:        "email",
-			FieldType:    "required",
-			Notification: invalidEmailDomain,
-		}
-
+		userCreateValidationError := domainError.NewValidationError(emailField, typeRequired, invalidEmailDomain)
 		userCreateValidationErrors.ValidationErrors = append(userCreateValidationErrors.ValidationErrors, userCreateValidationError)
 	}
-
 	if validator.IsBooleanNotTrue(domainUtility.CheckCorrectLengthString(userCreate.Password, minLength, maxLength)) {
-		userCreateValidationError := &domainError.ValidationError{
-			Field:        "password",
-			FieldType:    "required",
-			Notification: stringAllowedLength,
-		}
+		userCreateValidationError := domainError.NewValidationError(passwordField, typeRequired, passwordField+" "+stringAllowedLength)
 		userCreateValidationErrors.ValidationErrors = append(userCreateValidationErrors.ValidationErrors, userCreateValidationError)
-
 	} else if validator.IsBooleanNotTrue(validator.CheckMatchStrings(userCreate.Password, userCreate.PasswordConfirm)) {
-		userCreateValidationError := &domainError.ValidationError{
-			Field:        "password",
-			FieldType:    "required",
-			Notification: invalidPassword,
-		}
+		userCreateValidationError := domainError.NewValidationError(passwordField, typeRequired, invalidPassword)
 		userCreateValidationErrors.ValidationErrors = append(userCreateValidationErrors.ValidationErrors, userCreateValidationError)
-
 	} else if domainUtility.CheckSpecialCharactersString(userCreate.Password, passwordRegex) {
-		userCreateValidationError := &domainError.ValidationError{
-			Field:        "password",
-			FieldType:    "required",
-			Notification: passwordAllowedCharacters,
-		}
+		userCreateValidationError := domainError.NewValidationError(passwordField, typeRequired, passwordAllowedCharacters)
 		userCreateValidationErrors.ValidationErrors = append(userCreateValidationErrors.ValidationErrors, userCreateValidationError)
 	}
 	if validator.IsSliceNotEmpty(userCreateValidationErrors.ValidationErrors) {
@@ -117,7 +77,7 @@ func UserUpdateValidator(userUpdate *userModel.UserUpdate) error {
 	stringAllowedLength := "can be between " + strconv.Itoa(minLength) + " and " + strconv.Itoa(maxLength)
 	domainUtility.SanitizeString(&userUpdate.Name)
 	if validator.IsBooleanNotTrue(domainUtility.CheckCorrectLengthString(userUpdate.Name, minLength, maxLength)) {
-		userUpdateValidationError := &domainError.ValidationError{
+		userUpdateValidationError := domainError.ValidationError{
 			Field:        "name",
 			FieldType:    "required",
 			Notification: stringAllowedLength,
@@ -125,7 +85,7 @@ func UserUpdateValidator(userUpdate *userModel.UserUpdate) error {
 		userUpdateValidationErrors.ValidationErrors = append(userUpdateValidationErrors.ValidationErrors, userUpdateValidationError)
 
 	} else if domainUtility.CheckSpecialCharactersString(userUpdate.Name, usernameRegex) {
-		userUpdateValidationError := &domainError.ValidationError{
+		userUpdateValidationError := domainError.ValidationError{
 			Field:        "name",
 			FieldType:    "required",
 			Notification: usernameAllowedCharacters,

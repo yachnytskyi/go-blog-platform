@@ -7,43 +7,39 @@ type JsonResponse struct {
 	Status string `json:"status"`
 }
 
-func NewJsonResponse(data any) *JsonResponse {
-	return &JsonResponse{
+func NewJsonResponse(data any) JsonResponse {
+	return JsonResponse{
 		Data: data,
 	}
 }
 
-func NewJsonResponseWithError(err any) *JsonResponse {
+func NewJsonResponseWithError(err any) JsonResponse {
 	switch errorType := err.(type) {
 	case error:
-		return &JsonResponse{
+		return JsonResponse{
 			Error: errorType,
 		}
 	default:
-		return &JsonResponse{
+		return JsonResponse{
 			Errors: errorType,
 		}
 	}
 }
 
-// func NewJsonResponseWithErrors(errors any) *JsonResponse {
-// 	return &JsonResponse{
+// func NewJsonResponseWithErrors(errors any) JsonResponse {
+// 	return &sonResponse{
 // 		Errors: errors,
 // 	}
 // }
 
-func SetStatus(jsonResponse *JsonResponse) *JsonResponse {
+func SetStatus(jsonResponse *JsonResponse) {
 	if jsonResponse.Data != nil {
 		jsonResponse.Status = "success"
-		return jsonResponse
 	} else if jsonResponse.Error != nil {
 		jsonResponse.Status = "fail"
-		return jsonResponse
 	} else if jsonResponse.Errors != nil {
 		jsonResponse.Status = "fail"
-		return jsonResponse
 	} else {
 		jsonResponse.Status = "fail"
-		return jsonResponse
 	}
 }

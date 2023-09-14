@@ -37,10 +37,9 @@ const (
 func validateUserCreate(userCreate userModel.UserCreate) (userModel.UserCreate, error) {
 	validationErrors := &domainError.ValidationErrors{}
 	userCreate.Name = domainUtility.SanitizeString(userCreate.Name)
-	userCreate.Email = domainUtility.SanitizeString(userCreate.Email)
+	userCreate.Email = domainUtility.SanitizeAndToLowerString(userCreate.Email)
 	userCreate.Password = domainUtility.SanitizeString(userCreate.Password)
 	userCreate.PasswordConfirm = domainUtility.SanitizeString(userCreate.PasswordConfirm)
-	userCreate.Email = domainUtility.SanitizeAndToLowerString(userCreate.Email)
 
 	validateFieldError := validateField(userCreate.Name, nameField, TypeRequired, usernameRegex, usernameAllowedCharacters)
 	if validator.IsValueNotNil(validateFieldError) {

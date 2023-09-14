@@ -17,10 +17,10 @@ func (userGrpcServer *UserGrpcServer) Register(ctx context.Context, request *pb.
 		PasswordConfirm: request.GetPasswordConfirm(),
 	}
 
-	createdUserError := userGrpcServer.userUseCase.Register(ctx, user)
-	if createdUserError != nil {
+	createdUser := userGrpcServer.userUseCase.Register(ctx, user)
+	if createdUser.Error != nil {
 
-		switch errorType := createdUserError.(type) {
+		switch errorType := createdUser.Error.(type) {
 		case *domainError.ValidationError:
 			return nil, errorType
 		case *domainError.ErrorMessage:

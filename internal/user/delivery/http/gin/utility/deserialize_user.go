@@ -26,7 +26,7 @@ func DeserializeUser(userUseCase user.UseCase) gin.HandlerFunc {
 		cookie, cookieError := ctx.Cookie(accessToToken)
 		authorizationHeader := ctx.Request.Header.Get(authorization)
 		fields := strings.Fields(authorizationHeader)
-		if validator.IsSliceNotEmpty(fields) && validator.CheckMatchStrings(fields[0], bearer) {
+		if validator.IsSliceNotEmpty(fields) && validator.AreStringsEqual(fields[0], bearer) {
 			accessToken = fields[1]
 		} else if validator.IsErrorNil(cookieError) {
 			accessToken = cookie

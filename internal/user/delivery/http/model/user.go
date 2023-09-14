@@ -54,3 +54,9 @@ type UserResetPasswordView struct {
 type UserWelcomeMessageView struct {
 	Message string `json:"message"`
 }
+
+func NewWelcomeMessageView(message string) UserWelcomeMessageView {
+	return UserWelcomeMessageView{
+		Message: message,
+	}
+}

@@ -9,7 +9,12 @@ func SanitizeString(preparedString string) string {
 	return strings.TrimSpace(preparedString)
 }
 
-func StringToLower(preparedString string) string {
+func ToLowerString(preparedString string) string {
+	return strings.ToLower(preparedString)
+}
+
+func SanitizeAndToLowerString(preparedString string) string {
+	strings.TrimSpace(preparedString)
 	return strings.ToLower(preparedString)
 }
 

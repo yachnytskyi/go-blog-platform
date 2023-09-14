@@ -87,19 +87,16 @@ func (userController UserController) Register(ctx *gin.Context) {
 		return
 	}
 
-	createdUserData := userViewModel.UserCreateViewToUserCreateMapper(createdUserViewData)
-	createdUserError := userController.userUseCase.Register(ctx.Request.Context(), createdUserData)
-
-	if createdUserError != nil {
-		jsonResponse := httpError.HandleError(createdUserError)
+	userCreate := userViewModel.UserCreateViewToUserCreateMapper(createdUserViewData)
+	createdUser := userController.userUseCase.Register(ctx.Request.Context(), userCreate)
+	if validator.IsErrorNotNil(createdUser.Error) {
+		jsonResponse := httpError.HandleError(createdUser.Error)
 		httpModel.SetStatus(&jsonResponse)
 		ctx.JSON(http.StatusBadRequest, jsonResponse)
 		return
 	}
 
-	welcomeMessage := &userViewModel.UserWelcomeMessageView{
-		Message: config.SendingEmailNotification + createdUserData.Email,
-	}
+	welcomeMessage := userViewModel.NewWelcomeMessageView(config.SendingEmailNotification + createdUser.Data.Email)
 	jsonResponse := httpModel.NewJsonResponse(welcomeMessage)
 	httpModel.SetStatus(&jsonResponse)
 	ctx.JSON(http.StatusCreated, jsonResponse)
@@ -118,12 +115,15 @@ func (userController UserController) UpdateUserById(ctx *gin.Context) {
 
 	updatedUserData := userViewModel.UserUpdateViewToUserUpdateMapper(updatedUserViewData)
 	updatedUser, updatedUserError := userController.userUseCase.UpdateUserById(ctx.Request.Context(), userID, updatedUserData)
-
-	if updatedUserError != nil {
-		ctx.JSON(http.StatusBadRequest, httpError.HandleError(updatedUserError))
+	if validator.IsErrorNotNil(updatedUserError) {
+		jsonResponse := httpError.HandleError(updatedUserError)
+		httpModel.SetStatus(&jsonResponse)
+		ctx.JSON(http.StatusBadRequest, jsonResponse)
+		return
 	}
-
-	ctx.JSON(http.StatusOK, userViewModel.UserToUserViewMapper(updatedUser))
+	jsonResponse := httpModel.NewJsonResponse(userViewModel.UserToUserViewMapper(updatedUser))
+	httpModel.SetStatus(&jsonResponse)
+	ctx.JSON(http.StatusCreated, jsonResponse)
 }
 
 func (userController UserController) Delete(ctx *gin.Context) {
@@ -140,7 +140,6 @@ func (userController UserController) Delete(ctx *gin.Context) {
 
 func (userController UserController) Login(ctx *gin.Context) {
 	var userLoginViewData userViewModel.UserLoginView
-
 	err := ctx.ShouldBindJSON(&userLoginViewData)
 	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
@@ -148,30 +147,30 @@ func (userController UserController) Login(ctx *gin.Context) {
 	}
 
 	userLoginData := userViewModel.UserLoginViewToUserLoginMapper(userLoginViewData)
-	userID, err := userController.userUseCase.Login(ctx.Request.Context(), userLoginData)
-
-	if validator.IsErrorNotNil(err) {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+	userID, loginError := userController.userUseCase.Login(ctx.Request.Context(), userLoginData)
+	if validator.IsErrorNotNil(loginError) {
+		jsonResponse := httpError.HandleError(loginError)
+		httpModel.SetStatus(&jsonResponse)
+		ctx.JSON(http.StatusBadRequest, jsonResponse)
 		return
 	}
 
 	config, _ := config.LoadConfig(".")
-
-	// Generate tokens.
-	accessToken, err := httpUtility.CreateToken(config.AccessTokenExpiresIn, userID, config.AccessTokenPrivateKey)
-
-	if validator.IsErrorNotNil(err) {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+	accessToken, createTokenError := httpUtility.CreateToken(config.AccessTokenExpiresIn, userID, config.AccessTokenPrivateKey)
+	if validator.IsErrorNotNil(createTokenError) {
+		jsonResponse := httpError.HandleError(createTokenError)
+		httpModel.SetStatus(&jsonResponse)
+		ctx.JSON(http.StatusBadRequest, jsonResponse)
 		return
 	}
 
-	refreshToken, err := httpUtility.CreateToken(config.RefreshTokenExpiresIn, userID, config.RefreshTokenPrivateKey)
-
-	if validator.IsErrorNotNil(err) {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+	refreshToken, createTokenError := httpUtility.CreateToken(config.RefreshTokenExpiresIn, userID, config.RefreshTokenPrivateKey)
+	if validator.IsErrorNotNil(createTokenError) {
+		jsonResponse := httpError.HandleError(createTokenError)
+		httpModel.SetStatus(&jsonResponse)
+		ctx.JSON(http.StatusBadRequest, jsonResponse)
 		return
 	}
-
 	httpGinUtility.LoginSetCookies(ctx, accessToken, config.AccessTokenMaxAge*60, refreshToken, config.RefreshTokenMaxAge*60)
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
 }

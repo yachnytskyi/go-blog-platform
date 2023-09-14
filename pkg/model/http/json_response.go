@@ -35,11 +35,8 @@ func NewJsonResponseWithError(err any) JsonResponse {
 func SetStatus(jsonResponse *JsonResponse) {
 	if jsonResponse.Data != nil {
 		jsonResponse.Status = "success"
-	} else if jsonResponse.Error != nil {
-		jsonResponse.Status = "fail"
-	} else if jsonResponse.Errors != nil {
-		jsonResponse.Status = "fail"
-	} else {
-		jsonResponse.Status = "fail"
+		return
 	}
+	jsonResponse.Status = "fail"
+
 }

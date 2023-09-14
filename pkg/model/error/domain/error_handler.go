@@ -6,11 +6,13 @@ import (
 
 func HandleError(err error) error {
 	switch errorType := err.(type) {
-	case *ValidationError:
+	case ValidationError:
 		return errorType
-	case *ValidationErrors:
+	case ValidationErrors:
 		return errorType
-	case *EntityNotFoundError:
+	case ErrorMessage:
+		return errorType
+	case EntityNotFoundError:
 		return NewErrorMessage(config.EntityNotFoundErrorNotification)
 	default:
 		return NewErrorMessage(config.InternalErrorNotification)

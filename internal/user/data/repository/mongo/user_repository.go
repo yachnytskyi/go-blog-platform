@@ -31,8 +31,6 @@ const (
 	location                = "User.Data.Repository.MongoDB."
 	updateIsNotSuccessful   = "update was not successful"
 	delitionIsNotSuccessful = "delition was not successful"
-	// emailField              = "email"
-	// typeRequired            = "required"
 )
 
 type UserRepository struct {
@@ -135,7 +133,7 @@ func (userRepository UserRepository) CheckEmailDublicate(ctx context.Context, em
 	}
 	userFindOneValidationError := domainError.NewValidationError(userValidator.EmailField, userValidator.TypeRequired, config.EmailAlreadyExists)
 	logging.Logger(userFindOneValidationError)
-	return &userFindOneValidationError
+	return userFindOneValidationError
 }
 
 func (userRepository UserRepository) Register(ctx context.Context, userCreate userModel.UserCreate) common.Result[userModel.User] {

@@ -5,7 +5,7 @@ import (
 
 	pb "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1/model/pb"
 	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
-	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
+	userUseCase "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -23,9 +23,7 @@ func (userGrpcServer *UserGrpcServer) Login(ctx context.Context, request *pb.Log
 		return nil, status.Errorf(codes.PermissionDenied, "You are not verified, please verify your email to login")
 	}
 
-	err = domainUtility.VerifyPassword(user.Password, request.GetPassword())
-	if err != nil {
-
+	if userUseCase.ArePasswordsEqual(user.Password, request.GetPassword()) {
 		return nil, status.Errorf(codes.InvalidArgument, "Invalid email or Password")
 	}
 

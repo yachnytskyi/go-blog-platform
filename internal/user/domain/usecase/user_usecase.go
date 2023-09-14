@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/thanhpk/randstr"
@@ -49,21 +48,20 @@ func (userUseCase UserUseCase) GetUserByEmail(ctx context.Context, email string)
 	return fetchedUser, getUserByEmailError
 }
 
-func (userUseCase UserUseCase) Register(ctx context.Context, userCreate userModel.UserCreate) common.Result[userModel.User] {
-	userCreate, validationErrors := validateUserCreate(userCreate)
-	if validator.IsErrorNotNil(validationErrors) {
-		validationErrors = domainError.HandleError(validationErrors)
-		return common.NewResultWithError[userModel.User](validationErrors)
+func (userUseCase UserUseCase) Register(ctx context.Context, userCreateData userModel.UserCreate) common.Result[userModel.User] {
+	userCreate := validateUserCreate(userCreateData)
+	if validator.IsErrorNotNil(userCreate.Error) {
+		return common.NewResultWithError[userModel.User](domainError.HandleError(userCreate.Error))
 	}
-	checkEmailDublicateError := userUseCase.userRepository.CheckEmailDublicate(ctx, userCreate.Email)
+	checkEmailDublicateError := userUseCase.userRepository.CheckEmailDublicate(ctx, userCreate.Data.Email)
 	if validator.IsErrorNotNil(checkEmailDublicateError) {
 		checkEmailDublicateError = domainError.HandleError(checkEmailDublicateError)
 		return common.NewResultWithError[userModel.User](checkEmailDublicateError)
 	}
-	userCreate.Verified = true
-	userCreate.Role = "user"
+	userCreate.Data.Verified = true
+	userCreate.Data.Role = "user"
 
-	createdUser := userUseCase.userRepository.Register(ctx, userCreate)
+	createdUser := userUseCase.userRepository.Register(ctx, userCreate.Data)
 	if validator.IsErrorNotNil(createdUser.Error) {
 		createdUser.Error = domainError.HandleError(createdUser.Error)
 		return createdUser
@@ -94,14 +92,14 @@ func (userUseCase UserUseCase) Register(ctx context.Context, userCreate userMode
 	return createdUser
 }
 
-func (userUseCase UserUseCase) UpdateUserById(ctx context.Context, userID string, userUpdate userModel.UserUpdate) (userModel.User, error) {
-	userUpdate, validationErrors := UserUpdateValidator(userUpdate)
-	if validator.IsErrorNotNil(validationErrors) {
-		validationErrors = domainError.HandleError(validationErrors)
+func (userUseCase UserUseCase) UpdateUserById(ctx context.Context, userID string, userUpdateData userModel.UserUpdate) (userModel.User, error) {
+	userUpdate := validateUserUpdate(userUpdateData)
+	if validator.IsErrorNotNil(userUpdate.Error) {
+		validationErrors := domainError.HandleError(userUpdate.Error)
 		return userModel.User{}, validationErrors
 	}
 
-	updatedUser, userUpdateError := userUseCase.userRepository.UpdateUserById(ctx, userID, userUpdate)
+	updatedUser, userUpdateError := userUseCase.userRepository.UpdateUserById(ctx, userID, userUpdate.Data)
 	if validator.IsErrorNotNil(userUpdateError) {
 		userUpdateError = domainError.HandleError(userUpdateError)
 		return userModel.User{}, userUpdateError
@@ -114,24 +112,19 @@ func (userUseCase UserUseCase) DeleteUserById(ctx context.Context, userID string
 	return deletedUser
 }
 
-func (userUseCase UserUseCase) Login(ctx context.Context, userLogin userModel.UserLogin) (string, error) {
-	userLogin, validationErrors := UserLoginValidator(userLogin)
-	if validator.IsErrorNotNil(validationErrors) {
-		validationErrors = domainError.HandleError(validationErrors)
+func (userUseCase UserUseCase) Login(ctx context.Context, userLoginData userModel.UserLogin) (string, error) {
+	userLogin := validateUserLogin(userLoginData)
+	if validator.IsErrorNotNil(userLogin.Error) {
+		validationErrors := domainError.HandleError(userLogin.Error)
 		return "", validationErrors
 	}
 
-	fetchedUser, getUserByEmailError := userUseCase.userRepository.GetUserByEmail(ctx, userLogin.Email)
-
-	// Will return wrong email or password.
+	fetchedUser, getUserByEmailError := userUseCase.userRepository.GetUserByEmail(ctx, userLogin.Data.Email)
 	if validator.IsErrorNotNil(getUserByEmailError) {
-		return "", fmt.Errorf("invalid email or password")
+		return "", domainError.HandleError(domainError.NewErrorMessage(invalidEmailOrPassword))
 	}
-
-	// Verify password - we previously created this method.
-	matchPasswords := domainUtility.VerifyPassword(fetchedUser.Password, userLogin.Password)
-	if validator.IsErrorNotNil(matchPasswords) {
-		return "", fmt.Errorf("invalid email or password")
+	if ArePasswordsNotEqual(fetchedUser.Password, userLoginData.Password) {
+		return "", domainError.HandleError(domainError.NewErrorMessage(invalidEmailOrPassword))
 	}
 	return fetchedUser.UserID, nil
 }

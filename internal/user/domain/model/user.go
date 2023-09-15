@@ -56,3 +56,13 @@ type EmailData struct {
 	FirstName    string
 	Subject      string
 }
+
+func NewEmailData(url, templateName, templatePath, firstName, subject string) EmailData {
+	return EmailData{
+		URL:          url,
+		TemplateName: templateName,
+		TemplatePath: templatePath,
+		FirstName:    firstName,
+		Subject:      subject,
+	}
+}

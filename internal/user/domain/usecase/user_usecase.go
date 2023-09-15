@@ -196,13 +196,8 @@ func PrepareEmailData(ctx context.Context, userName string, url string, subject 
 		return common.NewResultWithError[userModel.EmailData](loadConfigInternalError)
 	}
 	userFirstName := domainUtility.UserFirstName(userName)
-	emailData := userModel.EmailData{
-		URL:          loadConfig.ClientOriginUrl + url + tokenValue,
-		TemplateName: templateName,
-		TemplatePath: templatePath,
-		FirstName:    userFirstName,
-		Subject:      subject,
-	}
+
+	emailData := userModel.NewEmailData(loadConfig.ClientOriginUrl+url+tokenValue, templateName, templatePath, userFirstName, subject)
 	return common.NewResultWithData[userModel.EmailData](emailData)
 
 }

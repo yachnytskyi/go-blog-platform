@@ -5,14 +5,15 @@ import (
 	"time"
 
 	"github.com/thanhpk/randstr"
-	"github.com/yachnytskyi/golang-mongo-grpc/config"
-	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
+	config "github.com/yachnytskyi/golang-mongo-grpc/config"
+	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
+	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
+	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	commonUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
+	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
@@ -33,8 +34,8 @@ func NewUserUseCase(userRepository user.Repository) user.UseCase {
 	return &UserUseCase{userRepository: userRepository}
 }
 
-func (userUseCase UserUseCase) GetAllUsers(ctx context.Context, page int, limit int) (userModel.Users, error) {
-	fetchedUsers, getAllUsers := userUseCase.userRepository.GetAllUsers(ctx, page, limit)
+func (userUseCase UserUseCase) GetAllUsers(ctx context.Context, paginationQuery commonModel.PaginationQuery) (userModel.Users, error) {
+	fetchedUsers, getAllUsers := userUseCase.userRepository.GetAllUsers(ctx, paginationQuery)
 	return fetchedUsers, getAllUsers
 }
 
@@ -56,12 +57,12 @@ func (userUseCase UserUseCase) GetUserByEmail(ctx context.Context, email string)
 func (userUseCase UserUseCase) Register(ctx context.Context, userCreateData userModel.UserCreate) common.Result[userModel.User] {
 	userCreate := validateUserCreate(userCreateData)
 	if validator.IsErrorNotNil(userCreate.Error) {
-		return common.NewResultWithError[userModel.User](domainError.HandleError(userCreate.Error))
+		return common.NewResultOnFailure[userModel.User](domainError.HandleError(userCreate.Error))
 	}
 	checkEmailDublicateError := userUseCase.userRepository.CheckEmailDublicate(ctx, userCreate.Data.Email)
 	if validator.IsErrorNotNil(checkEmailDublicateError) {
 		checkEmailDublicateError = domainError.HandleError(checkEmailDublicateError)
-		return common.NewResultWithError[userModel.User](checkEmailDublicateError)
+		return common.NewResultOnFailure[userModel.User](checkEmailDublicateError)
 	}
 	tokenValue := randstr.String(verificationCodeLength)
 	encodedTokenValue := commonUtility.Encode(tokenValue)
@@ -81,12 +82,12 @@ func (userUseCase UserUseCase) Register(ctx context.Context, userCreateData user
 	if validator.IsErrorNotNil(emailData.Error) {
 		logging.Logger(emailData.Error)
 		emailData.Error = domainError.HandleError(emailData.Error)
-		return common.NewResultWithError[userModel.User](emailData.Error)
+		return common.NewResultOnFailure[userModel.User](emailData.Error)
 	}
 	sendEmailVerificationMessageError := userUseCase.userRepository.SendEmailVerificationMessage(ctx, createdUser.Data, emailData.Data)
 	if validator.IsErrorNotNil(sendEmailVerificationMessageError) {
 		sendEmailVerificationMessageError = domainError.HandleError(sendEmailVerificationMessageError)
-		return common.NewResultWithError[userModel.User](sendEmailVerificationMessageError)
+		return common.NewResultOnFailure[userModel.User](sendEmailVerificationMessageError)
 	}
 	return createdUser
 }
@@ -193,11 +194,11 @@ func PrepareEmailData(ctx context.Context, userName string, url string, subject 
 		var loadConfigInternalError domainError.InternalError
 		loadConfigInternalError.Location = "User.Domain.UserUseCase.Registration.PrepareEmailData.LoadConfig"
 		loadConfigInternalError.Reason = loadConfigError.Error()
-		return common.NewResultWithError[userModel.EmailData](loadConfigInternalError)
+		return common.NewResultOnFailure[userModel.EmailData](loadConfigInternalError)
 	}
 	userFirstName := domainUtility.UserFirstName(userName)
 
 	emailData := userModel.NewEmailData(loadConfig.ClientOriginUrl+url+tokenValue, templateName, templatePath, userFirstName, subject)
-	return common.NewResultWithData[userModel.EmailData](emailData)
+	return common.NewResultOnSuccess[userModel.EmailData](emailData)
 
 }

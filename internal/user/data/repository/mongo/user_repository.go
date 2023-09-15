@@ -5,22 +5,18 @@ import (
 	"strings"
 	"time"
 
-	"github.com/yachnytskyi/golang-mongo-grpc/config"
-	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
+	config "github.com/yachnytskyi/golang-mongo-grpc/config"
+	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	userRepositoryMail "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/external/mail"
 	userRepositoryModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/mongo/model"
-
-	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
-
 	repositoryUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/utility"
-	mongoMapper "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
-
+	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	userValidator "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
+	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
+	mongoMapper "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
+	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
-
-	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -41,17 +37,10 @@ func NewUserRepository(collection *mongo.Collection) user.Repository {
 	return &UserRepository{collection: collection}
 }
 
-func (userRepository UserRepository) GetAllUsers(ctx context.Context, page int, limit int) (userModel.Users, error) {
-	if page == 0 || page < 0 || page > 100 {
-		page = 1
-	}
-	if limit == 0 || limit < 0 || limit > 100 {
-		limit = 10
-	}
-	skip := (page - 1) * limit
+func (userRepository UserRepository) GetAllUsers(ctx context.Context, paginationQuery commonModel.PaginationQuery) (userModel.Users, error) {
 	option := options.FindOptions{}
-	option.SetLimit(int64(limit))
-	option.SetSkip(int64(skip))
+	option.SetLimit(int64(paginationQuery.Limit))
+	option.SetSkip(int64(paginationQuery.Skip))
 
 	query := bson.M{}
 	cursor, cursorFindError := userRepository.collection.Find(ctx, query, &option)
@@ -62,7 +51,7 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, page int, 
 	}
 	defer cursor.Close(ctx)
 
-	fetchedUsers := make([]userRepositoryModel.UserRepository, 0, limit)
+	fetchedUsers := make([]userRepositoryModel.UserRepository, 0, paginationQuery.Limit)
 	for cursor.Next(ctx) {
 		user := userRepositoryModel.UserRepository{}
 		cursorDecodeError := cursor.Decode(&user)
@@ -86,7 +75,7 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, page int, 
 	}
 
 	users := userRepositoryModel.UsersRepositoryToUsersMapper(fetchedUsers)
-	users.Limit = limit
+	users.Limit = paginationQuery.Limit
 	return users, nil
 }
 
@@ -136,7 +125,7 @@ func (userRepository UserRepository) CheckEmailDublicate(ctx context.Context, em
 	return userFindOneValidationError
 }
 
-func (userRepository UserRepository) Register(ctx context.Context, userCreate userModel.UserCreate) common.Result[userModel.User] {
+func (userRepository UserRepository) Register(ctx context.Context, userCreate userModel.UserCreate) commonModel.Result[userModel.User] {
 	userCreateRepository := userRepositoryModel.UserCreateToUserCreateRepositoryMapper(userCreate)
 	userCreateRepository.Password, _ = repositoryUtility.HashPassword(userCreate.Password)
 	userCreateRepository.CreatedAt = time.Now()
@@ -146,7 +135,7 @@ func (userRepository UserRepository) Register(ctx context.Context, userCreate us
 	if validator.IsErrorNotNil(insertOneResultError) {
 		userCreateInternalError := domainError.NewInternalError(location+"Register.InsertOne", insertOneResultError.Error())
 		logging.Logger(userCreateInternalError)
-		return common.NewResultWithError[userModel.User](userCreateInternalError)
+		return commonModel.NewResultOnFailure[userModel.User](userCreateInternalError)
 	}
 
 	// Create a unique index for the email field.
@@ -158,7 +147,7 @@ func (userRepository UserRepository) Register(ctx context.Context, userCreate us
 	if validator.IsErrorNotNil(userIndexesCreateOneError) {
 		userCreateInternalError := domainError.NewInternalError(location+"Register.Indexes.CreateOne", userIndexesCreateOneError.Error())
 		logging.Logger(userCreateInternalError)
-		return common.NewResultWithError[userModel.User](userCreateInternalError)
+		return commonModel.NewResultOnFailure[userModel.User](userCreateInternalError)
 	}
 
 	createdUserRepository := userRepositoryModel.UserRepository{}
@@ -167,11 +156,11 @@ func (userRepository UserRepository) Register(ctx context.Context, userCreate us
 	if validator.IsErrorNotNil(userFindOneError) {
 		userCreateEntityNotFoundError := domainError.NewEntityNotFoundError(location+"Register.FindOne.Decode", userFindOneError.Error())
 		logging.Logger(userCreateEntityNotFoundError)
-		return common.NewResultWithError[userModel.User](userCreateEntityNotFoundError)
+		return commonModel.NewResultOnFailure[userModel.User](userCreateEntityNotFoundError)
 	}
 
 	createdUser := userRepositoryModel.UserRepositoryToUserMapper(createdUserRepository)
-	return common.NewResultWithData[userModel.User](createdUser)
+	return commonModel.NewResultOnSuccess[userModel.User](createdUser)
 }
 
 func (userRepository UserRepository) UpdateUserById(ctx context.Context, userID string, user userModel.UserUpdate) (userModel.User, error) {

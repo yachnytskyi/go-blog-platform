@@ -3,20 +3,18 @@ package gin
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/thanhpk/randstr"
-	"github.com/yachnytskyi/golang-mongo-grpc/config"
-	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
+	config "github.com/yachnytskyi/golang-mongo-grpc/config"
+	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	httpGinUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin/utility"
 	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
-
 	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
+	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/http"
-
 	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/http"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -31,22 +29,15 @@ func NewUserController(userUseCase user.UseCase) UserController {
 }
 
 func (userController UserController) GetAllUsers(ctx *gin.Context) {
-	page := ctx.DefaultQuery("page", "1")
-	limit := ctx.DefaultQuery("limit", "10")
+	page := ctx.DefaultQuery("page", commonModel.DefaultPage)
+	limit := ctx.DefaultQuery("limit", commonModel.DefaultLimit)
+	orderBy := ctx.DefaultQuery("order-by", "")
+	convertedPage := commonModel.GetPage(page)
+	convertedLimit := commonModel.GetLimit(limit)
+	orderBy = commonModel.GetOrderBy(orderBy)
+	paginationQuery := commonModel.NewPaginationQuery(convertedPage, convertedLimit, orderBy)
 
-	intPage, err := strconv.Atoi(page)
-	if validator.IsErrorNotNil(err) {
-		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
-		return
-	}
-
-	intLimit, err := strconv.Atoi(limit)
-	if validator.IsErrorNotNil(err) {
-		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
-		return
-	}
-
-	fetchedUsers, err := userController.userUseCase.GetAllUsers(ctx.Request.Context(), intPage, intLimit)
+	fetchedUsers, err := userController.userUseCase.GetAllUsers(ctx.Request.Context(), paginationQuery)
 	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return

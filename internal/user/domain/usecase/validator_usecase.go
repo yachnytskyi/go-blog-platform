@@ -57,9 +57,9 @@ func validateUserCreate(userCreate userModel.UserCreate) common.Result[userModel
 		validationErrors.ValidationErrors = append(validationErrors.ValidationErrors, validateFieldError)
 	}
 	if validator.IsSliceNotEmpty(validationErrors.ValidationErrors) {
-		return common.NewResultWithError[userModel.UserCreate](validationErrors)
+		return common.NewResultOnFailure[userModel.UserCreate](validationErrors)
 	}
-	return common.NewResultWithData[userModel.UserCreate](userCreate)
+	return common.NewResultOnSuccess[userModel.UserCreate](userCreate)
 }
 
 func validateUserUpdate(userUpdate userModel.UserUpdate) common.Result[userModel.UserUpdate] {
@@ -71,9 +71,9 @@ func validateUserUpdate(userUpdate userModel.UserUpdate) common.Result[userModel
 		validationErrors.ValidationErrors = append(validationErrors.ValidationErrors, validateFieldError)
 	}
 	if validator.IsSliceNotEmpty(validationErrors.ValidationErrors) {
-		return common.NewResultWithError[userModel.UserUpdate](validationErrors)
+		return common.NewResultOnFailure[userModel.UserUpdate](validationErrors)
 	}
-	return common.NewResultWithData[userModel.UserUpdate](userUpdate)
+	return common.NewResultOnSuccess[userModel.UserUpdate](userUpdate)
 }
 
 func validateUserLogin(userLogin userModel.UserLogin) common.Result[userModel.UserLogin] {
@@ -90,9 +90,9 @@ func validateUserLogin(userLogin userModel.UserLogin) common.Result[userModel.Us
 		validationErrors.ValidationErrors = append(validationErrors.ValidationErrors, validateFieldError)
 	}
 	if validator.IsSliceNotEmpty(validationErrors.ValidationErrors) {
-		return common.NewResultWithError[userModel.UserLogin](validationErrors)
+		return common.NewResultOnFailure[userModel.UserLogin](validationErrors)
 	}
-	return common.NewResultWithData[userModel.UserLogin](userLogin)
+	return common.NewResultOnSuccess[userModel.UserLogin](userLogin)
 }
 
 func validateUserForgottenPassword(userForgottenPassword userModel.UserForgottenPassword) common.Result[userModel.UserForgottenPassword] {
@@ -104,9 +104,9 @@ func validateUserForgottenPassword(userForgottenPassword userModel.UserForgotten
 		validationErrors.ValidationErrors = append(validationErrors.ValidationErrors, validateFieldError)
 	}
 	if validator.IsSliceNotEmpty(validationErrors.ValidationErrors) {
-		return common.NewResultWithError[userModel.UserForgottenPassword](validationErrors)
+		return common.NewResultOnFailure[userModel.UserForgottenPassword](validationErrors)
 	}
-	return common.NewResultWithData[userModel.UserForgottenPassword](userForgottenPassword)
+	return common.NewResultOnSuccess[userModel.UserForgottenPassword](userForgottenPassword)
 }
 
 func validateResetPassword(userResetPassword userModel.UserResetPassword) common.Result[userModel.UserResetPassword] {
@@ -119,9 +119,9 @@ func validateResetPassword(userResetPassword userModel.UserResetPassword) common
 		validationErrors.ValidationErrors = append(validationErrors.ValidationErrors, validateFieldError)
 	}
 	if validator.IsSliceNotEmpty(validationErrors.ValidationErrors) {
-		return common.NewResultWithError[userModel.UserResetPassword](validationErrors)
+		return common.NewResultOnFailure[userModel.UserResetPassword](validationErrors)
 	}
-	return common.NewResultWithData[userModel.UserResetPassword](userResetPassword)
+	return common.NewResultOnSuccess[userModel.UserResetPassword](userResetPassword)
 }
 
 func validateField(field, fieldName, fieldType, fieldRegex, errorMessage string) domainError.ValidationError {

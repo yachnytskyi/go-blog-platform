@@ -19,14 +19,15 @@ type User struct {
 }
 
 type UserCreate struct {
-	Name            string
-	Email           string
-	Password        string
-	PasswordConfirm string
-	Role            string
-	Verified        bool
-	CreatedAt       time.Time
-	UpdatedAt       time.Time
+	Name             string
+	Email            string
+	Password         string
+	PasswordConfirm  string
+	Role             string
+	Verified         bool
+	VerificationCode string
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
 }
 
 type UserUpdate struct {

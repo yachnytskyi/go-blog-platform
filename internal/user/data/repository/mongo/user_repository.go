@@ -139,7 +139,6 @@ func (userRepository UserRepository) CheckEmailDublicate(ctx context.Context, em
 func (userRepository UserRepository) Register(ctx context.Context, userCreate userModel.UserCreate) common.Result[userModel.User] {
 	userCreateRepository := userRepositoryModel.UserCreateToUserCreateRepositoryMapper(userCreate)
 	userCreateRepository.Password, _ = repositoryUtility.HashPassword(userCreate.Password)
-
 	userCreateRepository.CreatedAt = time.Now()
 	userCreateRepository.UpdatedAt = userCreate.CreatedAt
 
@@ -202,7 +201,7 @@ func (userRepository UserRepository) UpdateUserById(ctx context.Context, userID 
 	return updatedUser, nil
 }
 
-func (userRepository UserRepository) DeleteUserById(ctx context.Context, userID string) error {
+func (userRepository UserRepository) DeleteUser(ctx context.Context, userID string) error {
 	userIDMappedToMongoDB, _ := primitive.ObjectIDFromHex(userID)
 	query := bson.M{"_id": userIDMappedToMongoDB}
 	result, userDeleteOneError := userRepository.collection.DeleteOne(ctx, query)
@@ -219,23 +218,23 @@ func (userRepository UserRepository) DeleteUserById(ctx context.Context, userID 
 	return nil
 }
 
-func (userRepository UserRepository) UpdateNewRegisteredUserById(ctx context.Context, userID string, key string, value string) (userModel.User, error) {
-	userIDMappedToMongoDB, _ := primitive.ObjectIDFromHex(userID)
-	query := bson.D{{Key: "_id", Value: userIDMappedToMongoDB}}
-	update := bson.D{{Key: "$set", Value: bson.D{{Key: key, Value: value}}}}
-	result, userUpdateUpdateOneError := userRepository.collection.UpdateOne(ctx, query, update)
-	if validator.IsErrorNotNil(userUpdateUpdateOneError) {
-		updatedUserError := domainError.NewInternalError(location+"UpdateNewRegisteredUserById.UpdateOne", userUpdateUpdateOneError.Error())
-		logging.Logger(updatedUserError)
-		return userModel.User{}, updatedUserError
-	}
-	if result.ModifiedCount == 0 {
-		updatedUserError := domainError.NewInternalError(location+"UpdateNewRegisteredUserById.UpdateOne.ModifiedCount", updateIsNotSuccessful)
-		logging.Logger(updatedUserError)
-		return userModel.User{}, updatedUserError
-	}
-	return userModel.User{}, nil
-}
+// func (userRepository UserRepository) UpdateNewRegisteredUserById(ctx context.Context, userID string, key string, value string) (userModel.User, error) {
+// 	userIDMappedToMongoDB, _ := primitive.ObjectIDFromHex(userID)
+// 	query := bson.D{{Key: "_id", Value: userIDMappedToMongoDB}}
+// 	update := bson.D{{Key: "$set", Value: bson.D{{Key: key, Value: value}}}}
+// 	result, userUpdateUpdateOneError := userRepository.collection.UpdateOne(ctx, query, update)
+// 	if validator.IsErrorNotNil(userUpdateUpdateOneError) {
+// 		updatedUserError := domainError.NewInternalError(location+"UpdateNewRegisteredUserById.UpdateOne", userUpdateUpdateOneError.Error())
+// 		logging.Logger(updatedUserError)
+// 		return userModel.User{}, updatedUserError
+// 	}
+// 	if result.ModifiedCount == 0 {
+// 		updatedUserError := domainError.NewInternalError(location+"UpdateNewRegisteredUserById.UpdateOne.ModifiedCount", updateIsNotSuccessful)
+// 		logging.Logger(updatedUserError)
+// 		return userModel.User{}, updatedUserError
+// 	}
+// 	return userModel.User{}, nil
+// }
 
 func (userRepository UserRepository) ResetUserPassword(ctx context.Context, firstKey string, firstValue string, secondKey string, passwordKey, password string) error {
 	hashedPassword, _ := repositoryUtility.HashPassword(password)

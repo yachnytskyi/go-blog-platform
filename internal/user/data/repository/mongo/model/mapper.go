@@ -26,21 +26,22 @@ func UserRepositoryToUserMapper(userRepository UserRepository) userModel.User {
 	}
 }
 
-func UserCreateToUserCreateRepositoryMapper(user userModel.UserCreate) UserCreateRepository {
+func UserCreateToUserCreateRepositoryMapper(userCreate userModel.UserCreate) UserCreateRepository {
 	return UserCreateRepository{
-		Name:      user.Name,
-		Email:     user.Email,
-		Password:  user.Password,
-		Role:      user.Role,
-		Verified:  user.Verified,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
+		Name:             userCreate.Name,
+		Email:            userCreate.Email,
+		Password:         userCreate.Password,
+		Role:             userCreate.Role,
+		Verified:         userCreate.Verified,
+		VerificationCode: userCreate.VerificationCode,
+		CreatedAt:        userCreate.CreatedAt,
+		UpdatedAt:        userCreate.UpdatedAt,
 	}
 }
 
-func UserUpdateToUserUpdateRepositoryMapper(user userModel.UserUpdate) UserUpdateRepository {
+func UserUpdateToUserUpdateRepositoryMapper(userUpdate userModel.UserUpdate) UserUpdateRepository {
 	return UserUpdateRepository{
-		Name:      user.Name,
-		UpdatedAt: user.UpdatedAt,
+		Name:      userUpdate.Name,
+		UpdatedAt: userUpdate.UpdatedAt,
 	}
 }

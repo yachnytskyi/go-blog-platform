@@ -5,8 +5,6 @@ import (
 
 	pb "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1/model/pb"
 	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
-	userUseCase "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
-
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -23,19 +21,16 @@ func (userGrpcServer *UserGrpcServer) Login(ctx context.Context, request *pb.Log
 		return nil, status.Errorf(codes.PermissionDenied, "You are not verified, please verify your email to login")
 	}
 
-	if userUseCase.ArePasswordsEqual(user.Password, request.GetPassword()) {
-		return nil, status.Errorf(codes.InvalidArgument, "Invalid email or Password")
-	}
+	// if userUseCase.ArePasswordsEqual(user.Password, request.GetPassword()) {
+	// 	return nil, status.Errorf(codes.InvalidArgument, "Invalid email or Password")
+	// }
 
 	// Generate tokens
 	accessToken, err := httpUtility.CreateToken(userGrpcServer.config.AccessTokenExpiresIn, user.UserID, userGrpcServer.config.AccessTokenPrivateKey)
-
 	if err != nil {
 		return nil, status.Errorf(codes.PermissionDenied, err.Error())
 	}
-
 	refreshToken, err := httpUtility.CreateToken(userGrpcServer.config.RefreshTokenExpiresIn, user.UserID, userGrpcServer.config.RefreshTokenPrivateKey)
-
 	if err != nil {
 		return nil, status.Errorf(codes.PermissionDenied, err.Error())
 	}
@@ -45,6 +40,5 @@ func (userGrpcServer *UserGrpcServer) Login(ctx context.Context, request *pb.Log
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}
-
 	return response, nil
 }

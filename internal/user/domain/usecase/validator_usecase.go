@@ -6,11 +6,11 @@ import (
 	"strings"
 
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
+	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator/domain"
-	"golang.org/x/crypto/bcrypt"
+	bcrypt "golang.org/x/crypto/bcrypt"
 )
 
 const (
@@ -95,69 +95,33 @@ func validateUserLogin(userLogin userModel.UserLogin) common.Result[userModel.Us
 	return common.NewResultWithData[userModel.UserLogin](userLogin)
 }
 
-// func UserForgottenPasswordValidator(userForgottenPassword *userModel.UserForgottenPassword) error {
-// 	var message string
-// 	var err error
+func validateUserForgottenPassword(userForgottenPassword userModel.UserForgottenPassword) common.Result[userModel.UserForgottenPassword] {
+	validationErrors := domainError.ValidationErrors{}
+	userForgottenPassword.Email = domainUtility.SanitizeAndToLowerString(userForgottenPassword.Email)
 
-// 	if userForgottenPassword.Email == "" {
-// 		message = "key: `UserForgottenPasswordView.Email` error: field validation for `email` failed, `email` cannot be empty "
-// 		err = fmt.Errorf(message)
-// 	}
-
-// 	if validator.IsStringNotEmpty(userForgottenPassword.Email) {
-// 		_, ok := mail.ParseAddress(userForgottenPassword.Email)
-// 		if validator.IsValueNotNil(ok) {
-// 			message = message + "key: `UserForgottenPasswordView.Email` error: field validation for `email` failed, invalid email address "
-// 			err = fmt.Errorf(message)
-// 		}
-// 	}
-
-// 	if validator.IsValueNotNil(err) {
-// 		message = strings.TrimSpace(message)
-// 		err = fmt.Errorf(message)
-
-// 		return err
-// 	}
-
-// 	return nil
-// }
-
-// func UserResetPasswordValidator(userResetPassword *userModel.UserResetPassword) error {
-// 	var message string
-// 	var err error
-
-// 	if userResetPassword.Password == "" {
-// 		message = "key: `UserResetPasswordView.Password` error: field validation for `password` failed, `password` cannot be empty "
-// 		err = fmt.Errorf(message)
-// 	}
-
-// 	if userResetPassword.PasswordConfirm == "" {
-// 		message = "key: `UserResetPasswordView.PasswordConfirm` error: field validation for `password_confirm` failed, `password_confirm` cannot be empty "
-// 		err = fmt.Errorf(message)
-// 	}
-
-// 	if userResetPassword.Password != "" && userResetPassword.PasswordConfirm != "" && userResetPassword.Password != userResetPassword.PasswordConfirm {
-// 		message = message + "key: `UserResetPasswordView.PasswordConfirm` error: field validation for `password_confirm` failed, passwords do not match "
-// 		err = fmt.Errorf(message)
-// 	}
-
-// 	if err != nil {
-// 		message = strings.TrimSpace(message)
-// 		err = fmt.Errorf(message)
-
-// 		return err
-// 	}
-
-// 	return nil
-// }
-
-func IsEmailDomainValid(emailString string) bool {
-	host := strings.Split(emailString, "@")[1]
-	_, err := net.LookupMX(host)
-	if validator.IsErrorNotNil(err) {
-		return false
+	validateFieldError := validateEmail(userForgottenPassword.Email, EmailField, TypeRequired, emailRegex, emailAllowedCharacters)
+	if validator.IsValueNotNil(validateFieldError) {
+		validationErrors.ValidationErrors = append(validationErrors.ValidationErrors, validateFieldError)
 	}
-	return true
+	if validator.IsSliceNotEmpty(validationErrors.ValidationErrors) {
+		return common.NewResultWithError[userModel.UserForgottenPassword](validationErrors)
+	}
+	return common.NewResultWithData[userModel.UserForgottenPassword](userForgottenPassword)
+}
+
+func validateResetPassword(userResetPassword userModel.UserResetPassword) common.Result[userModel.UserResetPassword] {
+	validationErrors := domainError.ValidationErrors{}
+	userResetPassword.Password = domainUtility.SanitizeString(userResetPassword.Password)
+	userResetPassword.PasswordConfirm = domainUtility.SanitizeString(userResetPassword.PasswordConfirm)
+
+	validateFieldError := validatePassword(userResetPassword.Password, userResetPassword.PasswordConfirm, passwordField, TypeRequired, usernameRegex, passwordAllowedCharacters)
+	if validator.IsValueNotNil(validateFieldError) {
+		validationErrors.ValidationErrors = append(validationErrors.ValidationErrors, validateFieldError)
+	}
+	if validator.IsSliceNotEmpty(validationErrors.ValidationErrors) {
+		return common.NewResultWithError[userModel.UserResetPassword](validationErrors)
+	}
+	return common.NewResultWithData[userModel.UserResetPassword](userResetPassword)
 }
 
 func validateField(field, fieldName, fieldType, fieldRegex, errorMessage string) domainError.ValidationError {
@@ -174,7 +138,7 @@ func validateEmail(field, fieldName, fieldType, fieldRegex, errorMessage string)
 		return domainError.NewValidationError(fieldName, fieldType, fmt.Sprintf(stringAllowedLength, minLength, maxLength))
 	} else if domainUtility.CheckSpecialCharactersString(field, fieldRegex) {
 		return domainError.NewValidationError(fieldName, fieldType, errorMessage)
-	} else if validator.IsBooleanNotTrue(IsEmailDomainValid(field)) {
+	} else if validator.IsBooleanNotTrue(isEmailDomainValid(field)) {
 		return domainError.NewValidationError(fieldName, fieldType, invalidEmailDomain)
 	}
 	return domainError.ValidationError{}
@@ -191,8 +155,17 @@ func validatePassword(password, passwordConfirm, fieldName, fieldType, fieldRege
 	return domainError.ValidationError{}
 }
 
+func isEmailDomainValid(emailString string) bool {
+	host := strings.Split(emailString, "@")[1]
+	_, err := net.LookupMX(host)
+	if validator.IsErrorNotNil(err) {
+		return false
+	}
+	return true
+}
+
 // Compare the encrypted and the user provided passwords.
-func ArePasswordsEqual(hashedPassword string, checkedPassword string) bool {
+func arePasswordsEqual(hashedPassword string, checkedPassword string) bool {
 	if validator.IsErrorNotNil(bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(checkedPassword))) {
 		return false
 	}
@@ -200,7 +173,7 @@ func ArePasswordsEqual(hashedPassword string, checkedPassword string) bool {
 }
 
 // Compare the encrypted and the user provided passwords.
-func ArePasswordsNotEqual(hashedPassword string, checkedPassword string) bool {
+func arePasswordsNotEqual(hashedPassword string, checkedPassword string) bool {
 	if validator.IsErrorNotNil(bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(checkedPassword))) {
 		return true
 	}

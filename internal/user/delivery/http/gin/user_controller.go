@@ -129,12 +129,10 @@ func (userController UserController) UpdateUserById(ctx *gin.Context) {
 func (userController UserController) Delete(ctx *gin.Context) {
 	currentUser := ctx.MustGet("currentUser")
 	userID := currentUser.(userViewModel.UserView).UserID
-	err := userController.userUseCase.DeleteUserById(ctx.Request.Context(), fmt.Sprint(userID))
-
+	err := userController.userUseCase.DeleteUser(ctx.Request.Context(), fmt.Sprint(userID))
 	if validator.IsErrorNotNil(err) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 	}
-
 	ctx.JSON(http.StatusNoContent, nil)
 }
 

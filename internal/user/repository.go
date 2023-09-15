@@ -18,8 +18,7 @@ type Repository interface {
 	Register(ctx context.Context, user userModel.UserCreate) commonModel.Result[userModel.User]
 
 	UpdateUserById(ctx context.Context, userID string, user userModel.UserUpdate) (userModel.User, error)
-	DeleteUserById(ctx context.Context, userID string) error
-	UpdateNewRegisteredUserById(ctx context.Context, userID string, key string, value string) (userModel.User, error)
+	DeleteUser(ctx context.Context, userID string) error
 	UpdatePasswordResetTokenUserByEmail(ctx context.Context, email string, firstKey string, firstValue string, secondKey string, secondValue time.Time) error
 	ResetUserPassword(ctx context.Context, firstKey string, firstValue string, secondKey string, passwordKey, password string) error
 }

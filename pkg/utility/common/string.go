@@ -12,8 +12,8 @@ const (
 	location string = "common.string."
 )
 
-func Encode(baseString string) string {
-	return base64.StdEncoding.EncodeToString([]byte(baseString))
+func Encode(data string) string {
+	return base64.StdEncoding.EncodeToString([]byte(data))
 }
 
 func Decode(encodedString string) (string, error) {

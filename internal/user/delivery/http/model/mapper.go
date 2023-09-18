@@ -1,15 +1,25 @@
 package model
 
-import userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
+import (
+	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
+	"github.com/yachnytskyi/golang-mongo-grpc/pkg/model/http"
+)
 
 func UsersToUsersViewMapper(users userModel.Users) UsersView {
-	usersView := make([]UserView, 0, len(users.Users))
-	for _, user := range users.Users {
-		userView := UserToUserViewMapper(user)
-		usersView = append(usersView, userView)
+	usersView := make([]UserView, len(users.Users))
+	for index, user := range users.Users {
+		usersView[index] = UserToUserViewMapper(user)
 	}
 
 	return UsersView{
+		PaginationResponse: http.PaginationResponse{
+			CurrentPage: users.PaginationResponse.CurrentPage,
+			TotalPages:  users.PaginationResponse.TotalPages,
+			PagesLeft:   users.PaginationResponse.PagesLeft,
+			TotalItems:  users.PaginationResponse.TotalItems,
+			Limit:       users.PaginationResponse.Limit,
+			OrderBy:     users.PaginationResponse.OrderBy,
+		},
 		UsersView: usersView,
 	}
 }

@@ -1,10 +1,14 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
+)
 
 type Users struct {
-	Users []User
-	Limit int
+	Users              []User
+	PaginationResponse commonModel.PaginationResponse
 }
 
 type User struct {

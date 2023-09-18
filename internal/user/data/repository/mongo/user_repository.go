@@ -68,14 +68,22 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 		logging.Logger(cursorInternalError)
 		return userModel.Users{}, cursorInternalError
 	}
-	if len(fetchedUsers) == 0 {
+	if validator.IsSliceEmpty(fetchedUsers) {
 		return userModel.Users{
 			Users: make([]userModel.User, 0),
 		}, nil
 	}
 
-	users := userRepositoryModel.UsersRepositoryToUsersMapper(fetchedUsers)
-	users.Limit = paginationQuery.Limit
+	usersRepository := userRepositoryModel.UserRepositoryToUsersRepositoryMapper(fetchedUsers)
+	totalUsers, countDocumentsError := userRepository.collection.CountDocuments(context.Background(), query)
+	if validator.IsErrorNotNil(countDocumentsError) {
+		countInternalError := domainError.NewInternalError(location+"GetAllUsers.collection.CountDocuments", countDocumentsError.Error())
+		logging.Logger(countInternalError)
+		return userModel.Users{}, countInternalError
+	}
+	paginationResponse := commonModel.NewPaginationResponse(paginationQuery.Page, int(totalUsers), paginationQuery.Limit, paginationQuery.OrderBy)
+	usersRepository.PaginationResponse = paginationResponse
+	users := userRepositoryModel.UsersRepositoryToUsersMapper(usersRepository)
 	return users, nil
 }
 

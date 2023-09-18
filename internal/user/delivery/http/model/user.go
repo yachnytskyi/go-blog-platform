@@ -2,11 +2,14 @@ package model
 
 import (
 	"time"
+
+	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/http"
 )
 
 // [GET].
 type UsersView struct {
-	UsersView []UserView `json:"users"`
+	UsersView          []UserView                   `json:"users"`
+	PaginationResponse httpModel.PaginationResponse `json:"pagination_response"`
 }
 
 // [GET].

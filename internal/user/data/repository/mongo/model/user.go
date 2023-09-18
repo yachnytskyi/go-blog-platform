@@ -3,8 +3,14 @@ package model
 import (
 	"time"
 
+	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
+
+type UsersRepository struct {
+	Users              []UserRepository
+	PaginationResponse commonModel.PaginationResponse
+}
 
 type UserRepository struct {
 	UserID    primitive.ObjectID `bson:"_id"`

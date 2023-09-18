@@ -1,30 +1,8 @@
 package model
 
-import userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
-
-func UsersRepositoryToUsersMapper(usersRepository []UserRepository) userModel.Users {
-	users := make([]userModel.User, 0, len(usersRepository))
-	for _, userRepository := range usersRepository {
-		user := UserRepositoryToUserMapper(userRepository)
-		users = append(users, user)
-	}
-	return userModel.Users{
-		Users: users,
-	}
-}
-
-func UserRepositoryToUserMapper(userRepository UserRepository) userModel.User {
-	return userModel.User{
-		UserID:    userRepository.UserID.Hex(),
-		Name:      userRepository.Name,
-		Email:     userRepository.Email,
-		Password:  userRepository.Password,
-		Role:      userRepository.Role,
-		Verified:  userRepository.Verified,
-		CreatedAt: userRepository.CreatedAt,
-		UpdatedAt: userRepository.UpdatedAt,
-	}
-}
+import (
+	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
+)
 
 func UserCreateToUserCreateRepositoryMapper(userCreate userModel.UserCreate) UserCreateRepository {
 	return UserCreateRepository{
@@ -43,5 +21,39 @@ func UserUpdateToUserUpdateRepositoryMapper(userUpdate userModel.UserUpdate) Use
 	return UserUpdateRepository{
 		Name:      userUpdate.Name,
 		UpdatedAt: userUpdate.UpdatedAt,
+	}
+}
+
+func UserRepositoryToUserMapper(userRepository UserRepository) userModel.User {
+	return userModel.User{
+		UserID:    userRepository.UserID.Hex(),
+		Name:      userRepository.Name,
+		Email:     userRepository.Email,
+		Password:  userRepository.Password,
+		Role:      userRepository.Role,
+		Verified:  userRepository.Verified,
+		CreatedAt: userRepository.CreatedAt,
+		UpdatedAt: userRepository.UpdatedAt,
+	}
+}
+
+func UserRepositoryToUsersRepositoryMapper(usersRepository []UserRepository) UsersRepository {
+	users := make([]UserRepository, 0, len(usersRepository))
+	for _, userRepository := range usersRepository {
+		users = append(users, userRepository)
+	}
+	return UsersRepository{
+		Users: users,
+	}
+}
+
+func UsersRepositoryToUsersMapper(usersRepository UsersRepository) userModel.Users {
+	users := make([]userModel.User, len(usersRepository.Users))
+	for index, userRepository := range usersRepository.Users {
+		users[index] = UserRepositoryToUserMapper(userRepository)
+	}
+	return userModel.Users{
+		PaginationResponse: usersRepository.PaginationResponse,
+		Users:              users,
 	}
 }

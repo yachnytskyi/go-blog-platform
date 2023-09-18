@@ -1,6 +1,7 @@
 package common
 
 import (
+	"math"
 	"strconv"
 
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -24,7 +25,7 @@ func NewPaginationQuery(page, limit int, orderBy string) PaginationQuery {
 		Page:    page,
 		Limit:   limit,
 		OrderBy: orderBy,
-		Skip:    GetSkip(page, limit),
+		Skip:    (page - 1) * limit,
 	}
 }
 
@@ -33,7 +34,7 @@ func GetPage(page string) int {
 	if validator.IsErrorNotNil(stringConversionError) {
 		intPage, _ = strconv.Atoi(DefaultPage)
 	}
-	if isPaginationValueNotValid(intPage) {
+	if validator.IsIntegerNotZeroOrLess(intPage) {
 		intPage, _ = strconv.Atoi(DefaultPage)
 	}
 	return intPage
@@ -44,7 +45,7 @@ func GetLimit(limit string) int {
 	if validator.IsErrorNotNil(stringConversionError) {
 		intLimit, _ = strconv.Atoi(DefaultLimit)
 	}
-	if isPaginationValueNotValid(intLimit) {
+	if isLimitNotValid(intLimit) {
 		intLimit, _ = strconv.Atoi(DefaultLimit)
 	}
 	return intLimit
@@ -54,13 +55,38 @@ func GetOrderBy(orderBy string) string {
 	return orderBy
 }
 
-func GetSkip(page, limit int) int {
-	return (page - 1) * limit
-}
-
-func isPaginationValueNotValid(data int) bool {
+func isLimitNotValid(data int) bool {
 	if data == 0 || data < 0 || data > maxItemsPerPage {
 		return true
 	}
 	return false
+}
+
+type PaginationResponse struct {
+	CurrentPage int
+	TotalPages  int
+	PagesLeft   int
+	TotalItems  int
+	Limit       int
+	OrderBy     string
+}
+
+func NewPaginationResponse(currentPage, totalItems, limit int, orderBy string) PaginationResponse {
+	return PaginationResponse{
+		CurrentPage: currentPage,
+		TotalPages:  GetTotalPages(totalItems, limit),
+		PagesLeft:   GetPagesLeft(totalItems, limit, currentPage),
+		TotalItems:  totalItems,
+		Limit:       limit,
+		OrderBy:     orderBy,
+	}
+}
+
+func GetTotalPages(totalItems, limit int) int {
+	totalPages := float64(totalItems) / float64(limit)
+	return int(math.Ceil(totalPages))
+}
+
+func GetPagesLeft(totalItems, limit, currentPage int) int {
+	return GetTotalPages(totalItems, limit) - currentPage
 }

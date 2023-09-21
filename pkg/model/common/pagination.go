@@ -4,13 +4,8 @@ import (
 	"math"
 	"strconv"
 
+	"github.com/yachnytskyi/golang-mongo-grpc/config"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
-)
-
-const (
-	DefaultPage     = "1"
-	DefaultLimit    = "10"
-	maxItemsPerPage = 100
 )
 
 type PaginationQuery struct {
@@ -32,10 +27,10 @@ func NewPaginationQuery(page, limit int, orderBy string) PaginationQuery {
 func GetPage(page string) int {
 	intPage, stringConversionError := strconv.Atoi(page)
 	if validator.IsErrorNotNil(stringConversionError) {
-		intPage, _ = strconv.Atoi(DefaultPage)
+		intPage, _ = strconv.Atoi(config.DefaultPage)
 	}
 	if validator.IsIntegerZeroOrLess(intPage) {
-		intPage, _ = strconv.Atoi(DefaultPage)
+		intPage, _ = strconv.Atoi(config.DefaultPage)
 	}
 	return intPage
 }
@@ -43,10 +38,10 @@ func GetPage(page string) int {
 func GetLimit(limit string) int {
 	intLimit, stringConversionError := strconv.Atoi(limit)
 	if validator.IsErrorNotNil(stringConversionError) {
-		intLimit, _ = strconv.Atoi(DefaultLimit)
+		intLimit, _ = strconv.Atoi(config.DefaultLimit)
 	}
 	if isLimitNotValid(intLimit) {
-		intLimit, _ = strconv.Atoi(DefaultLimit)
+		intLimit, _ = strconv.Atoi(config.DefaultLimit)
 	}
 	return intLimit
 }
@@ -56,7 +51,7 @@ func GetOrderBy(orderBy string) string {
 }
 
 func isLimitNotValid(data int) bool {
-	if data == 0 || data < 0 || data > maxItemsPerPage {
+	if data == 0 || data < 0 || data > config.MaxItemsPerPage {
 		return true
 	}
 	return false

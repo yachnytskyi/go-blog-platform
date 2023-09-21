@@ -124,18 +124,18 @@ func validateResetPassword(userResetPassword userModel.UserResetPassword) common
 }
 
 func validateEmail(field, fieldName, fieldType, fieldRegex, errorMessage string) domainError.ValidationError {
-	if validator.IsBooleanNotTrue(domainUtility.CheckCorrectLengthString(field, config.MinLength, config.MaxLength)) {
+	if domainUtility.IsStringLengthNotCorrect(field, config.MinLength, config.MaxLength) {
 		return domainError.NewValidationError(fieldName, fieldType, fmt.Sprintf(config.StringAllowedLength, config.MinLength, config.MaxLength))
 	} else if domainUtility.CheckSpecialCharactersString(field, fieldRegex) {
 		return domainError.NewValidationError(fieldName, fieldType, errorMessage)
-	} else if validator.IsBooleanNotTrue(isEmailDomainValid(field)) {
+	} else if isEmailDomainNotValid(field) {
 		return domainError.NewValidationError(fieldName, fieldType, invalidEmailDomain)
 	}
 	return domainError.ValidationError{}
 }
 
 func validatePassword(password, passwordConfirm, fieldName, fieldType, fieldRegex, errorMessage string) domainError.ValidationError {
-	if validator.IsBooleanNotTrue(domainUtility.CheckCorrectLengthString(password, config.MinLength, config.MaxLength)) {
+	if domainUtility.IsStringLengthNotCorrect(password, config.MinLength, config.MaxLength) {
 		return domainError.NewValidationError(fieldName, fieldType, fmt.Sprintf(config.StringAllowedLength, config.MinLength, config.MaxLength))
 	} else if domainUtility.CheckSpecialCharactersString(password, fieldRegex) {
 		return domainError.NewValidationError(fieldName, fieldType, errorMessage)
@@ -145,13 +145,13 @@ func validatePassword(password, passwordConfirm, fieldName, fieldType, fieldRege
 	return domainError.ValidationError{}
 }
 
-func isEmailDomainValid(emailString string) bool {
+func isEmailDomainNotValid(emailString string) bool {
 	host := strings.Split(emailString, "@")[1]
 	_, err := net.LookupMX(host)
 	if validator.IsErrorNotNil(err) {
-		return false
+		return true
 	}
-	return true
+	return false
 }
 
 // Compare the encrypted and the user provided passwords.

@@ -29,7 +29,7 @@ func SanitizeAndToLowerString(data string) string {
 }
 
 func ValidateField(field, fieldName, fieldType, fieldRegex, errorMessage string) domainError.ValidationError {
-	if validator.IsBooleanNotTrue(CheckCorrectLengthString(field, config.MinLength, config.MaxLength)) {
+	if IsStringLengthNotCorrect(field, config.MinLength, config.MaxLength) {
 		return domainError.NewValidationError(fieldName, fieldType, fmt.Sprintf(stringAllowedLength, config.MinLength, config.MaxLength))
 	} else if CheckSpecialCharactersString(field, fieldRegex) {
 		return domainError.NewValidationError(fieldName, fieldType, errorMessage)
@@ -37,14 +37,14 @@ func ValidateField(field, fieldName, fieldType, fieldRegex, errorMessage string)
 	return domainError.ValidationError{}
 }
 
-func CheckCorrectLengthString(checkedString string, minLength int, maxLength int) bool {
+func IsStringLengthCorrect(checkedString string, minLength int, maxLength int) bool {
 	if len(checkedString) < minLength || len(checkedString) > maxLength {
 		return false
 	}
 	return true
 }
 
-func CheckIncorrectLengthString(checkedString string, minLength int, maxLength int) bool {
+func IsStringLengthNotCorrect(checkedString string, minLength int, maxLength int) bool {
 	if len(checkedString) < minLength || len(checkedString) > maxLength {
 		return true
 	}

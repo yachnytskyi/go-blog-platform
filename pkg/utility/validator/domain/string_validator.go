@@ -5,15 +5,12 @@ import (
 	"regexp"
 	"strings"
 
+	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
 const (
-	// Regex Patterns.
-	minLength = 4
-	maxLength = 40
-
 	// Error Messages.
 	stringAllowedLength = "can be between %d and %d characters long"
 )
@@ -32,8 +29,8 @@ func SanitizeAndToLowerString(data string) string {
 }
 
 func ValidateField(field, fieldName, fieldType, fieldRegex, errorMessage string) domainError.ValidationError {
-	if validator.IsBooleanNotTrue(CheckCorrectLengthString(field, minLength, maxLength)) {
-		return domainError.NewValidationError(fieldName, fieldType, fmt.Sprintf(stringAllowedLength, minLength, maxLength))
+	if validator.IsBooleanNotTrue(CheckCorrectLengthString(field, config.MinLength, config.MaxLength)) {
+		return domainError.NewValidationError(fieldName, fieldType, fmt.Sprintf(stringAllowedLength, config.MinLength, config.MaxLength))
 	} else if CheckSpecialCharactersString(field, fieldRegex) {
 		return domainError.NewValidationError(fieldName, fieldType, errorMessage)
 	}

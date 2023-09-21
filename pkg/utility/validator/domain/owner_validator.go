@@ -1,17 +1,13 @@
 package domain
 
 import (
-	"bytes"
-	"errors"
+	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
 func IsUserOwner(currentUserID string, userID string) error {
-	convertedCurrentUserID := []byte(currentUserID)
-	convertedUserID := []byte(userID)
-	comparisson := bytes.Compare(convertedCurrentUserID, convertedUserID)
-
-	if comparisson != 0 {
-		return errors.New("sorry, but you do not have permissions to do that")
+	if validator.AreStringsNotEqual(currentUserID, userID) {
+		return domainError.NewErrorMessage("sorry, but you do not have permissions to do that")
 	}
 	return nil
 }

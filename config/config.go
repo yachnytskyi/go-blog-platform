@@ -6,21 +6,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-const (
-	StringRegex                                = `^[a-zA-z0-9 !@#$€%^&*{}|()=/\;:+-_~'"<>,.? \t]*$`
-	TitleStringRegex                           = `^[a-zA-z0-9 !()=[]:;+-_~'",.? \t]*$`
-	TextStringRegex                            = `^[a-zA-z0-9 !@#$€%^&*{}][|/\()=/\;:+-_~'"<>,.? \t]*$`
-	SendingEmailNotification                   = "We sent an email with a verification code to "
-	UserConfirmationEmailTemplateName          = "verificationCode.html"
-	UserConfirmationEmailTemplatePath          = "internal/user/data/repository/external/mail/template"
-	ForgottenPasswordEmailTemplateName         = "resetPassword.html"
-	ForgottenPasswordEmailTemplatePath         = "internal/user/data/repository/external/mail/template"
-	EmailAlreadyExists                         = "user with this email already exists"
-	SendingEmailWithIntstructionsNotifications = "We sent you an email with needed instructions"
-	InternalErrorNotification                  = "something went wrong, please repeat later"
-	EntityNotFoundErrorNotification            = "please repeat it later"
-)
-
 type Config struct {
 	MongoURI          string `mapstructure:"MONGODB_LOCAL_URI"`
 	RedisURI          string `mapstructure:"REDIS_URL"`

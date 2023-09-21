@@ -9,13 +9,15 @@ import (
 func HandleError(err error) httpModel.JsonResponse {
 	switch errorType := err.(type) {
 	case domainError.ValidationError:
-		return httpModel.NewJsonResponseWithError(ValidationErrorToHttpValidationErrorViewMapper(errorType))
+		return httpModel.NewJsonResponseOnFailure(ValidationErrorToHttpValidationErrorViewMapper(errorType))
 	case domainError.ValidationErrors:
 		httpValidationErrors := ValidationErrorsToHttpValidationErrorsViewMapper(errorType)
-		return httpModel.NewJsonResponseWithError(httpValidationErrors.HttpValidationErrorsView)
+		return httpModel.NewJsonResponseOnFailure(httpValidationErrors.HttpValidationErrorsView)
 	case domainError.ErrorMessage:
-		return httpModel.JsonResponse{Error: ErrorMessageToErrorMessageViewMapper(errorType)}
+		return httpModel.NewJsonResponseOnFailure(ErrorMessageToHttpErrorMessageViewMapper(errorType))
+	case domainError.PaginationError:
+		return httpModel.NewJsonResponseOnFailure(PaginationErrorToHttpPaginationErrorView(errorType))
 	default:
-		return httpModel.JsonResponse{Error: NewHttpErrorMessage(config.InternalErrorNotification)}
+		return httpModel.NewJsonResponseOnFailure(NewHttpErrorMessage(config.InternalErrorNotification))
 	}
 }

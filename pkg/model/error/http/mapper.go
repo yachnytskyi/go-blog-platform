@@ -24,8 +24,16 @@ func ValidationErrorsToHttpValidationErrorsViewMapper(validationErrors domainErr
 	return HttpValidationErrorsView{HttpValidationErrorsView: httpValidationErrorsView}
 }
 
-func ErrorMessageToErrorMessageViewMapper(errorMessage domainError.ErrorMessage) HttpErrorMessageView {
+func ErrorMessageToHttpErrorMessageViewMapper(errorMessage domainError.ErrorMessage) HttpErrorMessageView {
 	return HttpErrorMessageView{
+		Notification: errorMessage.Notification,
+	}
+}
+
+func PaginationErrorToHttpPaginationErrorView(errorMessage domainError.PaginationError) HttpPaginationErrorView {
+	return HttpPaginationErrorView{
+		CurrentPage:  errorMessage.CurrentPage,
+		TotalPages:   errorMessage.TotalPages,
 		Notification: errorMessage.Notification,
 	}
 }

@@ -37,16 +37,17 @@ func (userController UserController) GetAllUsers(ctx *gin.Context) {
 	orderBy = commonModel.GetOrderBy(orderBy)
 	paginationQuery := commonModel.NewPaginationQuery(convertedPage, convertedLimit, orderBy)
 
-	fetchedUsers, err := userController.userUseCase.GetAllUsers(ctx.Request.Context(), paginationQuery)
-	if validator.IsErrorNotNil(err) {
-		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
+	fetchedUsers := userController.userUseCase.GetAllUsers(ctx.Request.Context(), paginationQuery)
+	if validator.IsErrorNotNil(fetchedUsers.Error) {
+		jsonResponse := httpError.HandleError(fetchedUsers.Error)
+		httpModel.SetStatus(&jsonResponse)
+		ctx.JSON(http.StatusOK, jsonResponse)
 		return
 	}
 
-	jsonResponse := httpModel.NewJsonResponse(userViewModel.UsersToUsersViewMapper(fetchedUsers))
+	jsonResponse := httpModel.NewJsonResponseOnSuccess(userViewModel.UsersToUsersViewMapper(fetchedUsers.Data))
 	httpModel.SetStatus(&jsonResponse)
 	ctx.JSON(http.StatusOK, jsonResponse)
-
 }
 
 func (userController UserController) GetMe(ctx *gin.Context) {
@@ -88,7 +89,7 @@ func (userController UserController) Register(ctx *gin.Context) {
 	}
 
 	welcomeMessage := userViewModel.NewWelcomeMessageView(config.SendingEmailNotification + createdUser.Data.Email)
-	jsonResponse := httpModel.NewJsonResponse(welcomeMessage)
+	jsonResponse := httpModel.NewJsonResponseOnSuccess(welcomeMessage)
 	httpModel.SetStatus(&jsonResponse)
 	ctx.JSON(http.StatusCreated, jsonResponse)
 }
@@ -112,7 +113,7 @@ func (userController UserController) UpdateUserById(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, jsonResponse)
 		return
 	}
-	jsonResponse := httpModel.NewJsonResponse(userViewModel.UserToUserViewMapper(updatedUser))
+	jsonResponse := httpModel.NewJsonResponseOnSuccess(userViewModel.UserToUserViewMapper(updatedUser))
 	httpModel.SetStatus(&jsonResponse)
 	ctx.JSON(http.StatusCreated, jsonResponse)
 }

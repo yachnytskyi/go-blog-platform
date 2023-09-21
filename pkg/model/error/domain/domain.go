@@ -88,3 +88,22 @@ func NewErrorMessage(notification string) ErrorMessage {
 func (err ErrorMessage) Error() string {
 	return fmt.Sprintf("notification: " + err.Notification)
 }
+
+type PaginationError struct {
+	CurrentPage  string
+	TotalPages   string
+	Notification string
+}
+
+func NewPaginationError(currentPage, totalPages, notification string) PaginationError {
+	return PaginationError{
+		CurrentPage:  currentPage,
+		TotalPages:   totalPages,
+		Notification: notification,
+	}
+}
+
+func (httpPaginationErrorView PaginationError) Error() string {
+	return fmt.Sprintf("page: " + httpPaginationErrorView.CurrentPage + " total: " +
+		httpPaginationErrorView.TotalPages + " notification: " + httpPaginationErrorView.Notification)
+}

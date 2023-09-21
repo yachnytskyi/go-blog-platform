@@ -14,6 +14,8 @@ func HandleError(err error) error {
 		return errorType
 	case EntityNotFoundError:
 		return NewErrorMessage(config.EntityNotFoundErrorNotification)
+	case PaginationError:
+		return errorType
 	default:
 		return NewErrorMessage(config.InternalErrorNotification)
 	}

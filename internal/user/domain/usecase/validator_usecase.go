@@ -9,6 +9,7 @@ import (
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
+
 	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator/domain"
 	bcrypt "golang.org/x/crypto/bcrypt"
 )
@@ -44,7 +45,7 @@ func validateUserCreate(userCreate userModel.UserCreate) common.Result[userModel
 	userCreate.Password = domainUtility.SanitizeString(userCreate.Password)
 	userCreate.PasswordConfirm = domainUtility.SanitizeString(userCreate.PasswordConfirm)
 
-	validateFieldError := validateField(userCreate.Name, nameField, TypeRequired, usernameRegex, usernameAllowedCharacters)
+	validateFieldError := domainUtility.ValidateField(userCreate.Name, nameField, TypeRequired, usernameRegex, usernameAllowedCharacters)
 	if validator.IsValueNotNil(validateFieldError) {
 		validationErrors.ValidationErrors = append(validationErrors.ValidationErrors, validateFieldError)
 	}
@@ -66,7 +67,7 @@ func validateUserUpdate(userUpdate userModel.UserUpdate) common.Result[userModel
 	validationErrors := domainError.ValidationErrors{}
 	userUpdate.Name = domainUtility.SanitizeString(userUpdate.Name)
 
-	validateFieldError := validateField(userUpdate.Name, nameField, TypeRequired, usernameRegex, usernameAllowedCharacters)
+	validateFieldError := domainUtility.ValidateField(userUpdate.Name, nameField, TypeRequired, usernameRegex, usernameAllowedCharacters)
 	if validator.IsValueNotNil(validateFieldError) {
 		validationErrors.ValidationErrors = append(validationErrors.ValidationErrors, validateFieldError)
 	}
@@ -85,7 +86,7 @@ func validateUserLogin(userLogin userModel.UserLogin) common.Result[userModel.Us
 	if validator.IsValueNotNil(validateFieldError) {
 		validationErrors.ValidationErrors = append(validationErrors.ValidationErrors, validateFieldError)
 	}
-	validateFieldError = validateField(userLogin.Password, passwordField, TypeRequired, usernameRegex, passwordAllowedCharacters)
+	validateFieldError = domainUtility.ValidateField(userLogin.Password, passwordField, TypeRequired, usernameRegex, passwordAllowedCharacters)
 	if validator.IsValueNotNil(validateFieldError) {
 		validationErrors.ValidationErrors = append(validationErrors.ValidationErrors, validateFieldError)
 	}
@@ -122,15 +123,6 @@ func validateResetPassword(userResetPassword userModel.UserResetPassword) common
 		return common.NewResultOnFailure[userModel.UserResetPassword](validationErrors)
 	}
 	return common.NewResultOnSuccess[userModel.UserResetPassword](userResetPassword)
-}
-
-func validateField(field, fieldName, fieldType, fieldRegex, errorMessage string) domainError.ValidationError {
-	if validator.IsBooleanNotTrue(domainUtility.CheckCorrectLengthString(field, minLength, maxLength)) {
-		return domainError.NewValidationError(fieldName, fieldType, fmt.Sprintf(stringAllowedLength, minLength, maxLength))
-	} else if domainUtility.CheckSpecialCharactersString(field, fieldRegex) {
-		return domainError.NewValidationError(fieldName, fieldType, errorMessage)
-	}
-	return domainError.ValidationError{}
 }
 
 func validateEmail(field, fieldName, fieldType, fieldRegex, errorMessage string) domainError.ValidationError {

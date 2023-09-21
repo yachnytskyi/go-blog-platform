@@ -55,3 +55,22 @@ func NewHttpErrorMessage(notification string) HttpErrorMessageView {
 func (httpMessageErrorView HttpErrorMessageView) Error() string {
 	return fmt.Sprintf("notification: " + httpMessageErrorView.Notification)
 }
+
+type HttpPaginationErrorView struct {
+	CurrentPage  string `json:"current_page"`
+	TotalPages   string `json:"total_pages"`
+	Notification string `json:"notification"`
+}
+
+func NewHttpPaginationErrorView(currentPage, totalPages, notification string) HttpPaginationErrorView {
+	return HttpPaginationErrorView{
+		CurrentPage:  currentPage,
+		TotalPages:   totalPages,
+		Notification: notification,
+	}
+}
+
+func (httpPaginationErrorView HttpPaginationErrorView) Error() string {
+	return fmt.Sprintf("current page: " + httpPaginationErrorView.CurrentPage + " total pages: " +
+		httpPaginationErrorView.TotalPages + " notification: " + httpPaginationErrorView.Notification)
+}

@@ -37,17 +37,27 @@ func NewUserRepository(collection *mongo.Collection) user.Repository {
 	return &UserRepository{collection: collection}
 }
 
-func (userRepository UserRepository) GetAllUsers(ctx context.Context, paginationQuery commonModel.PaginationQuery) (userModel.Users, error) {
+func (userRepository UserRepository) GetAllUsers(ctx context.Context, paginationQuery commonModel.PaginationQuery) commonModel.Result[userModel.Users] {
+	query := bson.M{}
+	totalUsers, countDocumentsError := userRepository.collection.CountDocuments(context.Background(), query)
+	if validator.IsErrorNotNil(countDocumentsError) {
+		countInternalError := domainError.NewInternalError(location+"GetAllUsers.collection.CountDocuments", countDocumentsError.Error())
+		logging.Logger(countInternalError)
+		return commonModel.NewResultOnFailure[userModel.Users](countInternalError)
+	}
+	if totalUsers <= int64(paginationQuery.Skip) {
+		paginationQuery.Page = commonModel.GetTotalPages(int(totalUsers), paginationQuery.Limit)
+		paginationQuery.Skip = (paginationQuery.Page - 1) * paginationQuery.Limit
+	}
+
 	option := options.FindOptions{}
 	option.SetLimit(int64(paginationQuery.Limit))
 	option.SetSkip(int64(paginationQuery.Skip))
-
-	query := bson.M{}
 	cursor, cursorFindError := userRepository.collection.Find(ctx, query, &option)
 	if validator.IsErrorNotNil(cursorFindError) {
 		getAllUsersEntityNotFoundError := domainError.NewEntityNotFoundError(location+"GetAllUsers.Find", cursorFindError.Error())
 		logging.Logger(getAllUsersEntityNotFoundError)
-		return userModel.Users{}, getAllUsersEntityNotFoundError
+		return commonModel.NewResultOnFailure[userModel.Users](getAllUsersEntityNotFoundError)
 	}
 	defer cursor.Close(ctx)
 
@@ -58,7 +68,7 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 		if validator.IsErrorNotNil(cursorDecodeError) {
 			fetchedUserInternalError := domainError.NewInternalError(location+"GetAllUsers.cursor.decode", cursorDecodeError.Error())
 			logging.Logger(fetchedUserInternalError)
-			return userModel.Users{}, fetchedUserInternalError
+			return commonModel.NewResultOnFailure[userModel.Users](fetchedUserInternalError)
 		}
 		fetchedUsers = append(fetchedUsers, user)
 	}
@@ -66,25 +76,18 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 	if validator.IsErrorNotNil(cursorError) {
 		cursorInternalError := domainError.NewInternalError(location+"GetAllUsers.cursor.Err", cursorError.Error())
 		logging.Logger(cursorInternalError)
-		return userModel.Users{}, cursorInternalError
+		return commonModel.NewResultOnFailure[userModel.Users](cursorInternalError)
 	}
 	if validator.IsSliceEmpty(fetchedUsers) {
-		return userModel.Users{
-			Users: make([]userModel.User, 0),
-		}, nil
+		return commonModel.NewResultOnSuccess[userModel.Users](userModel.Users{})
+
 	}
 
 	usersRepository := userRepositoryModel.UserRepositoryToUsersRepositoryMapper(fetchedUsers)
-	totalUsers, countDocumentsError := userRepository.collection.CountDocuments(context.Background(), query)
-	if validator.IsErrorNotNil(countDocumentsError) {
-		countInternalError := domainError.NewInternalError(location+"GetAllUsers.collection.CountDocuments", countDocumentsError.Error())
-		logging.Logger(countInternalError)
-		return userModel.Users{}, countInternalError
-	}
 	paginationResponse := commonModel.NewPaginationResponse(paginationQuery.Page, int(totalUsers), paginationQuery.Limit, paginationQuery.OrderBy)
 	usersRepository.PaginationResponse = paginationResponse
 	users := userRepositoryModel.UsersRepositoryToUsersMapper(usersRepository)
-	return users, nil
+	return commonModel.NewResultOnSuccess[userModel.Users](users)
 }
 
 func (userRepository UserRepository) GetUserById(ctx context.Context, userID string) (userModel.User, error) {

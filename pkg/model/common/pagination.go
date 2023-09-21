@@ -34,7 +34,7 @@ func GetPage(page string) int {
 	if validator.IsErrorNotNil(stringConversionError) {
 		intPage, _ = strconv.Atoi(DefaultPage)
 	}
-	if validator.IsIntegerNotZeroOrLess(intPage) {
+	if validator.IsIntegerZeroOrLess(intPage) {
 		intPage, _ = strconv.Atoi(DefaultPage)
 	}
 	return intPage

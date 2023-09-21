@@ -41,7 +41,7 @@ func (userController UserController) GetAllUsers(ctx *gin.Context) {
 	if validator.IsErrorNotNil(fetchedUsers.Error) {
 		jsonResponse := httpError.HandleError(fetchedUsers.Error)
 		httpModel.SetStatus(&jsonResponse)
-		ctx.JSON(http.StatusOK, jsonResponse)
+		ctx.JSON(http.StatusBadRequest, jsonResponse)
 		return
 	}
 

@@ -13,10 +13,11 @@ func UsersToUsersViewMapper(users userModel.Users) UsersView {
 
 	return UsersView{
 		PaginationResponse: http.PaginationResponse{
-			CurrentPage: users.PaginationResponse.CurrentPage,
+			CurrentPage: users.PaginationResponse.Page,
 			TotalPages:  users.PaginationResponse.TotalPages,
 			PagesLeft:   users.PaginationResponse.PagesLeft,
 			TotalItems:  users.PaginationResponse.TotalItems,
+			ItemsLeft:   users.PaginationResponse.ItemsLeft,
 			Limit:       users.PaginationResponse.Limit,
 			OrderBy:     users.PaginationResponse.OrderBy,
 		},

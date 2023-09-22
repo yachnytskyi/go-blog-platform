@@ -14,6 +14,20 @@ func IsIntegerNotZero(data int) bool {
 	return true
 }
 
+func IsIntegerLessThanZero(data int) bool {
+	if data < 0 {
+		return true
+	}
+	return false
+}
+
+func IsIntegerNotLessThanZero(data int) bool {
+	if data < 0 {
+		return false
+	}
+	return true
+}
+
 func IsIntegerZeroOrLess(data int) bool {
 	if data == 0 || data < 0 {
 		return true

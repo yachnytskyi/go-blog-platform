@@ -8,6 +8,10 @@ import (
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
+const (
+	zero = 0
+)
+
 type PaginationQuery struct {
 	Page    int
 	Limit   int
@@ -20,7 +24,7 @@ func NewPaginationQuery(page, limit int, orderBy string) PaginationQuery {
 		Page:    page,
 		Limit:   limit,
 		OrderBy: orderBy,
-		Skip:    GetSkip(page, limit),
+		Skip:    getSkip(page, limit),
 	}
 }
 
@@ -46,12 +50,12 @@ func GetLimit(limit string) int {
 	return intLimit
 }
 
-func GetSkip(page, limit int) int {
+func getSkip(page, limit int) int {
 	return (page - 1) * limit
 }
 
 func isLimitNotValid(data int) bool {
-	if data == 0 || data < 0 || data > config.MaxItemsPerPage {
+	if data == zero || data < zero || data > config.MaxItemsPerPage {
 		return true
 	}
 	return false
@@ -59,37 +63,46 @@ func isLimitNotValid(data int) bool {
 
 func SetCorrectPage(totalItems int, paginationQuery PaginationQuery) PaginationQuery {
 	if totalItems <= paginationQuery.Skip {
-		paginationQuery.Page = GetTotalPages(int(totalItems), paginationQuery.Limit)
-		paginationQuery.Skip = GetSkip(paginationQuery.Page, paginationQuery.Limit)
+		paginationQuery.Page = getTotalPages(totalItems, paginationQuery.Limit)
+		paginationQuery.Skip = getSkip(paginationQuery.Page, paginationQuery.Limit)
 	}
 	return paginationQuery
 }
 
 type PaginationResponse struct {
-	CurrentPage int
-	TotalPages  int
-	PagesLeft   int
-	TotalItems  int
-	Limit       int
-	OrderBy     string
+	Page       int
+	TotalPages int
+	PagesLeft  int
+	TotalItems int
+	ItemsLeft  int
+	Limit      int
+	OrderBy    string
 }
 
-func NewPaginationResponse(currentPage, totalItems, limit int, orderBy string) PaginationResponse {
+func NewPaginationResponse(page, totalItems, limit int, orderBy string) PaginationResponse {
 	return PaginationResponse{
-		CurrentPage: currentPage,
-		TotalPages:  GetTotalPages(totalItems, limit),
-		PagesLeft:   GetPagesLeft(totalItems, limit, currentPage),
-		TotalItems:  totalItems,
-		Limit:       limit,
-		OrderBy:     orderBy,
+		Page:       page,
+		TotalPages: getTotalPages(totalItems, limit),
+		PagesLeft:  getPagesLeft(page, totalItems, limit),
+		TotalItems: totalItems,
+		ItemsLeft:  getItemsLeft(page, totalItems, limit),
+		Limit:      limit,
+		OrderBy:    orderBy,
 	}
 }
 
-func GetTotalPages(totalItems, limit int) int {
+func getTotalPages(totalItems, limit int) int {
 	totalPages := float64(totalItems) / float64(limit)
 	return int(math.Ceil(totalPages))
 }
 
-func GetPagesLeft(totalItems, limit, currentPage int) int {
-	return GetTotalPages(totalItems, limit) - currentPage
+func getPagesLeft(page, totalItems, limit int) int {
+	return getTotalPages(totalItems, limit) - page
+}
+
+func getItemsLeft(page, totalItems, limit int) int {
+	if validator.IsIntegerLessThanZero(totalItems - (page * limit)) {
+		return zero
+	}
+	return totalItems - (page * limit)
 }

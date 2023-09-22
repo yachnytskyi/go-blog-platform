@@ -45,11 +45,8 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 		logging.Logger(countInternalError)
 		return commonModel.NewResultOnFailure[userModel.Users](countInternalError)
 	}
-	if totalUsers <= int64(paginationQuery.Skip) {
-		paginationQuery.Page = commonModel.GetTotalPages(int(totalUsers), paginationQuery.Limit)
-		paginationQuery.Skip = (paginationQuery.Page - 1) * paginationQuery.Limit
-	}
 
+	paginationQuery = commonModel.SetCorrectPage(int(totalUsers), paginationQuery)
 	option := options.FindOptions{}
 	option.SetLimit(int64(paginationQuery.Limit))
 	option.SetSkip(int64(paginationQuery.Skip))

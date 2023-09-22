@@ -7,13 +7,6 @@ type JsonResponse struct {
 	Status string `json:"status"`
 }
 
-func NewJsonResponse(data any, err any) JsonResponse {
-	return JsonResponse{
-		Data:  data,
-		Error: err,
-	}
-}
-
 func NewJsonResponseOnSuccess(data any) JsonResponse {
 	return JsonResponse{
 		Data: data,

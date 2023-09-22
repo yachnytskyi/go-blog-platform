@@ -29,14 +29,12 @@ func NewUserController(userUseCase user.UseCase) UserController {
 }
 
 func (userController UserController) GetAllUsers(ctx *gin.Context) {
-	page := ctx.DefaultQuery("page", commonModel.DefaultPage)
-	limit := ctx.DefaultQuery("limit", commonModel.DefaultLimit)
+	page := ctx.DefaultQuery("page", config.DefaultPage)
+	limit := ctx.DefaultQuery("limit", config.DefaultLimit)
 	orderBy := ctx.DefaultQuery("order-by", "")
 	convertedPage := commonModel.GetPage(page)
 	convertedLimit := commonModel.GetLimit(limit)
-	orderBy = commonModel.GetOrderBy(orderBy)
 	paginationQuery := commonModel.NewPaginationQuery(convertedPage, convertedLimit, orderBy)
-
 	fetchedUsers := userController.userUseCase.GetAllUsers(ctx.Request.Context(), paginationQuery)
 	if validator.IsErrorNotNil(fetchedUsers.Error) {
 		jsonResponse := httpError.HandleError(fetchedUsers.Error)

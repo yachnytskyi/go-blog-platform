@@ -20,7 +20,7 @@ func NewPaginationQuery(page, limit int, orderBy string) PaginationQuery {
 		Page:    page,
 		Limit:   limit,
 		OrderBy: orderBy,
-		Skip:    (page - 1) * limit,
+		Skip:    GetSkip(page, limit),
 	}
 }
 
@@ -46,8 +46,8 @@ func GetLimit(limit string) int {
 	return intLimit
 }
 
-func GetOrderBy(orderBy string) string {
-	return orderBy
+func GetSkip(page, limit int) int {
+	return (page - 1) * limit
 }
 
 func isLimitNotValid(data int) bool {
@@ -55,6 +55,14 @@ func isLimitNotValid(data int) bool {
 		return true
 	}
 	return false
+}
+
+func SetCorrectPage(totalItems int, paginationQuery PaginationQuery) PaginationQuery {
+	if totalItems <= paginationQuery.Skip {
+		paginationQuery.Page = GetTotalPages(int(totalItems), paginationQuery.Limit)
+		paginationQuery.Skip = GetSkip(paginationQuery.Page, paginationQuery.Limit)
+	}
+	return paginationQuery
 }
 
 type PaginationResponse struct {

@@ -47,7 +47,6 @@ var (
 	userController userHttpGinPackage.UserController
 	userRouter     userHttpGinPackage.UserRouter
 
-	postCollection *mongo.Collection
 	postRepository postPackage.Repository
 	postUseCase    postPackage.UseCase
 	postController postHttpGinPackage.PostHandler
@@ -76,6 +75,7 @@ func init() {
 	// Connect to MongoDB.
 	mongoconn := options.Client().ApplyURI(loadConfig.MongoURI)
 	mongoClient, err := mongo.Connect(ctx, mongoconn)
+	db := mongoClient.Database(loadConfig.MongoDatabaseName)
 
 	if err != nil {
 		panic(err)
@@ -88,13 +88,9 @@ func init() {
 
 	fmt.Println("MongoDB successfully connected...")
 
-	// Collections.
-	userCollection = mongoClient.Database("golang_mongodb").Collection("users")
-	postCollection = mongoClient.Database("golang_mongodb").Collection("posts")
-
 	// Repositories.
-	userRepository = userRepositoryPackage.NewUserRepository(userCollection)
-	postRepository = postRepositoryPackage.NewPostRepository(postCollection)
+	userRepository = userRepositoryPackage.NewUserRepository(db)
+	postRepository = postRepositoryPackage.NewPostRepository(db)
 
 	// Use Cases.
 	userUseCase = userUseCasePackage.NewUserUseCase(userRepository)

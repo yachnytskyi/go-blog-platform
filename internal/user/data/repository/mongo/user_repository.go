@@ -33,8 +33,8 @@ type UserRepository struct {
 	collection *mongo.Collection
 }
 
-func NewUserRepository(collection *mongo.Collection) user.Repository {
-	return &UserRepository{collection: collection}
+func NewUserRepository(db *mongo.Database) user.Repository {
+	return &UserRepository{collection: db.Collection("users")}
 }
 
 func (userRepository UserRepository) GetAllUsers(ctx context.Context, paginationQuery commonModel.PaginationQuery) commonModel.Result[userModel.Users] {

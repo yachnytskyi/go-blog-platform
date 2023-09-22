@@ -7,9 +7,10 @@ import (
 )
 
 type Config struct {
+	MongoDatabaseName string `mapstructure:"MONGO_DATABASE_NAME"`
 	MongoURI          string `mapstructure:"MONGODB_LOCAL_URI"`
-	RedisURI          string `mapstructure:"REDIS_URL"`
 	Port              string `mapstructure:"PORT"`
+
 	GrpcServerAddress string `mapstructure:"GRPC_SERVER_ADDRESS"`
 
 	AccessTokenPrivateKey  string        `mapstructure:"ACCESS_TOKEN_PRIVATE_KEY"`
@@ -34,7 +35,6 @@ func LoadConfig(path string) (config Config, err error) {
 	viper.AddConfigPath(path)
 	viper.SetConfigType("env")
 	viper.SetConfigName("app")
-
 	viper.AutomaticEnv()
 
 	err = viper.ReadInConfig()

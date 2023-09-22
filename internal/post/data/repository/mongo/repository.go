@@ -27,8 +27,8 @@ type PostRepository struct {
 	collection *mongo.Collection
 }
 
-func NewPostRepository(collection *mongo.Collection) post.Repository {
-	return &PostRepository{collection: collection}
+func NewPostRepository(db *mongo.Database) post.Repository {
+	return &PostRepository{collection: db.Collection("posts")}
 }
 
 func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int, limit int) (*postModel.Posts, error) {

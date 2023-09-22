@@ -124,7 +124,7 @@ func validateResetPassword(userResetPassword userModel.UserResetPassword) common
 }
 
 func validateEmail(field, fieldName, fieldType, fieldRegex, errorMessage string) domainError.ValidationError {
-	if domainUtility.IsStringLengthNotCorrect(field, config.MinLength, config.MaxLength) {
+	if domainUtility.IsStringLengthNotValid(field, config.MinLength, config.MaxLength) {
 		return domainError.NewValidationError(fieldName, fieldType, fmt.Sprintf(config.StringAllowedLength, config.MinLength, config.MaxLength))
 	} else if domainUtility.CheckSpecialCharactersString(field, fieldRegex) {
 		return domainError.NewValidationError(fieldName, fieldType, errorMessage)
@@ -135,7 +135,7 @@ func validateEmail(field, fieldName, fieldType, fieldRegex, errorMessage string)
 }
 
 func validatePassword(password, passwordConfirm, fieldName, fieldType, fieldRegex, errorMessage string) domainError.ValidationError {
-	if domainUtility.IsStringLengthNotCorrect(password, config.MinLength, config.MaxLength) {
+	if domainUtility.IsStringLengthNotValid(password, config.MinLength, config.MaxLength) {
 		return domainError.NewValidationError(fieldName, fieldType, fmt.Sprintf(config.StringAllowedLength, config.MinLength, config.MaxLength))
 	} else if domainUtility.CheckSpecialCharactersString(password, fieldRegex) {
 		return domainError.NewValidationError(fieldName, fieldType, errorMessage)

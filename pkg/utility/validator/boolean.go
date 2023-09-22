@@ -1,15 +1,9 @@
 package validator
 
 func IsBooleanTrue(data bool) bool {
-	if data == true {
-		return true
-	}
-	return false
+	return data
 }
 
 func IsBooleanNotTrue(data bool) bool {
-	if data == true {
-		return false
-	}
-	return true
+	return !data
 }

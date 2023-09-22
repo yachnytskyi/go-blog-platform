@@ -1,29 +1,17 @@
 package validator
 
 func IsStringEmpty(data string) bool {
-	if data == "" {
-		return true
-	}
-	return false
+	return data == ""
 }
 
 func IsStringNotEmpty(data string) bool {
-	if data == "" {
-		return false
-	}
-	return true
+	return data != ""
 }
 
 func AreStringsEqual(firstString string, secondString string) bool {
-	if firstString == secondString {
-		return true
-	}
-	return false
+	return firstString == secondString
 }
 
 func AreStringsNotEqual(firstString string, secondString string) bool {
-	if firstString == secondString {
-		return false
-	}
-	return true
+	return firstString != secondString
 }

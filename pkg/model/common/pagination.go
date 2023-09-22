@@ -33,7 +33,7 @@ func GetPage(page string) int {
 	if validator.IsErrorNotNil(stringConversionError) {
 		intPage, _ = strconv.Atoi(config.DefaultPage)
 	}
-	if validator.IsIntegerZeroOrLess(intPage) {
+	if validator.IsIntegerZeroOrNegative(intPage) {
 		intPage, _ = strconv.Atoi(config.DefaultPage)
 	}
 	return intPage
@@ -101,7 +101,7 @@ func getPagesLeft(page, totalItems, limit int) int {
 }
 
 func getItemsLeft(page, totalItems, limit int) int {
-	if validator.IsIntegerLessThanZero(totalItems - (page * limit)) {
+	if validator.IsIntegerNegative(totalItems - (page * limit)) {
 		return zero
 	}
 	return totalItems - (page * limit)

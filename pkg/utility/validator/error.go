@@ -1,15 +1,9 @@
 package validator
 
 func IsErrorNil(err error) bool {
-	if err == nil {
-		return true
-	}
-	return false
+	return err == nil
 }
 
 func IsErrorNotNil(err error) bool {
-	if err == nil {
-		return false
-	}
-	return true
+	return err != nil
 }

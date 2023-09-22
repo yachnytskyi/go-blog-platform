@@ -10,11 +10,6 @@ import (
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
-const (
-	// Error Messages.
-	stringAllowedLength = "can be between %d and %d characters long"
-)
-
 func SanitizeString(data string) string {
 	return strings.TrimSpace(data)
 }
@@ -29,22 +24,22 @@ func SanitizeAndToLowerString(data string) string {
 }
 
 func ValidateField(field, fieldName, fieldType, fieldRegex, errorMessage string) domainError.ValidationError {
-	if IsStringLengthNotCorrect(field, config.MinLength, config.MaxLength) {
-		return domainError.NewValidationError(fieldName, fieldType, fmt.Sprintf(stringAllowedLength, config.MinLength, config.MaxLength))
+	if IsStringLengthNotValid(field, config.MinLength, config.MaxLength) {
+		return domainError.NewValidationError(fieldName, fieldType, fmt.Sprintf(config.StringAllowedLength, config.MinLength, config.MaxLength))
 	} else if CheckSpecialCharactersString(field, fieldRegex) {
 		return domainError.NewValidationError(fieldName, fieldType, errorMessage)
 	}
 	return domainError.ValidationError{}
 }
 
-func IsStringLengthCorrect(checkedString string, minLength int, maxLength int) bool {
+func IsStringLengthValid(checkedString string, minLength int, maxLength int) bool {
 	if len(checkedString) < minLength || len(checkedString) > maxLength {
 		return false
 	}
 	return true
 }
 
-func IsStringLengthNotCorrect(checkedString string, minLength int, maxLength int) bool {
+func IsStringLengthNotValid(checkedString string, minLength int, maxLength int) bool {
 	if len(checkedString) < minLength || len(checkedString) > maxLength {
 		return true
 	}

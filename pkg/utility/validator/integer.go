@@ -1,43 +1,26 @@
 package validator
 
+func IsIntegerPositive(data int) bool {
+	return data > 0
+}
+
+func IsIntegerNegative(data int) bool {
+	return data < 0
+}
+
 func IsIntegerZero(data int) bool {
-	if data == 0 {
-		return true
-	}
-	return false
+	return data == 0
 }
 
 func IsIntegerNotZero(data int) bool {
-	if data == 0 {
-		return false
-	}
-	return true
+	return data != 0
+
 }
 
-func IsIntegerLessThanZero(data int) bool {
-	if data < 0 {
-		return true
-	}
-	return false
+func IsIntegerZeroOrPositive(data int) bool {
+	return data >= 0
 }
 
-func IsIntegerNotLessThanZero(data int) bool {
-	if data < 0 {
-		return false
-	}
-	return true
-}
-
-func IsIntegerZeroOrLess(data int) bool {
-	if data == 0 || data < 0 {
-		return true
-	}
-	return false
-}
-
-func IsIntegerNotZeroOrLess(data int) bool {
-	if data == 0 || data < 0 {
-		return false
-	}
-	return true
+func IsIntegerZeroOrNegative(data int) bool {
+	return data <= 0
 }

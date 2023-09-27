@@ -9,6 +9,7 @@ import (
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	mongoDBFactory "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/data/repository/mongo"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/application"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 )
 
@@ -19,19 +20,20 @@ const (
 
 // Define a DatabaseFactory interface to create different database instances.
 type DatabaseFactory interface {
-	NewRepository(ctx context.Context) (interface{}, error)
+	NewRepository(ctx context.Context) interface{}
 	NewUserRepository(db interface{}) user.UserRepository
 	NewPostRepository(db interface{}) post.PostRepository
+	CloseRepository()
 }
 
-func InjectRepository(loadConfig config.Config) (DatabaseFactory, error) {
+func InjectRepository(loadConfig config.Config) DatabaseFactory {
 	switch loadConfig.Database {
-	case loadConfig.MongoConfig:
-		return &mongoDBFactory.MongoDBFactory{MongoConfig: loadConfig.MongoConfig}, nil
+	case config.MongoDB:
+		return &mongoDBFactory.MongoDBFactory{MongoConfig: loadConfig.MongoConfig}
 	// Add other database cases here as needed.
 	default:
-		internalError := domainError.NewInternalError(location+".loadConfig.MongoConfig:", fmt.Sprintf(unsupportedDatabase, loadConfig.Database))
-		logging.Logger(internalError)
-		return nil, domainError.NewInternalError(location, fmt.Sprintf(unsupportedDatabase, loadConfig.Database))
+		logging.Logger(domainError.NewInternalError(location+".loadConfig.DatabaseType:", fmt.Sprintf(unsupportedDatabase, loadConfig.Database)))
+		application.GracefulShutdown()
+		return nil
 	}
 }

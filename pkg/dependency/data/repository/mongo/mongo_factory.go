@@ -25,36 +25,41 @@ const (
 
 type MongoDBFactory struct {
 	MongoConfig config.MongoConfig
+	MongoClient *mongo.Client
 }
 
 // NewRepository creates a new database instance.
-func (f *MongoDBFactory) NewRepository(ctx context.Context) (interface{}, error) {
-	mongoconn := options.Client().ApplyURI(f.MongoConfig.MongoURI)
-	mongoClient, connectError := mongo.Connect(ctx, mongoconn)
-	db := mongoClient.Database(f.MongoConfig.MongoDatabaseName)
+func (mongoDBFactory *MongoDBFactory) NewRepository(ctx context.Context) interface{} {
+	mongoConnection := options.Client().ApplyURI(mongoDBFactory.MongoConfig.MongoURI)
+	mongoClient, connectError := mongo.Connect(ctx, mongoConnection)
+	db := mongoClient.Database(mongoDBFactory.MongoConfig.MongoDatabaseName)
 	if validator.IsErrorNotNil(connectError) {
-		internalError := domainError.NewInternalError(location+"mongoClient.Database", connectError.Error())
-		logging.Logger(internalError)
-		return nil, internalError
+		logging.Logger(domainError.NewInternalError(location+"mongoClient.Database", connectError.Error()))
+		return nil
 	}
 	connectError = mongoClient.Ping(ctx, readpref.Primary())
 	if validator.IsErrorNotNil(connectError) {
-		internalError := domainError.NewInternalError(location+"mongoClient.Ping", connectError.Error())
-		logging.Logger(internalError)
-		return nil, internalError
+		logging.Logger(domainError.NewInternalError(location+"mongoClient.Ping", connectError.Error()))
+		return nil
 	}
 	fmt.Println("Database successfully connected...")
-	return db, nil
+	return db
 }
 
 // NewUserRepository creates a new UserRepository.
-func (f *MongoDBFactory) NewUserRepository(db interface{}) user.UserRepository {
+func (mongoDBFactory *MongoDBFactory) NewUserRepository(db interface{}) user.UserRepository {
 	mongoDB := db.(*mongo.Database)
 	return userRepository.NewUserRepository(mongoDB)
 }
 
 // NewPostRepository creates a new PostRepository.
-func (f *MongoDBFactory) NewPostRepository(db interface{}) post.PostRepository {
+func (mongoDBFactory *MongoDBFactory) NewPostRepository(db interface{}) post.PostRepository {
 	mongoDB := db.(*mongo.Database)
 	return postRepository.NewPostRepository(mongoDB)
+}
+
+func (mongoDBFactory *MongoDBFactory) CloseRepository() {
+	if validator.IsValueNotNil(mongoDBFactory.MongoClient) {
+		mongoDBFactory.MongoClient.Disconnect(context.Background())
+	}
 }

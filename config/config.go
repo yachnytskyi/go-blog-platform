@@ -8,7 +8,7 @@ import (
 
 type Config struct {
 	MongoConfig MongoConfig `mapstructure:",squash"`
-	Database    MongoConfig `mapstructure:",squash"`
+	Database    string      `mapstructure:"Database"`
 
 	Port              string `mapstructure:"PORT"`
 	GrpcServerAddress string `mapstructure:"GRPC_SERVER_ADDRESS"`

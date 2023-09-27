@@ -26,4 +26,7 @@ const (
 	SendingEmailWithIntstructionsNotifications = "We sent you an email with needed instructions"
 	InternalErrorNotification                  = "something went wrong, please repeat later"
 	EntityNotFoundErrorNotification            = "please repeat it later"
+
+	// Databases.
+	MongoDB = "MongoDB"
 )

@@ -69,10 +69,10 @@ func init() {
 	// Create a context.
 	ctx = context.TODO()
 
-	repositoryFactory := repository.InjectRepository(loadConfig)
+	repositoryFactory, _ := repository.InjectRepository(loadConfig)
 
 	// Create a DB database instance using the factory.
-	db := repositoryFactory.NewRepository(ctx)
+	db, _ := repositoryFactory.NewRepository(ctx)
 	userRepository = repositoryFactory.NewUserRepository(db)
 	postRepository = repositoryFactory.NewPostRepository(db)
 

@@ -9,10 +9,10 @@ import (
 )
 
 type PostUseCase struct {
-	postRepository post.Repository
+	postRepository post.PostRepository
 }
 
-func NewPostUseCase(postRepository post.Repository) post.UseCase {
+func NewPostUseCase(postRepository post.PostRepository) post.PostUseCase {
 	return &PostUseCase{postRepository: postRepository}
 }
 

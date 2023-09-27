@@ -7,10 +7,10 @@ import (
 )
 
 type Config struct {
-	MongoDatabaseName string `mapstructure:"MONGO_DATABASE_NAME"`
-	MongoURI          string `mapstructure:"MONGODB_LOCAL_URI"`
-	Port              string `mapstructure:"PORT"`
+	MongoConfig MongoConfig `mapstructure:",squash"`
+	Database    MongoConfig `mapstructure:",squash"`
 
+	Port              string `mapstructure:"PORT"`
 	GrpcServerAddress string `mapstructure:"GRPC_SERVER_ADDRESS"`
 
 	AccessTokenPrivateKey  string        `mapstructure:"ACCESS_TOKEN_PRIVATE_KEY"`
@@ -29,6 +29,11 @@ type Config struct {
 	SMTPPassword string `mapstructure:"SMTP_PASSWORD"`
 	SMTPPort     int    `mapstructure:"SMTP_PORT"`
 	SMTPUser     string `mapstructure:"SMTP_USER"`
+}
+
+type MongoConfig struct {
+	MongoDatabaseName string `mapstructure:"MONGO_DATABASE_NAME"`
+	MongoURI          string `mapstructure:"MONGODB_LOCAL_URI"`
 }
 
 func LoadConfig(path string) (config Config, err error) {

@@ -27,7 +27,7 @@ type PostRepository struct {
 	collection *mongo.Collection
 }
 
-func NewPostRepository(db *mongo.Database) post.Repository {
+func NewPostRepository(db *mongo.Database) post.PostRepository {
 	return &PostRepository{collection: db.Collection("posts")}
 }
 

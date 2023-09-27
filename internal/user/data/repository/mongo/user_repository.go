@@ -33,7 +33,7 @@ type UserRepository struct {
 	collection *mongo.Collection
 }
 
-func NewUserRepository(db *mongo.Database) user.Repository {
+func NewUserRepository(db *mongo.Database) user.UserRepository {
 	return &UserRepository{collection: db.Collection("users")}
 }
 

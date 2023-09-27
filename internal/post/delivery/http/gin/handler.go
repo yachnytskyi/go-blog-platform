@@ -14,10 +14,10 @@ import (
 )
 
 type PostHandler struct {
-	postUseCase post.UseCase
+	postUseCase post.PostUseCase
 }
 
-func NewPostHandler(postUseCase post.UseCase) PostHandler {
+func NewPostHandler(postUseCase post.PostUseCase) PostHandler {
 	return PostHandler{postUseCase: postUseCase}
 }
 

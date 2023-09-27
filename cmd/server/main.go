@@ -3,13 +3,13 @@ package main
 // Require the packages.
 import (
 	"context"
-	"fmt"
 	"log"
 	"net"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/yachnytskyi/golang-mongo-grpc/config"
+
 	postProtobufV1 "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/grpc/v1/model/pb"
 	userProtobufV1 "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1/model/pb"
 
@@ -17,12 +17,13 @@ import (
 	"google.golang.org/grpc/reflection"
 
 	postPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
-	postRepositoryPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post/data/repository/mongo"
 	postGrpcPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/grpc/v1"
 	postHttpGinPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/http/gin"
 	postUseCasePackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/usecase"
+
 	userPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
-	userRepositoryPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/mongo"
+	repository "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/data/repository"
+
 	userGrpcPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1"
 	userHttpGinPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin"
 	userUseCasePackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
@@ -31,8 +32,6 @@ import (
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
 // Create required variables that we'll re-assign later.
@@ -42,17 +41,15 @@ var (
 	mongoClient *mongo.Client
 
 	userCollection *mongo.Collection
-	userRepository userPackage.Repository
-	userUseCase    userPackage.UseCase
+	userRepository userPackage.UserRepository
+	userUseCase    userPackage.UserUseCase
 	userController userHttpGinPackage.UserController
 	userRouter     userHttpGinPackage.UserRouter
 
-	postRepository postPackage.Repository
-	postUseCase    postPackage.UseCase
+	postRepository postPackage.PostRepository
+	postUseCase    postPackage.PostUseCase
 	postController postHttpGinPackage.PostHandler
 	postRouter     postHttpGinPackage.PostRouter
-
-	// templateInstance *template.Template
 )
 
 const (
@@ -72,25 +69,12 @@ func init() {
 	// Create a context.
 	ctx = context.TODO()
 
-	// Connect to MongoDB.
-	mongoconn := options.Client().ApplyURI(loadConfig.MongoURI)
-	mongoClient, err := mongo.Connect(ctx, mongoconn)
-	db := mongoClient.Database(loadConfig.MongoDatabaseName)
+	repositoryFactory := repository.InjectRepository(loadConfig)
 
-	if err != nil {
-		panic(err)
-	}
-
-	err = mongoClient.Ping(ctx, readpref.Primary())
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println("MongoDB successfully connected...")
-
-	// Repositories.
-	userRepository = userRepositoryPackage.NewUserRepository(db)
-	postRepository = postRepositoryPackage.NewPostRepository(db)
+	// Create a DB database instance using the factory.
+	db := repositoryFactory.NewRepository(ctx)
+	userRepository = repositoryFactory.NewUserRepository(db)
+	postRepository = repositoryFactory.NewPostRepository(db)
 
 	// Use Cases.
 	userUseCase = userUseCasePackage.NewUserUseCase(userRepository)

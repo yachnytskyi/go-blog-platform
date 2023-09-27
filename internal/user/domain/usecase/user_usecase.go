@@ -26,10 +26,10 @@ const (
 )
 
 type UserUseCase struct {
-	userRepository user.Repository
+	userRepository user.UserRepository
 }
 
-func NewUserUseCase(userRepository user.Repository) user.UseCase {
+func NewUserUseCase(userRepository user.UserRepository) user.UserUseCase {
 	return &UserUseCase{userRepository: userRepository}
 }
 

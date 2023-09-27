@@ -14,7 +14,7 @@ func NewPostRouter(postHandler PostHandler) PostRouter {
 	return PostRouter{postHandler: postHandler}
 }
 
-func (postRouter *PostRouter) PostRouter(routerGroup *gin.RouterGroup, userUseCase user.UseCase) {
+func (postRouter *PostRouter) PostRouter(routerGroup *gin.RouterGroup, userUseCase user.UserUseCase) {
 	router := routerGroup.Group("/posts")
 
 	router.GET("/", postRouter.postHandler.GetAllPosts)

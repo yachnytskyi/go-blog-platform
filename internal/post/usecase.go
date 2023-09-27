@@ -6,7 +6,7 @@ import (
 	postModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
 )
 
-type UseCase interface {
+type PostUseCase interface {
 	GetAllPosts(ctx context.Context, page int, limit int) (*postModel.Posts, error)
 	GetPostById(ctx context.Context, postID string) (*postModel.Post, error)
 	CreatePost(ctx context.Context, user *postModel.PostCreate) (*postModel.Post, error)

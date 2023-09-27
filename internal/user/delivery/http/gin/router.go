@@ -14,7 +14,7 @@ func NewUserRouter(userController UserController) UserRouter {
 	return UserRouter{userController: userController}
 }
 
-func (userRouter *UserRouter) UserRouter(routerGroup *gin.RouterGroup, userUseCase user.UseCase) {
+func (userRouter *UserRouter) UserRouter(routerGroup *gin.RouterGroup, userUseCase user.UserUseCase) {
 	router := routerGroup.Group("/users")
 	router.GET("/", userRouter.userController.GetAllUsers)
 	router.GET("/:userID", userRouter.userController.GetUserById)

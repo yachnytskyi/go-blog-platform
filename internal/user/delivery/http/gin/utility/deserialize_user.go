@@ -20,7 +20,7 @@ const (
 	bearer        = "Bearer"
 )
 
-func DeserializeUser(userUseCase user.UseCase) gin.HandlerFunc {
+func DeserializeUser(userUseCase user.UserUseCase) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var accessToken string
 		cookie, cookieError := ctx.Cookie(accessToToken)

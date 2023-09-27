@@ -8,7 +8,7 @@ import (
 	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 )
 
-type Repository interface {
+type UserRepository interface {
 	GetAllUsers(ctx context.Context, paginationQuery commonModel.PaginationQuery) commonModel.Result[userModel.Users]
 	GetUserById(ctx context.Context, userID string) (userModel.User, error)
 	GetUserByEmail(ctx context.Context, email string) (userModel.User, error)

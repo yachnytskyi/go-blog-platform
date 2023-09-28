@@ -1,6 +1,9 @@
 package config
 
 const (
+	// Context timers.
+	DefaultContextTimer = 5
+
 	// Pagination.
 	DefaultPage     = "1"
 	DefaultLimit    = "10"

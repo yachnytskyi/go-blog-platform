@@ -19,18 +19,18 @@ import (
 )
 
 const (
-	location            = "pkg.dependency.data.repository.mongo.NewRepoitory"
+	location            = "pkg.dependency.data.repository.mongo.NewRepository."
 	unsupportedDatabase = "unsupported database type: %s"
 )
 
 type MongoDBFactory struct {
 	MongoConfig config.MongoConfig
+	MongoClient *mongo.Client
 }
 
 func (mongoDBFactory *MongoDBFactory) NewRepository(ctx context.Context) interface{} {
 	mongoConnection := options.Client().ApplyURI(mongoDBFactory.MongoConfig.MongoURI)
 	mongoClient, connectError := mongo.Connect(ctx, mongoConnection)
-	defer mongoClient.Disconnect(ctx)
 	db := mongoClient.Database(mongoDBFactory.MongoConfig.MongoDatabaseName)
 	if validator.IsErrorNotNil(connectError) {
 		logging.Logger(domainError.NewInternalError(location+"mongoClient.Database", connectError.Error()))
@@ -43,6 +43,12 @@ func (mongoDBFactory *MongoDBFactory) NewRepository(ctx context.Context) interfa
 	}
 	fmt.Println("Database successfully connected...")
 	return db
+}
+
+func (mongoDBFactory *MongoDBFactory) CloseRepository() {
+	if validator.IsValueNotNil(mongoDBFactory.MongoClient) {
+		mongoDBFactory.MongoClient.Disconnect(context.Background())
+	}
 }
 
 func (mongoDBFactory *MongoDBFactory) NewUserRepository(db interface{}) user.UserRepository {

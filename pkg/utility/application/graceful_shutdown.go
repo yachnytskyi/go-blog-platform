@@ -1,10 +1,18 @@
 package application
 
 import (
+	"fmt"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
+
+	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
+)
+
+const (
+	completed = "Completed graceful shutdown of the app"
+	reason    = "Received signal: %v"
 )
 
 var (
@@ -19,9 +27,11 @@ func GracefulShutdown() {
 		waitGroup.Add(1)
 
 		go func() {
-			<-terminate
+			code := <-terminate
+			logging.Logger(fmt.Sprintf(reason, code.String()))
 			os.Exit(1)
 		}()
 	})
+	logging.Logger(completed)
 	waitGroup.Wait()
 }

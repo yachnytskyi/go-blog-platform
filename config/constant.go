@@ -1,8 +1,10 @@
 package config
 
+import "time"
+
 const (
 	// Context timers.
-	DefaultContextTimer = 5
+	DefaultContextTimer = time.Duration(time.Second * 5)
 
 	// Pagination.
 	DefaultPage     = "1"
@@ -32,4 +34,7 @@ const (
 
 	// Databases.
 	MongoDB = "MongoDB"
+
+	// Domains.
+	UseCase = "UseCase"
 )

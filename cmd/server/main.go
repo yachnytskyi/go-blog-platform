@@ -19,17 +19,20 @@ import (
 	postPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
 	postGrpcPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/grpc/v1"
 	postHttpGinPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/http/gin"
+
 	postUseCasePackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/usecase"
 
 	userPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
+	// dependency "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency"
+
 	repository "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/data/repository"
+	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 
 	userGrpcPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1"
 	userHttpGinPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin"
-	userUseCasePackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
-
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
+
+	userUseCasePackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
 
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -67,6 +70,9 @@ func init() {
 	// Create a context.
 	ctx, cancel := context.WithTimeout(context.Background(), config.DefaultContextTimer)
 	defer cancel()
+
+	// a := dependency.CreateApplication(ctx)
+	// fmt.Println(a)
 
 	repositoryFactory := repository.InjectRepository(loadConfig)
 

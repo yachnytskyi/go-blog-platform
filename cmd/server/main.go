@@ -8,7 +8,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/yachnytskyi/golang-mongo-grpc/config"
+	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 
 	postProtobufV1 "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/grpc/v1/model/pb"
 	userProtobufV1 "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1/model/pb"
@@ -65,7 +65,8 @@ func init() {
 	}
 
 	// Create a context.
-	ctx = context.TODO()
+	ctx, cancel := context.WithTimeout(context.Background(), config.DefaultContextTimer)
+	defer cancel()
 
 	repositoryFactory := repository.InjectRepository(loadConfig)
 

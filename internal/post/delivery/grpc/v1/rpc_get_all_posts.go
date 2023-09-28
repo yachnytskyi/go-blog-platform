@@ -3,14 +3,17 @@ package v1
 import (
 	"context"
 
+	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 	postProtobufV1 "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/grpc/v1/model/pb"
 	"google.golang.org/grpc/codes"
+
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func (PostGrpcServer *PostGrpcServer) GetAllPosts(postsData *postProtobufV1.Posts, streamOfPosts postProtobufV1.PostUseCase_GetAllPostsServer) error {
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.Background(), config.DefaultContextTimer)
+	defer cancel()
 	page := postsData.GetPage()
 	limit := postsData.GetLimit()
 

@@ -29,7 +29,7 @@ import (
 	userUseCasePackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
 
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
+	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -58,8 +58,6 @@ const (
 
 // Init function that will run before the "main" function.
 func init() {
-
-	// Load the .env variables.
 	loadConfig, loadConfigError := config.LoadConfig(".")
 	if loadConfigError != nil {
 		loadConfigInternalError := domainError.NewInternalError(location+"init.LoadConfig", loadConfigError.Error())
@@ -98,8 +96,6 @@ func main() {
 	if err != nil {
 		log.Fatal("Could not load config", err)
 	}
-
-	defer mongoClient.Disconnect(ctx)
 
 	startGinServer(config)
 	// startGrpcServer(config)
@@ -145,7 +141,7 @@ func startGrpcServer(config config.Config) {
 
 func startGinServer(config config.Config) {
 	corsConfig := cors.DefaultConfig()
-	corsConfig.AllowOrigins = []string{"http://localhost:8080", "http://localhost:3000"}
+	corsConfig.AllowOrigins = []string{"http://localhost:8080"}
 	corsConfig.AllowCredentials = true
 
 	server.Use(cors.New(corsConfig))

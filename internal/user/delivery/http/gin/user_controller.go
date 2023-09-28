@@ -14,8 +14,8 @@ import (
 	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
 	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
 	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
-	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/http"
-	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/http"
+	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
+	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )

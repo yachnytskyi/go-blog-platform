@@ -25,13 +25,12 @@ const (
 
 type MongoDBFactory struct {
 	MongoConfig config.MongoConfig
-	MongoClient *mongo.Client
 }
 
-// NewRepository creates a new database instance.
 func (mongoDBFactory *MongoDBFactory) NewRepository(ctx context.Context) interface{} {
 	mongoConnection := options.Client().ApplyURI(mongoDBFactory.MongoConfig.MongoURI)
 	mongoClient, connectError := mongo.Connect(ctx, mongoConnection)
+	defer mongoClient.Disconnect(ctx)
 	db := mongoClient.Database(mongoDBFactory.MongoConfig.MongoDatabaseName)
 	if validator.IsErrorNotNil(connectError) {
 		logging.Logger(domainError.NewInternalError(location+"mongoClient.Database", connectError.Error()))
@@ -46,20 +45,12 @@ func (mongoDBFactory *MongoDBFactory) NewRepository(ctx context.Context) interfa
 	return db
 }
 
-// NewUserRepository creates a new UserRepository.
 func (mongoDBFactory *MongoDBFactory) NewUserRepository(db interface{}) user.UserRepository {
 	mongoDB := db.(*mongo.Database)
 	return userRepository.NewUserRepository(mongoDB)
 }
 
-// NewPostRepository creates a new PostRepository.
 func (mongoDBFactory *MongoDBFactory) NewPostRepository(db interface{}) post.PostRepository {
 	mongoDB := db.(*mongo.Database)
 	return postRepository.NewPostRepository(mongoDB)
-}
-
-func (mongoDBFactory *MongoDBFactory) CloseRepository() {
-	if validator.IsValueNotNil(mongoDBFactory.MongoClient) {
-		mongoDBFactory.MongoClient.Disconnect(context.Background())
-	}
 }

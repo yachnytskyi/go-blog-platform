@@ -23,7 +23,6 @@ type DatabaseFactory interface {
 	NewRepository(ctx context.Context) interface{}
 	NewUserRepository(db interface{}) user.UserRepository
 	NewPostRepository(db interface{}) post.PostRepository
-	CloseRepository()
 }
 
 func InjectRepository(loadConfig config.Config) DatabaseFactory {

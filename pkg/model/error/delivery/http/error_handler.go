@@ -2,8 +2,8 @@ package http
 
 import (
 	"github.com/yachnytskyi/golang-mongo-grpc/config"
+	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/http"
 )
 
 func HandleError(err error) httpModel.JsonResponse {

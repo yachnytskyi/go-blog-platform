@@ -3,7 +3,7 @@ package model
 import (
 	"time"
 
-	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/http"
+	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 )
 
 // [GET].

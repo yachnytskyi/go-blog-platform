@@ -2,7 +2,7 @@ package model
 
 import (
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/model/http"
+	"github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 )
 
 func UsersToUsersViewMapper(users userModel.Users) UsersView {

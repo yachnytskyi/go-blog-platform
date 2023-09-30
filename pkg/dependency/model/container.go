@@ -1,15 +1,34 @@
 package model
 
-import "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory"
+import (
+	"context"
+
+	"github.com/yachnytskyi/golang-mongo-grpc/internal/post"
+	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
+)
 
 type Container struct {
-	RepositoryFactory factory.RepositoryFactory
-	DomainFactory     factory.DomainFactory
+	RepositoryFactory RepositoryFactory
+	DomainFactory     DomainFactory
 }
 
-func NewContainer(repositoryFactory factory.RepositoryFactory, domainFactory factory.DomainFactory) *Container {
+func NewContainer(repositoryFactory RepositoryFactory, domainFactory DomainFactory) *Container {
 	return &Container{
 		RepositoryFactory: repositoryFactory,
 		DomainFactory:     domainFactory,
 	}
+}
+
+// Define a DatabaseFactory interface to create different database instances.
+type RepositoryFactory interface {
+	NewRepository(ctx context.Context) interface{}
+	CloseRepository()
+	NewUserRepository(db interface{}) user.UserRepository
+	NewPostRepository(db interface{}) post.PostRepository
+}
+
+// Define a DatabaseFactory interface to create different database instances.
+type DomainFactory interface {
+	NewUserRepository(db interface{}) user.UserUseCase
+	NewPostRepository(db interface{}) post.PostUseCase
 }

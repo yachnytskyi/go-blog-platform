@@ -21,11 +21,9 @@ import (
 	// dependency "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency"
 
 	repository "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/data/repository"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
+	commonUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
 
 	userHttpGinPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin"
-	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-
 	userUseCasePackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
 )
 
@@ -44,17 +42,9 @@ var (
 	postRouter     postHttpGinPackage.PostRouter
 )
 
-const (
-	location = "cmd.server.init."
-)
-
 // Init function that will run before the "main" function.
 func init() {
-	loadConfig, loadConfigError := config.LoadConfig(config.ConfigPath)
-	if loadConfigError != nil {
-		loadConfigInternalError := domainError.NewInternalError(location+"init.LoadConfig", loadConfigError.Error())
-		logging.Logger(loadConfigInternalError)
-	}
+	loadConfig := commonUtility.LoadConfig()
 
 	// Create a context.
 	ctx, cancel := context.WithTimeout(context.Background(), config.DefaultContextTimer)
@@ -87,11 +77,8 @@ func init() {
 }
 
 func main() {
-	config, err := config.LoadConfig(config.ConfigPath)
-	if err != nil {
-		log.Fatal("Could not load config", err)
-	}
-	startGinServer(config)
+	loadConfig := commonUtility.LoadConfig()
+	startGinServer(loadConfig)
 	// startGrpcServer(config)
 }
 

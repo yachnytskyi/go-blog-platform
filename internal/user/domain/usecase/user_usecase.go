@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/thanhpk/randstr"
-	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
@@ -74,8 +73,9 @@ func (userUseCase UserUseCase) Register(ctx context.Context, userCreateData user
 		createdUser.Error = domainError.HandleError(createdUser.Error)
 		return createdUser
 	}
-	templateName := config.UserConfirmationEmailTemplateName
-	templatePath := config.UserConfirmationEmailTemplatePath
+	loadConfig := commonUtility.LoadConfig()
+	templateName := loadConfig.Email.UserConfirmationTemplateName
+	templatePath := loadConfig.Email.UserConfirmationTemplatePath
 
 	emailData := PrepareEmailData(ctx, createdUser.Data.Name, emailConfirmationUrl, emailConfirmationSubject, tokenValue, templateName, templatePath)
 	if validator.IsErrorNotNil(emailData.Error) {
@@ -159,8 +159,9 @@ func (userUseCase UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.C
 		return updatedUserPasswordError
 	}
 
-	templateName := config.ForgottenPasswordEmailTemplateName
-	templatePath := config.ForgottenPasswordEmailTemplatePath
+	loadConfig := commonUtility.LoadConfig()
+	templateName := loadConfig.Email.ForgottenPasswordTemplateName
+	templatePath := loadConfig.Email.ForgottenPasswordTemplatePath
 	emailData := PrepareEmailData(ctx, fetchedUser.Name, forgottenPasswordUrl, forgottenPasswordSubject, tokenValue, templateName, templatePath)
 	if validator.IsErrorNotNil(emailData.Error) {
 		logging.Logger(emailData.Error)
@@ -183,15 +184,8 @@ func (userUseCase UserUseCase) ResetUserPassword(ctx context.Context, firstKey s
 
 func PrepareEmailData(ctx context.Context, userName string, url string, subject string,
 	tokenValue string, templateName string, templatePath string) commonModel.Result[userModel.EmailData] {
-	loadConfig, loadConfigError := config.LoadConfig(config.ConfigPath)
-	if validator.IsErrorNotNil(loadConfigError) {
-		var loadConfigInternalError domainError.InternalError
-		loadConfigInternalError.Location = "User.Domain.UserUseCase.Registration.PrepareEmailData.LoadConfig"
-		loadConfigInternalError.Reason = loadConfigError.Error()
-		return commonModel.NewResultOnFailure[userModel.EmailData](loadConfigInternalError)
-	}
+	loadConfig := commonUtility.LoadConfig()
 	userFirstName := domainUtility.UserFirstName(userName)
-
 	emailData := userModel.NewEmailData(loadConfig.Email.ClientOriginUrl+url+tokenValue, templateName, templatePath, userFirstName, subject)
 	return commonModel.NewResultOnSuccess[userModel.EmailData](emailData)
 

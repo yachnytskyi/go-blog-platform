@@ -46,23 +46,25 @@ type RefreshToken struct {
 }
 
 type Email struct {
-	ClientOriginUrl string `mapstructure:"Client_Origin_Url"`
-	EmailFrom       string `mapstructure:"Email_From"`
-	SMTPHost        string `mapstructure:"SMTP_Host"`
-	SMTPPassword    string `mapstructure:"SMTP_Password"`
-	SMTPPort        int    `mapstructure:"SMTP_Port"`
-	SMTPUser        string `mapstructure:"SMTP_User"`
+	ClientOriginUrl               string `mapstructure:"Client_Origin_Url"`
+	EmailFrom                     string `mapstructure:"Email_From"`
+	SMTPHost                      string `mapstructure:"SMTP_Host"`
+	SMTPPassword                  string `mapstructure:"SMTP_Password"`
+	SMTPPort                      int    `mapstructure:"SMTP_Port"`
+	SMTPUser                      string `mapstructure:"SMTP_User"`
+	UserConfirmationTemplateName  string `mapstructure:"User_Confirmation_Template_Name"`
+	UserConfirmationTemplatePath  string `mapstructure:"User_Confirmation_Template_Path"`
+	ForgottenPasswordTemplateName string `mapstructure:"Forgotten_Password_Template_Name"`
+	ForgottenPasswordTemplatePath string `mapstructure:"Forgotten_Password_Template_Path"`
 }
 
 func LoadConfig(path string) (config Config, err error) {
 	viper.SetConfigFile(path)
 	viper.AutomaticEnv()
-
 	err = viper.ReadInConfig()
 	if err != nil {
 		return Config{}, err
 	}
-
 	err = viper.Unmarshal(&config)
 	return
 }

@@ -22,11 +22,7 @@ const (
 	MaxLength        = 40
 
 	// User Notifications.
-	SendingEmailNotification           = "We sent an email with a verification code to "
-	UserConfirmationEmailTemplateName  = "verificationCode.html"
-	UserConfirmationEmailTemplatePath  = "internal/user/data/repository/external/mail/template"
-	ForgottenPasswordEmailTemplateName = "resetPassword.html"
-	ForgottenPasswordEmailTemplatePath = "internal/user/data/repository/external/mail/template"
+	SendingEmailNotification = "We sent an email with a verification code to "
 
 	// Error Messages.
 	StringAllowedLength                        = "can be between %d and %d characters long"

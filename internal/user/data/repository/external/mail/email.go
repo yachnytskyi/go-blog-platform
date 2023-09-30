@@ -9,7 +9,8 @@ import (
 	"path/filepath"
 
 	"github.com/k3a/html2text"
-	"github.com/yachnytskyi/golang-mongo-grpc/config"
+	commonUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
+
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
@@ -44,11 +45,7 @@ func ParseTemplateDirectory(templatePath string) (*template.Template, error) {
 }
 
 func SendEmail(ctx context.Context, user userModel.User, data userModel.EmailData) error {
-	loadConfig, loadConfigError := config.LoadConfig(config.ConfigPath)
-	if validator.IsErrorNotNil(loadConfigError) {
-		loadConfigInternalError := domainError.NewInternalError(location+"SendEmail.LoadConfig", loadConfigError.Error())
-		return loadConfigInternalError
-	}
+	loadConfig := commonUtility.LoadConfig()
 	smtpPass := loadConfig.Email.SMTPPassword
 	smtpUser := loadConfig.Email.SMTPUser
 	smtpHost := loadConfig.Email.SMTPHost
@@ -71,11 +68,8 @@ func SendEmail(ctx context.Context, user userModel.User, data userModel.EmailDat
 }
 
 func PrepareSendMessage(ctx context.Context, userEmail string, data userModel.EmailData) (*gomail.Message, error) {
-	loadConfig, loadConfigError := config.LoadConfig(config.ConfigPath)
-	if validator.IsErrorNotNil(loadConfigError) {
-		loadConfigInternalError := domainError.NewInternalError(location+"SendEmail.PrepareSendMessage.LoadConfig", loadConfigError.Error())
-		return nil, loadConfigInternalError
-	}
+	loadConfig := commonUtility.LoadConfig()
+
 	// Prepare data.
 	from := loadConfig.Email.EmailFrom
 	to := userEmail

@@ -17,7 +17,7 @@ import (
 	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
-	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
+	commonUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
@@ -156,22 +156,22 @@ func (userController UserController) Login(ginContext *gin.Context) {
 		return
 	}
 
-	config, _ := config.LoadConfig(config.ConfigPath)
-	accessToken, createTokenError := httpUtility.CreateToken(config.AccessToken.ExpiredIn, userID, config.AccessToken.PrivateKey)
+	loadConfig := commonUtility.LoadConfig()
+	accessToken, createTokenError := httpUtility.CreateToken(loadConfig.AccessToken.ExpiredIn, userID, loadConfig.AccessToken.PrivateKey)
 	if validator.IsErrorNotNil(createTokenError) {
 		jsonResponse := httpError.HandleError(createTokenError)
 		httpModel.SetStatus(&jsonResponse)
 		ginContext.JSON(http.StatusBadRequest, jsonResponse)
 		return
 	}
-	refreshToken, createTokenError := httpUtility.CreateToken(config.RefreshToken.ExpiredIn, userID, config.RefreshToken.PrivateKey)
+	refreshToken, createTokenError := httpUtility.CreateToken(loadConfig.RefreshToken.ExpiredIn, userID, loadConfig.RefreshToken.PrivateKey)
 	if validator.IsErrorNotNil(createTokenError) {
 		jsonResponse := httpError.HandleError(createTokenError)
 		httpModel.SetStatus(&jsonResponse)
 		ginContext.JSON(http.StatusBadRequest, jsonResponse)
 		return
 	}
-	httpGinUtility.LoginSetCookies(ginContext, accessToken, config.AccessToken.MaxAge*60, refreshToken, config.AccessToken.MaxAge*60)
+	httpGinUtility.LoginSetCookies(ginContext, accessToken, loadConfig.AccessToken.MaxAge*60, refreshToken, loadConfig.AccessToken.MaxAge*60)
 	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
 }
 
@@ -191,8 +191,8 @@ func (userController UserController) RefreshAccessToken(ginContext *gin.Context)
 		return
 	}
 
-	config, _ := config.LoadConfig(config.ConfigPath)
-	userID, err := httpUtility.ValidateToken(cookie, config.RefreshToken.PublicKey)
+	loadConfig := commonUtility.LoadConfig()
+	userID, err := httpUtility.ValidateToken(cookie, loadConfig.RefreshToken.PublicKey)
 	if validator.IsErrorNotNil(err) {
 		ginContext.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": err.Error()})
 		return
@@ -202,14 +202,14 @@ func (userController UserController) RefreshAccessToken(ginContext *gin.Context)
 		ginContext.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": "the user is belonged to this token no longer exists "})
 	}
 
-	accessToken, err := httpUtility.CreateToken(config.AccessToken.ExpiredIn, userID, config.AccessToken.PrivateKey)
+	accessToken, err := httpUtility.CreateToken(loadConfig.AccessToken.ExpiredIn, userID, loadConfig.AccessToken.PrivateKey)
 
 	if validator.IsErrorNotNil(err) {
 		ginContext.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
-	httpGinUtility.RefreshAccessTokenSetCookies(ginContext, accessToken, config.AccessToken.MaxAge*60)
+	httpGinUtility.RefreshAccessTokenSetCookies(ginContext, accessToken, loadConfig.AccessToken.MaxAge*60)
 	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
 }
 
@@ -233,7 +233,7 @@ func (userController UserController) ForgottenPassword(ginContext *gin.Context) 
 
 	// Generate verification code.
 	resetToken := randstr.String(20)
-	passwordResetToken := common.Encode(resetToken)
+	passwordResetToken := commonUtility.Encode(resetToken)
 	passwordResetAt := time.Now().Add(time.Minute * 15)
 
 	// Update the user.
@@ -257,7 +257,7 @@ func (userController UserController) ResetUserPassword(ginContext *gin.Context) 
 		return
 	}
 
-	passwordResetToken := common.Encode(resetToken)
+	passwordResetToken := commonUtility.Encode(resetToken)
 
 	// Update the user.
 	err = userController.userUseCase.ResetUserPassword(ctx, "passwordResetToken", passwordResetToken, "passwordResetAt", "password", userResetPasswordView.Password)

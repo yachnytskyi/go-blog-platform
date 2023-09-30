@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/gin-gonic/gin"
-	"github.com/yachnytskyi/golang-mongo-grpc/config"
-	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
+	gin "github.com/gin-gonic/gin"
+	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
+	commonUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
+	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 
 	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
 	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
@@ -36,8 +36,8 @@ func DeserializeUser(userUseCase user.UserUseCase) gin.HandlerFunc {
 			return
 		}
 
-		config, _ := config.LoadConfig(config.ConfigPath)
-		userID, validateTokenError := httpUtility.ValidateToken(accessToken, config.AccessToken.PublicKey)
+		loadConfig := commonUtility.LoadConfig()
+		userID, validateTokenError := httpUtility.ValidateToken(accessToken, loadConfig.AccessToken.PublicKey)
 		if validator.IsErrorNotNil(validateTokenError) {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": "fail", "message": validateTokenError.Error()})
 			return

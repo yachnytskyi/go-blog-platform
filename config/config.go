@@ -4,9 +4,13 @@ import (
 	"time"
 
 	"github.com/spf13/viper"
-	// domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
+)
+
+const (
+	location = "config.LoadConfig."
 )
 
 type Config struct {
@@ -66,10 +70,16 @@ func LoadConfig(path string) (config Config, err error) {
 	viper.AutomaticEnv()
 	readInConfigError := viper.ReadInConfig()
 	if validator.IsErrorNotNil(readInConfigError) {
-		// readInInternalError := domainError.NewInternalError("ss", readInConfigError.Error())
-		logging.Logger(readInConfigError)
-		return Config{}, readInConfigError
+		readInInternalError := domainError.NewInternalError(location+"ReadInConfig", readInConfigError.Error())
+		logging.Logger(readInInternalError)
+		return Config{}, readInInternalError
 	}
+
+	viper.SetDefault("Database", "MongoDB")
+	viper.SetDefault("Domain", "UseCase")
+	viper.SetDefault("MongoDB.Name", "golang_mongodb")
+	viper.SetDefault("MongoDB.URI", "mongodb://root:root@localhost:27017")
+	viper.SetDefault("Gin.Port", "8080")
 	err = viper.Unmarshal(&config)
 	return
 }

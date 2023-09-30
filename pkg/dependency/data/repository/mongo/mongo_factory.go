@@ -2,7 +2,6 @@ package mongo
 
 import (
 	"context"
-	"fmt"
 
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
 	postRepository "github.com/yachnytskyi/golang-mongo-grpc/internal/post/data/repository/mongo"
@@ -19,6 +18,9 @@ import (
 )
 
 const (
+	successfully_connected = "Database is successfully connected..."
+	successfully_closed    = "Database connection has been successfully closed..."
+
 	location            = "pkg.dependency.data.repository.mongo.NewRepository."
 	unsupportedDatabase = "unsupported database type: %s"
 )
@@ -29,25 +31,27 @@ type MongoDBFactory struct {
 }
 
 func (mongoDBFactory *MongoDBFactory) NewRepository(ctx context.Context) interface{} {
+	var connectError error
 	mongoConnection := options.Client().ApplyURI(mongoDBFactory.MongoConfig.MongoURI)
-	mongoClient, connectError := mongo.Connect(ctx, mongoConnection)
-	db := mongoClient.Database(mongoDBFactory.MongoConfig.MongoDatabaseName)
+	mongoDBFactory.MongoClient, connectError = mongo.Connect(ctx, mongoConnection)
+	db := mongoDBFactory.MongoClient.Database(mongoDBFactory.MongoConfig.MongoDatabaseName)
 	if validator.IsErrorNotNil(connectError) {
 		logging.Logger(domainError.NewInternalError(location+"mongoClient.Database", connectError.Error()))
 		return nil
 	}
-	connectError = mongoClient.Ping(ctx, readpref.Primary())
+	connectError = mongoDBFactory.MongoClient.Ping(ctx, readpref.Primary())
 	if validator.IsErrorNotNil(connectError) {
 		logging.Logger(domainError.NewInternalError(location+"mongoClient.Ping", connectError.Error()))
 		return nil
 	}
-	fmt.Println("Database successfully connected...")
+	logging.Logger(successfully_connected)
 	return db
 }
 
 func (mongoDBFactory *MongoDBFactory) CloseRepository() {
 	if validator.IsValueNotNil(mongoDBFactory.MongoClient) {
 		mongoDBFactory.MongoClient.Disconnect(context.Background())
+		logging.Logger(successfully_closed)
 	}
 }
 

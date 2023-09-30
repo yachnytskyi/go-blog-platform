@@ -7,6 +7,7 @@ import (
 	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 	repository "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/data/repository"
 	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/domain"
+	container "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/application"
@@ -17,26 +18,27 @@ const (
 	location = "pkg.dependendency.CreateApplication"
 )
 
-type Container struct {
-}
-
-func CreateApplication(ctx context.Context) Container {
+func CreateApplication(ctx context.Context) *container.Container {
+	container := container.Container{}
 	loadConfig, loadConfigError := config.LoadConfig(".")
 	if loadConfigError != nil {
 		loadConfigInternalError := domainError.NewInternalError(location+".LoadConfig", loadConfigError.Error())
 		logging.Logger(loadConfigInternalError)
-		application.GracefulShutdown()
+		application.GracefulShutdown(&container)
 	}
 
-	repositoryFactory := repository.InjectRepository(loadConfig)
-	db := repositoryFactory.NewRepository(ctx)
-	userRepository := repositoryFactory.NewUserRepository(db)
-	postRepository := repositoryFactory.NewPostRepository(db)
+	// Repositories.
+	repository.InjectRepository(loadConfig, &container)
+	db := container.RepositoryFactory.NewRepository(ctx)
+	userRepository := container.RepositoryFactory.NewUserRepository(db)
+	postRepository := container.RepositoryFactory.NewPostRepository(db)
 	fmt.Println(userRepository, postRepository)
 
-	domainFactory := domain.InjectDomain(loadConfig, repositoryFactory)
-	userDomain := domainFactory.NewUserRepository(userRepository)
-	postDomain := domainFactory.NewPostRepository(postRepository)
+	// Domains.
+	domain.InjectDomain(loadConfig, &container)
+	userDomain := container.DomainFactory.NewUserRepository(userRepository)
+	postDomain := container.DomainFactory.NewPostRepository(postRepository)
+	fmt.Println(container)
 	fmt.Println(userDomain, postDomain)
-	return Container{}
+	return &container
 }

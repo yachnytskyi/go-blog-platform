@@ -3,22 +3,17 @@ package main
 // Require the packages.
 import (
 	"context"
+	"fmt"
 	"log"
-	"net"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 
-	postProtobufV1 "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/grpc/v1/model/pb"
-	userProtobufV1 "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1/model/pb"
-
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
-
 	postPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
-	postGrpcPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/grpc/v1"
 	postHttpGinPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/http/gin"
+
+	"github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency"
 
 	postUseCasePackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/usecase"
 
@@ -28,22 +23,16 @@ import (
 	repository "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/data/repository"
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 
-	userGrpcPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1"
 	userHttpGinPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 
 	userUseCasePackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
-
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // Create required variables that we'll re-assign later.
 var (
-	server      *gin.Engine
-	ctx         context.Context
-	mongoClient *mongo.Client
+	server *gin.Engine
 
-	userCollection *mongo.Collection
 	userRepository userPackage.UserRepository
 	userUseCase    userPackage.UserUseCase
 	userController userHttpGinPackage.UserController
@@ -71,15 +60,15 @@ func init() {
 	ctx, cancel := context.WithTimeout(context.Background(), config.DefaultContextTimer)
 	defer cancel()
 
-	// a := dependency.CreateApplication(ctx)
-	// fmt.Println(a)
+	container := dependency.CreateApplication(ctx)
+	fmt.Println(container)
 
-	repositoryFactory := repository.InjectRepository(loadConfig)
+	repository.InjectRepository(loadConfig, container)
 
 	// Create a DB database instance using the factory.
-	db := repositoryFactory.NewRepository(ctx)
-	userRepository = repositoryFactory.NewUserRepository(db)
-	postRepository = repositoryFactory.NewPostRepository(db)
+	db := container.RepositoryFactory.NewRepository(ctx)
+	userRepository = container.RepositoryFactory.NewUserRepository(db)
+	postRepository = container.RepositoryFactory.NewPostRepository(db)
 
 	// Use Cases.
 	userUseCase = userUseCasePackage.NewUserUseCase(userRepository)
@@ -105,48 +94,49 @@ func main() {
 	}
 
 	startGinServer(config)
+
 	// startGrpcServer(config)
 }
 
-func startGrpcServer(config config.Config) {
-	userGrpcServer, err := userGrpcPackage.NewGrpcUserServer(config, userUseCase, userCollection)
+// func startGrpcServer(config config.Config) {
+// 	userGrpcServer, err := userGrpcPackage.NewGrpcUserServer(config, userUseCase, userCollection)
 
-	if err != nil {
-		log.Fatal("cannot createt gRPC User Server: ", err)
-	}
+// 	if err != nil {
+// 		log.Fatal("cannot createt gRPC User Server: ", err)
+// 	}
 
-	postGrpcServer, err := postGrpcPackage.NewGrpcPostServer(postUseCase)
+// 	postGrpcServer, err := postGrpcPackage.NewGrpcPostServer(postUseCase)
 
-	if err != nil {
-		log.Fatal("cannot create gRPC Post Server: ", err)
-	}
+// 	if err != nil {
+// 		log.Fatal("cannot create gRPC Post Server: ", err)
+// 	}
 
-	grpcServer := grpc.NewServer()
+// 	grpcServer := grpc.NewServer()
 
-	// Register User gRPC server.
-	userProtobufV1.RegisterUserUseCaseServer(grpcServer, userGrpcServer)
+// 	// Register User gRPC server.
+// 	userProtobufV1.RegisterUserUseCaseServer(grpcServer, userGrpcServer)
 
-	// Register Post gRPC server.
-	postProtobufV1.RegisterPostUseCaseServer(grpcServer, postGrpcServer)
+// 	// Register Post gRPC server.
+// 	postProtobufV1.RegisterPostUseCaseServer(grpcServer, postGrpcServer)
 
-	reflection.Register(grpcServer)
+// 	reflection.Register(grpcServer)
 
-	listener, err := net.Listen("tcp", config.GrpcServerAddress)
+// 	listener, err := net.Listen("tcp", config.GrpcServerAddress)
 
-	if err != nil {
-		log.Fatal("cannot create grpc server: ", err)
-	}
+// 	if err != nil {
+// 		log.Fatal("cannot create grpc server: ", err)
+// 	}
 
-	log.Printf("start grpc server on %s", listener.Addr().String())
-	err = grpcServer.Serve(listener)
+// 	log.Printf("start grpc server on %s", listener.Addr().String())
+// 	err = grpcServer.Serve(listener)
 
-	if err != nil {
-		log.Fatal("cannot create grpc server: ", err)
-	}
-
-}
+// 	if err != nil {
+// 		log.Fatal("cannot create grpc server: ", err)
+// 	}
+// }
 
 func startGinServer(config config.Config) {
+
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowOrigins = []string{"http://localhost:8080"}
 	corsConfig.AllowCredentials = true

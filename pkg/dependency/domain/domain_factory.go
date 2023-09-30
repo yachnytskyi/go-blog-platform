@@ -5,11 +5,11 @@ import (
 	"fmt"
 
 	config "github.com/yachnytskyi/golang-mongo-grpc/config"
-	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
-	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
-	repository "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/data/repository"
 	useCaseFactory "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/domain/usecase"
+	container "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
+
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/application"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 )
 
@@ -18,20 +18,13 @@ const (
 	unsupportedDomain = "unsupported domain type: %s"
 )
 
-// Define a DatabaseFactory interface to create different database instances.
-type DomainFactory interface {
-	NewUserRepository(db interface{}) user.UserUseCase
-	NewPostRepository(db interface{}) post.PostUseCase
-}
-
-func InjectDomain(loadConfig config.Config, repositoryFactory repository.RepositoryFactory) DomainFactory {
+func InjectDomain(loadConfig config.Config, container *container.Container) {
 	switch loadConfig.Domain {
 	case config.UseCase:
-		return useCaseFactory.UseCaseFactory{}
+		container.DomainFactory = useCaseFactory.UseCaseFactory{}
 	// Add other domain options here as needed.
 	default:
 		logging.Logger(domainError.NewInternalError(location+".loadConfig.Domain:", fmt.Sprintf(unsupportedDomain, loadConfig.Domain)))
-		GracefulShutdownDomain(repositoryFactory)
-		return nil
+		application.GracefulShutdown(container)
 	}
 }

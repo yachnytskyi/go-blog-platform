@@ -7,6 +7,7 @@ import (
 	"sync"
 	"syscall"
 
+	container "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 )
 
@@ -21,13 +22,15 @@ var (
 	waitGroup    sync.WaitGroup
 )
 
-func GracefulShutdown() {
+func GracefulShutdown(container *container.Container) {
+	fmt.Println("shutdown")
 	shutDownOnce.Do(func() {
 		signal.Notify(terminate, os.Interrupt, syscall.SIGTERM)
 		waitGroup.Add(1)
 
 		go func() {
 			code := <-terminate
+			fmt.Println("shutdown")
 			logging.Logger(fmt.Sprintf(reason, code.String()))
 			os.Exit(1)
 		}()

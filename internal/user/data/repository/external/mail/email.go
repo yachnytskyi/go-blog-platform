@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"crypto/tls"
-	"fmt"
 	"html/template"
 	"os"
 	"path/filepath"
@@ -13,13 +12,14 @@ import (
 	"github.com/yachnytskyi/golang-mongo-grpc/config"
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	"gopkg.in/gomail.v2"
 )
 
 const (
-	printlnMessage = "parsing template..."
-	location       = "User.Data.Repository.External.Mail."
+	loggerMessage = "parsing template..."
+	location      = "User.Data.Repository.External.Mail."
 )
 
 // Email template parser.
@@ -35,9 +35,9 @@ func ParseTemplateDirectory(templatePath string) (*template.Template, error) {
 		}
 		return nil
 	})
-	fmt.Println(printlnMessage)
+	logging.Logger(loggerMessage)
 	if validator.IsErrorNotNil(filePathWalkError) {
-		sendEmailInternalError := domainError.NewInternalError(location+"ParseTemplateDirectory."+printlnMessage, filePathWalkError.Error())
+		sendEmailInternalError := domainError.NewInternalError(location+"ParseTemplateDirectory."+loggerMessage, filePathWalkError.Error())
 		return nil, sendEmailInternalError
 	}
 	return template.ParseFiles(paths...)

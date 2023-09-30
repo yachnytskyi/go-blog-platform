@@ -3,7 +3,7 @@ package v1
 import (
 	"context"
 
-	config "github.com/yachnytskyi/golang-mongo-grpc/config"
+	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
 	postProtobufV1 "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/grpc/v1/model/pb"
 	"google.golang.org/grpc/codes"
 
@@ -12,7 +12,7 @@ import (
 )
 
 func (PostGrpcServer *PostGrpcServer) GetAllPosts(postsData *postProtobufV1.Posts, streamOfPosts postProtobufV1.PostUseCase_GetAllPostsServer) error {
-	ctx, cancel := context.WithTimeout(context.Background(), config.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(context.Background(), constant.DefaultContextTimer)
 	defer cancel()
 	page := postsData.GetPage()
 	limit := postsData.GetLimit()

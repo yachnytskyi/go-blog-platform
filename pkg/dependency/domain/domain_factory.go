@@ -4,7 +4,8 @@ import (
 	// "context"
 	"fmt"
 
-	config "github.com/yachnytskyi/golang-mongo-grpc/config"
+	"github.com/yachnytskyi/golang-mongo-grpc/config"
+	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
 	useCaseFactory "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/domain/usecase"
 	container "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 
@@ -20,7 +21,7 @@ const (
 
 func InjectDomain(loadConfig config.Config, container *container.Container) {
 	switch loadConfig.Domain {
-	case config.UseCase:
+	case constant.UseCase:
 		container.DomainFactory = useCaseFactory.UseCaseFactory{}
 	// Add other domain options here as needed.
 	default:

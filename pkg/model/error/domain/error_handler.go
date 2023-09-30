@@ -1,7 +1,7 @@
 package domain
 
 import (
-	"github.com/yachnytskyi/golang-mongo-grpc/config"
+	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
 )
 
 func HandleError(err error) error {
@@ -13,10 +13,10 @@ func HandleError(err error) error {
 	case ErrorMessage:
 		return errorType
 	case EntityNotFoundError:
-		return NewErrorMessage(config.EntityNotFoundErrorNotification)
+		return NewErrorMessage(constant.EntityNotFoundErrorNotification)
 	case PaginationError:
 		return errorType
 	default:
-		return NewErrorMessage(config.InternalErrorNotification)
+		return NewErrorMessage(constant.InternalErrorNotification)
 	}
 }

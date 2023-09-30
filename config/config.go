@@ -4,11 +4,14 @@ import (
 	"time"
 
 	"github.com/spf13/viper"
+	// domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
+	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
 type Config struct {
 	Database string `mapstructure:"Database"`
-	Domain   string `mapstrucrure:"Domain"`
+	Domain   string `mapstructure:"Domain"`
 
 	MongoDBConfig MongoDBConfig `mapstructure:"MongoDB"`
 	GinConfig     GinConfig     `mapstructure:"Gin"`
@@ -61,9 +64,11 @@ type Email struct {
 func LoadConfig(path string) (config Config, err error) {
 	viper.SetConfigFile(path)
 	viper.AutomaticEnv()
-	err = viper.ReadInConfig()
-	if err != nil {
-		return Config{}, err
+	readInConfigError := viper.ReadInConfig()
+	if validator.IsErrorNotNil(readInConfigError) {
+		// readInInternalError := domainError.NewInternalError("ss", readInConfigError.Error())
+		logging.Logger(readInConfigError)
+		return Config{}, readInConfigError
 	}
 	err = viper.Unmarshal(&config)
 	return

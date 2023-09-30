@@ -3,7 +3,8 @@ package repository
 import (
 	"fmt"
 
-	config "github.com/yachnytskyi/golang-mongo-grpc/config"
+	"github.com/yachnytskyi/golang-mongo-grpc/config"
+	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
 	mongoDBFactory "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/data/repository/mongo"
 	container "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
@@ -18,7 +19,7 @@ const (
 
 func InjectRepository(loadConfig config.Config, container *container.Container) {
 	switch loadConfig.Database {
-	case config.MongoDB:
+	case constant.MongoDB:
 		container.RepositoryFactory = &mongoDBFactory.MongoDBFactory{MongoDBConfig: loadConfig.MongoDBConfig}
 	// Add other database cases here as needed.
 	default:

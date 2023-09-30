@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	config "github.com/yachnytskyi/golang-mongo-grpc/config"
+	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	userRepositoryMail "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/external/mail"
 	userRepositoryModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/mongo/model"
@@ -128,7 +128,7 @@ func (userRepository UserRepository) CheckEmailDublicate(ctx context.Context, em
 		logging.Logger(userFindOneInternalError)
 		return userFindOneInternalError
 	}
-	userFindOneValidationError := domainError.NewValidationError(userValidator.EmailField, userValidator.TypeRequired, config.EmailAlreadyExists)
+	userFindOneValidationError := domainError.NewValidationError(userValidator.EmailField, userValidator.TypeRequired, constant.EmailAlreadyExists)
 	logging.Logger(userFindOneValidationError)
 	return userFindOneValidationError
 }

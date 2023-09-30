@@ -9,7 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/thanhpk/randstr"
-	config "github.com/yachnytskyi/golang-mongo-grpc/config"
+	"github.com/yachnytskyi/golang-mongo-grpc/config/constant"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	httpGinUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin/utility"
 	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
@@ -30,10 +30,10 @@ func NewUserController(userUseCase user.UserUseCase) UserController {
 }
 
 func (userController UserController) GetAllUsers(ginContext *gin.Context) {
-	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), config.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
-	page := ginContext.DefaultQuery("page", config.DefaultPage)
-	limit := ginContext.DefaultQuery("limit", config.DefaultLimit)
+	page := ginContext.DefaultQuery("page", constant.DefaultPage)
+	limit := ginContext.DefaultQuery("limit", constant.DefaultLimit)
 	orderBy := ginContext.DefaultQuery("order-by", "")
 	convertedPage := commonModel.GetPage(page)
 	convertedLimit := commonModel.GetLimit(limit)
@@ -57,7 +57,7 @@ func (userController UserController) GetMe(ginContext *gin.Context) {
 }
 
 func (userController UserController) GetUserById(ginContext *gin.Context) {
-	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), config.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
 	userID := ginContext.Param("userID")
 	defer cancel()
@@ -75,7 +75,7 @@ func (userController UserController) GetUserById(ginContext *gin.Context) {
 }
 
 func (userController UserController) Register(ginContext *gin.Context) {
-	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), config.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
 	var createdUserViewData userViewModel.UserCreateView
 	err := ginContext.ShouldBindJSON(&createdUserViewData)
@@ -93,14 +93,14 @@ func (userController UserController) Register(ginContext *gin.Context) {
 		return
 	}
 
-	welcomeMessage := userViewModel.NewWelcomeMessageView(config.SendingEmailNotification + createdUser.Data.Email)
+	welcomeMessage := userViewModel.NewWelcomeMessageView(constant.SendingEmailNotification + createdUser.Data.Email)
 	jsonResponse := httpModel.NewJsonResponseOnSuccess(welcomeMessage)
 	httpModel.SetStatus(&jsonResponse)
 	ginContext.JSON(http.StatusCreated, jsonResponse)
 }
 
 func (userController UserController) UpdateUserById(ginContext *gin.Context) {
-	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), config.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
 	currentUserView := ginContext.MustGet("currentUser").(userViewModel.UserView)
 	userID := currentUserView.UserID
@@ -126,7 +126,7 @@ func (userController UserController) UpdateUserById(ginContext *gin.Context) {
 }
 
 func (userController UserController) Delete(ginContext *gin.Context) {
-	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), config.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
 	currentUser := ginContext.MustGet("currentUser")
 	userID := currentUser.(userViewModel.UserView).UserID
@@ -138,7 +138,7 @@ func (userController UserController) Delete(ginContext *gin.Context) {
 }
 
 func (userController UserController) Login(ginContext *gin.Context) {
-	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), config.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
 	var userLoginViewData userViewModel.UserLoginView
 	err := ginContext.ShouldBindJSON(&userLoginViewData)
@@ -214,7 +214,7 @@ func (userController UserController) RefreshAccessToken(ginContext *gin.Context)
 }
 
 func (userController UserController) ForgottenPassword(ginContext *gin.Context) {
-	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), config.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
 	var userViewEmail userViewModel.UserForgottenPasswordView
 
@@ -224,7 +224,7 @@ func (userController UserController) ForgottenPassword(ginContext *gin.Context) 
 		return
 	}
 
-	message := config.SendingEmailWithIntstructionsNotifications
+	message := constant.SendingEmailWithIntstructionsNotifications
 	fetchedUser, err := userController.userUseCase.GetUserByEmail(ctx, userViewEmail.Email)
 	if validator.IsErrorNotNil(err) {
 		ginContext.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": err.Error()})
@@ -246,7 +246,7 @@ func (userController UserController) ForgottenPassword(ginContext *gin.Context) 
 }
 
 func (userController UserController) ResetUserPassword(ginContext *gin.Context) {
-	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), config.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
 	resetToken := ginContext.Params.ByName("resetToken")
 	var userResetPasswordView userViewModel.UserResetPasswordView

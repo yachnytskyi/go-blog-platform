@@ -5,7 +5,7 @@ import (
 	"net"
 	"strings"
 
-	config "github.com/yachnytskyi/golang-mongo-grpc/config"
+	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
@@ -124,8 +124,8 @@ func validateResetPassword(userResetPassword userModel.UserResetPassword) common
 }
 
 func validateEmail(field, fieldName, fieldType, fieldRegex, errorMessage string) domainError.ValidationError {
-	if domainUtility.IsStringLengthNotValid(field, config.MinLength, config.MaxLength) {
-		return domainError.NewValidationError(fieldName, fieldType, fmt.Sprintf(config.StringAllowedLength, config.MinLength, config.MaxLength))
+	if domainUtility.IsStringLengthNotValid(field, constant.MinLength, constant.MaxLength) {
+		return domainError.NewValidationError(fieldName, fieldType, fmt.Sprintf(constant.StringAllowedLength, constant.MinLength, constant.MaxLength))
 	} else if domainUtility.CheckSpecialCharactersString(field, fieldRegex) {
 		return domainError.NewValidationError(fieldName, fieldType, errorMessage)
 	} else if isEmailDomainNotValid(field) {
@@ -135,8 +135,8 @@ func validateEmail(field, fieldName, fieldType, fieldRegex, errorMessage string)
 }
 
 func validatePassword(password, passwordConfirm, fieldName, fieldType, fieldRegex, errorMessage string) domainError.ValidationError {
-	if domainUtility.IsStringLengthNotValid(password, config.MinLength, config.MaxLength) {
-		return domainError.NewValidationError(fieldName, fieldType, fmt.Sprintf(config.StringAllowedLength, config.MinLength, config.MaxLength))
+	if domainUtility.IsStringLengthNotValid(password, constant.MinLength, constant.MaxLength) {
+		return domainError.NewValidationError(fieldName, fieldType, fmt.Sprintf(constant.StringAllowedLength, constant.MinLength, constant.MaxLength))
 	} else if domainUtility.CheckSpecialCharactersString(password, fieldRegex) {
 		return domainError.NewValidationError(fieldName, fieldType, errorMessage)
 	} else if validator.AreStringsNotEqual(password, passwordConfirm) {

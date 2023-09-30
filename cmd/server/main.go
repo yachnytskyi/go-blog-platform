@@ -8,7 +8,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	config "github.com/yachnytskyi/golang-mongo-grpc/config"
+	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
 
 	postPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
 	postHttpGinPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/http/gin"
@@ -47,7 +47,7 @@ func init() {
 	loadConfig := commonUtility.LoadConfig()
 
 	// Create a context.
-	ctx, cancel := context.WithTimeout(context.Background(), config.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(context.Background(), constant.DefaultContextTimer)
 	defer cancel()
 
 	container := dependency.CreateApplication(ctx)
@@ -77,12 +77,12 @@ func init() {
 }
 
 func main() {
-	loadConfig := commonUtility.LoadConfig()
-	startGinServer(loadConfig)
+	startGinServer()
 	// startGrpcServer(config)
 }
 
-func startGinServer(config config.Config) {
+func startGinServer() {
+	loadConfig := commonUtility.LoadConfig()
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowOrigins = []string{"http://localhost:8080"}
 	corsConfig.AllowCredentials = true
@@ -91,7 +91,7 @@ func startGinServer(config config.Config) {
 	router := server.Group("/api")
 	userRouter.UserRouter(router, userUseCase)
 	postRouter.PostRouter(router, userUseCase)
-	log.Fatal(server.Run(":" + config.GinConfig.Port))
+	log.Fatal(server.Run(":" + loadConfig.GinConfig.Port))
 }
 
 // func startGrpcServer(config config.Config) {

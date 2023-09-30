@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/yachnytskyi/golang-mongo-grpc/config"
-	"github.com/yachnytskyi/golang-mongo-grpc/internal/post"
+	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
+	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
 	postViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/model"
 	postModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
 	ginUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin/utility"
@@ -24,7 +24,7 @@ func NewPostHandler(postUseCase post.PostUseCase) PostHandler {
 }
 
 func (postHandler *PostHandler) GetAllPosts(ginContext *gin.Context) {
-	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), config.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
 	page := ginContext.DefaultQuery("page", "1")
 	limit := ginContext.DefaultQuery("limit", "10")
@@ -54,7 +54,7 @@ func (postHandler *PostHandler) GetAllPosts(ginContext *gin.Context) {
 }
 
 func (postHandler *PostHandler) GetPostById(ginContext *gin.Context) {
-	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), config.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
 	postID := ginContext.Param("postID")
 
@@ -73,7 +73,7 @@ func (postHandler *PostHandler) GetPostById(ginContext *gin.Context) {
 }
 
 func (postHandler *PostHandler) CreatePost(ginContext *gin.Context) {
-	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), config.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
 	var createdPostData *postModel.PostCreate = new(postModel.PostCreate)
 	currentUser := ginContext.MustGet("currentUser").(*userModel.User)
@@ -100,7 +100,7 @@ func (postHandler *PostHandler) CreatePost(ginContext *gin.Context) {
 }
 
 func (postHandler *PostHandler) UpdatePostById(ginContext *gin.Context) {
-	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), config.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
 	postID := ginContext.Param("postID")
 	currentUserID := ginUtility.GetCurrentUserID(ginContext)
@@ -131,7 +131,7 @@ func (postHandler *PostHandler) UpdatePostById(ginContext *gin.Context) {
 }
 
 func (postHandler *PostHandler) DeletePostByID(ginContext *gin.Context) {
-	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), config.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
 	postID := ginContext.Param("postID")
 	currentUserID := ginUtility.GetCurrentUserID(ginContext)

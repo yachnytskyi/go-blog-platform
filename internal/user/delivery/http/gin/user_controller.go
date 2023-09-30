@@ -156,23 +156,22 @@ func (userController UserController) Login(ginContext *gin.Context) {
 		return
 	}
 
-	config, _ := config.LoadConfig(".")
-	accessToken, createTokenError := httpUtility.CreateToken(config.AccessTokenExpiresIn, userID, config.AccessTokenPrivateKey)
+	config, _ := config.LoadConfig(config.ConfigPath)
+	accessToken, createTokenError := httpUtility.CreateToken(config.AccessToken.ExpiredIn, userID, config.AccessToken.PrivateKey)
 	if validator.IsErrorNotNil(createTokenError) {
 		jsonResponse := httpError.HandleError(createTokenError)
 		httpModel.SetStatus(&jsonResponse)
 		ginContext.JSON(http.StatusBadRequest, jsonResponse)
 		return
 	}
-
-	refreshToken, createTokenError := httpUtility.CreateToken(config.RefreshTokenExpiresIn, userID, config.RefreshTokenPrivateKey)
+	refreshToken, createTokenError := httpUtility.CreateToken(config.RefreshToken.ExpiredIn, userID, config.RefreshToken.PrivateKey)
 	if validator.IsErrorNotNil(createTokenError) {
 		jsonResponse := httpError.HandleError(createTokenError)
 		httpModel.SetStatus(&jsonResponse)
 		ginContext.JSON(http.StatusBadRequest, jsonResponse)
 		return
 	}
-	httpGinUtility.LoginSetCookies(ginContext, accessToken, config.AccessTokenMaxAge*60, refreshToken, config.RefreshTokenMaxAge*60)
+	httpGinUtility.LoginSetCookies(ginContext, accessToken, config.AccessToken.MaxAge*60, refreshToken, config.AccessToken.MaxAge*60)
 	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
 }
 
@@ -192,10 +191,8 @@ func (userController UserController) RefreshAccessToken(ginContext *gin.Context)
 		return
 	}
 
-	config, _ := config.LoadConfig(".")
-
-	userID, err := httpUtility.ValidateToken(cookie, config.RefreshTokenPublicKey)
-
+	config, _ := config.LoadConfig(config.ConfigPath)
+	userID, err := httpUtility.ValidateToken(cookie, config.RefreshToken.PublicKey)
 	if validator.IsErrorNotNil(err) {
 		ginContext.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": err.Error()})
 		return
@@ -205,14 +202,14 @@ func (userController UserController) RefreshAccessToken(ginContext *gin.Context)
 		ginContext.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": "the user is belonged to this token no longer exists "})
 	}
 
-	accessToken, err := httpUtility.CreateToken(config.AccessTokenExpiresIn, userID, config.AccessTokenPrivateKey)
+	accessToken, err := httpUtility.CreateToken(config.AccessToken.ExpiredIn, userID, config.AccessToken.PrivateKey)
 
 	if validator.IsErrorNotNil(err) {
 		ginContext.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
-	httpGinUtility.RefreshAccessTokenSetCookies(ginContext, accessToken, config.AccessTokenMaxAge*60)
+	httpGinUtility.RefreshAccessTokenSetCookies(ginContext, accessToken, config.AccessToken.MaxAge*60)
 	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
 }
 
@@ -229,7 +226,6 @@ func (userController UserController) ForgottenPassword(ginContext *gin.Context) 
 
 	message := config.SendingEmailWithIntstructionsNotifications
 	fetchedUser, err := userController.userUseCase.GetUserByEmail(ctx, userViewEmail.Email)
-
 	if validator.IsErrorNotNil(err) {
 		ginContext.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": err.Error()})
 		return
@@ -242,12 +238,10 @@ func (userController UserController) ForgottenPassword(ginContext *gin.Context) 
 
 	// Update the user.
 	err = userController.userUseCase.UpdatePasswordResetTokenUserByEmail(ctx, fetchedUser.Email, "passwordResetToken", passwordResetToken, "passwordResetAt", passwordResetAt)
-
 	if validator.IsErrorNotNil(err) {
 		ginContext.JSON(http.StatusBadGateway, gin.H{"status": "success", "message": err.Error()})
 		return
 	}
-
 	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
 }
 

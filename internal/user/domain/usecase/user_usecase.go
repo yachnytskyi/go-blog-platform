@@ -45,7 +45,7 @@ func (userUseCase UserUseCase) GetUserById(ctx context.Context, userID string) (
 
 func (userUseCase UserUseCase) GetUserByEmail(ctx context.Context, email string) (userModel.User, error) {
 	validateEmailError := validateEmail(email, EmailField, TypeRequired, emailRegex, emailAllowedCharacters)
-	if validator.IsErrorNotNil(validateEmailError) {
+	if validator.IsValueNotNil(validateEmailError) {
 		validateEmailError := domainError.HandleError(validateEmailError)
 		return userModel.User{}, validateEmailError
 	}
@@ -128,16 +128,11 @@ func (userUseCase UserUseCase) Login(ctx context.Context, userLoginData userMode
 	return fetchedUser.UserID, nil
 }
 
-// func (userUseCase UserUseCase) UpdateNewRegisteredUserById(ctx context.Context, userID string, key string, value string) (userModel.User, error) {
-// 	updatedUser, updateNewRegisteredUserById := userUseCase.userRepository.UpdateNewRegisteredUserById(ctx, userID, key, value)
-// 	return updatedUser, updateNewRegisteredUserById
-// }
-
 func (userUseCase UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.Context, email string, firstKey string, firstValue string,
 	secondKey string, secondValue time.Time) error {
 
 	validateEmailError := validateEmail(email, EmailField, TypeRequired, emailRegex, emailAllowedCharacters)
-	if validator.IsErrorNotNil(validateEmailError) {
+	if validator.IsValueNotNil(validateEmailError) {
 		validateEmailError := domainError.HandleError(validateEmailError)
 		return validateEmailError
 	}
@@ -188,7 +183,7 @@ func (userUseCase UserUseCase) ResetUserPassword(ctx context.Context, firstKey s
 
 func PrepareEmailData(ctx context.Context, userName string, url string, subject string,
 	tokenValue string, templateName string, templatePath string) commonModel.Result[userModel.EmailData] {
-	loadConfig, loadConfigError := config.LoadConfig(".")
+	loadConfig, loadConfigError := config.LoadConfig(config.ConfigPath)
 	if validator.IsErrorNotNil(loadConfigError) {
 		var loadConfigInternalError domainError.InternalError
 		loadConfigInternalError.Location = "User.Domain.UserUseCase.Registration.PrepareEmailData.LoadConfig"
@@ -197,7 +192,7 @@ func PrepareEmailData(ctx context.Context, userName string, url string, subject 
 	}
 	userFirstName := domainUtility.UserFirstName(userName)
 
-	emailData := userModel.NewEmailData(loadConfig.ClientOriginUrl+url+tokenValue, templateName, templatePath, userFirstName, subject)
+	emailData := userModel.NewEmailData(loadConfig.Email.ClientOriginUrl+url+tokenValue, templateName, templatePath, userFirstName, subject)
 	return commonModel.NewResultOnSuccess[userModel.EmailData](emailData)
 
 }

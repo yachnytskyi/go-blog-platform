@@ -26,11 +26,11 @@ func (userGrpcServer *UserGrpcServer) Login(ctx context.Context, request *pb.Log
 	// }
 
 	// Generate tokens
-	accessToken, err := httpUtility.CreateToken(userGrpcServer.config.AccessTokenExpiresIn, user.UserID, userGrpcServer.config.AccessTokenPrivateKey)
+	accessToken, err := httpUtility.CreateToken(userGrpcServer.config.AccessToken.ExpiredIn, user.UserID, userGrpcServer.config.AccessToken.PrivateKey)
 	if err != nil {
 		return nil, status.Errorf(codes.PermissionDenied, err.Error())
 	}
-	refreshToken, err := httpUtility.CreateToken(userGrpcServer.config.RefreshTokenExpiresIn, user.UserID, userGrpcServer.config.RefreshTokenPrivateKey)
+	refreshToken, err := httpUtility.CreateToken(userGrpcServer.config.RefreshToken.ExpiredIn, user.UserID, userGrpcServer.config.RefreshToken.PrivateKey)
 	if err != nil {
 		return nil, status.Errorf(codes.PermissionDenied, err.Error())
 	}

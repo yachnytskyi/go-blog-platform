@@ -18,6 +18,6 @@ TODO.md
 logs.txt
 .idea/
 secret.md
-app.env
 /temp
 temp/
+config/yaml/application.yaml

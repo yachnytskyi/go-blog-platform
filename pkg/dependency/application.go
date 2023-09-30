@@ -20,7 +20,7 @@ const (
 
 func CreateApplication(ctx context.Context) *container.Container {
 	container := container.Container{}
-	loadConfig, loadConfigError := config.LoadConfig(".")
+	loadConfig, loadConfigError := config.LoadConfig(config.ConfigPath)
 	if loadConfigError != nil {
 		loadConfigInternalError := domainError.NewInternalError(location+".LoadConfig", loadConfigError.Error())
 		logging.Logger(loadConfigInternalError)

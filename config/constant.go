@@ -3,6 +3,9 @@ package config
 import "time"
 
 const (
+	// Config paths.
+	ConfigPath = "config/yaml/application.yaml"
+
 	// Context timers.
 	DefaultContextTimer = time.Duration(time.Second * 5)
 

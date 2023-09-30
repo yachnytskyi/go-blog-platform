@@ -44,15 +44,15 @@ func ParseTemplateDirectory(templatePath string) (*template.Template, error) {
 }
 
 func SendEmail(ctx context.Context, user userModel.User, data userModel.EmailData) error {
-	loadConfig, loadConfigError := config.LoadConfig(".")
+	loadConfig, loadConfigError := config.LoadConfig(config.ConfigPath)
 	if validator.IsErrorNotNil(loadConfigError) {
 		loadConfigInternalError := domainError.NewInternalError(location+"SendEmail.LoadConfig", loadConfigError.Error())
 		return loadConfigInternalError
 	}
-	smtpPass := loadConfig.SMTPPassword
-	smtpUser := loadConfig.SMTPUser
-	smtpHost := loadConfig.SMTPHost
-	smtpPort := loadConfig.SMTPPort
+	smtpPass := loadConfig.Email.SMTPPassword
+	smtpUser := loadConfig.Email.SMTPUser
+	smtpHost := loadConfig.Email.SMTPHost
+	smtpPort := loadConfig.Email.SMTPPort
 
 	dialer := gomail.NewDialer(smtpHost, smtpPort, smtpUser, smtpPass)
 	dialer.TLSConfig = &tls.Config{InsecureSkipVerify: true}
@@ -71,13 +71,13 @@ func SendEmail(ctx context.Context, user userModel.User, data userModel.EmailDat
 }
 
 func PrepareSendMessage(ctx context.Context, userEmail string, data userModel.EmailData) (*gomail.Message, error) {
-	loadConfig, loadConfigError := config.LoadConfig(".")
+	loadConfig, loadConfigError := config.LoadConfig(config.ConfigPath)
 	if validator.IsErrorNotNil(loadConfigError) {
 		loadConfigInternalError := domainError.NewInternalError(location+"SendEmail.PrepareSendMessage.LoadConfig", loadConfigError.Error())
 		return nil, loadConfigInternalError
 	}
 	// Prepare data.
-	from := loadConfig.EmailFrom
+	from := loadConfig.Email.EmailFrom
 	to := userEmail
 
 	var body bytes.Buffer

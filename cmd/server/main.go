@@ -50,7 +50,7 @@ const (
 
 // Init function that will run before the "main" function.
 func init() {
-	loadConfig, loadConfigError := config.LoadConfig(".")
+	loadConfig, loadConfigError := config.LoadConfig(config.ConfigPath)
 	if loadConfigError != nil {
 		loadConfigInternalError := domainError.NewInternalError(location+"init.LoadConfig", loadConfigError.Error())
 		logging.Logger(loadConfigInternalError)
@@ -87,15 +87,24 @@ func init() {
 }
 
 func main() {
-	config, err := config.LoadConfig(".")
-
+	config, err := config.LoadConfig(config.ConfigPath)
 	if err != nil {
 		log.Fatal("Could not load config", err)
 	}
-
 	startGinServer(config)
-
 	// startGrpcServer(config)
+}
+
+func startGinServer(config config.Config) {
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowOrigins = []string{"http://localhost:8080"}
+	corsConfig.AllowCredentials = true
+
+	server.Use(cors.New(corsConfig))
+	router := server.Group("/api")
+	userRouter.UserRouter(router, userUseCase)
+	postRouter.PostRouter(router, userUseCase)
+	log.Fatal(server.Run(":" + config.GinConfig.Port))
 }
 
 // func startGrpcServer(config config.Config) {
@@ -134,19 +143,3 @@ func main() {
 // 		log.Fatal("cannot create grpc server: ", err)
 // 	}
 // }
-
-func startGinServer(config config.Config) {
-
-	corsConfig := cors.DefaultConfig()
-	corsConfig.AllowOrigins = []string{"http://localhost:8080"}
-	corsConfig.AllowCredentials = true
-
-	server.Use(cors.New(corsConfig))
-
-	router := server.Group("/api")
-
-	userRouter.UserRouter(router, userUseCase)
-	postRouter.PostRouter(router, userUseCase)
-
-	log.Fatal(server.Run(":" + config.Port))
-}

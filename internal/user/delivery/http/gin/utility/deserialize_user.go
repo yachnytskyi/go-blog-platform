@@ -36,8 +36,8 @@ func DeserializeUser(userUseCase user.UserUseCase) gin.HandlerFunc {
 			return
 		}
 
-		config, _ := config.LoadConfig(".")
-		userID, validateTokenError := httpUtility.ValidateToken(accessToken, config.AccessTokenPublicKey)
+		config, _ := config.LoadConfig(config.ConfigPath)
+		userID, validateTokenError := httpUtility.ValidateToken(accessToken, config.AccessToken.PublicKey)
 		if validator.IsErrorNotNil(validateTokenError) {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": "fail", "message": validateTokenError.Error()})
 			return

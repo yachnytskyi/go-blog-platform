@@ -19,7 +19,7 @@ const (
 func InjectRepository(loadConfig config.Config, container *container.Container) {
 	switch loadConfig.Database {
 	case config.MongoDB:
-		container.RepositoryFactory = &mongoDBFactory.MongoDBFactory{MongoConfig: loadConfig.MongoConfig}
+		container.RepositoryFactory = &mongoDBFactory.MongoDBFactory{MongoDBConfig: loadConfig.MongoDBConfig}
 	// Add other database cases here as needed.
 	default:
 		logging.Logger(domainError.NewInternalError(location+".loadConfig.Database:", fmt.Sprintf(unsupportedDatabase, loadConfig.Database)))

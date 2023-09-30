@@ -7,46 +7,60 @@ import (
 )
 
 type Config struct {
-	Database    string      `mapstructure:"Database"`
-	Domain      string      `mapstrucrure:"Domain"`
-	MongoConfig MongoConfig `mapstructure:",squash"`
+	Database string `mapstructure:"Database"`
+	Domain   string `mapstrucrure:"Domain"`
 
-	Port              string `mapstructure:"PORT"`
-	GrpcServerAddress string `mapstructure:"GRPC_SERVER_ADDRESS"`
-
-	AccessTokenPrivateKey  string        `mapstructure:"ACCESS_TOKEN_PRIVATE_KEY"`
-	AccessTokenPublicKey   string        `mapstructure:"ACCESS_TOKEN_PUBLIC_KEY"`
-	RefreshTokenPrivateKey string        `mapstructure:"REFRESH_TOKEN_PRIVATE_KEY"`
-	RefreshTokenPublicKey  string        `mapstructure:"REFRESH_TOKEN_PUBLIC_KEY"`
-	AccessTokenExpiresIn   time.Duration `mapstructure:"ACCESS_TOKEN_EXPIRED_IN"`
-	RefreshTokenExpiresIn  time.Duration `mapstructure:"REFRESH_TOKEN_EXPIRED_IN"`
-	AccessTokenMaxAge      int           `mapstructure:"ACCESS_TOKEN_MAXAGE"`
-	RefreshTokenMaxAge     int           `mapstructure:"REFRESH_TOKEN_MAXAGE"`
-
-	ClientOriginUrl string `mapstructure:"CLIENT_ORIGIN_URL"`
-
-	EmailFrom    string `mapstructure:"EMAIL_FROM"`
-	SMTPHost     string `mapstructure:"SMTP_HOST"`
-	SMTPPassword string `mapstructure:"SMTP_PASSWORD"`
-	SMTPPort     int    `mapstructure:"SMTP_PORT"`
-	SMTPUser     string `mapstructure:"SMTP_USER"`
+	MongoDBConfig MongoDBConfig `mapstructure:"MongoDB"`
+	GinConfig     GinConfig     `mapstructure:"Gin"`
+	GRPCConfig    GRPCConfig    `mapstructure:"Grpc"`
+	AccessToken   AccessToken   `mapstructure:"Access_Token"`
+	RefreshToken  RefreshToken  `mapstructure:"Refresh_Token"`
+	Email         Email         `mapstructure:"Email"`
 }
 
-type MongoConfig struct {
-	MongoDatabaseName string `mapstructure:"MONGO_DATABASE_NAME"`
-	MongoURI          string `mapstructure:"MONGODB_LOCAL_URI"`
+type MongoDBConfig struct {
+	Name string `mapstructure:"Name"`
+	URI  string `mapstructure:"URI"`
+}
+
+type GinConfig struct {
+	Port string `mapstructure:"PORT"`
+}
+
+type GRPCConfig struct {
+	ServerUrl string `mapstructure:"Server_Url"`
+}
+
+type AccessToken struct {
+	PrivateKey string        `mapstructure:"Private_Key"`
+	PublicKey  string        `mapstructure:"Public_Key"`
+	ExpiredIn  time.Duration `mapstructure:"Expired_In"`
+	MaxAge     int           `mapstructure:"Max_Age"`
+}
+
+type RefreshToken struct {
+	PrivateKey string        `mapstructure:"Private_Key"`
+	PublicKey  string        `mapstructure:"Public_Key"`
+	ExpiredIn  time.Duration `mapstructure:"Expired_In"`
+	MaxAge     int           `mapstructure:"Max_Age"`
+}
+
+type Email struct {
+	ClientOriginUrl string `mapstructure:"Client_Origin_Url"`
+	EmailFrom       string `mapstructure:"Email_From"`
+	SMTPHost        string `mapstructure:"SMTP_Host"`
+	SMTPPassword    string `mapstructure:"SMTP_Password"`
+	SMTPPort        int    `mapstructure:"SMTP_Port"`
+	SMTPUser        string `mapstructure:"SMTP_User"`
 }
 
 func LoadConfig(path string) (config Config, err error) {
-	viper.AddConfigPath(path)
-	viper.SetConfigType("env")
-	viper.SetConfigName("app")
+	viper.SetConfigFile(path)
 	viper.AutomaticEnv()
 
 	err = viper.ReadInConfig()
-
 	if err != nil {
-		return
+		return Config{}, err
 	}
 
 	err = viper.Unmarshal(&config)

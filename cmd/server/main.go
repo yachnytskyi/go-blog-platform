@@ -21,7 +21,7 @@ import (
 	// dependency "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency"
 
 	repository "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/data/repository"
-	commonUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
+	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 
 	userHttpGinPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin"
 	userUseCasePackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
@@ -44,7 +44,8 @@ var (
 
 // Init function that will run before the "main" function.
 func init() {
-	loadConfig := commonUtility.LoadConfig()
+	applicationModel.LoadConfig()
+	applicationConfig := applicationModel.ApplicationConfig
 
 	// Create a context.
 	ctx, cancel := context.WithTimeout(context.Background(), constant.DefaultContextTimer)
@@ -53,7 +54,7 @@ func init() {
 	container := dependency.CreateApplication(ctx)
 	fmt.Println(container)
 
-	repository.InjectRepository(loadConfig, container)
+	repository.InjectRepository(applicationConfig, container)
 
 	// Create a DB database instance using the factory.
 	db := container.RepositoryFactory.NewRepository(ctx)
@@ -82,7 +83,7 @@ func main() {
 }
 
 func startGinServer() {
-	loadConfig := commonUtility.LoadConfig()
+	applicationConfig := applicationModel.ApplicationConfig
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowOrigins = []string{"http://localhost:8080"}
 	corsConfig.AllowCredentials = true
@@ -91,7 +92,7 @@ func startGinServer() {
 	router := server.Group("/api")
 	userRouter.UserRouter(router, userUseCase)
 	postRouter.PostRouter(router, userUseCase)
-	log.Fatal(server.Run(":" + loadConfig.GinConfig.Port))
+	log.Fatal(server.Run(":" + applicationConfig.GinConfig.Port))
 }
 
 // func startGrpcServer(config config.Config) {

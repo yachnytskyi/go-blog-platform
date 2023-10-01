@@ -6,24 +6,22 @@ import (
 
 	repository "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/data/repository"
 	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/domain"
-	container "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
-
-	commonUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
+	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 )
 
-func CreateApplication(ctx context.Context) *container.Container {
-	container := container.Container{}
-	loadConfig := commonUtility.LoadConfig()
+func CreateApplication(ctx context.Context) *applicationModel.Container {
+	container := applicationModel.Container{}
+	applicationConfig := applicationModel.ApplicationConfig
 
 	// Repositories.
-	repository.InjectRepository(loadConfig, &container)
+	repository.InjectRepository(applicationConfig, &container)
 	db := container.RepositoryFactory.NewRepository(ctx)
 	userRepository := container.RepositoryFactory.NewUserRepository(db)
 	postRepository := container.RepositoryFactory.NewPostRepository(db)
 	fmt.Println(userRepository, postRepository)
 
 	// Domains.
-	domain.InjectDomain(loadConfig, &container)
+	domain.InjectDomain(applicationConfig, &container)
 	userDomain := container.DomainFactory.NewUserRepository(userRepository)
 	postDomain := container.DomainFactory.NewPostRepository(postRepository)
 	fmt.Println(container)

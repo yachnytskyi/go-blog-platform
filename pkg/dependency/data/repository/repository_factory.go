@@ -17,7 +17,7 @@ const (
 	unsupportedDatabase = "unsupported database type: %s"
 )
 
-func InjectRepository(loadConfig config.Config, container *container.Container) {
+func InjectRepository(loadConfig config.ApplicationConfig, container *container.Container) {
 	switch loadConfig.Database {
 	case constant.MongoDB:
 		container.RepositoryFactory = &mongoDBFactory.MongoDBFactory{MongoDBConfig: loadConfig.MongoDBConfig}

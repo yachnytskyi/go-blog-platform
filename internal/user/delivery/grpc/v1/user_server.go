@@ -9,17 +9,17 @@ import (
 
 type UserGrpcServer struct {
 	pb.UnimplementedUserUseCaseServer
-	config         config.Config
-	userUseCase    user.UserUseCase
-	userCollection *mongo.Collection
+	applicationConfig config.ApplicationConfig
+	userUseCase       user.UserUseCase
+	userCollection    *mongo.Collection
 }
 
-func NewGrpcUserServer(config config.Config, userUseCase user.UserUseCase, userCollection *mongo.Collection) (*UserGrpcServer, error) {
+func NewGrpcUserServer(config config.ApplicationConfig, userUseCase user.UserUseCase, userCollection *mongo.Collection) (*UserGrpcServer, error) {
 
 	userGrpcServer := &UserGrpcServer{
-		config:         config,
-		userUseCase:    userUseCase,
-		userCollection: userCollection,
+		applicationConfig: config,
+		userUseCase:       userUseCase,
+		userCollection:    userCollection,
 	}
 
 	return userGrpcServer, nil

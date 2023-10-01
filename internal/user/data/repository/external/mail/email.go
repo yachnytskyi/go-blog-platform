@@ -9,9 +9,8 @@ import (
 	"path/filepath"
 
 	"github.com/k3a/html2text"
-	commonUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
-
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
+	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -45,11 +44,11 @@ func ParseTemplateDirectory(templatePath string) (*template.Template, error) {
 }
 
 func SendEmail(ctx context.Context, user userModel.User, data userModel.EmailData) error {
-	loadConfig := commonUtility.LoadConfig()
-	smtpPass := loadConfig.Email.SMTPPassword
-	smtpUser := loadConfig.Email.SMTPUser
-	smtpHost := loadConfig.Email.SMTPHost
-	smtpPort := loadConfig.Email.SMTPPort
+	applicationConfig := applicationModel.ApplicationConfig
+	smtpPass := applicationConfig.Email.SMTPPassword
+	smtpUser := applicationConfig.Email.SMTPUser
+	smtpHost := applicationConfig.Email.SMTPHost
+	smtpPort := applicationConfig.Email.SMTPPort
 
 	dialer := gomail.NewDialer(smtpHost, smtpPort, smtpUser, smtpPass)
 	dialer.TLSConfig = &tls.Config{InsecureSkipVerify: true}
@@ -68,10 +67,10 @@ func SendEmail(ctx context.Context, user userModel.User, data userModel.EmailDat
 }
 
 func PrepareSendMessage(ctx context.Context, userEmail string, data userModel.EmailData) (*gomail.Message, error) {
-	loadConfig := commonUtility.LoadConfig()
+	applicationConfig := applicationModel.ApplicationConfig
 
 	// Prepare data.
-	from := loadConfig.Email.EmailFrom
+	from := applicationConfig.Email.EmailFrom
 	to := userEmail
 
 	var body bytes.Buffer

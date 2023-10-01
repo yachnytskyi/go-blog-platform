@@ -19,7 +19,7 @@ const (
 	unsupportedDomain = "unsupported domain type: %s"
 )
 
-func InjectDomain(loadConfig config.Config, container *container.Container) {
+func InjectDomain(loadConfig config.ApplicationConfig, container *container.Container) {
 	switch loadConfig.Domain {
 	case constant.UseCase:
 		container.DomainFactory = useCaseFactory.UseCaseFactory{}

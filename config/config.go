@@ -13,10 +13,9 @@ const (
 	location = "config.LoadConfig."
 )
 
-type Config struct {
-	Database string `mapstructure:"Database"`
-	Domain   string `mapstructure:"Domain"`
-
+type ApplicationConfig struct {
+	Database      string        `mapstructure:"Database"`
+	Domain        string        `mapstructure:"Domain"`
 	MongoDBConfig MongoDBConfig `mapstructure:"MongoDB"`
 	GinConfig     GinConfig     `mapstructure:"Gin"`
 	GRPCConfig    GRPCConfig    `mapstructure:"Grpc"`
@@ -65,16 +64,15 @@ type Email struct {
 	ForgottenPasswordTemplatePath string `mapstructure:"Forgotten_Password_Template_Path"`
 }
 
-func LoadConfig(path string) (config Config, err error) {
+func LoadConfig(path string) (config ApplicationConfig, err error) {
 	viper.SetConfigFile(path)
 	viper.AutomaticEnv()
 	readInConfigError := viper.ReadInConfig()
 	if validator.IsErrorNotNil(readInConfigError) {
 		readInInternalError := domainError.NewInternalError(location+"ReadInConfig", readInConfigError.Error())
 		logging.Logger(readInInternalError)
-		return Config{}, readInInternalError
+		return ApplicationConfig{}, readInInternalError
 	}
-
 	viper.SetDefault("Database", "MongoDB")
 	viper.SetDefault("Domain", "UseCase")
 	viper.SetDefault("MongoDB.Name", "golang_mongodb")

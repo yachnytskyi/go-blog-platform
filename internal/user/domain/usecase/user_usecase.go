@@ -8,6 +8,7 @@ import (
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
+	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	commonUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
@@ -73,9 +74,9 @@ func (userUseCase UserUseCase) Register(ctx context.Context, userCreateData user
 		createdUser.Error = domainError.HandleError(createdUser.Error)
 		return createdUser
 	}
-	loadConfig := commonUtility.LoadConfig()
-	templateName := loadConfig.Email.UserConfirmationTemplateName
-	templatePath := loadConfig.Email.UserConfirmationTemplatePath
+	applicationConfig := applicationModel.ApplicationConfig
+	templateName := applicationConfig.Email.UserConfirmationTemplateName
+	templatePath := applicationConfig.Email.UserConfirmationTemplatePath
 
 	emailData := PrepareEmailData(ctx, createdUser.Data.Name, emailConfirmationUrl, emailConfirmationSubject, tokenValue, templateName, templatePath)
 	if validator.IsErrorNotNil(emailData.Error) {
@@ -159,9 +160,9 @@ func (userUseCase UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.C
 		return updatedUserPasswordError
 	}
 
-	loadConfig := commonUtility.LoadConfig()
-	templateName := loadConfig.Email.ForgottenPasswordTemplateName
-	templatePath := loadConfig.Email.ForgottenPasswordTemplatePath
+	applicationConfig := applicationModel.ApplicationConfig
+	templateName := applicationConfig.Email.ForgottenPasswordTemplateName
+	templatePath := applicationConfig.Email.ForgottenPasswordTemplatePath
 	emailData := PrepareEmailData(ctx, fetchedUser.Name, forgottenPasswordUrl, forgottenPasswordSubject, tokenValue, templateName, templatePath)
 	if validator.IsErrorNotNil(emailData.Error) {
 		logging.Logger(emailData.Error)
@@ -184,9 +185,9 @@ func (userUseCase UserUseCase) ResetUserPassword(ctx context.Context, firstKey s
 
 func PrepareEmailData(ctx context.Context, userName string, url string, subject string,
 	tokenValue string, templateName string, templatePath string) commonModel.Result[userModel.EmailData] {
-	loadConfig := commonUtility.LoadConfig()
+	applicationConfig := applicationModel.ApplicationConfig
 	userFirstName := domainUtility.UserFirstName(userName)
-	emailData := userModel.NewEmailData(loadConfig.Email.ClientOriginUrl+url+tokenValue, templateName, templatePath, userFirstName, subject)
+	emailData := userModel.NewEmailData(applicationConfig.Email.ClientOriginUrl+url+tokenValue, templateName, templatePath, userFirstName, subject)
 	return commonModel.NewResultOnSuccess[userModel.EmailData](emailData)
 
 }

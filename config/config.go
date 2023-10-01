@@ -1,8 +1,10 @@
 package config
 
 import (
+	"os"
 	"time"
 
+	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
@@ -14,7 +16,10 @@ var (
 )
 
 const (
-	location = "config.LoadConfig."
+	environmentsPath   = "config/environment/.env."
+	devInveronmentName = "dev"
+	defaultConfigPath  = "config/yaml/dev.application.yaml"
+	location           = "config.LoadConfig."
 )
 
 type ApplicationConfig struct {
@@ -68,8 +73,18 @@ type Email struct {
 	ForgottenPasswordTemplatePath string `mapstructure:"Forgotten_Password_Template_Path"`
 }
 
-func LoadConfig(path string) (unmarshalError error) {
-	viper.SetConfigFile(path)
+func LoadConfig() (unmarshalError error) {
+	loadEnvironmentsError := godotenv.Load(environmentsPath + devInveronmentName)
+	if validator.IsErrorNotNil(loadEnvironmentsError) {
+		loadEnvironmentsInternalError := domainError.NewInternalError(location+"Load", loadEnvironmentsError.Error())
+		logging.Logger(loadEnvironmentsInternalError)
+		return loadEnvironmentsInternalError
+	}
+	configPath := os.Getenv("CONFIG_PATH")
+	if validator.IsStringEmpty(configPath) {
+		configPath = defaultConfigPath
+	}
+	viper.SetConfigFile(configPath)
 	viper.AutomaticEnv()
 	readInConfigError := viper.ReadInConfig()
 	if validator.IsErrorNotNil(readInConfigError) {

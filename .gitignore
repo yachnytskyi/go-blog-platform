@@ -20,4 +20,4 @@ logs.txt
 secret.md
 /temp
 temp/
-config/yaml/application.yaml
+config/yaml/dev.application.yaml

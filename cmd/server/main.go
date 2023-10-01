@@ -3,7 +3,6 @@ package main
 // Require the packages.
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"github.com/gin-contrib/cors"
@@ -20,8 +19,6 @@ import (
 
 	userPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	// dependency "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency"
-
-	repository "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/data/repository"
 
 	userHttpGinPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin"
 	userUseCasePackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
@@ -44,16 +41,14 @@ var (
 
 // Init function that will run before the "main" function.
 func init() {
-	config.LoadConfig(constant.ConfigPath)
+	config.LoadConfig()
 
 	// Create a context.
 	ctx, cancel := context.WithTimeout(context.Background(), constant.DefaultContextTimer)
 	defer cancel()
 
 	container := dependency.CreateApplication(ctx)
-	fmt.Println(container)
-
-	repository.InjectRepository(container)
+	// repository.InjectRepository(container)
 
 	// Create a DB database instance using the factory.
 	db := container.RepositoryFactory.NewRepository(ctx)

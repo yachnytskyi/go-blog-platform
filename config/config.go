@@ -6,9 +6,10 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
+	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
+	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
+	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
 var (
@@ -17,8 +18,10 @@ var (
 
 const (
 	environmentsPath   = "config/environment/.env."
-	devInveronmentName = "dev"
-	defaultConfigPath  = "config/yaml/dev.application.yaml"
+	devInvironmentName = "dev"
+	defaultMongoDBName = "golang-mongodb"
+	defaultMongoDBURI  = "mongodb://root:root@localhost:27017"
+	defaultServerPort  = "8080"
 	location           = "config.LoadConfig."
 )
 
@@ -74,16 +77,13 @@ type Email struct {
 }
 
 func LoadConfig() (unmarshalError error) {
-	loadEnvironmentsError := godotenv.Load(environmentsPath + devInveronmentName)
+	loadEnvironmentsError := godotenv.Load(environmentsPath + devInvironmentName)
 	if validator.IsErrorNotNil(loadEnvironmentsError) {
 		loadEnvironmentsInternalError := domainError.NewInternalError(location+"Load", loadEnvironmentsError.Error())
 		logging.Logger(loadEnvironmentsInternalError)
 		return loadEnvironmentsInternalError
 	}
 	configPath := os.Getenv("CONFIG_PATH")
-	if validator.IsStringEmpty(configPath) {
-		configPath = defaultConfigPath
-	}
 	viper.SetConfigFile(configPath)
 	viper.AutomaticEnv()
 	readInConfigError := viper.ReadInConfig()
@@ -92,11 +92,11 @@ func LoadConfig() (unmarshalError error) {
 		logging.Logger(readInInternalError)
 		return readInInternalError
 	}
-	viper.SetDefault("Database", "MongoDB")
-	viper.SetDefault("Domain", "UseCase")
-	viper.SetDefault("MongoDB.Name", "golang_mongodb")
-	viper.SetDefault("MongoDB.URI", "mongodb://root:root@localhost:27017")
-	viper.SetDefault("Gin.Port", "8080")
+	viper.SetDefault("Database", constant.MongoDB)
+	viper.SetDefault("Domain", constant.UseCase)
+	viper.SetDefault("MongoDB.Name", defaultMongoDBName)
+	viper.SetDefault("MongoDB.URI", defaultMongoDBURI)
+	viper.SetDefault("Gin.Port", defaultServerPort)
 	unmarshalError = viper.Unmarshal(&AppConfig)
 	return
 }

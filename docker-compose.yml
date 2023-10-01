@@ -5,7 +5,7 @@ services:
     image: mongo
     container_name: mongodb
     restart: always
-    env_file: ./config/yaml/dev.application.yaml
+    env_file: ./config/yaml/v1/dev.application.yaml
     ports:
       - '27017:27017'
     volumes:

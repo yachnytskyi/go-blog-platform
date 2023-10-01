@@ -17,6 +17,7 @@ var (
 )
 
 const (
+	version            = "V1"
 	environmentsPath   = "config/environment/.env."
 	devInvironmentName = "dev"
 	defaultMongoDBName = "golang-mongodb"
@@ -26,26 +27,30 @@ const (
 )
 
 type ApplicationConfig struct {
-	Database      string        `mapstructure:"Database"`
-	Domain        string        `mapstructure:"Domain"`
-	MongoDBConfig MongoDBConfig `mapstructure:"MongoDB"`
-	GinConfig     GinConfig     `mapstructure:"Gin"`
-	GRPCConfig    GRPCConfig    `mapstructure:"Grpc"`
-	AccessToken   AccessToken   `mapstructure:"Access_Token"`
-	RefreshToken  RefreshToken  `mapstructure:"Refresh_Token"`
-	Email         Email         `mapstructure:"Email"`
+	Core         Core         `mapstructure:"Core"`
+	MongoDB      MongoDB      `mapstructure:"MongoDB"`
+	Gin          Gin          `mapstructure:"Gin"`
+	GRPC         GRPC         `mapstructure:"Grpc"`
+	AccessToken  AccessToken  `mapstructure:"Access_Token"`
+	RefreshToken RefreshToken `mapstructure:"Refresh_Token"`
+	Email        Email        `mapstructure:"Email"`
 }
 
-type MongoDBConfig struct {
+type Core struct {
+	Database string `mapstructure:"Database"`
+	Domain   string `mapstructure:"Domain"`
+}
+
+type MongoDB struct {
 	Name string `mapstructure:"Name"`
 	URI  string `mapstructure:"URI"`
 }
 
-type GinConfig struct {
+type Gin struct {
 	Port string `mapstructure:"PORT"`
 }
 
-type GRPCConfig struct {
+type GRPC struct {
 	ServerUrl string `mapstructure:"Server_Url"`
 }
 
@@ -83,7 +88,7 @@ func LoadConfig() (unmarshalError error) {
 		logging.Logger(loadEnvironmentsInternalError)
 		return loadEnvironmentsInternalError
 	}
-	configPath := os.Getenv("CONFIG_PATH")
+	configPath := os.Getenv(version)
 	viper.SetConfigFile(configPath)
 	viper.AutomaticEnv()
 	readInConfigError := viper.ReadInConfig()

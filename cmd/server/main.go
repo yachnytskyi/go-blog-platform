@@ -86,7 +86,7 @@ func startGinServer() {
 	router := server.Group("/api")
 	userRouter.UserRouter(router, userUseCase)
 	postRouter.PostRouter(router, userUseCase)
-	log.Fatal(server.Run(":" + applicationConfig.GinConfig.Port))
+	log.Fatal(server.Run(":" + applicationConfig.Gin.Port))
 }
 
 // func startGrpcServer(config config.Config) {

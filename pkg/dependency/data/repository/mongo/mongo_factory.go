@@ -26,15 +26,15 @@ const (
 )
 
 type MongoDBFactory struct {
-	MongoDBConfig config.MongoDBConfig
-	MongoClient   *mongo.Client
+	MongoDB     config.MongoDB
+	MongoClient *mongo.Client
 }
 
 func (mongoDBFactory *MongoDBFactory) NewRepository(ctx context.Context) interface{} {
 	var connectError error
-	mongoConnection := options.Client().ApplyURI(mongoDBFactory.MongoDBConfig.URI)
+	mongoConnection := options.Client().ApplyURI(mongoDBFactory.MongoDB.URI)
 	mongoDBFactory.MongoClient, connectError = mongo.Connect(ctx, mongoConnection)
-	db := mongoDBFactory.MongoClient.Database(mongoDBFactory.MongoDBConfig.Name)
+	db := mongoDBFactory.MongoClient.Database(mongoDBFactory.MongoDB.Name)
 	if validator.IsErrorNotNil(connectError) {
 		logging.Logger(domainError.NewInternalError(location+"mongoClient.Database", connectError.Error()))
 		return nil

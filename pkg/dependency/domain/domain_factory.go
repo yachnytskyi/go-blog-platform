@@ -21,12 +21,12 @@ const (
 
 func InjectDomain(container *container.Container) {
 	applicationConfig := config.AppConfig
-	switch applicationConfig.Domain {
+	switch applicationConfig.Core.Domain {
 	case constant.UseCase:
 		container.DomainFactory = useCaseFactory.UseCaseFactory{}
 	// Add other domain options here as needed.
 	default:
-		logging.Logger(domainError.NewInternalError(location+".loadConfig.Domain:", fmt.Sprintf(unsupportedDomain, applicationConfig.Domain)))
+		logging.Logger(domainError.NewInternalError(location+".loadConfig.Domain:", fmt.Sprintf(unsupportedDomain, applicationConfig.Core.Domain)))
 		application.GracefulShutdown(container)
 	}
 }

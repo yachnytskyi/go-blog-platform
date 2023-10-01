@@ -19,12 +19,12 @@ const (
 
 func InjectRepository(container *applicationModel.Container) {
 	applicationConfig := config.AppConfig
-	switch applicationConfig.Database {
+	switch applicationConfig.Core.Database {
 	case constant.MongoDB:
-		container.RepositoryFactory = &mongoDBFactory.MongoDBFactory{MongoDBConfig: applicationConfig.MongoDBConfig}
+		container.RepositoryFactory = &mongoDBFactory.MongoDBFactory{MongoDB: applicationConfig.MongoDB}
 	// Add other database cases here as needed.
 	default:
-		logging.Logger(domainError.NewInternalError(location+".applicationConfig.Database:", fmt.Sprintf(unsupportedDatabase, applicationConfig.Database)))
+		logging.Logger(domainError.NewInternalError(location+".applicationConfig.Database:", fmt.Sprintf(unsupportedDatabase, applicationConfig.Core.Database)))
 		application.GracefulShutdown(container)
 	}
 }

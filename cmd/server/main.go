@@ -7,13 +7,14 @@ import (
 	"log"
 
 	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
+	gin "github.com/gin-gonic/gin"
+	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
 
 	postPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
 	postHttpGinPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/http/gin"
 
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency"
+	dependency "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency"
 
 	postUseCasePackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/usecase"
 
@@ -21,7 +22,6 @@ import (
 	// dependency "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency"
 
 	repository "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/data/repository"
-	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 
 	userHttpGinPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin"
 	userUseCasePackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
@@ -44,8 +44,7 @@ var (
 
 // Init function that will run before the "main" function.
 func init() {
-	applicationModel.LoadConfig()
-	applicationConfig := applicationModel.ApplicationConfig
+	config.LoadConfig(constant.ConfigPath)
 
 	// Create a context.
 	ctx, cancel := context.WithTimeout(context.Background(), constant.DefaultContextTimer)
@@ -54,7 +53,7 @@ func init() {
 	container := dependency.CreateApplication(ctx)
 	fmt.Println(container)
 
-	repository.InjectRepository(applicationConfig, container)
+	repository.InjectRepository(container)
 
 	// Create a DB database instance using the factory.
 	db := container.RepositoryFactory.NewRepository(ctx)
@@ -83,7 +82,7 @@ func main() {
 }
 
 func startGinServer() {
-	applicationConfig := applicationModel.ApplicationConfig
+	applicationConfig := config.AppConfig
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowOrigins = []string{"http://localhost:8080"}
 	corsConfig.AllowCredentials = true

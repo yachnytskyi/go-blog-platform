@@ -6,7 +6,7 @@ import (
 	"github.com/yachnytskyi/golang-mongo-grpc/config"
 	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
 	mongoDBFactory "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/data/repository/mongo"
-	container "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
+	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	application "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/application"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
@@ -17,13 +17,14 @@ const (
 	unsupportedDatabase = "unsupported database type: %s"
 )
 
-func InjectRepository(loadConfig config.ApplicationConfig, container *container.Container) {
-	switch loadConfig.Database {
+func InjectRepository(container *applicationModel.Container) {
+	applicationConfig := config.AppConfig
+	switch applicationConfig.Database {
 	case constant.MongoDB:
-		container.RepositoryFactory = &mongoDBFactory.MongoDBFactory{MongoDBConfig: loadConfig.MongoDBConfig}
+		container.RepositoryFactory = &mongoDBFactory.MongoDBFactory{MongoDBConfig: applicationConfig.MongoDBConfig}
 	// Add other database cases here as needed.
 	default:
-		logging.Logger(domainError.NewInternalError(location+".loadConfig.Database:", fmt.Sprintf(unsupportedDatabase, loadConfig.Database)))
+		logging.Logger(domainError.NewInternalError(location+".applicationConfig.Database:", fmt.Sprintf(unsupportedDatabase, applicationConfig.Database)))
 		application.GracefulShutdown(container)
 	}
 }

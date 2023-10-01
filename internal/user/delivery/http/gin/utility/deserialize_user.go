@@ -6,12 +6,11 @@ import (
 	"strings"
 
 	gin "github.com/gin-gonic/gin"
+	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
-	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
-	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
-
 	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
 	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
+	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
 const (
@@ -36,7 +35,7 @@ func DeserializeUser(userUseCase user.UserUseCase) gin.HandlerFunc {
 			return
 		}
 
-		applicationConfig := applicationModel.ApplicationConfig
+		applicationConfig := config.AppConfig
 		userID, validateTokenError := httpUtility.ValidateToken(accessToken, applicationConfig.AccessToken.PublicKey)
 		if validator.IsErrorNotNil(validateTokenError) {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": "fail", "message": validateTokenError.Error()})

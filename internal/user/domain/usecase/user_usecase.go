@@ -5,10 +5,10 @@ import (
 	"time"
 
 	"github.com/thanhpk/randstr"
+	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
-	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	commonUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
@@ -74,7 +74,7 @@ func (userUseCase UserUseCase) Register(ctx context.Context, userCreateData user
 		createdUser.Error = domainError.HandleError(createdUser.Error)
 		return createdUser
 	}
-	applicationConfig := applicationModel.ApplicationConfig
+	applicationConfig := config.AppConfig
 	templateName := applicationConfig.Email.UserConfirmationTemplateName
 	templatePath := applicationConfig.Email.UserConfirmationTemplatePath
 
@@ -160,7 +160,7 @@ func (userUseCase UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.C
 		return updatedUserPasswordError
 	}
 
-	applicationConfig := applicationModel.ApplicationConfig
+	applicationConfig := config.AppConfig
 	templateName := applicationConfig.Email.ForgottenPasswordTemplateName
 	templatePath := applicationConfig.Email.ForgottenPasswordTemplatePath
 	emailData := PrepareEmailData(ctx, fetchedUser.Name, forgottenPasswordUrl, forgottenPasswordSubject, tokenValue, templateName, templatePath)
@@ -185,7 +185,7 @@ func (userUseCase UserUseCase) ResetUserPassword(ctx context.Context, firstKey s
 
 func PrepareEmailData(ctx context.Context, userName string, url string, subject string,
 	tokenValue string, templateName string, templatePath string) commonModel.Result[userModel.EmailData] {
-	applicationConfig := applicationModel.ApplicationConfig
+	applicationConfig := config.AppConfig
 	userFirstName := domainUtility.UserFirstName(userName)
 	emailData := userModel.NewEmailData(applicationConfig.Email.ClientOriginUrl+url+tokenValue, templateName, templatePath, userFirstName, subject)
 	return commonModel.NewResultOnSuccess[userModel.EmailData](emailData)

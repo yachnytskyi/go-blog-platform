@@ -9,12 +9,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/thanhpk/randstr"
+	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	httpGinUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin/utility"
 	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
 	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
-	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
@@ -157,7 +157,7 @@ func (userController UserController) Login(ginContext *gin.Context) {
 		return
 	}
 
-	applicationConfig := applicationModel.ApplicationConfig
+	applicationConfig := config.AppConfig
 	accessToken, createTokenError := httpUtility.CreateToken(applicationConfig.AccessToken.ExpiredIn, userID, applicationConfig.AccessToken.PrivateKey)
 	if validator.IsErrorNotNil(createTokenError) {
 		jsonResponse := httpError.HandleError(createTokenError)
@@ -192,7 +192,7 @@ func (userController UserController) RefreshAccessToken(ginContext *gin.Context)
 		return
 	}
 
-	applicationConfig := applicationModel.ApplicationConfig
+	applicationConfig := config.AppConfig
 	userID, err := httpUtility.ValidateToken(cookie, applicationConfig.RefreshToken.PublicKey)
 	if validator.IsErrorNotNil(err) {
 		ginContext.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": err.Error()})

@@ -9,11 +9,11 @@ import (
 	"path/filepath"
 
 	"github.com/k3a/html2text"
+	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
-	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
+	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
+	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	"gopkg.in/gomail.v2"
 )
 
@@ -44,7 +44,7 @@ func ParseTemplateDirectory(templatePath string) (*template.Template, error) {
 }
 
 func SendEmail(ctx context.Context, user userModel.User, data userModel.EmailData) error {
-	applicationConfig := applicationModel.ApplicationConfig
+	applicationConfig := config.AppConfig
 	smtpPass := applicationConfig.Email.SMTPPassword
 	smtpUser := applicationConfig.Email.SMTPUser
 	smtpHost := applicationConfig.Email.SMTPHost
@@ -67,7 +67,7 @@ func SendEmail(ctx context.Context, user userModel.User, data userModel.EmailDat
 }
 
 func PrepareSendMessage(ctx context.Context, userEmail string, data userModel.EmailData) (*gomail.Message, error) {
-	applicationConfig := applicationModel.ApplicationConfig
+	applicationConfig := config.AppConfig
 
 	// Prepare data.
 	from := applicationConfig.Email.EmailFrom

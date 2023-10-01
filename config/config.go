@@ -9,6 +9,10 @@ import (
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
+var (
+	AppConfig ApplicationConfig
+)
+
 const (
 	location = "config.LoadConfig."
 )
@@ -64,20 +68,20 @@ type Email struct {
 	ForgottenPasswordTemplatePath string `mapstructure:"Forgotten_Password_Template_Path"`
 }
 
-func LoadConfig(path string) (config ApplicationConfig, err error) {
+func LoadConfig(path string) (unmarshalError error) {
 	viper.SetConfigFile(path)
 	viper.AutomaticEnv()
 	readInConfigError := viper.ReadInConfig()
 	if validator.IsErrorNotNil(readInConfigError) {
 		readInInternalError := domainError.NewInternalError(location+"ReadInConfig", readInConfigError.Error())
 		logging.Logger(readInInternalError)
-		return ApplicationConfig{}, readInInternalError
+		return readInInternalError
 	}
 	viper.SetDefault("Database", "MongoDB")
 	viper.SetDefault("Domain", "UseCase")
 	viper.SetDefault("MongoDB.Name", "golang_mongodb")
 	viper.SetDefault("MongoDB.URI", "mongodb://root:root@localhost:27017")
 	viper.SetDefault("Gin.Port", "8080")
-	err = viper.Unmarshal(&config)
+	unmarshalError = viper.Unmarshal(&AppConfig)
 	return
 }

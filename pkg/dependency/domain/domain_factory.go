@@ -19,13 +19,14 @@ const (
 	unsupportedDomain = "unsupported domain type: %s"
 )
 
-func InjectDomain(loadConfig config.ApplicationConfig, container *container.Container) {
-	switch loadConfig.Domain {
+func InjectDomain(container *container.Container) {
+	applicationConfig := config.AppConfig
+	switch applicationConfig.Domain {
 	case constant.UseCase:
 		container.DomainFactory = useCaseFactory.UseCaseFactory{}
 	// Add other domain options here as needed.
 	default:
-		logging.Logger(domainError.NewInternalError(location+".loadConfig.Domain:", fmt.Sprintf(unsupportedDomain, loadConfig.Domain)))
+		logging.Logger(domainError.NewInternalError(location+".loadConfig.Domain:", fmt.Sprintf(unsupportedDomain, applicationConfig.Domain)))
 		application.GracefulShutdown(container)
 	}
 }

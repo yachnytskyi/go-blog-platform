@@ -11,17 +11,16 @@ import (
 
 func CreateApplication(ctx context.Context) *applicationModel.Container {
 	container := applicationModel.Container{}
-	applicationConfig := applicationModel.ApplicationConfig
 
 	// Repositories.
-	repository.InjectRepository(applicationConfig, &container)
+	repository.InjectRepository(&container)
 	db := container.RepositoryFactory.NewRepository(ctx)
 	userRepository := container.RepositoryFactory.NewUserRepository(db)
 	postRepository := container.RepositoryFactory.NewPostRepository(db)
 	fmt.Println(userRepository, postRepository)
 
 	// Domains.
-	domain.InjectDomain(applicationConfig, &container)
+	domain.InjectDomain(&container)
 	userDomain := container.DomainFactory.NewUserRepository(userRepository)
 	postDomain := container.DomainFactory.NewPostRepository(postRepository)
 	fmt.Println(container)

@@ -51,6 +51,9 @@ func GetLimit(limit string) int {
 }
 
 func getSkip(page, limit int) int {
+	if validator.IsIntegerZero(page) {
+		return page
+	}
 	return (page - 1) * limit
 }
 

@@ -6,6 +6,7 @@ import (
 
 	"github.com/thanhpk/randstr"
 	config "github.com/yachnytskyi/golang-mongo-grpc/config"
+	"github.com/yachnytskyi/golang-mongo-grpc/config/constant"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
@@ -44,7 +45,7 @@ func (userUseCase UserUseCase) GetUserById(ctx context.Context, userID string) (
 }
 
 func (userUseCase UserUseCase) GetUserByEmail(ctx context.Context, email string) (userModel.User, error) {
-	validateEmailError := validateEmail(email, EmailField, TypeRequired, emailRegex, emailAllowedCharacters)
+	validateEmailError := validateEmail(email, constant.FieldRequired, emailRegex)
 	if validator.IsValueNotNil(validateEmailError) {
 		validateEmailError := domainError.HandleError(validateEmailError)
 		return userModel.User{}, validateEmailError
@@ -132,7 +133,7 @@ func (userUseCase UserUseCase) Login(ctx context.Context, userLoginData userMode
 func (userUseCase UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.Context, email string, firstKey string, firstValue string,
 	secondKey string, secondValue time.Time) error {
 
-	validateEmailError := validateEmail(email, EmailField, TypeRequired, emailRegex, emailAllowedCharacters)
+	validateEmailError := validateEmail(email, EmailField, emailRegex)
 	if validator.IsValueNotNil(validateEmailError) {
 		validateEmailError := domainError.HandleError(validateEmailError)
 		return validateEmailError

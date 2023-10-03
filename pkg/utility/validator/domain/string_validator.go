@@ -7,7 +7,6 @@ import (
 
 	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
 func SanitizeString(data string) string {
@@ -24,9 +23,9 @@ func SanitizeAndToLowerString(data string) string {
 }
 
 func ValidateField(field, fieldName, fieldType, fieldRegex, errorMessage string) domainError.ValidationError {
-	if IsStringLengthNotValid(field, constant.MinLength, constant.MaxLength) {
-		return domainError.NewValidationError(fieldName, fieldType, fmt.Sprintf(constant.StringAllowedLength, constant.MinLength, constant.MaxLength))
-	} else if CheckSpecialCharactersString(field, fieldRegex) {
+	if IsStringLengthNotValid(field, constant.MinStringLength, constant.MaxStringLength) {
+		return domainError.NewValidationError(fieldName, fieldType, fmt.Sprintf(constant.StringAllowedLength, constant.MinStringLength, constant.MaxStringLength))
+	} else if IsStringCharactersNotValid(field, fieldRegex) {
 		return domainError.NewValidationError(fieldName, fieldType, errorMessage)
 	}
 	return domainError.ValidationError{}
@@ -46,18 +45,12 @@ func IsStringLengthNotValid(checkedString string, minLength int, maxLength int) 
 	return false
 }
 
-func CheckSpecialCharactersString(checkedString string, regexString string) bool {
-	if validator.IsBooleanNotTrue(regexp.MustCompile(regexString).MatchString(checkedString)) {
-		return true
-	}
-	return false
+func IsStringCharactersValid(checkedString string, regexString string) bool {
+	return regexp.MustCompile(regexString).MatchString(checkedString)
 }
 
-func CheckNoSpecialCharactersString(checkedString string, regexString string) bool {
-	if validator.IsBooleanNotTrue(regexp.MustCompile(regexString).MatchString(checkedString)) {
-		return false
-	}
-	return true
+func IsStringCharactersNotValid(checkedString string, regexString string) bool {
+	return !regexp.MustCompile(regexString).MatchString(checkedString)
 }
 
 func CheckCorrectLengthOptionalString(checkedString string, minLength int, maxLength int) bool {
@@ -72,18 +65,4 @@ func CheckIncorrectLengthOptionalString(checkedString string, minLength int, max
 		return true
 	}
 	return false
-}
-
-func CheckSpecialCharactersOptionalString(checkedString string, regexString string) bool {
-	if validator.IsBooleanNotTrue(regexp.MustCompile(regexString).MatchString(checkedString)) {
-		return true
-	}
-	return false
-}
-
-func CheckNoSpecialCharactersOptionalString(checkedString string, regexString string) bool {
-	if validator.IsBooleanNotTrue(regexp.MustCompile(regexString).MatchString(checkedString)) {
-		return false
-	}
-	return true
 }

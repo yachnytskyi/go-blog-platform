@@ -12,11 +12,14 @@ const (
 	MaxItemsPerPage = 100
 
 	// Regex patterns.
-	StringRegex      = `^[a-zA-z0-9 !@#$€%^&*{}|()=/\;:+-_~'"<>,.? \t]*$`
-	TitleStringRegex = `^[a-zA-z0-9 !()=[]:;+-_~'",.? \t]*$`
-	TextStringRegex  = `^[a-zA-z0-9 !@#$€%^&*{}][|/\()=/\;:+-_~'"<>,.? \t]*$`
-	MinLength        = 4
-	MaxLength        = 40
+	StringRegex             = `^[a-zA-z0-9 !@#$€%^&*{}|()=/\;:+-_~'"<>,.? \t]*$`
+	TitleStringRegex        = `^[a-zA-z0-9 !()=[]:;+-_~'",.? \t]*$`
+	TextStringRegex         = `^[a-zA-z0-9 !@#$€%^&*{}][|/\()=/\;:+-_~'"<>,.? \t]*$`
+	MinStringLength         = 4
+	MaxStringLength         = 40
+	MinOptionalStringLength = 0
+	FieldRequired           = "required"
+	FieldOptional           = "optional"
 
 	// User Notifications.
 	SendingEmailNotification = "We sent an email with a verification code to "

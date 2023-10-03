@@ -8,7 +8,6 @@ import (
 	mongoDBFactory "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/data/repository/mongo"
 	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-	application "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/application"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 )
 
@@ -25,6 +24,6 @@ func InjectRepository(container *applicationModel.Container) {
 	// Add other database cases here as needed.
 	default:
 		logging.Logger(domainError.NewInternalError(location+".applicationConfig.Database:", fmt.Sprintf(unsupportedDatabase, applicationConfig.Core.Database)))
-		application.GracefulShutdown(container)
+		applicationModel.GracefulShutdown(container)
 	}
 }

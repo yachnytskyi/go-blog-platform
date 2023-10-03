@@ -33,24 +33,25 @@ const (
 	nameField     = "name"
 	EmailField    = "email"
 	passwordField = "password"
-	TypeRequired  = "required"
 )
 
 func validateUserCreate(userCreate userModel.UserCreate) common.Result[userModel.UserCreate] {
 	validationErrors := domainError.ValidationErrors{}
-	userCreate.Name = domainUtility.SanitizeString(userCreate.Name)
 	userCreate.Email = domainUtility.SanitizeAndToLowerString(userCreate.Email)
+	userCreate.Name = domainUtility.SanitizeString(userCreate.Name)
 	userCreate.Password = domainUtility.SanitizeString(userCreate.Password)
 	userCreate.PasswordConfirm = domainUtility.SanitizeString(userCreate.PasswordConfirm)
 
-	validateFieldError := domainUtility.ValidateField(userCreate.Name, nameField, TypeRequired, usernameRegex, usernameAllowedCharacters)
+	validateFieldError := validateEmail(userCreate.Email, emailRegex)
 	if validator.IsValueNotNil(validateFieldError) {
 		validationErrors.ValidationErrors = append(validationErrors.ValidationErrors, validateFieldError)
 	}
-	validateFieldError = validateEmail(userCreate.Email, EmailField, emailRegex)
+
+	validateFieldError = domainUtility.ValidateField(userCreate.Name, nameField, usernameRegex, usernameAllowedCharacters)
 	if validator.IsValueNotNil(validateFieldError) {
 		validationErrors.ValidationErrors = append(validationErrors.ValidationErrors, validateFieldError)
 	}
+
 	validateFieldError = validatePassword(userCreate.Password, userCreate.PasswordConfirm, passwordField, usernameRegex)
 	if validator.IsValueNotNil(validateFieldError) {
 		validationErrors.ValidationErrors = append(validationErrors.ValidationErrors, validateFieldError)
@@ -65,7 +66,7 @@ func validateUserUpdate(userUpdate userModel.UserUpdate) common.Result[userModel
 	validationErrors := domainError.ValidationErrors{}
 	userUpdate.Name = domainUtility.SanitizeString(userUpdate.Name)
 
-	validateFieldError := domainUtility.ValidateField(userUpdate.Name, nameField, TypeRequired, usernameRegex, usernameAllowedCharacters)
+	validateFieldError := domainUtility.ValidateField(userUpdate.Name, nameField, usernameRegex, usernameAllowedCharacters)
 	if validator.IsValueNotNil(validateFieldError) {
 		validationErrors.ValidationErrors = append(validationErrors.ValidationErrors, validateFieldError)
 	}
@@ -80,11 +81,11 @@ func validateUserLogin(userLogin userModel.UserLogin) common.Result[userModel.Us
 	userLogin.Email = domainUtility.SanitizeAndToLowerString(userLogin.Email)
 	userLogin.Password = domainUtility.SanitizeString(userLogin.Password)
 
-	validateFieldError := validateEmail(userLogin.Email, EmailField, emailRegex)
+	validateFieldError := validateEmail(userLogin.Email, emailRegex)
 	if validator.IsValueNotNil(validateFieldError) {
 		validationErrors.ValidationErrors = append(validationErrors.ValidationErrors, validateFieldError)
 	}
-	validateFieldError = domainUtility.ValidateField(userLogin.Password, passwordField, TypeRequired, usernameRegex, passwordAllowedCharacters)
+	validateFieldError = domainUtility.ValidateField(userLogin.Password, passwordField, passwordRegex, passwordAllowedCharacters)
 	if validator.IsValueNotNil(validateFieldError) {
 		validationErrors.ValidationErrors = append(validationErrors.ValidationErrors, validateFieldError)
 	}
@@ -98,7 +99,7 @@ func validateUserForgottenPassword(userForgottenPassword userModel.UserForgotten
 	validationErrors := domainError.ValidationErrors{}
 	userForgottenPassword.Email = domainUtility.SanitizeAndToLowerString(userForgottenPassword.Email)
 
-	validateFieldError := validateEmail(userForgottenPassword.Email, EmailField, emailRegex)
+	validateFieldError := validateEmail(userForgottenPassword.Email, emailRegex)
 	if validator.IsValueNotNil(validateFieldError) {
 		validationErrors.ValidationErrors = append(validationErrors.ValidationErrors, validateFieldError)
 	}
@@ -113,7 +114,7 @@ func validateResetPassword(userResetPassword userModel.UserResetPassword) common
 	userResetPassword.Password = domainUtility.SanitizeString(userResetPassword.Password)
 	userResetPassword.PasswordConfirm = domainUtility.SanitizeString(userResetPassword.PasswordConfirm)
 
-	validateFieldError := validatePassword(userResetPassword.Password, userResetPassword.PasswordConfirm, passwordField, usernameRegex)
+	validateFieldError := validatePassword(userResetPassword.Password, userResetPassword.PasswordConfirm, passwordField, passwordRegex)
 	if validator.IsValueNotNil(validateFieldError) {
 		validationErrors.ValidationErrors = append(validationErrors.ValidationErrors, validateFieldError)
 	}
@@ -123,23 +124,29 @@ func validateResetPassword(userResetPassword userModel.UserResetPassword) common
 	return common.NewResultOnSuccess[userModel.UserResetPassword](userResetPassword)
 }
 
-func validateEmail(field, fieldName, fieldRegex string) domainError.ValidationError {
-	if domainUtility.IsStringLengthNotValid(field, constant.MinStringLength, constant.MaxStringLength) {
-		return domainError.NewValidationError(fieldName, constant.FieldRequired, fmt.Sprintf(constant.StringAllowedLength, constant.MinStringLength, constant.MaxStringLength))
-	} else if domainUtility.IsStringCharactersNotValid(field, fieldRegex) {
-		return domainError.NewValidationError(fieldName, constant.FieldRequired, emailAllowedCharacters)
-	} else if isEmailDomainNotValid(field) {
-		return domainError.NewValidationError(fieldName, constant.FieldRequired, invalidEmailDomain)
+func validateEmail(email, fieldRegex string) domainError.ValidationError {
+	if domainUtility.IsStringLengthNotValid(email, constant.MinStringLength, constant.MaxStringLength) {
+		notification := fmt.Sprintf(constant.StringAllowedLength, constant.MinStringLength, constant.MaxStringLength)
+		return domainError.NewValidationError(EmailField, constant.FieldRequired, notification)
+	}
+	if domainUtility.IsStringCharactersNotValid(email, fieldRegex) {
+		return domainError.NewValidationError(EmailField, constant.FieldRequired, emailAllowedCharacters)
+	}
+	if isEmailDomainNotValid(email) {
+		return domainError.NewValidationError(EmailField, constant.FieldRequired, invalidEmailDomain)
 	}
 	return domainError.ValidationError{}
 }
 
 func validatePassword(password, passwordConfirm, fieldName, fieldRegex string) domainError.ValidationError {
 	if domainUtility.IsStringLengthNotValid(password, constant.MinStringLength, constant.MaxStringLength) {
-		return domainError.NewValidationError(fieldName, constant.FieldRequired, fmt.Sprintf(constant.StringAllowedLength, constant.MinStringLength, constant.MaxStringLength))
-	} else if domainUtility.IsStringCharactersNotValid(password, fieldRegex) {
+		notification := fmt.Sprintf(constant.StringAllowedLength, constant.MinStringLength, constant.MaxStringLength)
+		return domainError.NewValidationError(fieldName, constant.FieldRequired, notification)
+	}
+	if domainUtility.IsStringCharactersNotValid(password, fieldRegex) {
 		return domainError.NewValidationError(fieldName, constant.FieldRequired, passwordAllowedCharacters)
-	} else if validator.AreStringsNotEqual(password, passwordConfirm) {
+	}
+	if validator.AreStringsNotEqual(password, passwordConfirm) {
 		return domainError.NewValidationError(fieldName, constant.FieldRequired, passwordsDoNotMatch)
 	}
 	return domainError.ValidationError{}

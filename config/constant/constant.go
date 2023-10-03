@@ -26,6 +26,7 @@ const (
 
 	// Error Messages.
 	StringAllowedLength                        = "can be between %d and %d characters long"
+	StringOptionalAllowedLength                = "cannot be more than %d characters"
 	EmailAlreadyExists                         = "user with this email already exists"
 	SendingEmailWithIntstructionsNotifications = "We sent you an email with needed instructions"
 	InternalErrorNotification                  = "something went wrong, please repeat later"

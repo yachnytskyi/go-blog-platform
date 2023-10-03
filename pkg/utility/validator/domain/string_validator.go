@@ -22,11 +22,24 @@ func SanitizeAndToLowerString(data string) string {
 	return strings.ToLower(data)
 }
 
-func ValidateField(field, fieldName, fieldType, fieldRegex, errorMessage string) domainError.ValidationError {
+func ValidateField(field, fieldName, fieldRegex, notification string) domainError.ValidationError {
 	if IsStringLengthNotValid(field, constant.MinStringLength, constant.MaxStringLength) {
-		return domainError.NewValidationError(fieldName, fieldType, fmt.Sprintf(constant.StringAllowedLength, constant.MinStringLength, constant.MaxStringLength))
-	} else if IsStringCharactersNotValid(field, fieldRegex) {
-		return domainError.NewValidationError(fieldName, fieldType, errorMessage)
+		notification = fmt.Sprintf(constant.StringAllowedLength, constant.MinStringLength, constant.MaxStringLength)
+		return domainError.NewValidationError(fieldName, constant.FieldRequired, notification)
+	}
+	if IsStringCharactersNotValid(field, fieldRegex) {
+		return domainError.NewValidationError(fieldName, constant.FieldRequired, notification)
+	}
+	return domainError.ValidationError{}
+}
+
+func ValidateOptionalField(field, fieldName, fieldType, fieldRegex, notification string) domainError.ValidationError {
+	if IsStringLengthNotValid(field, constant.MinOptionalStringLength, constant.MaxStringLength) {
+		notification = fmt.Sprintf(constant.StringOptionalAllowedLength, constant.MaxStringLength)
+		return domainError.NewValidationError(fieldName, fieldType, notification)
+	}
+	if IsStringCharactersNotValid(field, fieldRegex) {
+		return domainError.NewValidationError(fieldName, fieldType, notification)
 	}
 	return domainError.ValidationError{}
 }

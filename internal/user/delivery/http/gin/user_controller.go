@@ -30,7 +30,8 @@ func NewUserController(userUseCase user.UserUseCase) UserController {
 	return UserController{userUseCase: userUseCase}
 }
 
-func (userController UserController) GetAllUsers(ginContext *gin.Context) {
+func (userController UserController) GetAllUsers(controllerContext interface{}) {
+	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
 	page := ginContext.DefaultQuery("page", constant.DefaultPage)

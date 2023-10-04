@@ -16,7 +16,10 @@ func NewUserRouter(userController UserController) UserRouter {
 
 func (userRouter *UserRouter) UserRouter(routerGroup *gin.RouterGroup, userUseCase user.UserUseCase) {
 	router := routerGroup.Group("/users")
-	router.GET("/", userRouter.userController.GetAllUsers)
+	router.GET("/", func(c *gin.Context) {
+		userRouter.userController.GetAllUsers(c)
+	})
+
 	router.GET("/:userID", userRouter.userController.GetUserById)
 	router.POST("/login", userRouter.userController.Login)
 	router.POST("/register", userRouter.userController.Register)

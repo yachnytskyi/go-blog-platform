@@ -35,7 +35,7 @@ var (
 
 	postRepository postPackage.PostRepository
 	postUseCase    postPackage.PostUseCase
-	postController postHttpGinPackage.PostHandler
+	postController postHttpGinPackage.PostController
 	postRouter     postHttpGinPackage.PostRouter
 )
 
@@ -61,7 +61,7 @@ func init() {
 
 	// Handlers
 	userController = userHttpGinPackage.NewUserController(userUseCase)
-	postController = postHttpGinPackage.NewPostHandler(postUseCase)
+	postController = postHttpGinPackage.NewPostController(postUseCase)
 
 	// Routers.
 	userRouter = userHttpGinPackage.NewUserRouter(userController)

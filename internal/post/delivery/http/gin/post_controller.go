@@ -14,15 +14,15 @@ import (
 	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
 )
 
-type PostHandler struct {
+type PostController struct {
 	postUseCase post.PostUseCase
 }
 
-func NewPostHandler(postUseCase post.PostUseCase) PostHandler {
-	return PostHandler{postUseCase: postUseCase}
+func NewPostController(postUseCase post.PostUseCase) PostController {
+	return PostController{postUseCase: postUseCase}
 }
 
-func (postHandler *PostHandler) GetAllPosts(ginContext *gin.Context) {
+func (postController PostController) GetAllPosts(ginContext *gin.Context) {
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
 	page := ginContext.DefaultQuery("page", "1")
@@ -42,7 +42,7 @@ func (postHandler *PostHandler) GetAllPosts(ginContext *gin.Context) {
 		return
 	}
 
-	fetchedPosts, err := postHandler.postUseCase.GetAllPosts(ctx, intPage, intLimit)
+	fetchedPosts, err := postController.postUseCase.GetAllPosts(ctx, intPage, intLimit)
 	if err != nil {
 		ginContext.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
@@ -50,12 +50,12 @@ func (postHandler *PostHandler) GetAllPosts(ginContext *gin.Context) {
 	ginContext.JSON(http.StatusOK, postViewModel.PostsToPostsViewMapper(fetchedPosts))
 }
 
-func (postHandler *PostHandler) GetPostById(ginContext *gin.Context) {
+func (postController PostController) GetPostById(ginContext *gin.Context) {
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
 	postID := ginContext.Param("postID")
 
-	fetchedPost, err := postHandler.postUseCase.GetPostById(ctx, postID)
+	fetchedPost, err := postController.postUseCase.GetPostById(ctx, postID)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "Id exists") {
@@ -69,7 +69,7 @@ func (postHandler *PostHandler) GetPostById(ginContext *gin.Context) {
 	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "data": postViewModel.PostToPostViewMapper(fetchedPost)})
 }
 
-func (postHandler *PostHandler) CreatePost(ginContext *gin.Context) {
+func (postController PostController) CreatePost(ginContext *gin.Context) {
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
 	var createdPostData *postModel.PostCreate = new(postModel.PostCreate)
@@ -82,7 +82,7 @@ func (postHandler *PostHandler) CreatePost(ginContext *gin.Context) {
 		ginContext.JSON(http.StatusBadRequest, err.Error())
 	}
 
-	createdPost, err := postHandler.postUseCase.CreatePost(ctx, createdPostData)
+	createdPost, err := postController.postUseCase.CreatePost(ctx, createdPostData)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "sorry, but this title already exists. Please choose another one") {
@@ -96,7 +96,7 @@ func (postHandler *PostHandler) CreatePost(ginContext *gin.Context) {
 	ginContext.JSON(http.StatusCreated, gin.H{"status": "success", "data": createdPost})
 }
 
-func (postHandler *PostHandler) UpdatePostById(ginContext *gin.Context) {
+func (postController PostController) UpdatePostById(ginContext *gin.Context) {
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
 	postID := ginContext.Param("postID")
@@ -111,7 +111,7 @@ func (postHandler *PostHandler) UpdatePostById(ginContext *gin.Context) {
 		return
 	}
 
-	updatedPost, err := postHandler.postUseCase.UpdatePostById(ctx, postID, updatedPostData, currentUserID)
+	updatedPost, err := postController.postUseCase.UpdatePostById(ctx, postID, updatedPostData, currentUserID)
 	if err != nil {
 		if strings.Contains(err.Error(), "Id exists") {
 			ginContext.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": err.Error()})
@@ -127,12 +127,12 @@ func (postHandler *PostHandler) UpdatePostById(ginContext *gin.Context) {
 	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "data": updatedPost})
 }
 
-func (postHandler *PostHandler) DeletePostByID(ginContext *gin.Context) {
+func (postController PostController) DeletePostByID(ginContext *gin.Context) {
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
 	postID := ginContext.Param("postID")
 	currentUserID := ginContext.MustGet("userID").(string)
-	err := postHandler.postUseCase.DeletePostByID(ctx, postID, currentUserID)
+	err := postController.postUseCase.DeletePostByID(ctx, postID, currentUserID)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "Id exists") {
@@ -146,6 +146,5 @@ func (postHandler *PostHandler) DeletePostByID(ginContext *gin.Context) {
 		ginContext.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
-
 	ginContext.JSON(http.StatusNoContent, nil)
 }

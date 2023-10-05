@@ -1,14 +1,11 @@
-package utility
+package middleware
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 
 	gin "github.com/gin-gonic/gin"
 	config "github.com/yachnytskyi/golang-mongo-grpc/config"
-	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
-	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
 	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
@@ -19,7 +16,7 @@ const (
 	bearer        = "Bearer"
 )
 
-func DeserializeUser(userUseCase user.UserUseCase) gin.HandlerFunc {
+func DeserializeUser() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var accessToken string
 		cookie, cookieError := ctx.Cookie(accessToToken)
@@ -41,17 +38,7 @@ func DeserializeUser(userUseCase user.UserUseCase) gin.HandlerFunc {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": "fail", "message": validateTokenError.Error()})
 			return
 		}
-
-		context := ctx.Request.Context()
-		user, getUSerByIdError := userUseCase.GetUserById(context, fmt.Sprint(userID))
-		if validator.IsErrorNotNil(getUSerByIdError) {
-
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": "fail", "message": "You are not logged in"})
-			return
-		}
-
-		userMappedToUserView := userViewModel.UserToUserViewMapper(user)
-		ctx.Set("currentUser", userMappedToUserView)
+		ctx.Set("userID", userID)
 		ctx.Next()
 	}
 }

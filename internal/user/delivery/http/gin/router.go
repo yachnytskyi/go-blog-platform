@@ -2,8 +2,8 @@ package gin
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
-	httpGinUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin/utility"
+	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
+	httpGinUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin/utility/middleware"
 )
 
 type UserRouter struct {
@@ -26,8 +26,8 @@ func (userRouter *UserRouter) UserRouter(routerGroup *gin.RouterGroup, userUseCa
 	router.POST("/forgotten-password", userRouter.userController.ForgottenPassword)
 	router.PATCH("/reset-password/:resetToken", userRouter.userController.ResetUserPassword)
 
-	router.Use(httpGinUtility.DeserializeUser(userUseCase))
-	router.GET("/me", userRouter.userController.GetMe)
+	router.Use(httpGinUtility.DeserializeUser())
+	router.GET("/current_user", userRouter.userController.GetCurrentUser)
 	router.PUT("/update", userRouter.userController.UpdateUserById)
 	router.DELETE("/delete", userRouter.userController.Delete)
 	router.GET("/refresh", userRouter.userController.RefreshAccessToken)

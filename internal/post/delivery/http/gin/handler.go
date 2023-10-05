@@ -11,7 +11,6 @@ import (
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
 	postViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/model"
 	postModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
-	ginUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin/utility"
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 )
 
@@ -103,11 +102,11 @@ func (postHandler *PostHandler) UpdatePostById(ginContext *gin.Context) {
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
 	postID := ginContext.Param("postID")
-	currentUserID := ginUtility.GetCurrentUserID(ginContext)
+	currentUserID := ginContext.MustGet("userID").(string)
 
 	var updatedPostData *postModel.PostUpdate = new(postModel.PostUpdate)
 	updatedPostData.PostID = ginContext.Param("postID")
-	updatedPostData.UserID = ginUtility.GetCurrentUserID(ginContext)
+	updatedPostData.UserID = currentUserID
 	err := ginContext.ShouldBindJSON(&updatedPostData)
 	if err != nil {
 		ginContext.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
@@ -134,8 +133,7 @@ func (postHandler *PostHandler) DeletePostByID(ginContext *gin.Context) {
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
 	postID := ginContext.Param("postID")
-	currentUserID := ginUtility.GetCurrentUserID(ginContext)
-
+	currentUserID := ginContext.MustGet("userID").(string)
 	err := postHandler.postUseCase.DeletePostByID(ctx, postID, currentUserID)
 
 	if err != nil {

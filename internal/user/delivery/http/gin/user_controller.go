@@ -12,7 +12,9 @@ import (
 	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
-	httpGinUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin/utility"
+	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
+
+	httpGinCookie "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin/utility/cookie"
 	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
 	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
 	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
@@ -53,16 +55,15 @@ func (userController UserController) GetAllUsers(controllerContext interface{}) 
 	ginContext.JSON(http.StatusOK, jsonResponse)
 }
 
-func (userController UserController) GetMe(ginContext *gin.Context) {
-	currentUserView := ginContext.MustGet("currentUser").(userViewModel.UserView)
-	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": currentUserView}})
+func (userController UserController) GetCurrentUser(ginContext *gin.Context) {
+	currentUser := userController.GetCurrentUserFromContext(ginContext)
+	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": userViewModel.UserToUserViewMapper(currentUser)}})
 }
 
 func (userController UserController) GetUserById(ginContext *gin.Context) {
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
 	userID := ginContext.Param("userID")
-	defer cancel()
 	fetchedUser, err := userController.userUseCase.GetUserById(ctx, userID)
 	if validator.IsErrorNotNil(err) {
 		if strings.Contains(err.Error(), "Id exists") {
@@ -173,7 +174,7 @@ func (userController UserController) Login(ginContext *gin.Context) {
 		ginContext.JSON(http.StatusBadRequest, jsonResponse)
 		return
 	}
-	httpGinUtility.LoginSetCookies(ginContext, accessToken, applicationConfig.AccessToken.MaxAge*60, refreshToken, applicationConfig.AccessToken.MaxAge*60)
+	httpGinCookie.LoginSetCookies(ginContext, accessToken, applicationConfig.AccessToken.MaxAge*60, refreshToken, applicationConfig.AccessToken.MaxAge*60)
 	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
 }
 
@@ -211,7 +212,7 @@ func (userController UserController) RefreshAccessToken(ginContext *gin.Context)
 		return
 	}
 
-	httpGinUtility.RefreshAccessTokenSetCookies(ginContext, accessToken, applicationConfig.AccessToken.MaxAge*60)
+	httpGinCookie.RefreshAccessTokenSetCookies(ginContext, accessToken, applicationConfig.AccessToken.MaxAge*60)
 	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
 }
 
@@ -268,12 +269,26 @@ func (userController UserController) ResetUserPassword(ginContext *gin.Context) 
 		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 	}
 
-	httpGinUtility.ResetUserPasswordSetCookies(ginContext)
+	httpGinCookie.ResetUserPasswordSetCookies(ginContext)
 	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "message": "Congratulations! Your password was updated successfully! Please sign in again."})
 
 }
 
 func (userController UserController) Logout(ginContext *gin.Context) {
-	httpGinUtility.LogoutSetCookies(ginContext)
+	httpGinCookie.LogoutSetCookies(ginContext)
 	ginContext.JSON(http.StatusOK, gin.H{"status": "success"})
+}
+
+func (userController UserController) GetCurrentUserFromContext(ginContext *gin.Context) userModel.User {
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
+	defer cancel()
+	currentUserID := ginContext.MustGet("userID").(string)
+	currentUser, getUserByIdError := userController.userUseCase.GetUserById(ctx, currentUserID)
+	if validator.IsErrorNotNil(getUserByIdError) {
+		jsonResponse := httpError.HandleError(getUserByIdError)
+		httpModel.SetStatus(&jsonResponse)
+		ginContext.JSON(http.StatusBadRequest, jsonResponse)
+		return userModel.User{}
+	}
+	return currentUser
 }

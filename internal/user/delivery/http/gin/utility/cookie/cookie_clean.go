@@ -1,4 +1,4 @@
-package utility
+package cookie
 
 import "github.com/gin-gonic/gin"
 

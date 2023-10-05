@@ -85,7 +85,7 @@ func startGinServer() {
 	server.Use(cors.New(corsConfig))
 	router := server.Group("/api")
 	userRouter.UserRouter(router, userUseCase)
-	postRouter.PostRouter(router, userUseCase)
+	postRouter.PostRouter(router)
 	log.Fatal(server.Run(":" + applicationConfig.Gin.Port))
 }
 

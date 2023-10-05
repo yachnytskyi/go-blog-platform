@@ -4,6 +4,27 @@ import (
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 )
 
+func UserRepositoryToUsersRepositoryMapper(usersRepository []UserRepository) UsersRepository {
+	users := make([]UserRepository, 0, len(usersRepository))
+	for _, userRepository := range usersRepository {
+		users = append(users, userRepository)
+	}
+	return UsersRepository{
+		Users: users,
+	}
+}
+
+func UsersRepositoryToUsersMapper(usersRepository UsersRepository) userModel.Users {
+	users := make([]userModel.User, len(usersRepository.Users))
+	for index, userRepository := range usersRepository.Users {
+		users[index] = UserRepositoryToUserMapper(userRepository)
+	}
+	return userModel.Users{
+		PaginationResponse: usersRepository.PaginationResponse,
+		Users:              users,
+	}
+}
+
 func UserCreateToUserCreateRepositoryMapper(userCreate userModel.UserCreate) UserCreateRepository {
 	return UserCreateRepository{
 		Name:             userCreate.Name,
@@ -34,26 +55,5 @@ func UserRepositoryToUserMapper(userRepository UserRepository) userModel.User {
 		Verified:  userRepository.Verified,
 		CreatedAt: userRepository.CreatedAt,
 		UpdatedAt: userRepository.UpdatedAt,
-	}
-}
-
-func UserRepositoryToUsersRepositoryMapper(usersRepository []UserRepository) UsersRepository {
-	users := make([]UserRepository, 0, len(usersRepository))
-	for _, userRepository := range usersRepository {
-		users = append(users, userRepository)
-	}
-	return UsersRepository{
-		Users: users,
-	}
-}
-
-func UsersRepositoryToUsersMapper(usersRepository UsersRepository) userModel.Users {
-	users := make([]userModel.User, len(usersRepository.Users))
-	for index, userRepository := range usersRepository.Users {
-		users[index] = UserRepositoryToUserMapper(userRepository)
-	}
-	return userModel.Users{
-		PaginationResponse: usersRepository.PaginationResponse,
-		Users:              users,
 	}
 }

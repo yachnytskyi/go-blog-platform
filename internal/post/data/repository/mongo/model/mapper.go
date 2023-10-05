@@ -12,6 +12,14 @@ const (
 	location = "Post.Data.Repository.MongoDB."
 )
 
+func PostsRepositoryToPostsMapper(postsRepository []*PostRepository) []*postModel.Post {
+	posts := make([]*postModel.Post, len(postsRepository))
+	for index, postRepository := range postsRepository {
+		posts[index] = PostRepositoryToPostMapper(postRepository)
+	}
+	return posts
+}
+
 func PostRepositoryToPostMapper(postRepository *PostRepository) *postModel.Post {
 	return &postModel.Post{
 		PostID:    postRepository.PostID.Hex(),

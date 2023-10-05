@@ -55,10 +55,10 @@ func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int,
 
 	defer cursor.Close(ctx)
 
-	var fetchedPosts []*postModel.Post
+	var fetchedPosts []*postRepositoryModel.PostRepository
 
 	for cursor.Next(ctx) {
-		post := &postModel.Post{}
+		post := &postRepositoryModel.PostRepository{}
 		err := cursor.Decode(post)
 
 		if validator.IsErrorNotNil(err) {
@@ -78,9 +78,8 @@ func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int,
 			Posts: make([]*postModel.Post, 0),
 		}, nil
 	}
-
 	return &postModel.Posts{
-		Posts: fetchedPosts,
+		Posts: postRepositoryModel.PostsRepositoryToPostsMapper(fetchedPosts),
 	}, nil
 }
 
@@ -89,7 +88,7 @@ func (postRepository *PostRepository) GetPostById(ctx context.Context, postID st
 
 	query := bson.M{"_id": postIDMappedToMongoDB}
 
-	var fetchedPost *postModel.Post
+	var fetchedPost *postRepositoryModel.PostRepository
 
 	err := postRepository.collection.FindOne(ctx, query).Decode(&fetchedPost)
 	if validator.IsErrorNotNil(err) {
@@ -99,8 +98,7 @@ func (postRepository *PostRepository) GetPostById(ctx context.Context, postID st
 
 		return nil, err
 	}
-
-	return fetchedPost, nil
+	return postRepositoryModel.PostRepositoryToPostMapper(fetchedPost), nil
 }
 
 func (postRepository *PostRepository) CreatePost(ctx context.Context, post *postModel.PostCreate) (*postModel.Post, error) {
@@ -129,13 +127,14 @@ func (postRepository *PostRepository) CreatePost(ctx context.Context, post *post
 		return nil, errors.New("could not create an index for a title")
 	}
 
-	var createdPost *postModel.Post
+	var createdPost *postRepositoryModel.PostRepository
 	query := bson.M{"_id": result.InsertedID}
 	err = postRepository.collection.FindOne(ctx, query).Decode(&createdPost)
 	if validator.IsErrorNotNil(err) {
 		return nil, err
 	}
-	return createdPost, nil
+
+	return postRepositoryModel.PostRepositoryToPostMapper(createdPost), nil
 }
 
 func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID string, post *postModel.PostUpdate) (*postModel.Post, error) {

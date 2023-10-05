@@ -54,7 +54,7 @@ func (userController UserController) GetAllUsers(controllerContext interface{}) 
 }
 
 func (userController UserController) GetCurrentUser(ginContext *gin.Context) {
-	currentUser := userController.GetCurrentUserFromContext(ginContext)
+	currentUser := ginContext.MustGet("user").(userViewModel.UserView)
 	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": currentUser}})
 }
 
@@ -176,13 +176,12 @@ func (userController UserController) Login(ginContext *gin.Context) {
 
 func (userController UserController) RefreshAccessToken(ginContext *gin.Context) {
 	message := "could not refresh access token"
-	currentUserView := userController.GetCurrentUserFromContext(ginContext)
+	currentUser := ginContext.MustGet("user").(userViewModel.UserView)
 
-	if validator.IsValueNil(currentUserView) {
+	if validator.IsValueNil(currentUser) {
 		ginContext.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": message})
 		return
 	}
-
 	cookie, err := ginContext.Cookie("refresh_token")
 
 	if validator.IsErrorNotNil(err) {
@@ -275,16 +274,16 @@ func (userController UserController) Logout(ginContext *gin.Context) {
 	ginContext.JSON(http.StatusOK, gin.H{"status": "success"})
 }
 
-func (userController UserController) GetCurrentUserFromContext(ginContext *gin.Context) userViewModel.UserView {
-	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
-	defer cancel()
-	currentUserID := ginContext.MustGet("userID").(string)
-	currentUser, getUserByIdError := userController.userUseCase.GetUserById(ctx, currentUserID)
-	if validator.IsErrorNotNil(getUserByIdError) {
-		jsonResponse := httpError.HandleError(getUserByIdError)
-		httpModel.SetStatus(&jsonResponse)
-		ginContext.JSON(http.StatusBadRequest, jsonResponse)
-		return userViewModel.UserView{}
-	}
-	return userViewModel.UserToUserViewMapper(currentUser)
-}
+// func (userController UserController) GetCurrentUserFromContext(ginContext *gin.Context) userViewModel.UserView {
+// 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
+// 	defer cancel()
+// 	currentUserID := ginContext.MustGet("userID").(string)
+// 	currentUser, getUserByIdError := userController.userUseCase.GetUserById(ctx, currentUserID)
+// 	if validator.IsErrorNotNil(getUserByIdError) {
+// 		jsonResponse := httpError.HandleError(getUserByIdError)
+// 		httpModel.SetStatus(&jsonResponse)
+// 		ginContext.JSON(http.StatusBadRequest, jsonResponse)
+// 		return userViewModel.UserView{}
+// 	}
+// 	return userViewModel.UserToUserViewMapper(currentUser)
+// }

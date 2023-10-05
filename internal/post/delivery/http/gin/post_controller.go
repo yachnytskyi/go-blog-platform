@@ -11,7 +11,7 @@ import (
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
 	postViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/model"
 	postModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
-	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
+	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
 )
 
 type PostHandler struct {
@@ -43,12 +43,10 @@ func (postHandler *PostHandler) GetAllPosts(ginContext *gin.Context) {
 	}
 
 	fetchedPosts, err := postHandler.postUseCase.GetAllPosts(ctx, intPage, intLimit)
-
 	if err != nil {
 		ginContext.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
-
 	ginContext.JSON(http.StatusOK, postViewModel.PostsToPostsViewMapper(fetchedPosts))
 }
 
@@ -75,7 +73,7 @@ func (postHandler *PostHandler) CreatePost(ginContext *gin.Context) {
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
 	var createdPostData *postModel.PostCreate = new(postModel.PostCreate)
-	currentUser := ginContext.MustGet("currentUser").(*userModel.User)
+	currentUser := ginContext.MustGet("user").(userViewModel.UserView)
 	createdPostData.User = currentUser.Name
 	createdPostData.UserID = currentUser.UserID
 

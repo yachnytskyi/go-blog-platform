@@ -1,15 +1,15 @@
 package user
 
 type UserController interface {
-	GetAllUsers(context interface{})
-	GetCurrentUser(context interface{})
-	GetUserById(context interface{})
-	Register(context interface{})
-	UpdateUserById(context interface{})
-	Delete(context interface{})
-	Login(context interface{})
-	RefreshAccessToken(context interface{})
-	ForgottenPassword(context interface{})
-	ResetUserPassword(context interface{})
-	Logout(context interface{})
+	GetAllUsers(controllerContext interface{})
+	GetCurrentUser(controllerContext interface{})
+	GetUserById(controllerContext interface{})
+	Register(controllerContext interface{})
+	UpdateUserById(controllerContext interface{})
+	Delete(controllerContext interface{})
+	Login(controllerContext interface{})
+	RefreshAccessToken(controllerContext interface{})
+	ForgottenPassword(controllerContext interface{})
+	ResetUserPassword(controllerContext interface{})
+	Logout(controllerContext interface{})
 }

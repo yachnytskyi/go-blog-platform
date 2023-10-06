@@ -7,7 +7,7 @@ import (
 )
 
 type UserRouter struct {
-	userController UserController
+	userController user.UserController
 }
 
 func NewUserRouter(userController UserController) UserRouter {
@@ -16,7 +16,6 @@ func NewUserRouter(userController UserController) UserRouter {
 
 func (userRouter *UserRouter) UserRouter(routerGroup *gin.RouterGroup, userUseCase user.UserUseCase) {
 	router := routerGroup.Group("/users")
-
 	router.GET("/", func(ginContext *gin.Context) {
 		userRouter.userController.GetAllUsers(ginContext)
 	})

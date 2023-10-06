@@ -1,10 +1,9 @@
 package user
 
-type UserDelivery interface {
+type UserController interface {
 	GetAllUsers(context interface{})
-	GetMe(context interface{})
+	GetCurrentUser(context interface{})
 	GetUserById(context interface{})
-	GetUserByEmail(context interface{})
 	Register(context interface{})
 	UpdateUserById(context interface{})
 	Delete(context interface{})

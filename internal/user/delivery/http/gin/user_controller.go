@@ -53,12 +53,14 @@ func (userController UserController) GetAllUsers(controllerContext interface{}) 
 	ginContext.JSON(http.StatusOK, jsonResponse)
 }
 
-func (userController UserController) GetCurrentUser(ginContext *gin.Context) {
+func (userController UserController) GetCurrentUser(controllerContext interface{}) {
+	ginContext := controllerContext.(*gin.Context)
 	currentUser := ginContext.MustGet("user").(userViewModel.UserView)
 	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": currentUser}})
 }
 
-func (userController UserController) GetUserById(ginContext *gin.Context) {
+func (userController UserController) GetUserById(controllerContext interface{}) {
+	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
 	userID := ginContext.Param("userID")
@@ -75,7 +77,8 @@ func (userController UserController) GetUserById(ginContext *gin.Context) {
 	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": userViewModel.UserToUserViewMapper(fetchedUser)}})
 }
 
-func (userController UserController) Register(ginContext *gin.Context) {
+func (userController UserController) Register(controllerContext interface{}) {
+	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
 	var createdUserViewData userViewModel.UserCreateView
@@ -100,7 +103,8 @@ func (userController UserController) Register(ginContext *gin.Context) {
 	ginContext.JSON(http.StatusCreated, jsonResponse)
 }
 
-func (userController UserController) UpdateUserById(ginContext *gin.Context) {
+func (userController UserController) UpdateUserById(controllerContext interface{}) {
+	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
 	currentUserID := ginContext.MustGet("userID").(string)
@@ -125,7 +129,8 @@ func (userController UserController) UpdateUserById(ginContext *gin.Context) {
 	ginContext.JSON(http.StatusCreated, jsonResponse)
 }
 
-func (userController UserController) Delete(ginContext *gin.Context) {
+func (userController UserController) Delete(controllerContext interface{}) {
+	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
 	currentUserID := ginContext.MustGet("userID").(string)
@@ -136,7 +141,8 @@ func (userController UserController) Delete(ginContext *gin.Context) {
 	ginContext.JSON(http.StatusNoContent, nil)
 }
 
-func (userController UserController) Login(ginContext *gin.Context) {
+func (userController UserController) Login(controllerContext interface{}) {
+	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
 	var userLoginViewData userViewModel.UserLoginView
@@ -174,7 +180,8 @@ func (userController UserController) Login(ginContext *gin.Context) {
 	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
 }
 
-func (userController UserController) RefreshAccessToken(ginContext *gin.Context) {
+func (userController UserController) RefreshAccessToken(controllerContext interface{}) {
+	ginContext := controllerContext.(*gin.Context)
 	message := "could not refresh access token"
 	currentUser := ginContext.MustGet("user").(userViewModel.UserView)
 
@@ -211,7 +218,8 @@ func (userController UserController) RefreshAccessToken(ginContext *gin.Context)
 	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
 }
 
-func (userController UserController) ForgottenPassword(ginContext *gin.Context) {
+func (userController UserController) ForgottenPassword(controllerContext interface{}) {
+	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
 	var userViewEmail userViewModel.UserForgottenPasswordView
@@ -243,7 +251,8 @@ func (userController UserController) ForgottenPassword(ginContext *gin.Context) 
 	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
 }
 
-func (userController UserController) ResetUserPassword(ginContext *gin.Context) {
+func (userController UserController) ResetUserPassword(controllerContext interface{}) {
+	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
 	resetToken := ginContext.Params.ByName("resetToken")
@@ -269,21 +278,8 @@ func (userController UserController) ResetUserPassword(ginContext *gin.Context) 
 
 }
 
-func (userController UserController) Logout(ginContext *gin.Context) {
+func (userController UserController) Logout(controllerContext interface{}) {
+	ginContext := controllerContext.(*gin.Context)
 	httpGinCookie.LogoutSetCookies(ginContext)
 	ginContext.JSON(http.StatusOK, gin.H{"status": "success"})
 }
-
-// func (userController UserController) GetCurrentUserFromContext(ginContext *gin.Context) userViewModel.UserView {
-// 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
-// 	defer cancel()
-// 	currentUserID := ginContext.MustGet("userID").(string)
-// 	currentUser, getUserByIdError := userController.userUseCase.GetUserById(ctx, currentUserID)
-// 	if validator.IsErrorNotNil(getUserByIdError) {
-// 		jsonResponse := httpError.HandleError(getUserByIdError)
-// 		httpModel.SetStatus(&jsonResponse)
-// 		ginContext.JSON(http.StatusBadRequest, jsonResponse)
-// 		return userViewModel.UserView{}
-// 	}
-// 	return userViewModel.UserToUserViewMapper(currentUser)
-// }

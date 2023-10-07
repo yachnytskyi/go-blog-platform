@@ -11,7 +11,7 @@ const (
 )
 
 func GracefulShutdown(ctx context.Context, container *Container) {
-	container.DeliveryFactory.CloseServer()
-	container.RepositoryFactory.CloseRepository()
+	container.DeliveryFactory.CloseServer(ctx)
+	container.RepositoryFactory.CloseRepository(ctx)
 	logging.Logger(completed)
 }

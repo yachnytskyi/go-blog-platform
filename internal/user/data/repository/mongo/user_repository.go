@@ -39,7 +39,7 @@ func NewUserRepository(db *mongo.Database) user.UserRepository {
 
 func (userRepository UserRepository) GetAllUsers(ctx context.Context, paginationQuery commonModel.PaginationQuery) commonModel.Result[userModel.Users] {
 	query := bson.M{}
-	totalUsers, countDocumentsError := userRepository.collection.CountDocuments(context.Background(), query)
+	totalUsers, countDocumentsError := userRepository.collection.CountDocuments(ctx, query)
 	if validator.IsErrorNotNil(countDocumentsError) {
 		countInternalError := domainError.NewInternalError(location+"GetAllUsers.collection.CountDocuments", countDocumentsError.Error())
 		logging.Logger(countInternalError)

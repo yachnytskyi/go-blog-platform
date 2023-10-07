@@ -46,9 +46,9 @@ func (mongoDBFactory *MongoDBFactory) NewRepository(ctx context.Context) interfa
 	return db
 }
 
-func (mongoDBFactory *MongoDBFactory) CloseRepository() {
+func (mongoDBFactory *MongoDBFactory) CloseRepository(ctx context.Context) {
 	if validator.IsValueNotNil(mongoDBFactory.MongoClient) {
-		mongoDBFactory.MongoClient.Disconnect(context.Background())
+		mongoDBFactory.MongoClient.Disconnect(ctx)
 		logging.Logger(successfully_closed)
 	}
 }

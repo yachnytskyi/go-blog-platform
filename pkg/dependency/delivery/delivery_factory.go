@@ -24,7 +24,8 @@ func InjectDelivery(ctx context.Context, container *applicationModel.Container) 
 		container.DeliveryFactory = &ginFactory.GinFactory{Gin: applicationConfig.Gin}
 	// Add other domain options here as needed.
 	default:
-		logging.Logger(domainError.NewInternalError(location+".loadConfig.Domain:", fmt.Sprintf(unsupportedDomain, applicationConfig.Core.Domain)))
+		notification := fmt.Sprintf(unsupportedDomain, applicationConfig.Core.Domain)
+		logging.Logger(domainError.NewInternalError(location+".loadConfig.Domain:", notification))
 		applicationModel.GracefulShutdown(ctx, container)
 	}
 }

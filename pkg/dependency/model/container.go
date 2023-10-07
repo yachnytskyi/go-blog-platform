@@ -30,7 +30,7 @@ func NewContainer(repositoryFactory RepositoryFactory, domainFactory DomainFacto
 // Define a DatabaseFactory interface to create different database instances.
 type RepositoryFactory interface {
 	NewRepository(ctx context.Context) interface{}
-	CloseRepository()
+	CloseRepository(ctx context.Context)
 	NewUserRepository(db interface{}) user.UserRepository
 	NewPostRepository(db interface{}) post.PostRepository
 }
@@ -43,11 +43,11 @@ type DomainFactory interface {
 
 // Define a DatabaseFactory interface to create different database instances.
 type DeliveryFactory interface {
+	InitializeServer(serverConfig ServerRouters)
+	LaunchServer(ctx context.Context, container *Container)
+	CloseServer(ctx context.Context)
 	NewUserController(domain interface{}) user.UserController
 	NewPostController(domain interface{}) post.PostController
 	NewUserRouter(controller interface{}) user.UserRouter
 	NewPostRouter(controller interface{}) post.PostRouter
-	InitializeServer(ctx context.Context, serverConfig ServerRouters)
-	LaunchServer(ctx context.Context, container *Container)
-	CloseServer()
 }

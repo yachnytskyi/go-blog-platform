@@ -30,6 +30,6 @@ func CreateApplication(ctx context.Context) *applicationModel.Container {
 	postController := container.DeliveryFactory.NewPostController(postDomain)
 	serverRouters.UserRouter = container.DeliveryFactory.NewUserRouter(userController)
 	serverRouters.PostRouter = container.DeliveryFactory.NewPostRouter(postController)
-	container.DeliveryFactory.InitializeServer(ctx, serverRouters)
+	container.DeliveryFactory.InitializeServer(serverRouters)
 	return container
 }

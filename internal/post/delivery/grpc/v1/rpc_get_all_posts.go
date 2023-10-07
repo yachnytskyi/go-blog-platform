@@ -12,7 +12,7 @@ import (
 )
 
 func (PostGrpcServer *PostGrpcServer) GetAllPosts(postsData *postProtobufV1.Posts, streamOfPosts postProtobufV1.PostUseCase_GetAllPostsServer) error {
-	ctx, cancel := context.WithTimeout(context.Background(), constant.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(context.TODO(), constant.DefaultContextTimer)
 	defer cancel()
 	page := postsData.GetPage()
 	limit := postsData.GetLimit()

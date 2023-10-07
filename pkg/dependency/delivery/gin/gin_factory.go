@@ -7,7 +7,6 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	config "github.com/yachnytskyi/golang-mongo-grpc/config"
-	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
 	postDelivery "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/http/gin"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
@@ -32,7 +31,7 @@ const (
 	shutDownCompleted = "Server connection has been shut down gracefully"
 )
 
-func (ginFactory *GinFactory) InitializeServer(ctx context.Context, serverConfig applicationModel.ServerRouters) {
+func (ginFactory *GinFactory) InitializeServer(serverConfig applicationModel.ServerRouters) {
 	applicationConfig := config.AppConfig
 	ginFactory.Router = gin.Default()
 	corsConfig := cors.DefaultConfig()
@@ -53,18 +52,15 @@ func (ginFactory *GinFactory) InitializeServer(ctx context.Context, serverConfig
 
 func (ginFactory *GinFactory) LaunchServer(ctx context.Context, container *applicationModel.Container) {
 	applicationConfig := config.AppConfig
-	logging.Logger(applicationConfig.Gin.Port)
 	runError := ginFactory.Router.Run(":" + applicationConfig.Gin.Port)
 	if validator.IsErrorNotNil(runError) {
-		container.RepositoryFactory.CloseRepository()
+		container.RepositoryFactory.CloseRepository(ctx)
 		runInternalError := domainError.NewInternalError(location+"LaunchServer.Router.Run", runError.Error())
 		logging.Logger(runInternalError)
 	}
 }
 
-func (ginFactory *GinFactory) CloseServer() {
-	ctx, cancel := context.WithTimeout(context.Background(), constant.DefaultContextTimer)
-	defer cancel()
+func (ginFactory *GinFactory) CloseServer(ctx context.Context) {
 	shutDownError := ginFactory.Server.Shutdown(ctx)
 	if validator.IsErrorNotNil(shutDownError) {
 		shutDownInternalError := domainError.NewInternalError(location+"CloseServer.Server.Shutdown", shutDownError.Error())
@@ -78,14 +74,14 @@ func (ginFactory *GinFactory) NewUserController(domain interface{}) user.UserCon
 	return userDelivery.NewUserController(userUseCase)
 }
 
-func (ginFactory *GinFactory) NewPostController(domain interface{}) post.PostController {
-	postUseCase := domain.(post.PostUseCase)
-	return postDelivery.NewPostController(postUseCase)
-}
-
 func (ginFactory *GinFactory) NewUserRouter(controller interface{}) user.UserRouter {
 	userController := controller.(user.UserController)
 	return userDelivery.NewUserRouter(userController)
+}
+
+func (ginFactory *GinFactory) NewPostController(domain interface{}) post.PostController {
+	postUseCase := domain.(post.PostUseCase)
+	return postDelivery.NewPostController(postUseCase)
 }
 
 func (ginFactory *GinFactory) NewPostRouter(controller interface{}) post.PostRouter {

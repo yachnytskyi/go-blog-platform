@@ -10,12 +10,14 @@ import (
 type Container struct {
 	RepositoryFactory RepositoryFactory
 	DomainFactory     DomainFactory
+	DeliveryFactory   DeliveryFactory
 }
 
-func NewContainer(repositoryFactory RepositoryFactory, domainFactory DomainFactory) *Container {
+func NewContainer(repositoryFactory RepositoryFactory, domainFactory DomainFactory, deliveryFactory DeliveryFactory) *Container {
 	return &Container{
 		RepositoryFactory: repositoryFactory,
 		DomainFactory:     domainFactory,
+		DeliveryFactory:   deliveryFactory,
 	}
 }
 
@@ -27,8 +29,16 @@ type RepositoryFactory interface {
 	NewPostRepository(db interface{}) post.PostRepository
 }
 
-// Define a DatabaseFactory interface to create different database instances.
+// Define a DomainFactory interface to create different domain instances.
 type DomainFactory interface {
-	NewUserRepository(db interface{}) user.UserUseCase
-	NewPostRepository(db interface{}) post.PostUseCase
+	NewUserUseCase(repository interface{}) user.UserUseCase
+	NewPostUseCase(repository interface{}) post.PostUseCase
+}
+
+// Define a DatabaseFactory interface to create different database instances.
+type DeliveryFactory interface {
+	NewUserController(domain interface{}) user.UserController
+	NewPostController(domain interface{}) post.PostController
+
+	CloseServer()
 }

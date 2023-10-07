@@ -37,4 +37,7 @@ const (
 
 	// Domains.
 	UseCase = "UseCase"
+
+	// Deliveries
+	Gin = "Gin"
 )

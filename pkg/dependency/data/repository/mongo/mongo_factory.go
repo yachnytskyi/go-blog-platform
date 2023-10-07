@@ -3,6 +3,7 @@ package mongo
 import (
 	"context"
 
+	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
 	postRepository "github.com/yachnytskyi/golang-mongo-grpc/internal/post/data/repository/mongo"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
@@ -13,16 +14,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
-
-	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 )
 
 const (
 	successfully_connected = "Database is successfully connected..."
 	successfully_closed    = "Database connection has been successfully closed..."
-
-	location            = "pkg.dependency.data.repository.mongo.NewRepository."
-	unsupportedDatabase = "unsupported database type: %s"
+	location               = "pkg.dependency.data.repository.mongo.NewRepository."
+	unsupportedDatabase    = "unsupported database type: %s"
 )
 
 type MongoDBFactory struct {

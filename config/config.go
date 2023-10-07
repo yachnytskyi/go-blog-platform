@@ -39,6 +39,7 @@ type ApplicationConfig struct {
 type Core struct {
 	Database string `mapstructure:"Database"`
 	Domain   string `mapstructure:"Domain"`
+	Delivery string `mapstructure:"Delivery"`
 }
 
 type MongoDB struct {
@@ -99,6 +100,7 @@ func LoadConfig() (unmarshalError error) {
 	}
 	viper.SetDefault("Database", constant.MongoDB)
 	viper.SetDefault("Domain", constant.UseCase)
+	viper.SetDefault("Delivery", constant.Gin)
 	viper.SetDefault("MongoDB.Name", defaultMongoDBName)
 	viper.SetDefault("MongoDB.URI", defaultMongoDBURI)
 	viper.SetDefault("Gin.Port", defaultServerPort)

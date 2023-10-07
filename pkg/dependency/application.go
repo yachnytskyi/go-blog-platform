@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	repository "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/data/repository"
+	"github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/delivery"
 	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/domain"
 	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 )
@@ -21,9 +22,18 @@ func CreateApplication(ctx context.Context) *applicationModel.Container {
 
 	// Domains.
 	domain.InjectDomain(&container)
-	userDomain := container.DomainFactory.NewUserRepository(userRepository)
-	postDomain := container.DomainFactory.NewPostRepository(postRepository)
-	fmt.Println(container)
+	userDomain := container.DomainFactory.NewUserUseCase(userRepository)
+	postDomain := container.DomainFactory.NewPostUseCase(postRepository)
 	fmt.Println(userDomain, postDomain)
+
+	// Deliveries.
+	delivery.InjectDelivery(&container)
+	userDelivery := container.DeliveryFactory.NewUserController(userDomain)
+	postDelivery := container.DeliveryFactory.NewPostController(postDomain)
+	fmt.Println(container)
+	fmt.Println(userDelivery, postDelivery)
+
+	// Routers
+
 	return &container
 }

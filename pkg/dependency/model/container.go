@@ -13,6 +13,12 @@ type Container struct {
 	DeliveryFactory   DeliveryFactory
 }
 
+type ServerRouters struct {
+	UserUseCase user.UserUseCase
+	UserRouter  user.UserRouter
+	PostRouter  post.PostRouter
+}
+
 func NewContainer(repositoryFactory RepositoryFactory, domainFactory DomainFactory, deliveryFactory DeliveryFactory) *Container {
 	return &Container{
 		RepositoryFactory: repositoryFactory,
@@ -39,6 +45,9 @@ type DomainFactory interface {
 type DeliveryFactory interface {
 	NewUserController(domain interface{}) user.UserController
 	NewPostController(domain interface{}) post.PostController
-
+	NewUserRouter(controller interface{}) user.UserRouter
+	NewPostRouter(controller interface{}) post.PostRouter
+	InitializeServer(ctx context.Context, serverConfig ServerRouters)
+	LaunchServer(ctx context.Context, container *Container)
 	CloseServer()
 }

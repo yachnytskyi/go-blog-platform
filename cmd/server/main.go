@@ -1,127 +1,32 @@
 package main
 
-// Require the packages.
 import (
 	"context"
-	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
-	"github.com/gin-contrib/cors"
-	gin "github.com/gin-gonic/gin"
 	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
-
-	postPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
-	postHttpGinPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/http/gin"
-
 	dependency "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency"
-
-	postUseCasePackage "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/usecase"
-
-	userPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
-	// dependency "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency"
-
-	userHttpGinPackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin"
-	userUseCasePackage "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
+	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 )
 
-// Create required variables that we'll re-assign later.
-var (
-	server *gin.Engine
-
-	userRepository userPackage.UserRepository
-	userUseCase    userPackage.UserUseCase
-	userController userHttpGinPackage.UserController
-	userRouter     userHttpGinPackage.UserRouter
-
-	postRepository postPackage.PostRepository
-	postUseCase    postPackage.PostUseCase
-	postController postHttpGinPackage.PostController
-	postRouter     postHttpGinPackage.PostRouter
-)
-
-// Init function that will run before the "main" function.
 func init() {
 	config.LoadConfig()
-
-	// Create a context.
-	ctx, cancel := context.WithTimeout(context.Background(), constant.DefaultContextTimer)
-	defer cancel()
-
-	container := dependency.CreateApplication(ctx)
-	// repository.InjectRepository(container)
-
-	// Create a DB database instance using the factory.
-	db := container.RepositoryFactory.NewRepository(ctx)
-	userRepository = container.RepositoryFactory.NewUserRepository(db)
-	postRepository = container.RepositoryFactory.NewPostRepository(db)
-
-	// Use Cases.
-	userUseCase = userUseCasePackage.NewUserUseCase(userRepository)
-	postUseCase = postUseCasePackage.NewPostUseCase(postRepository)
-
-	// Handlers
-	userController = userHttpGinPackage.NewUserController(userUseCase)
-	postController = postHttpGinPackage.NewPostController(postUseCase)
-
-	// Routers.
-	userRouter = userHttpGinPackage.NewUserRouter(userController)
-	postRouter = postHttpGinPackage.NewPostRouter(postController)
-
-	// Create the Gin Engine instance.
-	server = gin.Default()
 }
 
 func main() {
-	startGinServer()
-	// startGrpcServer(config)
+	ctx, cancel := context.WithTimeout(context.Background(), constant.DefaultContextTimer)
+	defer cancel()
+	container := dependency.CreateApplication(ctx)
+	go func() {
+		container.DeliveryFactory.LaunchServer(ctx, container)
+	}()
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	// Perform Graceful Shutdown
+	applicationModel.GracefulShutdown(ctx, container)
 }
-
-func startGinServer() {
-	applicationConfig := config.AppConfig
-	corsConfig := cors.DefaultConfig()
-	corsConfig.AllowOrigins = []string{"http://localhost:8080"}
-	corsConfig.AllowCredentials = true
-
-	server.Use(cors.New(corsConfig))
-	router := server.Group("/api")
-	userRouter.UserRouter(router, userUseCase)
-	postRouter.PostRouter(router, userUseCase)
-	log.Fatal(server.Run(":" + applicationConfig.Gin.Port))
-}
-
-// func startGrpcServer(config config.Config) {
-// 	userGrpcServer, err := userGrpcPackage.NewGrpcUserServer(config, userUseCase, userCollection)
-
-// 	if err != nil {
-// 		log.Fatal("cannot createt gRPC User Server: ", err)
-// 	}
-
-// 	postGrpcServer, err := postGrpcPackage.NewGrpcPostServer(postUseCase)
-
-// 	if err != nil {
-// 		log.Fatal("cannot create gRPC Post Server: ", err)
-// 	}
-
-// 	grpcServer := grpc.NewServer()
-
-// 	// Register User gRPC server.
-// 	userProtobufV1.RegisterUserUseCaseServer(grpcServer, userGrpcServer)
-
-// 	// Register Post gRPC server.
-// 	postProtobufV1.RegisterPostUseCaseServer(grpcServer, postGrpcServer)
-
-// 	reflection.Register(grpcServer)
-
-// 	listener, err := net.Listen("tcp", config.GrpcServerAddress)
-
-// 	if err != nil {
-// 		log.Fatal("cannot create grpc server: ", err)
-// 	}
-
-// 	log.Printf("start grpc server on %s", listener.Addr().String())
-// 	err = grpcServer.Serve(listener)
-
-// 	if err != nil {
-// 		log.Fatal("cannot create grpc server: ", err)
-// 	}
-// }

@@ -1,28 +1,94 @@
 package gin
 
 import (
+	"context"
+	"net/http"
+
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/yachnytskyi/golang-mongo-grpc/config"
+	config "github.com/yachnytskyi/golang-mongo-grpc/config"
+	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
-	postController "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/http/gin"
+	postDelivery "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/http/gin"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
-	userController "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin"
+	userDelivery "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin"
+	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
+	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
+	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
+)
+
+const (
+	location = "pkg.dependency.delivery.gin."
 )
 
 type GinFactory struct {
 	Gin    config.Gin
-	Server *gin.Engine
+	Server *http.Server
+	Router *gin.Engine
 }
 
-func (ginFactory GinFactory) CloseServer() {
+const (
+	shutDownCompleted = "Server connection has been shut down gracefully"
+)
+
+func (ginFactory *GinFactory) InitializeServer(ctx context.Context, serverConfig applicationModel.ServerRouters) {
+	applicationConfig := config.AppConfig
+	ginFactory.Router = gin.Default()
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowOrigins = []string{applicationConfig.Gin.AllowOrigins}
+	corsConfig.AllowCredentials = applicationConfig.Gin.AllowCredentials
+	router := ginFactory.Router.Group(applicationConfig.Gin.ServerGroup)
+	ginFactory.Router.Use(cors.New(corsConfig))
+
+	// Routers
+	serverConfig.UserRouter.UserRouter(router, serverConfig.UserUseCase)
+	serverConfig.PostRouter.PostRouter(router, serverConfig.UserUseCase)
+
+	ginFactory.Server = &http.Server{
+		Addr:    ":" + ginFactory.Gin.Port,
+		Handler: ginFactory.Router,
+	}
 }
 
-func (ginFactory GinFactory) NewUserController(domain interface{}) user.UserController {
+func (ginFactory *GinFactory) LaunchServer(ctx context.Context, container *applicationModel.Container) {
+	applicationConfig := config.AppConfig
+	logging.Logger(applicationConfig.Gin.Port)
+	runError := ginFactory.Router.Run(":" + applicationConfig.Gin.Port)
+	if validator.IsErrorNotNil(runError) {
+		container.RepositoryFactory.CloseRepository()
+		runInternalError := domainError.NewInternalError(location+"LaunchServer.Router.Run", runError.Error())
+		logging.Logger(runInternalError)
+	}
+}
+
+func (ginFactory *GinFactory) CloseServer() {
+	ctx, cancel := context.WithTimeout(context.Background(), constant.DefaultContextTimer)
+	defer cancel()
+	shutDownError := ginFactory.Server.Shutdown(ctx)
+	if validator.IsErrorNotNil(shutDownError) {
+		shutDownInternalError := domainError.NewInternalError(location+"CloseServer.Server.Shutdown", shutDownError.Error())
+		logging.Logger(shutDownInternalError)
+	}
+	logging.Logger(shutDownCompleted)
+}
+
+func (ginFactory *GinFactory) NewUserController(domain interface{}) user.UserController {
 	userUseCase := domain.(user.UserUseCase)
-	return userController.NewUserController(userUseCase)
+	return userDelivery.NewUserController(userUseCase)
 }
 
-func (ginFactory GinFactory) NewPostController(domain interface{}) post.PostController {
+func (ginFactory *GinFactory) NewPostController(domain interface{}) post.PostController {
 	postUseCase := domain.(post.PostUseCase)
-	return postController.NewPostController(postUseCase)
+	return postDelivery.NewPostController(postUseCase)
+}
+
+func (ginFactory *GinFactory) NewUserRouter(controller interface{}) user.UserRouter {
+	userController := controller.(user.UserController)
+	return userDelivery.NewUserRouter(userController)
+}
+
+func (ginFactory *GinFactory) NewPostRouter(controller interface{}) post.PostRouter {
+	postController := controller.(post.PostController)
+	return postDelivery.NewPostRouter(postController)
 }

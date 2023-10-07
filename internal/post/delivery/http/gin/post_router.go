@@ -11,12 +11,13 @@ type PostRouter struct {
 	postController post.PostController
 }
 
-func NewPostRouter(postController PostController) PostRouter {
+func NewPostRouter(postController post.PostController) PostRouter {
 	return PostRouter{postController: postController}
 }
 
-func (postRouter *PostRouter) PostRouter(routerGroup *gin.RouterGroup, userUseCase user.UserUseCase) {
-	router := routerGroup.Group("/posts")
+func (postRouter PostRouter) PostRouter(routerGroup interface{}, userUseCase user.UserUseCase) {
+	ginRouterGroup := routerGroup.(*gin.RouterGroup)
+	router := ginRouterGroup.Group("/posts")
 	router.GET("/", func(ginContext *gin.Context) {
 		postRouter.postController.GetAllPosts(ginContext)
 	})

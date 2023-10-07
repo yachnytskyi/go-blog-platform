@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"context"
 	"fmt"
 
 	config "github.com/yachnytskyi/golang-mongo-grpc/config"
@@ -17,14 +18,15 @@ const (
 	unsupportedDomain = "unsupported domain type: %s"
 )
 
-func InjectDomain(container *applicationModel.Container) {
+func InjectDomain(ctx context.Context, container *applicationModel.Container) {
 	applicationConfig := config.AppConfig
 	switch applicationConfig.Core.Domain {
 	case constant.UseCase:
 		container.DomainFactory = useCaseFactory.UseCaseFactory{}
 	// Add other domain options here as needed.
 	default:
-		logging.Logger(domainError.NewInternalError(location+".loadConfig.Domain:", fmt.Sprintf(unsupportedDomain, applicationConfig.Core.Domain)))
-		applicationModel.GracefulShutdown(container)
+		notification := fmt.Sprintf(unsupportedDomain, applicationConfig.Core.Domain)
+		logging.Logger(domainError.NewInternalError(location+".loadConfig.Domain:", notification))
+		applicationModel.GracefulShutdown(ctx, container)
 	}
 }

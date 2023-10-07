@@ -1,39 +1,17 @@
 package model
 
 import (
-	"fmt"
-	"os"
-	"os/signal"
-	"sync"
-	"syscall"
+	"context"
 
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 )
 
 const (
 	completed = "Completed graceful shutdown of the app"
-	reason    = "Received signal: %v"
 )
 
-var (
-	shutDownOnce sync.Once
-	terminate    = make(chan os.Signal, 1)
-	waitGroup    sync.WaitGroup
-)
-
-func GracefulShutdown(container *Container) {
-	fmt.Println("shutdown")
-	shutDownOnce.Do(func() {
-		signal.Notify(terminate, os.Interrupt, syscall.SIGTERM)
-		waitGroup.Add(1)
-
-		go func() {
-			code := <-terminate
-			fmt.Println("shutdown")
-			logging.Logger(fmt.Sprintf(reason, code.String()))
-			os.Exit(1)
-		}()
-	})
+func GracefulShutdown(ctx context.Context, container *Container) {
+	container.DeliveryFactory.CloseServer()
+	container.RepositoryFactory.CloseRepository()
 	logging.Logger(completed)
-	waitGroup.Wait()
 }

@@ -1,6 +1,7 @@
 package delivery
 
 import (
+	"context"
 	"fmt"
 
 	config "github.com/yachnytskyi/golang-mongo-grpc/config"
@@ -16,14 +17,14 @@ const (
 	unsupportedDomain = "unsupported domain type: %s"
 )
 
-func InjectDelivery(container *applicationModel.Container) {
+func InjectDelivery(ctx context.Context, container *applicationModel.Container) {
 	applicationConfig := config.AppConfig
 	switch applicationConfig.Core.Delivery {
 	case constant.Gin:
-		container.DeliveryFactory = ginFactory.GinFactory{Gin: applicationConfig.Gin}
+		container.DeliveryFactory = &ginFactory.GinFactory{Gin: applicationConfig.Gin}
 	// Add other domain options here as needed.
 	default:
 		logging.Logger(domainError.NewInternalError(location+".loadConfig.Domain:", fmt.Sprintf(unsupportedDomain, applicationConfig.Core.Domain)))
-		applicationModel.GracefulShutdown(container)
+		applicationModel.GracefulShutdown(ctx, container)
 	}
 }

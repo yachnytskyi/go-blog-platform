@@ -10,12 +10,13 @@ type UserRouter struct {
 	userController user.UserController
 }
 
-func NewUserRouter(userController UserController) UserRouter {
+func NewUserRouter(userController user.UserController) UserRouter {
 	return UserRouter{userController: userController}
 }
 
-func (userRouter *UserRouter) UserRouter(routerGroup *gin.RouterGroup, userUseCase user.UserUseCase) {
-	router := routerGroup.Group("/users")
+func (userRouter UserRouter) UserRouter(routerGroup interface{}, userUseCase user.UserUseCase) {
+	ginRouterGroup := routerGroup.(*gin.RouterGroup)
+	router := ginRouterGroup.Group("/users")
 	router.GET("/", func(ginContext *gin.Context) {
 		userRouter.userController.GetAllUsers(ginContext)
 	})

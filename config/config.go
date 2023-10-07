@@ -48,7 +48,10 @@ type MongoDB struct {
 }
 
 type Gin struct {
-	Port string `mapstructure:"PORT"`
+	Port             string `mapstructure:"Port"`
+	AllowOrigins     string `mapstructure:"Allow_Origins"`
+	AllowCredentials bool   `mapstructure:"Allow_Credentials"`
+	ServerGroup      string `mapstructure:"Server_Group"`
 }
 
 type GRPC struct {

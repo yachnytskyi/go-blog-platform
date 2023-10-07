@@ -2,38 +2,34 @@ package dependency
 
 import (
 	"context"
-	"fmt"
 
 	repository "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/data/repository"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/delivery"
+	delivery "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/delivery"
 	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/domain"
 	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 )
 
 func CreateApplication(ctx context.Context) *applicationModel.Container {
-	container := applicationModel.Container{}
+	container := &applicationModel.Container{}
+	serverRouters := applicationModel.ServerRouters{}
 
 	// Repositories.
-	repository.InjectRepository(&container)
+	repository.InjectRepository(ctx, container)
 	db := container.RepositoryFactory.NewRepository(ctx)
 	userRepository := container.RepositoryFactory.NewUserRepository(db)
 	postRepository := container.RepositoryFactory.NewPostRepository(db)
-	fmt.Println(userRepository, postRepository)
 
 	// Domains.
-	domain.InjectDomain(&container)
-	userDomain := container.DomainFactory.NewUserUseCase(userRepository)
+	domain.InjectDomain(ctx, container)
+	serverRouters.UserUseCase = container.DomainFactory.NewUserUseCase(userRepository)
 	postDomain := container.DomainFactory.NewPostUseCase(postRepository)
-	fmt.Println(userDomain, postDomain)
 
 	// Deliveries.
-	delivery.InjectDelivery(&container)
-	userDelivery := container.DeliveryFactory.NewUserController(userDomain)
-	postDelivery := container.DeliveryFactory.NewPostController(postDomain)
-	fmt.Println(container)
-	fmt.Println(userDelivery, postDelivery)
-
-	// Routers
-
-	return &container
+	delivery.InjectDelivery(ctx, container)
+	userController := container.DeliveryFactory.NewUserController(serverRouters.UserUseCase)
+	postController := container.DeliveryFactory.NewPostController(postDomain)
+	serverRouters.UserRouter = container.DeliveryFactory.NewUserRouter(userController)
+	serverRouters.PostRouter = container.DeliveryFactory.NewPostRouter(postController)
+	container.DeliveryFactory.InitializeServer(ctx, serverRouters)
+	return container
 }

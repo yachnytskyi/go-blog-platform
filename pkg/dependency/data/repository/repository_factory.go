@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/yachnytskyi/golang-mongo-grpc/config"
@@ -16,7 +17,7 @@ const (
 	unsupportedDatabase = "unsupported database type: %s"
 )
 
-func InjectRepository(container *applicationModel.Container) {
+func InjectRepository(ctx context.Context, container *applicationModel.Container) {
 	applicationConfig := config.AppConfig
 	switch applicationConfig.Core.Database {
 	case constant.MongoDB:
@@ -24,6 +25,6 @@ func InjectRepository(container *applicationModel.Container) {
 	// Add other database cases here as needed.
 	default:
 		logging.Logger(domainError.NewInternalError(location+".applicationConfig.Database:", fmt.Sprintf(unsupportedDatabase, applicationConfig.Core.Database)))
-		applicationModel.GracefulShutdown(container)
+		applicationModel.GracefulShutdown(ctx, container)
 	}
 }

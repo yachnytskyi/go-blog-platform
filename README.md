@@ -9,7 +9,11 @@ Gin
 MongoDB  
 gRPC**
 
-Hexagonal architecture with manual dependency injection and abstract factory are implemented.  
+Hexagonal architecture with manual dependency injection and abstract factory are used for:
+make a system easy to understand, develop, maintain, and deploy
+decouple the system’s policy from its details (it should not depend on the framework, state management, database, or servers you use)
+make your system testable
+encourage code reusability
 
 We have a script in Makefile that allows you to launch the project.
 
@@ -26,30 +30,23 @@ The API will then be available at  **http://localhost:8080/api/posts  http://loc
 You can also find all possible API requests/urls when you launch the project in your server terminal. 
 
 If you need to make rebuild, you can use these commands:
-
 ```make build``` if you prefer a shortcut command from Makefile.
-
 ```docker-compose build``` if you you prefer to enter a full command on your own.
   
 After that repeat this command:
+```make up```
 
-```make up``` 
 ## Run server
 
 To run this code, you will need docker and docker-compose installed on your machine. From the root project directory, run:  
-
 ```make up```    
 ```make reflex``` use reflex hot reload launch mode
-
 ```make run``` use default launch mode
 
 ## Stop Docker Compose services
-
 ```make down``` if you prefer a shortcut command from Makefile.
-
 ```docker-compose down``` if you you prefer to enter a full command on your own.
-
-  
+ 
 # Ways of possible improvements
 I am open for new ideas. Fistful, add unit and integration tests. Secondly, refactoring of the system.
 

@@ -17,7 +17,7 @@ We have a script in Makefile that allows you to launch the project.
 
 `config/yaml/v1/dev.application.example.yaml` file is provided you as an example of your own config settings, which you you need to put in your `config/yaml/v1/dev.application.yaml` file (you should create it on your own). 
 
-## From the project root director, run:
+## From the project root directory, run:
 
 ```make up``` if you prefer a shortcut command from Makefile.
 

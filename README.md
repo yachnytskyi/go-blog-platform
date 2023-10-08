@@ -36,11 +36,11 @@ To run this code, you will need docker and docker-compose installed on your mach
 ```make reflex``` use reflex hot reload launch mode  
 ```make run``` use default launch mode
 
-## Stop Docker Compose services. 
+## Stop Docker Compose services 
 ```make down``` if you prefer a shortcut command from Makefile.  
 ```docker-compose down``` if you you prefer to enter a full command on your own.
  
-# Ways of possible improvements
+## Ways of possible improvements
 I am open for new ideas. Fistful, add unit and integration tests. Secondly, refactoring of the system.
 
 </div>

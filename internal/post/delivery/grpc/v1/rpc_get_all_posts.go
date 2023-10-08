@@ -3,14 +3,17 @@ package v1
 import (
 	"context"
 
+	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
 	postProtobufV1 "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/grpc/v1/model/pb"
 	"google.golang.org/grpc/codes"
+
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func (PostGrpcServer *PostGrpcServer) GetAllPosts(postsData *postProtobufV1.Posts, streamOfPosts postProtobufV1.PostUseCase_GetAllPostsServer) error {
-	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(context.TODO(), constant.DefaultContextTimer)
+	defer cancel()
 	page := postsData.GetPage()
 	limit := postsData.GetLimit()
 
@@ -20,7 +23,7 @@ func (PostGrpcServer *PostGrpcServer) GetAllPosts(postsData *postProtobufV1.Post
 		return status.Errorf(codes.Internal, err.Error())
 	}
 
-	for _, post := range posts {
+	for _, post := range posts.Posts {
 		streamOfPosts.Send(&postProtobufV1.Post{
 			PostID:    post.PostID,
 			Title:     post.Title,

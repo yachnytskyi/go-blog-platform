@@ -5,18 +5,18 @@ import (
 
 	"github.com/yachnytskyi/golang-mongo-grpc/internal/post"
 	postModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
-	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility"
+	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator/domain"
 )
 
 type PostUseCase struct {
-	postRepository post.Repository
+	postRepository post.PostRepository
 }
 
-func NewPostUseCase(postRepository post.Repository) post.UseCase {
+func NewPostUseCase(postRepository post.PostRepository) post.PostUseCase {
 	return &PostUseCase{postRepository: postRepository}
 }
 
-func (postUseCase *PostUseCase) GetAllPosts(ctx context.Context, page int, limit int) ([]*postModel.Post, error) {
+func (postUseCase *PostUseCase) GetAllPosts(ctx context.Context, page int, limit int) (*postModel.Posts, error) {
 	fetchedPosts, err := postUseCase.postRepository.GetAllPosts(ctx, page, limit)
 
 	return fetchedPosts, err
@@ -43,7 +43,8 @@ func (postUseCase *PostUseCase) UpdatePostById(ctx context.Context, postID strin
 
 	userID := fetchedPost.UserID
 
-	if err := utility.IsUserOwner(currentUserID, userID); err != nil {
+	err = domainUtility.IsUserOwner(currentUserID, userID)
+	if err != nil {
 		return nil, err
 	}
 
@@ -61,7 +62,8 @@ func (postUseCase *PostUseCase) DeletePostByID(ctx context.Context, postID strin
 
 	userID := fetchedPost.UserID
 
-	if err := utility.IsUserOwner(currentUserID, userID); err != nil {
+	err = domainUtility.IsUserOwner(currentUserID, userID)
+	if err != nil {
 		return err
 	}
 

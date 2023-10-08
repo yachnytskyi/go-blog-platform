@@ -5,19 +5,11 @@ services:
     image: mongo
     container_name: mongodb
     restart: always
-    env_file: ./app.env
+    env_file: ./config/yaml/v1/dev.application.yaml
     ports:
       - '27017:27017'
     volumes:
       - mongodbDATA:/data/db
-
-  redis:
-    image: redis:alpine
-    container_name: redis
-    ports:
-      - '6379:6379'
-    volumes:
-      - redisDATA:/data
 
   # app:
   #   build:
@@ -40,4 +32,3 @@ services:
 
 volumes:
   mongodbDATA:
-  redisDATA:

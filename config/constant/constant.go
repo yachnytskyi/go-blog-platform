@@ -6,6 +6,13 @@ const (
 	// Context timers.
 	DefaultContextTimer = time.Duration(time.Second * 5)
 
+	// Tokens
+	AccessTokenValue  = "access_token"
+	RefreshTokenValue = "refresh_token"
+	LoggedInValue     = "logged_in"
+	TokenDomainValue  = "localhost"
+	LogoutMaxAgeValue = -1
+
 	// Pagination.
 	DefaultPage     = "1"
 	DefaultLimit    = "10"

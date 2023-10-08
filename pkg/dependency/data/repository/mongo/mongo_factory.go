@@ -20,7 +20,7 @@ const (
 	successfully_connected = "Database is successfully connected..."
 	successfully_closed    = "Database connection has been successfully closed..."
 	location               = "pkg.dependency.data.repository.mongo.NewRepository."
-	unsupportedDatabase    = "unsupported database type: %s"
+	unsupportedDatabase    = "Unsupported database type: %s"
 )
 
 type MongoDBFactory struct {

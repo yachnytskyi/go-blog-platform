@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/yachnytskyi/golang-mongo-grpc/config"
+	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
 	mongoDBFactory "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/data/repository/mongo"
 	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
@@ -14,7 +14,7 @@ import (
 
 const (
 	location            = "pkg/dependency/data/repository/InjectRepository"
-	unsupportedDatabase = "unsupported database type: %s"
+	unsupportedDatabase = "Unsupported database type: %s"
 )
 
 func InjectRepository(ctx context.Context, container *applicationModel.Container) {

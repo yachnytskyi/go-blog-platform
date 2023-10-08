@@ -17,13 +17,16 @@ var (
 )
 
 const (
-	version            = "V1"
-	environmentsPath   = "config/environment/.env."
-	devInvironmentName = "dev"
-	defaultMongoDBName = "golang-mongodb"
-	defaultMongoDBURI  = "mongodb://root:root@localhost:27017"
-	defaultServerPort  = "8080"
-	location           = "config.LoadConfig."
+	version                    = "v1"
+	environmentsPath           = "config/environment/.env."
+	devInvironmentName         = "dev"
+	defaultMongoDBName         = "golang-mongodb"
+	defaultMongoDBURI          = "mongodb://root:root@localhost:27017/golang_mongodb"
+	defaultGinPort             = "8080"
+	defaultGinAllowOrirings    = "http://localhost:8080"
+	defaultGinAllowCredentuals = true
+	defaultGinServerGroup      = "/api"
+	location                   = "config.LoadConfig."
 )
 
 type ApplicationConfig struct {
@@ -106,7 +109,10 @@ func LoadConfig() (unmarshalError error) {
 	viper.SetDefault("Delivery", constant.Gin)
 	viper.SetDefault("MongoDB.Name", defaultMongoDBName)
 	viper.SetDefault("MongoDB.URI", defaultMongoDBURI)
-	viper.SetDefault("Gin.Port", defaultServerPort)
+	viper.SetDefault("Gin.Port", defaultGinPort)
+	viper.SetDefault("Gin.AllowOrigins", defaultGinAllowOrirings)
+	viper.SetDefault("Gin.AllowCredentials", defaultGinAllowCredentuals)
+	viper.SetDefault("Gin.ServerGroup", defaultGinServerGroup)
 	unmarshalError = viper.Unmarshal(&AppConfig)
 	return
 }

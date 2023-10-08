@@ -14,7 +14,7 @@ import (
 
 const (
 	location          = "pkg/dependency/delivery/InjectDelivery"
-	unsupportedDomain = "unsupported domain type: %s"
+	unsupportedDomain = "Unsupported domain type: %s"
 )
 
 func InjectDelivery(ctx context.Context, container *applicationModel.Container) {

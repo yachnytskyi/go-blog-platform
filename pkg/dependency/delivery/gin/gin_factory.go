@@ -14,7 +14,7 @@ import (
 	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
+	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
 const (
@@ -28,7 +28,7 @@ type GinFactory struct {
 }
 
 const (
-	shutDownCompleted = "Server connection has been shut down gracefully"
+	shutDownCompleted = "Server connection has been successfully closed..."
 )
 
 func (ginFactory *GinFactory) InitializeServer(serverConfig applicationModel.ServerRouters) {

@@ -8,7 +8,6 @@ import (
 	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
 	useCaseFactory "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/domain/usecase"
 	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
-
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 )

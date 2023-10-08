@@ -176,8 +176,10 @@ func (userController UserController) Login(controllerContext interface{}) {
 		ginContext.JSON(http.StatusBadRequest, jsonResponse)
 		return
 	}
-	httpGinCookie.LoginSetCookies(ginContext, accessToken, applicationConfig.AccessToken.MaxAge*60, refreshToken, applicationConfig.AccessToken.MaxAge*60)
-	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
+	ginContext.SetCookie(constant.AccessTokenValue, accessToken, applicationConfig.AccessToken.MaxAge, "/", constant.TokenDomainValue, false, true)
+	ginContext.SetCookie(constant.RefreshTokenValue, refreshToken, applicationConfig.RefreshToken.MaxAge, "/", constant.TokenDomainValue, false, true)
+	ginContext.SetCookie(constant.LoggedInValue, "true", applicationConfig.AccessToken.MaxAge, "/", constant.TokenDomainValue, false, false)
+	ginContext.JSON(http.StatusOK, gin.H{"status": "success", constant.AccessTokenValue: accessToken})
 }
 
 func (userController UserController) RefreshAccessToken(controllerContext interface{}) {
@@ -189,7 +191,7 @@ func (userController UserController) RefreshAccessToken(controllerContext interf
 		ginContext.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": message})
 		return
 	}
-	cookie, err := ginContext.Cookie("refresh_token")
+	cookie, err := ginContext.Cookie(constant.RefreshTokenValue)
 
 	if validator.IsErrorNotNil(err) {
 		ginContext.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": message})
@@ -214,8 +216,9 @@ func (userController UserController) RefreshAccessToken(controllerContext interf
 		return
 	}
 
-	httpGinCookie.RefreshAccessTokenSetCookies(ginContext, accessToken, applicationConfig.AccessToken.MaxAge*60)
-	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "access_token": accessToken})
+	ginContext.SetCookie(constant.AccessTokenValue, accessToken, applicationConfig.AccessToken.MaxAge, "/", constant.TokenDomainValue, false, true)
+	ginContext.SetCookie(constant.LoggedInValue, "true", applicationConfig.AccessToken.MaxAge, "/", constant.TokenDomainValue, false, false)
+	ginContext.JSON(http.StatusOK, gin.H{"status": "success", constant.AccessTokenValue: accessToken})
 }
 
 func (userController UserController) ForgottenPassword(controllerContext interface{}) {
@@ -273,13 +276,13 @@ func (userController UserController) ResetUserPassword(controllerContext interfa
 		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 	}
 
-	httpGinCookie.ResetUserPasswordSetCookies(ginContext)
+	httpGinCookie.CleanCookies(ginContext)
 	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "message": "Congratulations! Your password was updated successfully! Please sign in again."})
 
 }
 
 func (userController UserController) Logout(controllerContext interface{}) {
 	ginContext := controllerContext.(*gin.Context)
-	httpGinCookie.LogoutSetCookies(ginContext)
+	httpGinCookie.CleanCookies(ginContext)
 	ginContext.JSON(http.StatusOK, gin.H{"status": "success"})
 }

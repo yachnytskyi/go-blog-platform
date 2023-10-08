@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	config "github.com/yachnytskyi/golang-mongo-grpc/config"
+	"github.com/yachnytskyi/golang-mongo-grpc/config/constant"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
 	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
@@ -15,7 +16,7 @@ import (
 func DeserializeUser(userUseCase user.UserUseCase) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var accessToken string
-		cookie, err := ctx.Cookie("access_token")
+		cookie, err := ctx.Cookie(constant.AccessTokenValue)
 		authorizationHeader := ctx.Request.Header.Get("Authorization")
 		fields := strings.Fields(authorizationHeader)
 		if len(fields) != 0 && fields[0] == "Bearer" {

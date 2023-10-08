@@ -21,8 +21,6 @@ We have a script in Makefile that allows you to launch the project.
 
 ```make up``` if you prefer a shortcut command from Makefile.
 
-```docker-compose up``` if you you prefer to enter a full command on your own.
-
 The API will then be available at  **http://localhost:8080/api/posts  http://localhost:8080/api/users**
 
 You can also find all possible API requests/urls when you launch the project in your server terminal. 

@@ -32,7 +32,7 @@ After that repeat this command:
 
 ## Run server
 To run this code, you will need docker and docker-compose installed on your machine. From the root project directory, run:  
-```make up```
+```make up`` or
 ```make reflex``` use reflex hot reload launch mode
 ```make run``` use default launch mode
 

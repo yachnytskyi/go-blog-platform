@@ -15,7 +15,7 @@ We have a script in Makefile that allows you to launch the project.
 
 ## Runing the Application
 
-`config/yaml/v1/dev.application.example.yaml` file is provided you as an example of your own config settings, which you you need to put in your `config/yaml/v1/dev.application.yaml` file (you should create it on your own). 
+`config/yaml/v1/dev.application.example.yaml` file is provided you as an example of your own config settings,  you need to put them in your `config/yaml/v1/dev.application.yaml` file (you should create it on your own). 
 
 ## From the project root directory, run:
 

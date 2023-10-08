@@ -9,7 +9,7 @@ Gin
 MongoDB  
 gRPC**
 
-Hexagonal architecture, manual dependency injection and abstract factory are implemented in the project
+Hexagonal architecture, manual dependency injection and abstract factory are implemented in the project.
 
 We have a script in Makefile that allows you to launch the project.
 

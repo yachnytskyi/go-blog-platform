@@ -19,7 +19,7 @@ We have a script in Makefile that allows you to launch the project.
 
 ## From the project root directory, run:
 
-```make up``` if you prefer a shortcut command from Makefile.
+```make up``` 
 
 The API will then be available at  **http://localhost:8080/api/posts  http://localhost:8080/api/users**
 
@@ -31,20 +31,19 @@ If you need to make rebuild, you can use these commands:
 
 ```docker-compose build``` if you you prefer to enter a full command on your own.
   
-After that repeat these commands:
+After that repeat this command:
 
-```make up``` if you prefer a shortcut command from Makefile.
-
+```make up``` 
 ## Run server
 
 To run this code, you will need docker and docker-compose installed on your machine. From the root project directory, run:  
 
 ```make up```    
-```make reflex``` (if you'd like to use the reflex hot reload launch mode of the server)
+```make reflex``` use reflex hot reload launch mode
 
-```make run``` (if you'd like to use `the default launch mode` of the server)
+```make run``` use default launch mode
 
-## Stop server
+## Stop Docker Compose services
 
 ```make down``` if you prefer a shortcut command from Makefile.
 

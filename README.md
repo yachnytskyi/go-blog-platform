@@ -4,7 +4,6 @@
 Source code for  Golang Mongo gRPC App.
 
 The project uses:
-
 **Golang    
 Gin  
 MongoDB  
@@ -22,7 +21,7 @@ We have a script in Makefile that allows you to launch the project.
 
 ```docker-compose up``` if you you prefer to enter a full command on your own.
 
-The API will then be available at  **http://localhost:8080/api/posts and http://localhost:8080/api/users**
+The API will then be available at  **http://localhost:8080/api/posts  http://localhost:8080/api/users**
 
 You can also find all possible API requests/urls when you launch the project in your server terminal. 
 

@@ -35,8 +35,6 @@ After that repeat these commands:
 
 ```make up``` if you prefer a shortcut command from Makefile.
 
-```docker-compose up``` if you you prefer to enter a full command on your own.
-
 ## Run server
 
 To run this code, you will need docker and docker-compose installed on your machine. From the root project directory, run:  

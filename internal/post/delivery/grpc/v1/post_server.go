@@ -7,10 +7,10 @@ import (
 
 type PostGrpcServer struct {
 	pb.UnimplementedPostUseCaseServer
-	postUseCase post.UseCase
+	postUseCase post.PostUseCase
 }
 
-func NewGrpcPostServer(postUseCase post.UseCase) (*PostGrpcServer, error) {
+func NewGrpcPostServer(postUseCase post.PostUseCase) (*PostGrpcServer, error) {
 	postGrpcServer := &PostGrpcServer{
 		postUseCase: postUseCase,
 	}

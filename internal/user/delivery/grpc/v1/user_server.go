@@ -1,26 +1,25 @@
 package v1
 
 import (
-	"github.com/yachnytskyi/golang-mongo-grpc/config"
-	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
+	config "github.com/yachnytskyi/golang-mongo-grpc/config"
+	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	pb "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1/model/pb"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type UserGrpcServer struct {
 	pb.UnimplementedUserUseCaseServer
-	config         config.Config
-	userUseCase    user.UseCase
-	userCollection *mongo.Collection
+	applicationConfig config.ApplicationConfig
+	userUseCase       user.UserUseCase
+	userCollection    *mongo.Collection
 }
 
-func NewGrpcUserServer(config config.Config, userUseCase user.UseCase, userCollection *mongo.Collection) (*UserGrpcServer, error) {
-
+func NewGrpcUserServer(userUseCase user.UserUseCase, userCollection *mongo.Collection) (*UserGrpcServer, error) {
+	applicationConfig := config.AppConfig
 	userGrpcServer := &UserGrpcServer{
-		config:         config,
-		userUseCase:    userUseCase,
-		userCollection: userCollection,
+		applicationConfig: applicationConfig,
+		userUseCase:       userUseCase,
+		userCollection:    userCollection,
 	}
-
 	return userGrpcServer, nil
 }

@@ -13,7 +13,8 @@ func (PostGrpcServer *PostGrpcServer) DeletePostById(ctx context.Context, postDa
 	postID := postData.GetPostID()
 	userID := postData.GetUserID()
 
-	if err := PostGrpcServer.postUseCase.DeletePostByID(ctx, postID, userID); err != nil {
+	err := PostGrpcServer.postUseCase.DeletePostByID(ctx, postID, userID)
+	if err != nil {
 		if strings.Contains(err.Error(), "Id exists") {
 			return nil, status.Errorf(codes.NotFound, err.Error())
 		}

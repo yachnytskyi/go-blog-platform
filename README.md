@@ -3,12 +3,13 @@
 ## Golang Mongo gRPC     
 Source code for  Golang Mongo gRPC App.
 
-The project uses:
+The project uses:  
 **Golang    
 Gin  
 MongoDB  
 gRPC**
 
+Hexagonal architecture with manual dependency injection and abstract factory are implemented.
 We have a script in Makefile that allows you to launch the project.
 
 ## Runing the Application

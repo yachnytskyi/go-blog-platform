@@ -13,7 +13,7 @@ Hexagonal architecture with manual dependency injection and abstract factory are
 
 We have a script in Makefile that allows you to launch the project.
 
-## Runing the Application
+## Initializing
 
 `config/yaml/v1/dev.application.example.yaml` file is provided you as an example of your own config settings,  you need to put them in your `config/yaml/v1/dev.application.yaml` file (you should create it on your own). 
 

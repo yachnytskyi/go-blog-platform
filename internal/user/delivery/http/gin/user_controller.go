@@ -3,7 +3,6 @@ package gin
 import (
 	"context"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -47,7 +46,6 @@ func (userController UserController) GetAllUsers(controllerContext interface{}) 
 		ginContext.JSON(http.StatusBadRequest, jsonResponse)
 		return
 	}
-
 	jsonResponse := httpModel.NewJsonResponseOnSuccess(userViewModel.UsersToUsersViewMapper(fetchedUsers.Data))
 	httpModel.SetStatus(&jsonResponse)
 	ginContext.JSON(http.StatusOK, jsonResponse)
@@ -55,26 +53,26 @@ func (userController UserController) GetAllUsers(controllerContext interface{}) 
 
 func (userController UserController) GetCurrentUser(controllerContext interface{}) {
 	ginContext := controllerContext.(*gin.Context)
-	currentUser := ginContext.MustGet("user").(userViewModel.UserView)
-	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": currentUser}})
+	jsonResponse := httpModel.NewJsonResponseOnSuccess(ginContext.MustGet(constant.UserContext).(userViewModel.UserView))
+	httpModel.SetStatus(&jsonResponse)
+	ginContext.JSON(http.StatusOK, jsonResponse)
 }
 
 func (userController UserController) GetUserById(controllerContext interface{}) {
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
-	userID := ginContext.Param("userID")
-	fetchedUser, err := userController.userUseCase.GetUserById(ctx, userID)
-	if validator.IsErrorNotNil(err) {
-		if strings.Contains(err.Error(), "Id exists") {
-			ginContext.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": err.Error()})
-			return
-		}
-		ginContext.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
+	userID := ginContext.Param(constant.UserIDContext)
+	fetchedUser := userController.userUseCase.GetUserById(ctx, userID)
+	if validator.IsErrorNotNil(fetchedUser.Error) {
+		jsonResponse := httpError.HandleError(fetchedUser.Error)
+		httpModel.SetStatus(&jsonResponse)
+		ginContext.JSON(http.StatusBadRequest, jsonResponse)
 		return
 	}
-
-	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": userViewModel.UserToUserViewMapper(fetchedUser)}})
+	jsonResponse := httpModel.NewJsonResponseOnSuccess(userViewModel.UserToUserViewMapper(fetchedUser.Data))
+	httpModel.SetStatus(&jsonResponse)
+	ginContext.JSON(http.StatusOK, jsonResponse)
 }
 
 func (userController UserController) Register(controllerContext interface{}) {
@@ -107,7 +105,7 @@ func (userController UserController) UpdateUserById(controllerContext interface{
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
-	currentUserID := ginContext.MustGet("userID").(string)
+	currentUserID := ginContext.MustGet(constant.UserIDContext).(string)
 
 	var updatedUserViewData userViewModel.UserUpdateView
 	err := ginContext.ShouldBindJSON(&updatedUserViewData)
@@ -133,7 +131,7 @@ func (userController UserController) Delete(controllerContext interface{}) {
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
-	currentUserID := ginContext.MustGet("userID").(string)
+	currentUserID := ginContext.MustGet(constant.UserIDContext).(string)
 	err := userController.userUseCase.DeleteUser(ctx, currentUserID)
 	if validator.IsErrorNotNil(err) {
 		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
@@ -185,7 +183,7 @@ func (userController UserController) Login(controllerContext interface{}) {
 func (userController UserController) RefreshAccessToken(controllerContext interface{}) {
 	ginContext := controllerContext.(*gin.Context)
 	message := "could not refresh access token"
-	currentUser := ginContext.MustGet("user").(userViewModel.UserView)
+	currentUser := ginContext.MustGet(constant.UserContext).(userViewModel.UserView)
 
 	if validator.IsValueNil(currentUser) {
 		ginContext.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": message})

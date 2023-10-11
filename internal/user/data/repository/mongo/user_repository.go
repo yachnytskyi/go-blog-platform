@@ -57,7 +57,6 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 		return commonModel.NewResultOnFailure[userModel.Users](getAllUsersEntityNotFoundError)
 	}
 	defer cursor.Close(ctx)
-
 	fetchedUsers := make([]userRepositoryModel.UserRepository, 0, paginationQuery.Limit)
 	for cursor.Next(ctx) {
 		user := userRepositoryModel.UserRepository{}
@@ -79,7 +78,6 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 		return commonModel.NewResultOnSuccess[userModel.Users](userModel.Users{})
 
 	}
-
 	usersRepository := userRepositoryModel.UserRepositoryToUsersRepositoryMapper(fetchedUsers)
 	paginationResponse := commonModel.NewPaginationResponse(paginationQuery.Page, int(totalUsers), paginationQuery.Limit, paginationQuery.OrderBy)
 	usersRepository.PaginationResponse = paginationResponse
@@ -87,7 +85,7 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 	return commonModel.NewResultOnSuccess[userModel.Users](users)
 }
 
-func (userRepository UserRepository) GetUserById(ctx context.Context, userID string) (userModel.User, error) {
+func (userRepository UserRepository) GetUserById(ctx context.Context, userID string) commonModel.Result[userModel.User] {
 	userObjectID, _ := primitive.ObjectIDFromHex(userID)
 	fetchedUser := userRepositoryModel.UserRepository{}
 	query := bson.M{"_id": userObjectID}
@@ -95,11 +93,10 @@ func (userRepository UserRepository) GetUserById(ctx context.Context, userID str
 	if validator.IsErrorNotNil(userFindOneError) {
 		userFindOneEntityNotFoundError := domainError.NewEntityNotFoundError(location+"GetUserById.FindOne.Decode", userFindOneError.Error())
 		logging.Logger(userFindOneEntityNotFoundError)
-		return userModel.User{}, userFindOneEntityNotFoundError
+		return commonModel.NewResultOnFailure[userModel.User](userFindOneEntityNotFoundError)
 	}
-
 	user := userRepositoryModel.UserRepositoryToUserMapper(fetchedUser)
-	return user, nil
+	return commonModel.NewResultOnSuccess[userModel.User](user)
 }
 
 func (userRepository UserRepository) GetUserByEmail(ctx context.Context, email string) (userModel.User, error) {

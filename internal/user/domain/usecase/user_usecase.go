@@ -35,12 +35,18 @@ func NewUserUseCase(userRepository user.UserRepository) user.UserUseCase {
 
 func (userUseCase UserUseCase) GetAllUsers(ctx context.Context, paginationQuery commonModel.PaginationQuery) commonModel.Result[userModel.Users] {
 	fetchedUsers := userUseCase.userRepository.GetAllUsers(ctx, paginationQuery)
+	if validator.IsErrorNotNil(fetchedUsers.Error) {
+		return commonModel.NewResultOnFailure[userModel.Users](domainError.HandleError(fetchedUsers.Error))
+	}
 	return fetchedUsers
 }
 
-func (userUseCase UserUseCase) GetUserById(ctx context.Context, userID string) (userModel.User, error) {
-	fetchedUser, getUserByIdError := userUseCase.userRepository.GetUserById(ctx, userID)
-	return fetchedUser, getUserByIdError
+func (userUseCase UserUseCase) GetUserById(ctx context.Context, userID string) commonModel.Result[userModel.User] {
+	fetchedUser := userUseCase.userRepository.GetUserById(ctx, userID)
+	if validator.IsErrorNotNil(fetchedUser.Error) {
+		return commonModel.NewResultOnFailure[userModel.User](domainError.HandleError(fetchedUser.Error))
+	}
+	return fetchedUser
 }
 
 func (userUseCase UserUseCase) GetUserByEmail(ctx context.Context, email string) (userModel.User, error) {

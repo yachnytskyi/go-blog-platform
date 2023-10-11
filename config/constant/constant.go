@@ -12,6 +12,8 @@ const (
 	LoggedInValue     = "logged_in"
 	TokenDomainValue  = "localhost"
 	LogoutMaxAgeValue = -1
+	UserIDContext     = "userID"
+	UserContext       = "user"
 
 	// Pagination.
 	DefaultPage     = "1"
@@ -29,15 +31,15 @@ const (
 	FieldOptional           = "optional"
 
 	// User Notifications.
-	SendingEmailNotification = "We sent an email with a verification code to "
+	SendingEmailNotification                   = "We sent an email with a verification code to "
+	SendingEmailWithIntstructionsNotifications = "We sent you an email with needed instructions"
 
 	// Error Messages.
-	StringAllowedLength                        = "can be between %d and %d characters long"
-	StringOptionalAllowedLength                = "cannot be more than %d characters"
-	EmailAlreadyExists                         = "user with this email already exists"
-	SendingEmailWithIntstructionsNotifications = "We sent you an email with needed instructions"
-	InternalErrorNotification                  = "something went wrong, please repeat later"
-	EntityNotFoundErrorNotification            = "please repeat it later"
+	StringAllowedLength             = "can be between %d and %d characters long"
+	StringOptionalAllowedLength     = "cannot be more than %d characters"
+	EmailAlreadyExists              = "user with this email already exists"
+	InternalErrorNotification       = "something went wrong, please repeat later"
+	EntityNotFoundErrorNotification = "this item does not exist"
 
 	// Databases.
 	MongoDB = "MongoDB"

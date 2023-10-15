@@ -10,7 +10,6 @@ MongoDB
 gRPC**
 
 Hexagonal architecture, manual dependency injection and abstract factory are implemented in the project.  
-We have a script in Makefile that allows you to launch the project.
 
 ## Initializing
 `config/yaml/v1/dev.application.example.yaml` file is provided you as an example of your own config settings,  

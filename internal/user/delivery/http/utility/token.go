@@ -30,14 +30,12 @@ func CreateToken(ttl time.Duration, payload interface{}, privateKey string) (str
 		logging.Logger(decodeStringInternalError)
 		return "", decodeStringInternalError
 	}
-
 	key, parsePrivateKeyError := jwt.ParseRSAPrivateKeyFromPEM(decodedPrivateKey)
 	if validator.IsErrorNotNil(parsePrivateKeyError) {
 		parsePrivateKeyInternalError := domainError.NewInternalError(location+"CreateToken.ParseRSAPrivateKeyFromPEM", parsePrivateKeyError.Error())
 		logging.Logger(parsePrivateKeyInternalError)
 		return "", parsePrivateKeyInternalError
 	}
-
 	now := time.Now().UTC()
 	claims := jwt.MapClaims{
 		user_id: payload,
@@ -61,14 +59,12 @@ func ValidateToken(token string, publicKey string) (interface{}, error) {
 		logging.Logger(decodeStringInternalError)
 		return nil, decodeStringInternalError
 	}
-
 	key, parseError := jwt.ParseRSAPublicKeyFromPEM(decodedPublicKey)
 	if validator.IsErrorNotNil(parseError) {
 		parseInternalError := domainError.NewInternalError(location+"ValidateToken.DecodeString", parseError.Error())
 		logging.Logger(parseInternalError)
 		return nil, parseInternalError
 	}
-
 	parsedToken, parseError := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
 		_, ok := t.Method.(*jwt.SigningMethodRSA)
 		if validator.IsBooleanNotTrue(ok) {
@@ -84,7 +80,6 @@ func ValidateToken(token string, publicKey string) (interface{}, error) {
 		logging.Logger(parseInternalError)
 		return nil, parseInternalError
 	}
-
 	claims, ok := parsedToken.Claims.(jwt.MapClaims)
 	if validator.IsBooleanNotTrue(ok) || validator.IsBooleanNotTrue(parsedToken.Valid) {
 		errorMessage := domainError.NewErrorMessage(invalidToken)

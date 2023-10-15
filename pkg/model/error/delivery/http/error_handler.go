@@ -1,7 +1,7 @@
 package http
 
 import (
-	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
@@ -18,6 +18,6 @@ func HandleError(err error) httpModel.JsonResponse {
 	case domainError.PaginationError:
 		return httpModel.NewJsonResponseOnFailure(PaginationErrorToHttpPaginationErrorView(errorType))
 	default:
-		return httpModel.NewJsonResponseOnFailure(NewHttpErrorMessage(constant.InternalErrorNotification))
+		return httpModel.NewJsonResponseOnFailure(NewHttpErrorMessage(constants.InternalErrorNotification))
 	}
 }

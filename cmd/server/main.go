@@ -7,7 +7,7 @@ import (
 	"syscall"
 
 	config "github.com/yachnytskyi/golang-mongo-grpc/config"
-	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	dependency "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency"
 	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 )
@@ -17,7 +17,7 @@ func init() {
 }
 
 func main() {
-	ctx, cancel := context.WithTimeout(context.Background(), constant.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultContextTimer)
 	defer cancel()
 	container := dependency.CreateApplication(ctx)
 	go func() {

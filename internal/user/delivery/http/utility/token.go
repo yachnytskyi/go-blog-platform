@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
-	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -68,7 +68,7 @@ func ValidateToken(token string, publicKey string) (interface{}, error) {
 	parsedToken, parseError := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
 		_, ok := t.Method.(*jwt.SigningMethodRSA)
 		if validator.IsBooleanNotTrue(ok) {
-			errorMessage := domainError.NewErrorMessage(constant.InternalErrorNotification)
+			errorMessage := domainError.NewErrorMessage(constants.InternalErrorNotification)
 			logging.Logger("location: " + location + "ValidateToken.jwt.Parse")
 			logging.Logger(fmt.Errorf(unexpectedMethod, t.Header["alg"]))
 			return nil, errorMessage

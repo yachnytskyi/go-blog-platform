@@ -5,7 +5,7 @@ import (
 	"regexp"
 	"strings"
 
-	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 )
@@ -28,14 +28,14 @@ func SanitizeAndToLowerString(data string) string {
 }
 
 func ValidateField(field, fieldName, fieldRegex, notification string) domainError.ValidationError {
-	if IsStringLengthNotValid(field, constant.MinStringLength, constant.MaxStringLength) {
-		notification = fmt.Sprintf(constant.StringAllowedLength, constant.MinStringLength, constant.MaxStringLength)
-		validationError := domainError.NewValidationError(location+"ValidateField.IsStringLengthNotValid", fieldName, constant.FieldRequired, notification)
+	if IsStringLengthNotValid(field, constants.MinStringLength, constants.MaxStringLength) {
+		notification = fmt.Sprintf(constants.StringAllowedLength, constants.MinStringLength, constants.MaxStringLength)
+		validationError := domainError.NewValidationError(location+"ValidateField.IsStringLengthNotValid", fieldName, constants.FieldRequired, notification)
 		logging.Logger(validationError)
 		return validationError
 	}
 	if IsStringCharactersNotValid(field, fieldRegex) {
-		validationError := domainError.NewValidationError(location+"ValidateField.IsStringCharactersNotValid", fieldName, constant.FieldRequired, notification)
+		validationError := domainError.NewValidationError(location+"ValidateField.IsStringCharactersNotValid", fieldName, constants.FieldRequired, notification)
 		logging.Logger(validationError)
 		return validationError
 	}
@@ -43,8 +43,8 @@ func ValidateField(field, fieldName, fieldRegex, notification string) domainErro
 }
 
 func ValidateOptionalField(field, fieldName, fieldType, fieldRegex, notification string) domainError.ValidationError {
-	if IsStringLengthNotValid(field, constant.MinOptionalStringLength, constant.MaxStringLength) {
-		notification = fmt.Sprintf(constant.StringOptionalAllowedLength, constant.MaxStringLength)
+	if IsStringLengthNotValid(field, constants.MinOptionalStringLength, constants.MaxStringLength) {
+		notification = fmt.Sprintf(constants.StringOptionalAllowedLength, constants.MaxStringLength)
 		validationError := domainError.NewValidationError(location+"ValidateOptionalField.IsStringLengthNotValid", fieldName, fieldType, notification)
 		logging.Logger(validationError)
 		return validationError

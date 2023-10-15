@@ -7,7 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	config "github.com/yachnytskyi/golang-mongo-grpc/config"
-	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
 	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
@@ -22,7 +22,7 @@ const (
 func AuthContextMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var accessToken string
-		cookie, cookieError := ctx.Cookie(constant.AccessTokenValue)
+		cookie, cookieError := ctx.Cookie(constants.AccessTokenValue)
 		authorizationHeader := ctx.Request.Header.Get(authorization)
 		fields := strings.Fields(authorizationHeader)
 		if validator.IsSliceNotEmpty(fields) && fields[0] == bearer {
@@ -48,8 +48,8 @@ func AuthContextMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
 			return
 		}
 		userMappedToUserView := userViewModel.UserToUserViewMapper(user.Data)
-		ctx.Set(constant.UserIDContext, userID)
-		ctx.Set(constant.UserContext, userMappedToUserView)
+		ctx.Set(constants.UserIDContext, userID)
+		ctx.Set(constants.UserContext, userMappedToUserView)
 		ctx.Next()
 	}
 }

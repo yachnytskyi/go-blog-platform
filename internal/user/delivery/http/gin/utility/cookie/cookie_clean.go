@@ -2,11 +2,11 @@ package cookie
 
 import (
 	"github.com/gin-gonic/gin"
-	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 )
 
 func CleanCookies(ctx *gin.Context) {
-	ctx.SetCookie(constant.AccessTokenValue, "", constant.LogoutMaxAgeValue, "/", constant.TokenDomainValue, false, true)
-	ctx.SetCookie("refresh_token", "", constant.LogoutMaxAgeValue, "/", constant.TokenDomainValue, false, true)
-	ctx.SetCookie(constant.LoggedInValue, "", constant.LogoutMaxAgeValue, "/", constant.TokenDomainValue, false, true)
+	ctx.SetCookie(constants.AccessTokenValue, "", constants.LogoutMaxAgeValue, "/", constants.TokenDomainValue, false, true)
+	ctx.SetCookie("refresh_token", "", constants.LogoutMaxAgeValue, "/", constants.TokenDomainValue, false, true)
+	ctx.SetCookie(constants.LoggedInValue, "", constants.LogoutMaxAgeValue, "/", constants.TokenDomainValue, false, true)
 }

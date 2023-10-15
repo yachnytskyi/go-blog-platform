@@ -6,7 +6,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
-	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -104,9 +104,9 @@ func LoadConfig() (unmarshalError error) {
 		logging.Logger(readInInternalError)
 		return readInInternalError
 	}
-	viper.SetDefault("Database", constant.MongoDB)
-	viper.SetDefault("Domain", constant.UseCase)
-	viper.SetDefault("Delivery", constant.Gin)
+	viper.SetDefault("Database", constants.MongoDB)
+	viper.SetDefault("Domain", constants.UseCase)
+	viper.SetDefault("Delivery", constants.Gin)
 	viper.SetDefault("MongoDB.Name", defaultMongoDBName)
 	viper.SetDefault("MongoDB.URI", defaultMongoDBURI)
 	viper.SetDefault("Gin.Port", defaultGinPort)

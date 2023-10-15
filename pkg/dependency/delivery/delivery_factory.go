@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	config "github.com/yachnytskyi/golang-mongo-grpc/config"
-	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	ginFactory "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/delivery/gin"
 	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
@@ -20,7 +20,7 @@ const (
 func InjectDelivery(ctx context.Context, container *applicationModel.Container) {
 	applicationConfig := config.AppConfig
 	switch applicationConfig.Core.Delivery {
-	case constant.Gin:
+	case constants.Gin:
 		container.DeliveryFactory = &ginFactory.GinFactory{Gin: applicationConfig.Gin}
 	// Add other domain options here as needed.
 	default:

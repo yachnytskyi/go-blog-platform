@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
 	postViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/model"
 	postModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
@@ -24,7 +24,7 @@ func NewPostController(postUseCase post.PostUseCase) PostController {
 
 func (postController PostController) GetAllPosts(controllerContext interface{}) {
 	ginContext := controllerContext.(*gin.Context)
-	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
 	page := ginContext.DefaultQuery("page", "1")
 	limit := ginContext.DefaultQuery("limit", "10")
@@ -53,7 +53,7 @@ func (postController PostController) GetAllPosts(controllerContext interface{}) 
 
 func (postController PostController) GetPostById(controllerContext interface{}) {
 	ginContext := controllerContext.(*gin.Context)
-	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
 	postID := ginContext.Param("postID")
 
@@ -73,7 +73,7 @@ func (postController PostController) GetPostById(controllerContext interface{}) 
 
 func (postController PostController) CreatePost(controllerContext interface{}) {
 	ginContext := controllerContext.(*gin.Context)
-	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
 	var createdPostData *postModel.PostCreate = new(postModel.PostCreate)
 	currentUser := ginContext.MustGet("user").(userViewModel.UserView)
@@ -101,7 +101,7 @@ func (postController PostController) CreatePost(controllerContext interface{}) {
 
 func (postController PostController) UpdatePostById(controllerContext interface{}) {
 	ginContext := controllerContext.(*gin.Context)
-	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
 	postID := ginContext.Param("postID")
 	currentUserID := ginContext.MustGet("userID").(string)
@@ -133,7 +133,7 @@ func (postController PostController) UpdatePostById(controllerContext interface{
 
 func (postController PostController) DeletePostByID(controllerContext interface{}) {
 	ginContext := controllerContext.(*gin.Context)
-	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
 	postID := ginContext.Param("postID")
 	currentUserID := ginContext.MustGet("userID").(string)

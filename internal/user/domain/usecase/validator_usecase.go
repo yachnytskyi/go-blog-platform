@@ -5,7 +5,7 @@ import (
 	"net"
 	"strings"
 
-	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
@@ -127,19 +127,19 @@ func validateResetPassword(userResetPassword userModel.UserResetPassword) common
 }
 
 func validateEmail(email, fieldRegex string) domainError.ValidationError {
-	if domainUtility.IsStringLengthNotValid(email, constant.MinStringLength, constant.MaxStringLength) {
-		notification := fmt.Sprintf(constant.StringAllowedLength, constant.MinStringLength, constant.MaxStringLength)
-		validationError := domainError.NewValidationError(location+"validateEmail.IsStringLengthNotValid", EmailField, constant.FieldRequired, notification)
+	if domainUtility.IsStringLengthNotValid(email, constants.MinStringLength, constants.MaxStringLength) {
+		notification := fmt.Sprintf(constants.StringAllowedLength, constants.MinStringLength, constants.MaxStringLength)
+		validationError := domainError.NewValidationError(location+"validateEmail.IsStringLengthNotValid", EmailField, constants.FieldRequired, notification)
 		logging.Logger(validationError)
 		return validationError
 	}
 	if domainUtility.IsStringCharactersNotValid(email, fieldRegex) {
-		validationError := domainError.NewValidationError(location+"validateEmail.IsStringCharactersNotValid", EmailField, constant.FieldRequired, emailAllowedCharacters)
+		validationError := domainError.NewValidationError(location+"validateEmail.IsStringCharactersNotValid", EmailField, constants.FieldRequired, emailAllowedCharacters)
 		logging.Logger(validationError)
 		return validationError
 	}
 	if isEmailDomainNotValid(email) {
-		validationError := domainError.NewValidationError(location+"validateEmail.IsEmailDomainNotValid", EmailField, constant.FieldRequired, invalidEmailDomain)
+		validationError := domainError.NewValidationError(location+"validateEmail.IsEmailDomainNotValid", EmailField, constants.FieldRequired, invalidEmailDomain)
 		logging.Logger(validationError)
 		return validationError
 	}
@@ -147,19 +147,19 @@ func validateEmail(email, fieldRegex string) domainError.ValidationError {
 }
 
 func validatePassword(password, passwordConfirm, fieldName, fieldRegex string) domainError.ValidationError {
-	if domainUtility.IsStringLengthNotValid(password, constant.MinStringLength, constant.MaxStringLength) {
-		notification := fmt.Sprintf(constant.StringAllowedLength, constant.MinStringLength, constant.MaxStringLength)
-		validationError := domainError.NewValidationError(location+"validatePassword.IsStringLengthNotValid", fieldName, constant.FieldRequired, notification)
+	if domainUtility.IsStringLengthNotValid(password, constants.MinStringLength, constants.MaxStringLength) {
+		notification := fmt.Sprintf(constants.StringAllowedLength, constants.MinStringLength, constants.MaxStringLength)
+		validationError := domainError.NewValidationError(location+"validatePassword.IsStringLengthNotValid", fieldName, constants.FieldRequired, notification)
 		logging.Logger(validationError)
 		return validationError
 	}
 	if domainUtility.IsStringCharactersNotValid(password, fieldRegex) {
-		validationError := domainError.NewValidationError(location+"validatePassword.IsStringCharactersNotValid", fieldName, constant.FieldRequired, passwordAllowedCharacters)
+		validationError := domainError.NewValidationError(location+"validatePassword.IsStringCharactersNotValid", fieldName, constants.FieldRequired, passwordAllowedCharacters)
 		logging.Logger(validationError)
 		return validationError
 	}
 	if validator.AreStringsNotEqual(password, passwordConfirm) {
-		validationError := domainError.NewValidationError(location+"validatePassword.AreStringsNotEqual", fieldName, constant.FieldRequired, passwordsDoNotMatch)
+		validationError := domainError.NewValidationError(location+"validatePassword.AreStringsNotEqual", fieldName, constants.FieldRequired, passwordsDoNotMatch)
 		logging.Logger(validationError)
 		return validationError
 	}
@@ -175,7 +175,7 @@ func isEmailDomainNotValid(emailString string) bool {
 // Compare the encrypted and the user provided passwords.
 func arePasswordsNotEqual(hashedPassword string, checkedPassword string) domainError.ValidationError {
 	if validator.IsErrorNotNil(bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(checkedPassword))) {
-		validationError := domainError.NewValidationError(location+"arePasswordsNotEqual.CompareHashAndPassword", checkedPassword, constant.FieldRequired, passwordsDoNotMatch)
+		validationError := domainError.NewValidationError(location+"arePasswordsNotEqual.CompareHashAndPassword", checkedPassword, constants.FieldRequired, passwordsDoNotMatch)
 		logging.Logger(validationError)
 		return validationError
 	}

@@ -19,7 +19,7 @@ const (
 	bearer        = "Bearer"
 )
 
-func DeserializeUser(userUseCase user.UserUseCase) gin.HandlerFunc {
+func AuthContextMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var accessToken string
 		cookie, cookieError := ctx.Cookie(constant.AccessTokenValue)

@@ -23,18 +23,19 @@ const (
 	passwordRegex = `^[a-zA-z0-9-_*,.]*$`
 
 	// Error Messages.
-	usernameAllowedCharacters = "sorry, only letters (a-z), numbers(0-9) and spaces are allowed"
-	passwordAllowedCharacters = "sorry, only letters (a-z), numbers(0-9), the asterics, hyphen and underscore characters are allowed"
-	emailAllowedCharacters    = "sorry, only letters (a-z), numbers(0-9) and periods (.) are allowed, you cannot use a period in the end and more than one in a row"
-	invalidEmailDomain        = "email domain does not exist"
-	passwordsDoNotMatch       = "passwords do not match"
-	invalidEmailOrPassword    = "invalid email or password"
+	usernameAllowedCharacters = "sorry, only letters (a-z), numbers(0-9) and spaces are allowed."
+	passwordAllowedCharacters = "sorry, only letters (a-z), numbers(0-9), the asterics, hyphen and underscore characters are allowed."
+	emailAllowedCharacters    = "sorry, only letters (a-z), numbers(0-9) and periods (.) are allowed, you cannot use a period in the end and more than one in a row."
+	invalidEmailDomain        = "email domain does not exist."
+	passwordsDoNotMatch       = "passwords do not match."
+	invalidEmailOrPassword    = "invalid email or password."
 
 	// Field Names.
 	nameField     = "name"
 	EmailField    = "email"
 	passwordField = "password"
 
+	// Location.
 	location = "internal.user.domain.usecase."
 )
 

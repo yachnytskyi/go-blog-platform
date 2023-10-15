@@ -38,6 +38,6 @@ To run this code, you will need docker and docker-compose installed on your mach
 ```docker-compose down``` if you you prefer to enter a full command on your own.
  
 ## Ways of possible improvements
-I am open for new ideas. Fistful, add unit and integration tests. Secondly, refactoring of the system.
+I am open for new ideas. At first add unit and integration tests. Secondly, refactoring of the system.
 
 </div>

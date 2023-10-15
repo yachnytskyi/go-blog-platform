@@ -32,14 +32,14 @@ const (
 
 	// User Notifications.
 	SendingEmailNotification                   = "We sent an email with a verification code to "
-	SendingEmailWithIntstructionsNotifications = "We sent you an email with needed instructions"
+	SendingEmailWithIntstructionsNotifications = "We sent you an email with needed instructions."
 
 	// Error Messages.
-	StringAllowedLength             = "can be between %d and %d characters long"
-	StringOptionalAllowedLength     = "cannot be more than %d characters"
-	EmailAlreadyExists              = "user with this email already exists"
-	InternalErrorNotification       = "something went wrong, please repeat later"
-	EntityNotFoundErrorNotification = "this item does not exist"
+	StringAllowedLength             = "can be between %d and %d characters long."
+	StringOptionalAllowedLength     = "cannot be more than %d characters."
+	EmailAlreadyExists              = "user with this email already exists."
+	InternalErrorNotification       = "something went wrong, please repeat later."
+	EntityNotFoundErrorNotification = "this item does not exist."
 
 	// Databases.
 	MongoDB = "MongoDB"

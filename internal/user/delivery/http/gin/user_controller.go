@@ -80,12 +80,11 @@ func (userController UserController) Register(controllerContext interface{}) {
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
 	defer cancel()
 	var createdUserViewData userViewModel.UserCreateView
-	err := ginContext.ShouldBindJSON(&createdUserViewData)
-	if validator.IsErrorNotNil(err) {
-		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+	shouldBindJSON := ginContext.ShouldBindJSON(&createdUserViewData)
+	if validator.IsErrorNotNil(shouldBindJSON) {
+		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": shouldBindJSON.Error()})
 		return
 	}
-
 	userCreate := userViewModel.UserCreateViewToUserCreateMapper(createdUserViewData)
 	createdUser := userController.userUseCase.Register(ctx, userCreate)
 	if validator.IsErrorNotNil(createdUser.Error) {
@@ -94,7 +93,6 @@ func (userController UserController) Register(controllerContext interface{}) {
 		ginContext.JSON(http.StatusBadRequest, jsonResponse)
 		return
 	}
-
 	welcomeMessage := userViewModel.NewWelcomeMessageView(constant.SendingEmailNotification + createdUser.Data.Email)
 	jsonResponse := httpModel.NewJsonResponseOnSuccess(welcomeMessage)
 	httpModel.SetStatus(&jsonResponse)

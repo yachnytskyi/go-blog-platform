@@ -26,7 +26,7 @@ func (userRouter UserRouter) UserRouter(routerGroup interface{}, userUseCase use
 	router.POST("/login", func(ginContext *gin.Context) {
 		userRouter.userController.Login(ginContext)
 	})
-	router.POST("/register", func(ginContext *gin.Context) {
+	router.POST("/register", httpGinMiddleware.AnonymousContextMiddleware(), func(ginContext *gin.Context) {
 		userRouter.userController.Register(ginContext)
 	})
 	router.POST("/forgotten-password", func(ginContext *gin.Context) {
@@ -36,7 +36,7 @@ func (userRouter UserRouter) UserRouter(routerGroup interface{}, userUseCase use
 		userRouter.userController.ResetUserPassword(ginContext)
 	})
 
-	router.Use(httpGinMiddleware.DeserializeUser(userUseCase))
+	router.Use(httpGinMiddleware.AuthContextMiddleware(userUseCase))
 	router.GET("/current_user", func(ginContext *gin.Context) {
 		userRouter.userController.GetCurrentUser(ginContext)
 	})

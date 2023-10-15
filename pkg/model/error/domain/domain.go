@@ -6,13 +6,15 @@ import (
 )
 
 type ValidationError struct {
+	Location     string
 	Field        string
 	FieldType    string
 	Notification string
 }
 
-func NewValidationError(field string, fieldType string, notification string) ValidationError {
+func NewValidationError(location, field, fieldType, notification string) ValidationError {
 	return ValidationError{
+		Location:     location,
 		Field:        field,
 		FieldType:    fieldType,
 		Notification: notification,
@@ -20,7 +22,7 @@ func NewValidationError(field string, fieldType string, notification string) Val
 }
 
 func (err ValidationError) Error() string {
-	return fmt.Sprintf("field: " + err.Field + " " + "type: " + err.FieldType + " notification: " + err.Notification)
+	return fmt.Sprintf("location: " + err.Location + " field: " + err.Field + " " + "type: " + err.FieldType + " notification: " + err.Notification)
 }
 
 type ValidationErrors struct {
@@ -48,7 +50,7 @@ type EntityNotFoundError struct {
 	Reason   string
 }
 
-func NewEntityNotFoundError(location string, reason string) EntityNotFoundError {
+func NewEntityNotFoundError(location, reason string) EntityNotFoundError {
 	return EntityNotFoundError{
 		Location: location,
 		Reason:   reason,
@@ -64,7 +66,7 @@ type InternalError struct {
 	Reason   string
 }
 
-func NewInternalError(location string, reason string) InternalError {
+func NewInternalError(location, reason string) InternalError {
 	return InternalError{
 		Location: location,
 		Reason:   reason,

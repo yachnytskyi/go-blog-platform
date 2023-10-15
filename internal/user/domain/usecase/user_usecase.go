@@ -128,7 +128,8 @@ func (userUseCase UserUseCase) Login(ctx context.Context, userLoginData userMode
 	if validator.IsErrorNotNil(getUserByEmailError) {
 		return "", domainError.HandleError(domainError.NewErrorMessage(invalidEmailOrPassword))
 	}
-	if arePasswordsNotEqual(fetchedUser.Password, userLoginData.Password) {
+	arePasswordsNotEqualError := arePasswordsNotEqual(fetchedUser.Password, userLoginData.Password)
+	if validator.IsValueNotNil(arePasswordsNotEqualError) {
 		return "", domainError.HandleError(domainError.NewErrorMessage(invalidEmailOrPassword))
 	}
 	return fetchedUser.UserID, nil

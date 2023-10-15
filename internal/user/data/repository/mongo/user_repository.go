@@ -125,7 +125,7 @@ func (userRepository UserRepository) CheckEmailDublicate(ctx context.Context, em
 		logging.Logger(userFindOneInternalError)
 		return userFindOneInternalError
 	}
-	userFindOneValidationError := domainError.NewValidationError(userValidator.EmailField, constant.FieldRequired, constant.EmailAlreadyExists)
+	userFindOneValidationError := domainError.NewValidationError(location+"CheckEmailDublicate", userValidator.EmailField, constant.FieldRequired, constant.EmailAlreadyExists)
 	logging.Logger(userFindOneValidationError)
 	return userFindOneValidationError
 }

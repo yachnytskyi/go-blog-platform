@@ -7,6 +7,11 @@ import (
 
 	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
+)
+
+const (
+	location = "pkg.utility.validator.domain."
 )
 
 func SanitizeString(data string) string {
@@ -25,10 +30,14 @@ func SanitizeAndToLowerString(data string) string {
 func ValidateField(field, fieldName, fieldRegex, notification string) domainError.ValidationError {
 	if IsStringLengthNotValid(field, constant.MinStringLength, constant.MaxStringLength) {
 		notification = fmt.Sprintf(constant.StringAllowedLength, constant.MinStringLength, constant.MaxStringLength)
-		return domainError.NewValidationError(fieldName, constant.FieldRequired, notification)
+		validationError := domainError.NewValidationError(location+"ValidateField.IsStringLengthNotValid", fieldName, constant.FieldRequired, notification)
+		logging.Logger(validationError)
+		return validationError
 	}
 	if IsStringCharactersNotValid(field, fieldRegex) {
-		return domainError.NewValidationError(fieldName, constant.FieldRequired, notification)
+		validationError := domainError.NewValidationError(location+"ValidateField.IsStringCharactersNotValid", fieldName, constant.FieldRequired, notification)
+		logging.Logger(validationError)
+		return validationError
 	}
 	return domainError.ValidationError{}
 }
@@ -36,10 +45,14 @@ func ValidateField(field, fieldName, fieldRegex, notification string) domainErro
 func ValidateOptionalField(field, fieldName, fieldType, fieldRegex, notification string) domainError.ValidationError {
 	if IsStringLengthNotValid(field, constant.MinOptionalStringLength, constant.MaxStringLength) {
 		notification = fmt.Sprintf(constant.StringOptionalAllowedLength, constant.MaxStringLength)
-		return domainError.NewValidationError(fieldName, fieldType, notification)
+		validationError := domainError.NewValidationError(location+"ValidateOptionalField.IsStringLengthNotValid", fieldName, fieldType, notification)
+		logging.Logger(validationError)
+		return validationError
 	}
 	if IsStringCharactersNotValid(field, fieldRegex) {
-		return domainError.NewValidationError(fieldName, fieldType, notification)
+		validationError := domainError.NewValidationError(location+"ValidateField.IsStringCharactersNotValid", fieldName, fieldType, notification)
+		logging.Logger(validationError)
+		return validationError
 	}
 	return domainError.ValidationError{}
 }

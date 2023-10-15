@@ -10,7 +10,6 @@ MongoDB
 gRPC**
 
 Hexagonal architecture, manual dependency injection and abstract factory are implemented in the project.
-
 We have a script in Makefile that allows you to launch the project.
 
 ## Initializing
@@ -18,9 +17,7 @@ We have a script in Makefile that allows you to launch the project.
 
 ## From the project root directory, run:  
 ```make up``` 
-
 The API will then be available at  **http://localhost:8080/api/posts  http://localhost:8080/api/users**
-
 You can also find all possible API requests/urls when you launch the project in your server terminal. 
 
 If you need to make rebuild, you can use these commands:  

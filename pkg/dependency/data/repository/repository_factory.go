@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	location            = "pkg/dependency/data/repository/InjectRepository"
+	location            = "pkg/dependency/data/repository/InjectRepository."
 	unsupportedDatabase = "Unsupported database type: %s"
 )
 

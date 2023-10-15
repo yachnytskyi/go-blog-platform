@@ -26,13 +26,13 @@ func (userGrpcServer *UserGrpcServer) Login(ctx context.Context, request *pb.Log
 	// }
 
 	// Generate tokens
-	accessToken, err := httpUtility.CreateToken(userGrpcServer.applicationConfig.AccessToken.ExpiredIn, user.UserID, userGrpcServer.applicationConfig.AccessToken.PrivateKey)
-	if err != nil {
-		return nil, status.Errorf(codes.PermissionDenied, err.Error())
+	accessToken, createTokenError := httpUtility.CreateToken(userGrpcServer.applicationConfig.AccessToken.ExpiredIn, user.UserID, userGrpcServer.applicationConfig.AccessToken.PrivateKey)
+	if createTokenError != nil {
+		return nil, status.Errorf(codes.PermissionDenied, createTokenError.Error())
 	}
-	refreshToken, err := httpUtility.CreateToken(userGrpcServer.applicationConfig.RefreshToken.ExpiredIn, user.UserID, userGrpcServer.applicationConfig.RefreshToken.PrivateKey)
-	if err != nil {
-		return nil, status.Errorf(codes.PermissionDenied, err.Error())
+	refreshToken, createTokenError := httpUtility.CreateToken(userGrpcServer.applicationConfig.RefreshToken.ExpiredIn, user.UserID, userGrpcServer.applicationConfig.RefreshToken.PrivateKey)
+	if createTokenError != nil {
+		return nil, status.Errorf(codes.PermissionDenied, createTokenError.Error())
 	}
 
 	response := &pb.LoginUserView{

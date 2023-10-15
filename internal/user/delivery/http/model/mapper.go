@@ -5,6 +5,12 @@ import (
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 )
 
+func TokenStringToTokenViewMapper(token string) TokenView {
+	return TokenView{
+		Token: token,
+	}
+}
+
 func UsersToUsersViewMapper(users userModel.Users) UsersView {
 	usersView := make([]UserView, len(users.Users))
 	for index, user := range users.Users {

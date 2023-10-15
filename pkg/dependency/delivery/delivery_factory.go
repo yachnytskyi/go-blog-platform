@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	location          = "pkg/dependency/delivery/InjectDelivery"
+	location          = "pkg/dependency/delivery/InjectDelivery."
 	unsupportedDomain = "Unsupported domain type: %s"
 )
 

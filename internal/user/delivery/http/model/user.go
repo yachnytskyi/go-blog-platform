@@ -7,6 +7,11 @@ import (
 )
 
 // [GET].
+type TokenView struct {
+	Token string `json:"token"`
+}
+
+// [GET].
 type UsersView struct {
 	UsersView          []UserView                   `json:"users"`
 	PaginationResponse httpModel.PaginationResponse `json:"pagination_response"`

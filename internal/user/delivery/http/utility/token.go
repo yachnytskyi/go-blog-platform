@@ -6,59 +6,91 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
+	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
+	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
+const (
+	signingMethod    = "RS256"
+	user_id          = "user_id"
+	exp              = "exp"
+	iat              = "iat"
+	nbf              = "nbf"
+	location         = "internal.user.delivery.http.utility."
+	unexpectedMethod = "unexpected method: %s"
+	invalidToken     = "validate: invalid token"
+)
+
 func CreateToken(ttl time.Duration, payload interface{}, privateKey string) (string, error) {
-	decodedPrivateKey, err := base64.StdEncoding.DecodeString(privateKey)
-	if validator.IsErrorNotNil(err) {
-		return "", fmt.Errorf("could not decode key: %w", err)
+	decodedPrivateKey, decodeStringError := base64.StdEncoding.DecodeString(privateKey)
+	if validator.IsErrorNotNil(decodeStringError) {
+		decodeStringInternalError := domainError.NewInternalError(location+"CreateToken.StdEncoding.DecodeString", decodeStringError.Error())
+		logging.Logger(decodeStringInternalError)
+		return "", decodeStringInternalError
 	}
 
-	key, err := jwt.ParseRSAPrivateKeyFromPEM(decodedPrivateKey)
-	if validator.IsErrorNotNil(err) {
-		return "", fmt.Errorf("create: parse key: %w", err)
+	key, parsePrivateKeyError := jwt.ParseRSAPrivateKeyFromPEM(decodedPrivateKey)
+	if validator.IsErrorNotNil(parsePrivateKeyError) {
+		parsePrivateKeyInternalError := domainError.NewInternalError(location+"CreateToken.ParseRSAPrivateKeyFromPEM", parsePrivateKeyError.Error())
+		logging.Logger(parsePrivateKeyInternalError)
+		return "", parsePrivateKeyInternalError
 	}
 
 	now := time.Now().UTC()
-	claims := make(jwt.MapClaims)
-	claims["user_id"] = payload
-	claims["exp"] = now.Add(ttl).Unix()
-	claims["iat"] = now.Unix()
-	claims["nbf"] = now.Unix()
-
-	token, err := jwt.NewWithClaims(jwt.SigningMethodRS256, claims).SignedString(key)
-	if validator.IsErrorNotNil(err) {
-		return "", fmt.Errorf("create: sign token: %w", err)
+	claims := jwt.MapClaims{
+		user_id: payload,
+		exp:     now.Add(ttl).Unix(),
+		iat:     now.Unix(),
+		nbf:     now.Unix(),
+	}
+	token, newWithClaimsError := jwt.NewWithClaims(jwt.GetSigningMethod(signingMethod), claims).SignedString(key)
+	if validator.IsErrorNotNil(newWithClaimsError) {
+		newWithClaimsInternalError := domainError.NewInternalError(location+"CreateToken.NewWithClaims", newWithClaimsError.Error())
+		logging.Logger(newWithClaimsInternalError)
+		return "", newWithClaimsInternalError
 	}
 	return token, nil
 }
 
 func ValidateToken(token string, publicKey string) (interface{}, error) {
-	decodedPublicKey, err := base64.StdEncoding.DecodeString(publicKey)
-	if validator.IsErrorNotNil(err) {
-		return nil, fmt.Errorf("could not decode: %w", err)
+	decodedPublicKey, decodeStringError := base64.StdEncoding.DecodeString(publicKey)
+	if validator.IsErrorNotNil(decodeStringError) {
+		decodeStringInternalError := domainError.NewInternalError(location+"ValidateToken.DecodeString", decodeStringError.Error())
+		logging.Logger(decodeStringInternalError)
+		return nil, decodeStringInternalError
 	}
 
-	key, err := jwt.ParseRSAPublicKeyFromPEM(decodedPublicKey)
-	if validator.IsErrorNotNil(err) {
-		return "", fmt.Errorf("validate: parse key: %w", err)
+	key, parseError := jwt.ParseRSAPublicKeyFromPEM(decodedPublicKey)
+	if validator.IsErrorNotNil(parseError) {
+		parseInternalError := domainError.NewInternalError(location+"ValidateToken.DecodeString", parseError.Error())
+		logging.Logger(parseInternalError)
+		return nil, parseInternalError
 	}
 
-	parsedToken, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
+	parsedToken, parseError := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
 		_, ok := t.Method.(*jwt.SigningMethodRSA)
 		if validator.IsBooleanNotTrue(ok) {
-			return nil, fmt.Errorf("unexpected method: %s", t.Header["alg"])
+			errorMessage := domainError.NewErrorMessage(constant.InternalErrorNotification)
+			logging.Logger("location: " + location + "ValidateToken.jwt.Parse")
+			logging.Logger(fmt.Errorf(unexpectedMethod, t.Header["alg"]))
+			return nil, errorMessage
 		}
 		return key, nil
 	})
-	if validator.IsErrorNotNil(err) {
-		return nil, fmt.Errorf("validate: %w", err)
+	if validator.IsErrorNotNil(parseError) {
+		parseInternalError := domainError.NewInternalError(location+"ValidateToken.jwt.Parse", parseError.Error())
+		logging.Logger(parseInternalError)
+		return nil, parseInternalError
 	}
 
 	claims, ok := parsedToken.Claims.(jwt.MapClaims)
 	if validator.IsBooleanNotTrue(ok) || validator.IsBooleanNotTrue(parsedToken.Valid) {
-		return nil, fmt.Errorf("validate: invalid token")
+		errorMessage := domainError.NewErrorMessage(invalidToken)
+		logging.Logger("location: " + location + "parsedToken.Claims")
+		logging.Logger(errorMessage)
+		return nil, errorMessage
 	}
-	return claims["user_id"], nil
+	return claims[user_id], nil
 }

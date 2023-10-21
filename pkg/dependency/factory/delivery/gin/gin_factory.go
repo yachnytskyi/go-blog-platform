@@ -28,7 +28,8 @@ type GinFactory struct {
 }
 
 const (
-	shutDownCompleted = "Server connection has been successfully closed..."
+	successfully_connected = "Server is successfully launched..."
+	successfully_closed    = "Server has been successfully shutdown..."
 )
 
 func (ginFactory *GinFactory) InitializeServer(serverConfig applicationModel.ServerRouters) {
@@ -52,12 +53,16 @@ func (ginFactory *GinFactory) InitializeServer(serverConfig applicationModel.Ser
 
 func (ginFactory *GinFactory) LaunchServer(ctx context.Context, container *applicationModel.Container) {
 	applicationConfig := config.AppConfig
-	runError := ginFactory.Router.Run(":" + applicationConfig.Gin.Port)
-	if validator.IsErrorNotNil(runError) {
-		container.RepositoryFactory.CloseRepository(ctx)
-		runInternalError := domainError.NewInternalError(location+"LaunchServer.Router.Run", runError.Error())
-		logging.Logger(runInternalError)
-	}
+
+	go func() {
+		runError := ginFactory.Router.Run(":" + applicationConfig.Gin.Port)
+		if runError != nil {
+			container.RepositoryFactory.CloseRepository(ctx)
+			runInternalError := domainError.NewInternalError(location+"LaunchServer.Router.Run", runError.Error())
+			logging.Logger(runInternalError)
+		}
+	}()
+	logging.Logger(successfully_connected)
 }
 
 func (ginFactory *GinFactory) CloseServer(ctx context.Context) {
@@ -66,7 +71,7 @@ func (ginFactory *GinFactory) CloseServer(ctx context.Context) {
 		shutDownInternalError := domainError.NewInternalError(location+"CloseServer.Server.Shutdown", shutDownError.Error())
 		logging.Logger(shutDownInternalError)
 	}
-	logging.Logger(shutDownCompleted)
+	logging.Logger(successfully_closed)
 }
 
 func (ginFactory *GinFactory) NewUserController(domain interface{}) user.UserController {

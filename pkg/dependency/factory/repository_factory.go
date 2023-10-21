@@ -1,4 +1,4 @@
-package repository
+package factory
 
 import (
 	"context"
@@ -6,7 +6,7 @@ import (
 
 	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	mongoDBFactory "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/data/repository/mongo"
+	mongoDBFactory "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/data/repository/mongo"
 	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"

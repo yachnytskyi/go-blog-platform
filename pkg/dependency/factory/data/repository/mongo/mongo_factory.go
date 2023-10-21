@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	successfully_connected = "Database is successfully connected..."
+	successfully_connected = "Database connection is established..."
 	successfully_closed    = "Database connection has been successfully closed..."
 	location               = "pkg.dependency.data.repository.mongo.NewRepository."
 	unsupportedDatabase    = "Unsupported database type: %s"

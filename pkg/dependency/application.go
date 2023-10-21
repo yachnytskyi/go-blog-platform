@@ -3,9 +3,7 @@ package dependency
 import (
 	"context"
 
-	repository "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/data/repository"
-	delivery "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/delivery"
-	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/domain"
+	factory "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory"
 	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 )
 
@@ -14,18 +12,18 @@ func CreateApplication(ctx context.Context) *applicationModel.Container {
 	serverRouters := applicationModel.ServerRouters{}
 
 	// Repositories.
-	repository.InjectRepository(ctx, container)
+	factory.InjectRepository(ctx, container)
 	db := container.RepositoryFactory.NewRepository(ctx)
 	userRepository := container.RepositoryFactory.NewUserRepository(db)
 	postRepository := container.RepositoryFactory.NewPostRepository(db)
 
 	// Domains.
-	domain.InjectDomain(ctx, container)
+	factory.InjectDomain(ctx, container)
 	serverRouters.UserUseCase = container.DomainFactory.NewUserUseCase(userRepository)
 	postDomain := container.DomainFactory.NewPostUseCase(postRepository)
 
 	// Deliveries.
-	delivery.InjectDelivery(ctx, container)
+	factory.InjectDelivery(ctx, container)
 	userController := container.DeliveryFactory.NewUserController(serverRouters.UserUseCase)
 	postController := container.DeliveryFactory.NewPostController(postDomain)
 	serverRouters.UserRouter = container.DeliveryFactory.NewUserRouter(userController)

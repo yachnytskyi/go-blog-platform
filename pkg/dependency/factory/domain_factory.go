@@ -1,4 +1,4 @@
-package delivery
+package factory
 
 import (
 	"context"
@@ -6,22 +6,21 @@ import (
 
 	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	ginFactory "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/delivery/gin"
+	useCaseFactory "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/domain/usecase"
 	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 )
 
 const (
-	location          = "pkg/dependency/delivery/InjectDelivery."
-	unsupportedDomain = "Unsupported domain type: %s"
+	unsupportedDomain = "unsupported domain type: %s"
 )
 
-func InjectDelivery(ctx context.Context, container *applicationModel.Container) {
+func InjectDomain(ctx context.Context, container *applicationModel.Container) {
 	applicationConfig := config.AppConfig
-	switch applicationConfig.Core.Delivery {
-	case constants.Gin:
-		container.DeliveryFactory = &ginFactory.GinFactory{Gin: applicationConfig.Gin}
+	switch applicationConfig.Core.Domain {
+	case constants.UseCase:
+		container.DomainFactory = useCaseFactory.UseCaseFactory{}
 	// Add other domain options here as needed.
 	default:
 		notification := fmt.Sprintf(unsupportedDomain, applicationConfig.Core.Domain)

@@ -6,6 +6,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
+	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
+	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
+	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
@@ -21,7 +24,12 @@ func AnonymousContextMiddleware() gin.HandlerFunc {
 			accessToken = cookie
 		}
 		if validator.IsStringNotEmpty(accessToken) {
-			ginContext.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"status": "fail", "message": "You are already registered, and registration is not allowed for existing users."})
+			authorizationError := httpError.NewHttpAuthorizationErrorView(constants.AlreadyRegisteredNotification)
+			logging.Logger(authorizationError)
+			jsonResponse := httpModel.NewJsonResponseOnFailure(authorizationError)
+			httpModel.SetStatus(&jsonResponse)
+			ginContext.AbortWithStatusJSON(http.StatusForbidden, jsonResponse)
+			return
 		}
 		ginContext.Next()
 	}

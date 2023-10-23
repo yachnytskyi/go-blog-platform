@@ -23,10 +23,10 @@ func (userGrpcServer *UserGrpcServer) Register(ctx context.Context, request *pb.
 		switch errorType := createdUser.Error.(type) {
 		case *domainError.ValidationError:
 			return nil, errorType
-		case *domainError.ErrorMessage:
+		case *domainError.InternalError:
 			return nil, errorType
 		default:
-			var defaultError *domainError.ErrorMessage = new(domainError.ErrorMessage)
+			var defaultError *domainError.InternalError = new(domainError.InternalError)
 			defaultError.Notification = "reason:" + " something went wrong, please repeat later"
 			return nil, errorType
 		}

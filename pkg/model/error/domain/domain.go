@@ -45,50 +45,36 @@ func (validationErrors ValidationErrors) Error() string {
 	return result.String()
 }
 
-type EntityNotFoundError struct {
-	Location string
-	Reason   string
-}
-
-func NewEntityNotFoundError(location, reason string) EntityNotFoundError {
-	return EntityNotFoundError{
-		Location: location,
-		Reason:   reason,
-	}
-}
-
-func (err EntityNotFoundError) Error() string {
-	return fmt.Sprintf("location: " + err.Location + " reason: " + err.Reason)
-}
-
-type InternalError struct {
-	Location string
-	Reason   string
-}
-
-func NewInternalError(location, reason string) InternalError {
-	return InternalError{
-		Location: location,
-		Reason:   reason,
-	}
-}
-
-func (err InternalError) Error() string {
-	return fmt.Sprintf("location: " + err.Location + " reason: " + err.Reason)
-}
-
-type ErrorMessage struct {
+type AuthorizationError struct {
+	Location     string
 	Notification string
 }
 
-func NewErrorMessage(notification string) ErrorMessage {
-	return ErrorMessage{
+func NewAuthorizationError(location, notification string) AuthorizationError {
+	return AuthorizationError{
+		Location:     location,
 		Notification: notification,
 	}
 }
 
-func (err ErrorMessage) Error() string {
-	return fmt.Sprintf("notification: " + err.Notification)
+func (err AuthorizationError) Error() string {
+	return fmt.Sprintf("location: " + err.Location + " notification: " + err.Notification)
+}
+
+type EntityNotFoundError struct {
+	Location     string
+	Notification string
+}
+
+func NewEntityNotFoundError(location, notification string) EntityNotFoundError {
+	return EntityNotFoundError{
+		Location:     location,
+		Notification: notification,
+	}
+}
+
+func (err EntityNotFoundError) Error() string {
+	return fmt.Sprintf("location: " + err.Location + " notification: " + err.Notification)
 }
 
 type PaginationError struct {
@@ -105,7 +91,23 @@ func NewPaginationError(currentPage, totalPages, notification string) Pagination
 	}
 }
 
-func (httpPaginationErrorView PaginationError) Error() string {
-	return fmt.Sprintf("page: " + httpPaginationErrorView.CurrentPage + " total: " +
-		httpPaginationErrorView.TotalPages + " notification: " + httpPaginationErrorView.Notification)
+func (paginationError PaginationError) Error() string {
+	return fmt.Sprintf("page: " + paginationError.CurrentPage + " total: " +
+		paginationError.TotalPages + " notification: " + paginationError.Notification)
+}
+
+type InternalError struct {
+	Location     string
+	Notification string
+}
+
+func NewInternalError(location, notification string) InternalError {
+	return InternalError{
+		Location:     location,
+		Notification: notification,
+	}
+}
+
+func (err InternalError) Error() string {
+	return fmt.Sprintf("location: " + err.Location + " notification: " + err.Notification)
 }

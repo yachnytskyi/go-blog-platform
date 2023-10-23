@@ -31,15 +31,17 @@ const (
 	FieldOptional           = "optional"
 
 	// User Notifications.
-	SendingEmailNotification                   = "We sent an email with a verification code to "
-	SendingEmailWithIntstructionsNotifications = "We sent you an email with needed instructions."
+	SendingEmailNotification                 = "We have sent an email with a verification code to the provided address "
+	SendingEmailWithInstructionsNotification = "You will receive an email with detailed instructions shortly."
 
 	// Error Messages.
-	StringAllowedLength             = "can be between %d and %d characters long."
-	StringOptionalAllowedLength     = "cannot be more than %d characters."
-	EmailAlreadyExists              = "user with this email already exists."
-	InternalErrorNotification       = "something went wrong, please repeat later."
-	EntityNotFoundErrorNotification = "this item does not exist."
+	StringAllowedLength             = "Can be between %d and %d characters long."
+	StringOptionalAllowedLength     = "Cannot be more than %d characters."
+	EmailAlreadyExists              = "An account with this email address already exists."
+	AuthorizationErrorNotification  = "Access denied. You do not have the required permissions to perform this action. Please try again or contact our support team for assistance."
+	EntityNotFoundErrorNotification = "Sorry, the requested item does not exist in our records."
+	PaginationErrorNotification     = "Sorry, there was an issue with the pagination request. Please check your parameters and try again."
+	InternalErrorNotification       = "Oops! Something went wrong on our end. Please try again later or contact our support team for assistance."
 
 	// Databases.
 	MongoDB = "MongoDB"

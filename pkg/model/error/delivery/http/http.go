@@ -42,18 +42,32 @@ func (httpValidationErrorsView HttpValidationErrorsView) Error() string {
 	return result.String()
 }
 
-type HttpErrorMessageView struct {
+type HttpAuthorizationErrorView struct {
 	Notification string `json:"notification"`
 }
 
-func NewHttpErrorMessage(notification string) HttpErrorMessageView {
-	return HttpErrorMessageView{
+func NewHttpAuthorizationErrorView(notification string) HttpAuthorizationErrorView {
+	return HttpAuthorizationErrorView{
 		Notification: notification,
 	}
 }
 
-func (httpMessageErrorView HttpErrorMessageView) Error() string {
-	return fmt.Sprintf("notification: " + httpMessageErrorView.Notification)
+func (err HttpAuthorizationErrorView) Error() string {
+	return fmt.Sprintf("notification: " + err.Notification)
+}
+
+type HttpEntityNotFoundErrorView struct {
+	Notification string `json:"notification"`
+}
+
+func NewHttpEntityNotFoundErrorView(location, notification string) HttpEntityNotFoundErrorView {
+	return HttpEntityNotFoundErrorView{
+		Notification: notification,
+	}
+}
+
+func (err HttpEntityNotFoundErrorView) Error() string {
+	return fmt.Sprintf("notification: " + err.Notification)
 }
 
 type HttpPaginationErrorView struct {
@@ -73,4 +87,18 @@ func NewHttpPaginationErrorView(currentPage, totalPages, notification string) Ht
 func (httpPaginationErrorView HttpPaginationErrorView) Error() string {
 	return fmt.Sprintf("current page: " + httpPaginationErrorView.CurrentPage + " total pages: " +
 		httpPaginationErrorView.TotalPages + " notification: " + httpPaginationErrorView.Notification)
+}
+
+type HttpInternalErrorView struct {
+	Notification string `json:"notification"`
+}
+
+func NewHttpInternalErrorView(notification string) HttpInternalErrorView {
+	return HttpInternalErrorView{
+		Notification: notification,
+	}
+}
+
+func (err HttpInternalErrorView) Error() string {
+	return fmt.Sprintf("notification: " + err.Notification)
 }

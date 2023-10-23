@@ -31,9 +31,10 @@ const (
 	invalidEmailOrPassword    = "invalid email or password."
 
 	// Field Names.
-	nameField     = "name"
-	EmailField    = "email"
-	passwordField = "password"
+	nameField             = "name"
+	EmailField            = "email"
+	passwordField         = "password"
+	emailOrPasswordFields = "email or password"
 
 	// Location.
 	location = "internal.user.domain.usecase."
@@ -175,7 +176,7 @@ func isEmailDomainNotValid(emailString string) bool {
 // Compare the encrypted and the user provided passwords.
 func arePasswordsNotEqual(hashedPassword string, checkedPassword string) domainError.ValidationError {
 	if validator.IsErrorNotNil(bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(checkedPassword))) {
-		validationError := domainError.NewValidationError(location+"arePasswordsNotEqual.CompareHashAndPassword", checkedPassword, constants.FieldRequired, passwordsDoNotMatch)
+		validationError := domainError.NewValidationError(location+"arePasswordsNotEqual.CompareHashAndPassword", emailOrPasswordFields, constants.FieldRequired, passwordsDoNotMatch)
 		logging.Logger(validationError)
 		return validationError
 	}

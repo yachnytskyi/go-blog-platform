@@ -126,11 +126,12 @@ func (userUseCase UserUseCase) Login(ctx context.Context, userLoginData userMode
 
 	fetchedUser, getUserByEmailError := userUseCase.userRepository.GetUserByEmail(ctx, userLogin.Data.Email)
 	if validator.IsErrorNotNil(getUserByEmailError) {
-		return "", domainError.HandleError(domainError.NewErrorMessage(invalidEmailOrPassword))
+		return "", getUserByEmailError
 	}
 	arePasswordsNotEqualError := arePasswordsNotEqual(fetchedUser.Password, userLoginData.Password)
 	if validator.IsValueNotNil(arePasswordsNotEqualError) {
-		return "", domainError.HandleError(domainError.NewErrorMessage(invalidEmailOrPassword))
+		arePasswordsNotEqualError.Notification = invalidEmailOrPassword
+		return "", arePasswordsNotEqualError
 	}
 	return fetchedUser.UserID, nil
 }

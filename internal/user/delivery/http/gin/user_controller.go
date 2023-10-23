@@ -231,7 +231,6 @@ func (userController UserController) ForgottenPassword(controllerContext interfa
 		return
 	}
 
-	message := constants.SendingEmailWithIntstructionsNotifications
 	fetchedUser, err := userController.userUseCase.GetUserByEmail(ctx, userViewEmail.Email)
 	if validator.IsErrorNotNil(err) {
 		ginContext.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": err.Error()})
@@ -249,7 +248,7 @@ func (userController UserController) ForgottenPassword(controllerContext interfa
 		ginContext.JSON(http.StatusBadGateway, gin.H{"status": "success", "message": err.Error()})
 		return
 	}
-	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
+	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "message": constants.SendingEmailWithInstructionsNotification})
 }
 
 func (userController UserController) ResetUserPassword(controllerContext interface{}) {

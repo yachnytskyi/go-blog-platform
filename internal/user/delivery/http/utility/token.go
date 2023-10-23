@@ -2,11 +2,9 @@ package utility
 
 import (
 	"encoding/base64"
-	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt"
-	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -68,10 +66,9 @@ func ValidateToken(token string, publicKey string) (interface{}, error) {
 	parsedToken, parseError := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
 		_, ok := t.Method.(*jwt.SigningMethodRSA)
 		if validator.IsBooleanNotTrue(ok) {
-			errorMessage := domainError.NewErrorMessage(constants.InternalErrorNotification)
-			logging.Logger("location: " + location + "ValidateToken.jwt.Parse")
-			logging.Logger(fmt.Errorf(unexpectedMethod, t.Header["alg"]))
-			return nil, errorMessage
+			internalError := domainError.NewInternalError(location+"ValidateToken.jwt.Parse.NotOk", unexpectedMethod+" t.Header[alg]")
+			logging.Logger(internalError)
+			return nil, internalError
 		}
 		return key, nil
 	})
@@ -82,8 +79,7 @@ func ValidateToken(token string, publicKey string) (interface{}, error) {
 	}
 	claims, ok := parsedToken.Claims.(jwt.MapClaims)
 	if validator.IsBooleanNotTrue(ok) || validator.IsBooleanNotTrue(parsedToken.Valid) {
-		errorMessage := domainError.NewErrorMessage(invalidToken)
-		logging.Logger("location: " + location + "parsedToken.Claims")
+		errorMessage := domainError.NewInternalError(location+"parsedToken.Claims.NotOk", invalidToken)
 		logging.Logger(errorMessage)
 		return nil, errorMessage
 	}

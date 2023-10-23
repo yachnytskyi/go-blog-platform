@@ -10,13 +10,18 @@ func HandleError(err error) error {
 		return errorType
 	case ValidationErrors:
 		return errorType
-	case ErrorMessage:
+	case AuthorizationError:
+		errorType.Notification = constants.AuthorizationErrorNotification
 		return errorType
 	case EntityNotFoundError:
-		return NewErrorMessage(constants.EntityNotFoundErrorNotification)
+		errorType.Notification = constants.EntityNotFoundErrorNotification
+		return errorType
 	case PaginationError:
+		errorType.Notification = constants.PaginationErrorNotification
 		return errorType
 	default:
-		return NewErrorMessage(constants.InternalErrorNotification)
+		internalError := errorType.(InternalError)
+		internalError.Notification = constants.InternalErrorNotification
+		return internalError
 	}
 }

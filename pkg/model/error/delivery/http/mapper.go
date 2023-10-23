@@ -24,16 +24,28 @@ func ValidationErrorsToHttpValidationErrorsViewMapper(validationErrors domainErr
 	return HttpValidationErrorsView{HttpValidationErrorsView: httpValidationErrorsView}
 }
 
-func ErrorMessageToHttpErrorMessageViewMapper(errorMessage domainError.ErrorMessage) HttpErrorMessageView {
-	return HttpErrorMessageView{
-		Notification: errorMessage.Notification,
+func AuthorizationErrorToHttpAuthorizationErrorViewMapper(authorizationError domainError.AuthorizationError) HttpAuthorizationErrorView {
+	return HttpAuthorizationErrorView{
+		Notification: authorizationError.Notification,
 	}
 }
 
-func PaginationErrorToHttpPaginationErrorView(errorMessage domainError.PaginationError) HttpPaginationErrorView {
+func EntityNotFoundErrorToHttpEntityNotFoundErrorViewMapper(entityNotFoundError domainError.EntityNotFoundError) HttpEntityNotFoundErrorView {
+	return HttpEntityNotFoundErrorView{
+		Notification: entityNotFoundError.Notification,
+	}
+}
+
+func PaginationErrorToHttpPaginationErrorViewMapper(errorMessage domainError.PaginationError) HttpPaginationErrorView {
 	return HttpPaginationErrorView{
 		CurrentPage:  errorMessage.CurrentPage,
 		TotalPages:   errorMessage.TotalPages,
 		Notification: errorMessage.Notification,
+	}
+}
+
+func InternalErrorToHttpInternalErrorViewMapper(internalError domainError.InternalError) HttpInternalErrorView {
+	return HttpInternalErrorView{
+		Notification: internalError.Notification,
 	}
 }

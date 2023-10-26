@@ -41,7 +41,8 @@ func (userController UserController) GetAllUsers(controllerContext interface{}) 
 	paginationQuery := commonModel.NewPaginationQuery(convertedPage, convertedLimit, orderBy)
 	fetchedUsers := userController.userUseCase.GetAllUsers(ctx, paginationQuery)
 	if validator.IsErrorNotNil(fetchedUsers.Error) {
-		jsonResponse := httpError.HandleError(fetchedUsers.Error)
+		fetchedUsersError := httpError.HandleError(fetchedUsers.Error)
+		jsonResponse := httpModel.NewJsonResponseOnFailure(fetchedUsersError)
 		httpModel.SetStatus(&jsonResponse)
 		ginContext.JSON(http.StatusBadRequest, jsonResponse)
 		return
@@ -65,7 +66,8 @@ func (userController UserController) GetUserById(controllerContext interface{}) 
 	userID := ginContext.Param(constants.UserIDContext)
 	fetchedUser := userController.userUseCase.GetUserById(ctx, userID)
 	if validator.IsErrorNotNil(fetchedUser.Error) {
-		jsonResponse := httpError.HandleError(fetchedUser.Error)
+		fetchedUserError := httpError.HandleError(fetchedUser.Error)
+		jsonResponse := httpModel.NewJsonResponseOnFailure(fetchedUserError)
 		httpModel.SetStatus(&jsonResponse)
 		ginContext.JSON(http.StatusBadRequest, jsonResponse)
 		return
@@ -88,7 +90,8 @@ func (userController UserController) Register(controllerContext interface{}) {
 	userCreate := userViewModel.UserCreateViewToUserCreateMapper(createdUserViewData)
 	createdUser := userController.userUseCase.Register(ctx, userCreate)
 	if validator.IsErrorNotNil(createdUser.Error) {
-		jsonResponse := httpError.HandleError(createdUser.Error)
+		createdUserError := httpError.HandleError(createdUser.Error)
+		jsonResponse := httpModel.NewJsonResponseOnFailure(createdUserError)
 		httpModel.SetStatus(&jsonResponse)
 		ginContext.JSON(http.StatusBadRequest, jsonResponse)
 		return
@@ -115,7 +118,8 @@ func (userController UserController) UpdateUserById(controllerContext interface{
 	updatedUserData := userViewModel.UserUpdateViewToUserUpdateMapper(updatedUserViewData)
 	updatedUser, updatedUserError := userController.userUseCase.UpdateUserById(ctx, currentUserID, updatedUserData)
 	if validator.IsErrorNotNil(updatedUserError) {
-		jsonResponse := httpError.HandleError(updatedUserError)
+		updatedUserError := httpError.HandleError(updatedUserError)
+		jsonResponse := httpModel.NewJsonResponseOnFailure(updatedUserError)
 		httpModel.SetStatus(&jsonResponse)
 		ginContext.JSON(http.StatusBadRequest, jsonResponse)
 		return
@@ -151,7 +155,8 @@ func (userController UserController) Login(controllerContext interface{}) {
 	userLoginData := userViewModel.UserLoginViewToUserLoginMapper(userLoginViewData)
 	userID, loginError := userController.userUseCase.Login(ctx, userLoginData)
 	if validator.IsErrorNotNil(loginError) {
-		jsonResponse := httpError.HandleError(loginError)
+		loginError := httpError.HandleError(loginError)
+		jsonResponse := httpModel.NewJsonResponseOnFailure(loginError)
 		httpModel.SetStatus(&jsonResponse)
 		ginContext.JSON(http.StatusBadRequest, jsonResponse)
 		return
@@ -160,14 +165,16 @@ func (userController UserController) Login(controllerContext interface{}) {
 	applicationConfig := config.AppConfig
 	accessToken, createTokenError := httpUtility.CreateToken(applicationConfig.AccessToken.ExpiredIn, userID, applicationConfig.AccessToken.PrivateKey)
 	if validator.IsErrorNotNil(createTokenError) {
-		jsonResponse := httpError.HandleError(createTokenError)
+		createTokenError := httpError.HandleError(createTokenError)
+		jsonResponse := httpModel.NewJsonResponseOnFailure(createTokenError)
 		httpModel.SetStatus(&jsonResponse)
 		ginContext.JSON(http.StatusBadRequest, jsonResponse)
 		return
 	}
 	refreshToken, createTokenError := httpUtility.CreateToken(applicationConfig.RefreshToken.ExpiredIn, userID, applicationConfig.RefreshToken.PrivateKey)
 	if validator.IsErrorNotNil(createTokenError) {
-		jsonResponse := httpError.HandleError(createTokenError)
+		createTokenError := httpError.HandleError(createTokenError)
+		jsonResponse := httpModel.NewJsonResponseOnFailure(createTokenError)
 		httpModel.SetStatus(&jsonResponse)
 		ginContext.JSON(http.StatusBadRequest, jsonResponse)
 		return

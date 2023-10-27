@@ -16,9 +16,13 @@ const (
 	UserContext       = "user"
 
 	// Pagination.
-	DefaultPage     = "1"
-	DefaultLimit    = "10"
-	MaxItemsPerPage = 100
+	DefaultPage      = "1"
+	DefaultLimit     = "10"
+	MaxItemsPerPage  = 100
+	DefaultOrderBy   = "created_at"
+	DefaultSortOrder = "descend"
+	SortAscend       = "ascend"
+	SortDescend      = "descent"
 
 	// Regex patterns.
 	StringRegex             = `^[a-zA-z0-9 !@#$€%^&*{}|()=/\;:+-_~'"<>,.? \t]*$`

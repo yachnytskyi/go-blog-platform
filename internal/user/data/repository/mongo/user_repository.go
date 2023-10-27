@@ -13,8 +13,9 @@ import (
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	userValidator "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
 	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
-	mongoMapper "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
+	mongoModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	commonUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	"go.mongodb.org/mongo-driver/bson"
@@ -25,8 +26,8 @@ import (
 
 const (
 	location                = "User.Data.Repository.MongoDB."
-	updateIsNotSuccessful   = "update was not successful"
-	delitionIsNotSuccessful = "delition was not successful"
+	updateIsNotSuccessful   = "Update was not successful."
+	delitionIsNotSuccessful = "Delition was not successful."
 )
 
 type UserRepository struct {
@@ -37,47 +38,62 @@ func NewUserRepository(db *mongo.Database) user.UserRepository {
 	return &UserRepository{collection: db.Collection("users")}
 }
 
+// GetAllUsers retrieves a list of users from the database based on pagination parameters.
 func (userRepository UserRepository) GetAllUsers(ctx context.Context, paginationQuery commonModel.PaginationQuery) commonModel.Result[userModel.Users] {
+	// Initialize the query with an empty BSON document
+	// and determine the sort order based on the pagination query.
 	query := bson.M{}
+	sortOrder := mongoModel.SetSortOrder(paginationQuery.SortOrder)
+
+	// Count the total number of users to set up pagination.
 	totalUsers, countDocumentsError := userRepository.collection.CountDocuments(ctx, query)
 	if validator.IsErrorNotNil(countDocumentsError) {
-		countInternalError := domainError.NewInternalError(location+"GetAllUsers.collection.CountDocuments", countDocumentsError.Error())
-		logging.Logger(countInternalError)
-		return commonModel.NewResultOnFailure[userModel.Users](countInternalError)
+		countError := domainError.NewInternalError(location+"GetAllUsers.collection.CountDocuments", countDocumentsError.Error())
+		logging.Logger(countError)
+		return commonModel.NewResultOnFailure[userModel.Users](countError)
 	}
 
+	// Set up pagination and sorting options using provided parameters.
 	paginationQuery = commonModel.SetCorrectPage(int(totalUsers), paginationQuery)
 	option := options.FindOptions{}
 	option.SetLimit(int64(paginationQuery.Limit))
 	option.SetSkip(int64(paginationQuery.Skip))
+	sortOptions := bson.M{paginationQuery.OrderBy: sortOrder}
+	option.SetSort(sortOptions)
+
+	// Query the database to fetch users.
 	cursor, cursorFindError := userRepository.collection.Find(ctx, query, &option)
 	if validator.IsErrorNotNil(cursorFindError) {
-		getAllUsersEntityNotFoundError := domainError.NewEntityNotFoundError(location+"GetAllUsers.Find", cursorFindError.Error())
-		logging.Logger(getAllUsersEntityNotFoundError)
-		return commonModel.NewResultOnFailure[userModel.Users](getAllUsersEntityNotFoundError)
+		queryString := commonUtility.DatabaseQueryToStringMapper(query)
+		getAllUsersError := domainError.NewEntityNotFoundError(location+"GetAllUsers.Find", queryString, cursorFindError.Error())
+		logging.Logger(getAllUsersError)
+		return commonModel.NewResultOnFailure[userModel.Users](getAllUsersError)
 	}
 	defer cursor.Close(ctx)
+
+	// Process the results and map them to the repository model.
 	fetchedUsers := make([]userRepositoryModel.UserRepository, 0, paginationQuery.Limit)
 	for cursor.Next(ctx) {
 		user := userRepositoryModel.UserRepository{}
 		cursorDecodeError := cursor.Decode(&user)
 		if validator.IsErrorNotNil(cursorDecodeError) {
-			fetchedUserInternalError := domainError.NewInternalError(location+"GetAllUsers.cursor.decode", cursorDecodeError.Error())
-			logging.Logger(fetchedUserInternalError)
-			return commonModel.NewResultOnFailure[userModel.Users](fetchedUserInternalError)
+			fetchedUserError := domainError.NewInternalError(location+"GetAllUsers.cursor.decode", cursorDecodeError.Error())
+			logging.Logger(fetchedUserError)
+			return commonModel.NewResultOnFailure[userModel.Users](fetchedUserError)
 		}
 		fetchedUsers = append(fetchedUsers, user)
 	}
 	cursorError := cursor.Err()
 	if validator.IsErrorNotNil(cursorError) {
-		cursorInternalError := domainError.NewInternalError(location+"GetAllUsers.cursor.Err", cursorError.Error())
-		logging.Logger(cursorInternalError)
-		return commonModel.NewResultOnFailure[userModel.Users](cursorInternalError)
+		cursorError := domainError.NewInternalError(location+"GetAllUsers.cursor.Err", cursorError.Error())
+		logging.Logger(cursorError)
+		return commonModel.NewResultOnFailure[userModel.Users](cursorError)
 	}
 	if validator.IsSliceEmpty(fetchedUsers) {
 		return commonModel.NewResultOnSuccess[userModel.Users](userModel.Users{})
-
 	}
+
+	// Map the repository model to domain ones.
 	usersRepository := userRepositoryModel.UserRepositoryToUsersRepositoryMapper(fetchedUsers)
 	paginationResponse := commonModel.NewPaginationResponse(paginationQuery.Page, int(totalUsers), paginationQuery.Limit, paginationQuery.OrderBy)
 	usersRepository.PaginationResponse = paginationResponse
@@ -91,7 +107,8 @@ func (userRepository UserRepository) GetUserById(ctx context.Context, userID str
 	query := bson.M{"_id": userObjectID}
 	userFindOneError := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
 	if validator.IsErrorNotNil(userFindOneError) {
-		userFindOneEntityNotFoundError := domainError.NewEntityNotFoundError(location+"GetUserById.FindOne.Decode", userFindOneError.Error())
+		queryString := commonUtility.DatabaseQueryToStringMapper(query)
+		userFindOneEntityNotFoundError := domainError.NewEntityNotFoundError(location+"GetUserById.FindOne.Decode", queryString, userFindOneError.Error())
 		logging.Logger(userFindOneEntityNotFoundError)
 		return commonModel.NewResultOnFailure[userModel.User](userFindOneEntityNotFoundError)
 	}
@@ -104,7 +121,8 @@ func (userRepository UserRepository) GetUserByEmail(ctx context.Context, email s
 	query := bson.M{"email": email}
 	userFindOneError := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
 	if validator.IsErrorNotNil(userFindOneError) {
-		userFindOneEntityNotFoundError := domainError.NewEntityNotFoundError(location+"GetUserByEmail.FindOne.Decode", userFindOneError.Error())
+		queryString := commonUtility.DatabaseQueryToStringMapper(query)
+		userFindOneEntityNotFoundError := domainError.NewEntityNotFoundError(location+"GetUserByEmail.FindOne.Decode", queryString, userFindOneError.Error())
 		logging.Logger(userFindOneEntityNotFoundError)
 		return userModel.User{}, userFindOneEntityNotFoundError
 	}
@@ -159,7 +177,8 @@ func (userRepository UserRepository) Register(ctx context.Context, userCreate us
 	query := bson.M{"_id": insertOneResult.InsertedID}
 	userFindOneError := userRepository.collection.FindOne(ctx, query).Decode(&createdUserRepository)
 	if validator.IsErrorNotNil(userFindOneError) {
-		userCreateEntityNotFoundError := domainError.NewEntityNotFoundError(location+"Register.FindOne.Decode", userFindOneError.Error())
+		queryString := commonUtility.DatabaseQueryToStringMapper(query)
+		userCreateEntityNotFoundError := domainError.NewEntityNotFoundError(location+"Register.FindOne.Decode", queryString, userFindOneError.Error())
 		logging.Logger(userCreateEntityNotFoundError)
 		return commonModel.NewResultOnFailure[userModel.User](userCreateEntityNotFoundError)
 	}
@@ -172,7 +191,7 @@ func (userRepository UserRepository) UpdateUserById(ctx context.Context, userID 
 	userUpdateRepository := userRepositoryModel.UserUpdateToUserUpdateRepositoryMapper(user)
 	userUpdateRepository.UpdatedAt = time.Now()
 
-	userUpdateRepositoryMappedToMongoDB, mongoMapperError := mongoMapper.MongoMappper(userUpdateRepository)
+	userUpdateRepositoryMappedToMongoDB, mongoMapperError := mongoModel.MongoMapper(userUpdateRepository)
 	if validator.IsErrorNotNil(mongoMapperError) {
 		userUpdateError := domainError.NewInternalError(location+"UpdateUserById.MongoMapper", mongoMapperError.Error())
 		logging.Logger(userUpdateError)

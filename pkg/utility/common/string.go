@@ -2,9 +2,10 @@ package common
 
 import (
 	"encoding/base64"
+	"fmt"
 
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
+	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
@@ -24,4 +25,8 @@ func Decode(encodedString string) (string, error) {
 		return "", decodeStringInternalError
 	}
 	return string(data), nil
+}
+
+func DatabaseQueryToStringMapper(query any) string {
+	return fmt.Sprintf("%v", query)
 }

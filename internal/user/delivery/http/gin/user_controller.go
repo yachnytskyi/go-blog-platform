@@ -35,10 +35,11 @@ func (userController UserController) GetAllUsers(controllerContext interface{}) 
 	defer cancel()
 	page := ginContext.DefaultQuery("page", constants.DefaultPage)
 	limit := ginContext.DefaultQuery("limit", constants.DefaultLimit)
-	orderBy := ginContext.DefaultQuery("order-by", "")
+	orderBy := ginContext.DefaultQuery("order-by", constants.DefaultOrderBy)
+	sortOrder := ginContext.DefaultQuery("sort-order", constants.DefaultSortOrder)
 	convertedPage := commonModel.GetPage(page)
 	convertedLimit := commonModel.GetLimit(limit)
-	paginationQuery := commonModel.NewPaginationQuery(convertedPage, convertedLimit, orderBy)
+	paginationQuery := commonModel.NewPaginationQuery(convertedPage, convertedLimit, orderBy, sortOrder)
 	fetchedUsers := userController.userUseCase.GetAllUsers(ctx, paginationQuery)
 	if validator.IsErrorNotNil(fetchedUsers.Error) {
 		fetchedUsersError := httpError.HandleError(fetchedUsers.Error)
@@ -47,6 +48,7 @@ func (userController UserController) GetAllUsers(controllerContext interface{}) 
 		ginContext.JSON(http.StatusBadRequest, jsonResponse)
 		return
 	}
+
 	jsonResponse := httpModel.NewJsonResponseOnSuccess(userViewModel.UsersToUsersViewMapper(fetchedUsers.Data))
 	httpModel.SetStatus(&jsonResponse)
 	ginContext.JSON(http.StatusOK, jsonResponse)

@@ -63,18 +63,20 @@ func (err AuthorizationError) Error() string {
 
 type EntityNotFoundError struct {
 	Location     string
+	Query        string
 	Notification string
 }
 
-func NewEntityNotFoundError(location, notification string) EntityNotFoundError {
+func NewEntityNotFoundError(location, query, notification string) EntityNotFoundError {
 	return EntityNotFoundError{
 		Location:     location,
+		Query:        query,
 		Notification: notification,
 	}
 }
 
 func (err EntityNotFoundError) Error() string {
-	return fmt.Sprintf("location: " + err.Location + " notification: " + err.Notification)
+	return fmt.Sprintf("location: " + err.Location + " query: " + err.Query + " notification: " + err.Notification)
 }
 
 type PaginationError struct {

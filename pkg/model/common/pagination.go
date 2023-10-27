@@ -13,18 +13,20 @@ const (
 )
 
 type PaginationQuery struct {
-	Page    int
-	Limit   int
-	OrderBy string
-	Skip    int
+	Page      int
+	Limit     int
+	OrderBy   string
+	SortOrder string
+	Skip      int
 }
 
-func NewPaginationQuery(page, limit int, orderBy string) PaginationQuery {
+func NewPaginationQuery(page, limit int, orderBy, sortOrder string) PaginationQuery {
 	return PaginationQuery{
-		Page:    page,
-		Limit:   limit,
-		OrderBy: orderBy,
-		Skip:    getSkip(page, limit),
+		Page:      page,
+		Limit:     limit,
+		OrderBy:   orderBy,
+		SortOrder: sortOrder,
+		Skip:      getSkip(page, limit),
 	}
 }
 

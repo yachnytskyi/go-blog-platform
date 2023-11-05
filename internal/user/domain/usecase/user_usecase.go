@@ -30,9 +30,11 @@ type UserUseCase struct {
 }
 
 func NewUserUseCase(userRepository user.UserRepository) user.UserUseCase {
-	return &UserUseCase{userRepository: userRepository}
+	return UserUseCase{userRepository: userRepository}
 }
 
+// GetAllUsers retrieves a list of users based on the provided pagination parameters.
+// It returns a Result containing user data on success or an error on failure.
 func (userUseCase UserUseCase) GetAllUsers(ctx context.Context, paginationQuery commonModel.PaginationQuery) commonModel.Result[userModel.Users] {
 	fetchedUsers := userUseCase.userRepository.GetAllUsers(ctx, paginationQuery)
 	if validator.IsErrorNotNil(fetchedUsers.Error) {

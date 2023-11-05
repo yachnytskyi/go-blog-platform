@@ -35,7 +35,7 @@ type UserRepository struct {
 }
 
 func NewUserRepository(db *mongo.Database) user.UserRepository {
-	return &UserRepository{collection: db.Collection("users")}
+	return UserRepository{collection: db.Collection("users")}
 }
 
 // GetAllUsers retrieves a list of users from the database based on pagination parameters.

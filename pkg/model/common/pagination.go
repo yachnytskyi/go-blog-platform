@@ -8,6 +8,10 @@ import (
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
+const (
+	zero = 0
+)
+
 // PaginationQuery represents the parameters for paginating a list of items.
 type PaginationQuery struct {
 	Page      int    // Page number to retrieve.
@@ -62,7 +66,7 @@ func getSkip(page, limit int) int {
 
 // isLimitNotValid checks if a limit value is valid.
 func isLimitNotValid(data int) bool {
-	if data == 0 || data < 0 || data > constants.MaxItemsPerPage {
+	if data == zero || data < zero || data > constants.MaxItemsPerPage {
 		return true
 	}
 	return false
@@ -115,7 +119,7 @@ func getPagesLeft(page, totalItems, limit int) int {
 // getItemsLeft calculates the number of items remaining on the current page.
 func getItemsLeft(page, totalItems, limit int) int {
 	if validator.IsIntegerNegative(totalItems - (page * limit)) {
-		return 0
+		return zero
 	}
 	return totalItems - (page * limit)
 }

@@ -14,7 +14,8 @@ import (
 	httpGinCookie "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin/utility/cookie"
 	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
 	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
-	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
+	httpGinCommon "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/common"
+
 	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 	commonUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
@@ -29,26 +30,26 @@ func NewUserController(userUseCase user.UserUseCase) UserController {
 	return UserController{userUseCase: userUseCase}
 }
 
+// GetAllUsers is a controller method for handling an HTTP request to retrieve a list of users.
+// It expects a controller context and retrieves user data based on the provided pagination parameters.
+//
+// Possible Errors:
+// - http.StatusBadRequest: If there is an issue with the request parameters or the user data retrieval.
+// - Other errors depending on userUseCase.GetAllUsers.
+
 func (userController UserController) GetAllUsers(controllerContext interface{}) {
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
-	page := ginContext.DefaultQuery("page", constants.DefaultPage)
-	limit := ginContext.DefaultQuery("limit", constants.DefaultLimit)
-	orderBy := ginContext.DefaultQuery("order-by", constants.DefaultOrderBy)
-	sortOrder := ginContext.DefaultQuery("sort-order", constants.DefaultSortOrder)
-	convertedPage := commonModel.GetPage(page)
-	convertedLimit := commonModel.GetLimit(limit)
-	paginationQuery := commonModel.NewPaginationQuery(convertedPage, convertedLimit, orderBy, sortOrder)
+	paginationQuery := httpGinCommon.ParsePaginationQuery(ginContext)
 	fetchedUsers := userController.userUseCase.GetAllUsers(ctx, paginationQuery)
 	if validator.IsErrorNotNil(fetchedUsers.Error) {
-		fetchedUsersError := httpError.HandleError(fetchedUsers.Error)
-		jsonResponse := httpModel.NewJsonResponseOnFailure(fetchedUsersError)
-		httpModel.SetStatus(&jsonResponse)
-		ginContext.JSON(http.StatusBadRequest, jsonResponse)
+		httpGinCommon.GinNewJsonResponseOnFailure(ginContext, fetchedUsers.Error, http.StatusBadRequest)
 		return
 	}
 
+	// Map the fetched user data to a JSON response and set the status.
+	// Send the JSON response with a successful status code.
 	jsonResponse := httpModel.NewJsonResponseOnSuccess(userViewModel.UsersToUsersViewMapper(fetchedUsers.Data))
 	httpModel.SetStatus(&jsonResponse)
 	ginContext.JSON(http.StatusOK, jsonResponse)
@@ -68,12 +69,10 @@ func (userController UserController) GetUserById(controllerContext interface{}) 
 	userID := ginContext.Param(constants.UserIDContext)
 	fetchedUser := userController.userUseCase.GetUserById(ctx, userID)
 	if validator.IsErrorNotNil(fetchedUser.Error) {
-		fetchedUserError := httpError.HandleError(fetchedUser.Error)
-		jsonResponse := httpModel.NewJsonResponseOnFailure(fetchedUserError)
-		httpModel.SetStatus(&jsonResponse)
-		ginContext.JSON(http.StatusBadRequest, jsonResponse)
+		httpGinCommon.GinNewJsonResponseOnFailure(ginContext, fetchedUser.Error, http.StatusBadRequest)
 		return
 	}
+
 	jsonResponse := httpModel.NewJsonResponseOnSuccess(userViewModel.UserToUserViewMapper(fetchedUser.Data))
 	httpModel.SetStatus(&jsonResponse)
 	ginContext.JSON(http.StatusOK, jsonResponse)

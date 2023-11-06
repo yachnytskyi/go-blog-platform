@@ -35,6 +35,7 @@ type UserCreateRepository struct {
 }
 
 type UserUpdateRepository struct {
-	Name      string    `bson:"name"`
-	UpdatedAt time.Time `bson:"updated_at"`
+	UserID    primitive.ObjectID `bson:"_id"`
+	Name      string             `bson:"name"`
+	UpdatedAt time.Time          `bson:"updated_at"`
 }

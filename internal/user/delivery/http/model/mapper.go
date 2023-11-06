@@ -53,6 +53,7 @@ func UserCreateViewToUserCreateMapper(user UserCreateView) userModel.UserCreate 
 
 func UserUpdateViewToUserUpdateMapper(user UserUpdateView) userModel.UserUpdate {
 	return userModel.UserUpdate{
+		UserID:    user.UserID,
 		Name:      user.Name,
 		UpdatedAt: user.UpdatedAt,
 	}

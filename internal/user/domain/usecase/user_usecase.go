@@ -43,6 +43,8 @@ func (userUseCase UserUseCase) GetAllUsers(ctx context.Context, paginationQuery 
 	return fetchedUsers
 }
 
+// GetUserById retrieves a user by their ID using the provided context and user ID.
+// It returns a Result containing user data on success or an error on failure.
 func (userUseCase UserUseCase) GetUserById(ctx context.Context, userID string) commonModel.Result[userModel.User] {
 	fetchedUser := userUseCase.userRepository.GetUserById(ctx, userID)
 	if validator.IsErrorNotNil(fetchedUser.Error) {

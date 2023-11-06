@@ -25,7 +25,7 @@ import (
 )
 
 const (
-	location                = "User.Data.Repository.MongoDB."
+	location                = "User.Data.Repository.Mongo."
 	updateIsNotSuccessful   = "Update was not successful."
 	delitionIsNotSuccessful = "Delition was not successful."
 )
@@ -101,17 +101,29 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 	return commonModel.NewResultOnSuccess[userModel.Users](users)
 }
 
+// GetUserById retrieves a user by their ID from the database.
 func (userRepository UserRepository) GetUserById(ctx context.Context, userID string) commonModel.Result[userModel.User] {
-	userObjectID, _ := primitive.ObjectIDFromHex(userID)
+	userObjectID, objectIDFromHexError := primitive.ObjectIDFromHex(userID)
+	if objectIDFromHexError != nil {
+		objectIDFromHexError := domainError.NewInternalError(location+"GetUserById.ObjectIDFromHex", objectIDFromHexError.Error())
+		logging.Logger(objectIDFromHexError)
+		return commonModel.NewResultOnFailure[userModel.User](objectIDFromHexError)
+	}
+
+	// Initialize a User object and define the query to find the user by ObjectID.
 	fetchedUser := userRepositoryModel.UserRepository{}
 	query := bson.M{"_id": userObjectID}
+
+	// Find and decode the user.
 	userFindOneError := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
 	if validator.IsErrorNotNil(userFindOneError) {
 		queryString := commonUtility.DatabaseQueryToStringMapper(query)
-		userFindOneEntityNotFoundError := domainError.NewEntityNotFoundError(location+"GetUserById.FindOne.Decode", queryString, userFindOneError.Error())
-		logging.Logger(userFindOneEntityNotFoundError)
-		return commonModel.NewResultOnFailure[userModel.User](userFindOneEntityNotFoundError)
+		userFindOneError := domainError.NewEntityNotFoundError(location+"GetUserById.FindOne.Decode", queryString, userFindOneError.Error())
+		logging.Logger(userFindOneError)
+		return commonModel.NewResultOnFailure[userModel.User](userFindOneError)
 	}
+
+	// Map the retrieved User to the UserModel and return a success result.
 	user := userRepositoryModel.UserRepositoryToUserMapper(fetchedUser)
 	return commonModel.NewResultOnSuccess[userModel.User](user)
 }
@@ -122,9 +134,9 @@ func (userRepository UserRepository) GetUserByEmail(ctx context.Context, email s
 	userFindOneError := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
 	if validator.IsErrorNotNil(userFindOneError) {
 		queryString := commonUtility.DatabaseQueryToStringMapper(query)
-		userFindOneEntityNotFoundError := domainError.NewEntityNotFoundError(location+"GetUserByEmail.FindOne.Decode", queryString, userFindOneError.Error())
-		logging.Logger(userFindOneEntityNotFoundError)
-		return userModel.User{}, userFindOneEntityNotFoundError
+		userFindOneError := domainError.NewEntityNotFoundError(location+"GetUserByEmail.FindOne.Decode", queryString, userFindOneError.Error())
+		logging.Logger(userFindOneError)
+		return userModel.User{}, userFindOneError
 	}
 
 	user := userRepositoryModel.UserRepositoryToUserMapper(fetchedUser)
@@ -188,7 +200,10 @@ func (userRepository UserRepository) Register(ctx context.Context, userCreate us
 }
 
 func (userRepository UserRepository) UpdateUserById(ctx context.Context, userID string, user userModel.UserUpdate) (userModel.User, error) {
-	userUpdateRepository := userRepositoryModel.UserUpdateToUserUpdateRepositoryMapper(user)
+	userUpdateRepository, userUpdateRepositoryError := userRepositoryModel.UserUpdateToUserUpdateRepositoryMapper(user)
+	if validator.IsErrorNotNil(userUpdateRepositoryError) {
+		return userModel.User{}, userUpdateRepositoryError
+	}
 	userUpdateRepository.UpdatedAt = time.Now()
 
 	userUpdateRepositoryMappedToMongoDB, mongoMapperError := mongoModel.MongoMapper(userUpdateRepository)
@@ -198,8 +213,7 @@ func (userRepository UserRepository) UpdateUserById(ctx context.Context, userID 
 		return userModel.User{}, userUpdateError
 	}
 
-	userIDMappedToMongoDB, _ := primitive.ObjectIDFromHex(userID)
-	query := bson.D{{Key: "_id", Value: userIDMappedToMongoDB}}
+	query := bson.D{{Key: "_id", Value: userUpdateRepository.UserID}}
 	update := bson.D{{Key: "$set", Value: userUpdateRepositoryMappedToMongoDB}}
 	result := userRepository.collection.FindOneAndUpdate(ctx, query, update, options.FindOneAndUpdate().SetReturnDocument(1))
 	updatedUserRepository := userRepositoryModel.UserRepository{}

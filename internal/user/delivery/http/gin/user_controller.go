@@ -62,10 +62,15 @@ func (userController UserController) GetCurrentUser(controllerContext interface{
 	ginContext.JSON(http.StatusOK, jsonResponse)
 }
 
+// GetUserById is a controller method for handling an HTTP request to retrieve a user by their ID.
+// It expects a controller context and the user's ID to fetch the corresponding user from the database.
 func (userController UserController) GetUserById(controllerContext interface{}) {
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
+
+	// Get the user ID from the request parameters.
+	// Fetch the user using the user use case.
 	userID := ginContext.Param(constants.UserIDContext)
 	fetchedUser := userController.userUseCase.GetUserById(ctx, userID)
 	if validator.IsErrorNotNil(fetchedUser.Error) {
@@ -73,6 +78,8 @@ func (userController UserController) GetUserById(controllerContext interface{}) 
 		return
 	}
 
+	// Map the retrieved user data to a JSON response.
+	// Return the JSON response with a successful status code.
 	jsonResponse := httpModel.NewJsonResponseOnSuccess(userViewModel.UserToUserViewMapper(fetchedUser.Data))
 	httpModel.SetStatus(&jsonResponse)
 	ginContext.JSON(http.StatusOK, jsonResponse)
@@ -117,6 +124,7 @@ func (userController UserController) UpdateUserById(controllerContext interface{
 	}
 
 	updatedUserData := userViewModel.UserUpdateViewToUserUpdateMapper(updatedUserViewData)
+	updatedUserData.UserID = currentUserID
 	updatedUser, updatedUserError := userController.userUseCase.UpdateUserById(ctx, currentUserID, updatedUserData)
 	if validator.IsErrorNotNil(updatedUserError) {
 		updatedUserError := httpError.HandleError(updatedUserError)

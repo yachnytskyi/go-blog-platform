@@ -35,6 +35,7 @@ type UserCreate struct {
 }
 
 type UserUpdate struct {
+	UserID    string
 	Name      string
 	UpdatedAt time.Time
 }

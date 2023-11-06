@@ -2,15 +2,18 @@ package model
 
 import (
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
+	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
+
+const (
+	location = "User.Data.Repository.Mongo.Model."
 )
 
 func UserRepositoryToUsersRepositoryMapper(usersRepository []UserRepository) UsersRepository {
-	users := make([]UserRepository, 0, len(usersRepository))
-	for _, userRepository := range usersRepository {
-		users = append(users, userRepository)
-	}
 	return UsersRepository{
-		Users: users,
+		Users: append([]UserRepository{}, usersRepository...),
 	}
 }
 
@@ -38,11 +41,18 @@ func UserCreateToUserCreateRepositoryMapper(userCreate userModel.UserCreate) Use
 	}
 }
 
-func UserUpdateToUserUpdateRepositoryMapper(userUpdate userModel.UserUpdate) UserUpdateRepository {
+func UserUpdateToUserUpdateRepositoryMapper(userUpdate userModel.UserUpdate) (UserUpdateRepository, error) {
+	userObjectID, objectIDFromHexError := primitive.ObjectIDFromHex(userUpdate.UserID)
+	if objectIDFromHexError != nil {
+		objectIDFromHexError := domainError.NewInternalError(location+"UserUpdateToUserUpdateRepositoryMapper.ObjectIDFromHex", objectIDFromHexError.Error())
+		logging.Logger(objectIDFromHexError)
+		return UserUpdateRepository{}, objectIDFromHexError
+	}
 	return UserUpdateRepository{
+		UserID:    userObjectID,
 		Name:      userUpdate.Name,
 		UpdatedAt: userUpdate.UpdatedAt,
-	}
+	}, nil
 }
 
 func UserRepositoryToUserMapper(userRepository UserRepository) userModel.User {
@@ -56,4 +66,13 @@ func UserRepositoryToUserMapper(userRepository UserRepository) userModel.User {
 		CreatedAt: userRepository.CreatedAt,
 		UpdatedAt: userRepository.UpdatedAt,
 	}
+}
+
+func objectIDFromHex(userID string) primitive.ObjectID {
+	userObjectID, objectIDFromHexError := primitive.ObjectIDFromHex(userID)
+	if objectIDFromHexError != nil {
+		objectIDFromHexError := domainError.NewInternalError(location+"GetUserById.ObjectIDFromHex", objectIDFromHexError.Error())
+		logging.Logger(objectIDFromHexError)
+	}
+	return userObjectID
 }

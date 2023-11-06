@@ -37,6 +37,7 @@ type UserCreateView struct {
 
 // [PUT].
 type UserUpdateView struct {
+	UserID    string    `json:"user_id"`
 	Name      string    `json:"name"`
 	UpdatedAt time.Time `json:"updated_at"`
 }

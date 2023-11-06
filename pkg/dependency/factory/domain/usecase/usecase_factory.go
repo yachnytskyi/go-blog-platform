@@ -10,12 +10,12 @@ import (
 type UseCaseFactory struct {
 }
 
-func (useCaseFactory UseCaseFactory) NewUserUseCase(repository interface{}) user.UserUseCase {
+func (useCaseFactory UseCaseFactory) NewUserUseCase(repository any) user.UserUseCase {
 	userRepopository := repository.(user.UserRepository)
 	return userUseCase.NewUserUseCase(userRepopository)
 }
 
-func (useCaseFactory UseCaseFactory) NewPostUseCase(repository interface{}) post.PostUseCase {
+func (useCaseFactory UseCaseFactory) NewPostUseCase(repository any) post.PostUseCase {
 	postRepository := repository.(post.PostRepository)
 	return postUseCase.NewPostUseCase(postRepository)
 }

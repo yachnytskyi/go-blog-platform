@@ -28,7 +28,7 @@ type MongoDBFactory struct {
 	MongoClient *mongo.Client
 }
 
-func (mongoDBFactory *MongoDBFactory) NewRepository(ctx context.Context) interface{} {
+func (mongoDBFactory *MongoDBFactory) NewRepository(ctx context.Context) any {
 	var connectError error
 	mongoConnection := options.Client().ApplyURI(mongoDBFactory.MongoDB.URI)
 	mongoDBFactory.MongoClient, connectError = mongo.Connect(ctx, mongoConnection)
@@ -53,12 +53,12 @@ func (mongoDBFactory *MongoDBFactory) CloseRepository(ctx context.Context) {
 	}
 }
 
-func (mongoDBFactory *MongoDBFactory) NewUserRepository(db interface{}) user.UserRepository {
+func (mongoDBFactory *MongoDBFactory) NewUserRepository(db any) user.UserRepository {
 	mongoDB := db.(*mongo.Database)
 	return userRepository.NewUserRepository(mongoDB)
 }
 
-func (mongoDBFactory *MongoDBFactory) NewPostRepository(db interface{}) post.PostRepository {
+func (mongoDBFactory *MongoDBFactory) NewPostRepository(db any) post.PostRepository {
 	mongoDB := db.(*mongo.Database)
 	return postRepository.NewPostRepository(mongoDB)
 }

@@ -4,9 +4,9 @@ import (
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
 
-// HandleError takes an error as input and returns an interface{}.
+// HandleError takes an error as input and returns any.
 // It performs error type assertions and maps specific domain errors to their corresponding HTTP error views.
-func HandleError(err error) interface{} {
+func HandleError(err error) any {
 	switch errorType := err.(type) {
 	case domainError.ValidationError:
 		return ValidationErrorToHttpValidationErrorViewMapper(errorType)

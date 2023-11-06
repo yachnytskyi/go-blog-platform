@@ -21,7 +21,7 @@ const (
 	invalidToken     = "validate: invalid token"
 )
 
-func CreateToken(ttl time.Duration, payload interface{}, privateKey string) (string, error) {
+func CreateToken(ttl time.Duration, payload any, privateKey string) (string, error) {
 	decodedPrivateKey, decodeStringError := base64.StdEncoding.DecodeString(privateKey)
 	if validator.IsErrorNotNil(decodeStringError) {
 		decodeStringInternalError := domainError.NewInternalError(location+"CreateToken.StdEncoding.DecodeString", decodeStringError.Error())
@@ -50,7 +50,7 @@ func CreateToken(ttl time.Duration, payload interface{}, privateKey string) (str
 	return token, nil
 }
 
-func ValidateToken(token string, publicKey string) (interface{}, error) {
+func ValidateToken(token string, publicKey string) (any, error) {
 	decodedPublicKey, decodeStringError := base64.StdEncoding.DecodeString(publicKey)
 	if validator.IsErrorNotNil(decodeStringError) {
 		decodeStringInternalError := domainError.NewInternalError(location+"ValidateToken.DecodeString", decodeStringError.Error())
@@ -63,7 +63,7 @@ func ValidateToken(token string, publicKey string) (interface{}, error) {
 		logging.Logger(parseInternalError)
 		return nil, parseInternalError
 	}
-	parsedToken, parseError := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
+	parsedToken, parseError := jwt.Parse(token, func(t *jwt.Token) (any, error) {
 		_, ok := t.Method.(*jwt.SigningMethodRSA)
 		if validator.IsBooleanNotTrue(ok) {
 			internalError := domainError.NewInternalError(location+"ValidateToken.jwt.Parse.NotOk", unexpectedMethod+" t.Header[alg]")

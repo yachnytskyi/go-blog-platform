@@ -101,14 +101,14 @@ func (userUseCase UserUseCase) Register(ctx context.Context, userCreateData user
 	return createdUser
 }
 
-func (userUseCase UserUseCase) UpdateUserById(ctx context.Context, userID string, userUpdateData userModel.UserUpdate) (userModel.User, error) {
+func (userUseCase UserUseCase) UpdateUserById(ctx context.Context, userUpdateData userModel.UserUpdate) (userModel.User, error) {
 	userUpdate := validateUserUpdate(userUpdateData)
 	if validator.IsErrorNotNil(userUpdate.Error) {
 		validationErrors := domainError.HandleError(userUpdate.Error)
 		return userModel.User{}, validationErrors
 	}
 
-	updatedUser, userUpdateError := userUseCase.userRepository.UpdateUserById(ctx, userID, userUpdate.Data)
+	updatedUser, userUpdateError := userUseCase.userRepository.UpdateUserById(ctx, userUpdate.Data)
 	if validator.IsErrorNotNil(userUpdateError) {
 		userUpdateError = domainError.HandleError(userUpdateError)
 		return userModel.User{}, userUpdateError

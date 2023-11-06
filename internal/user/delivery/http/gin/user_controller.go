@@ -37,7 +37,7 @@ func NewUserController(userUseCase user.UserUseCase) UserController {
 // - http.StatusBadRequest: If there is an issue with the request parameters or the user data retrieval.
 // - Other errors depending on userUseCase.GetAllUsers.
 
-func (userController UserController) GetAllUsers(controllerContext interface{}) {
+func (userController UserController) GetAllUsers(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
@@ -55,7 +55,7 @@ func (userController UserController) GetAllUsers(controllerContext interface{}) 
 	ginContext.JSON(http.StatusOK, jsonResponse)
 }
 
-func (userController UserController) GetCurrentUser(controllerContext interface{}) {
+func (userController UserController) GetCurrentUser(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	jsonResponse := httpModel.NewJsonResponseOnSuccess(ginContext.MustGet(constants.UserContext).(userViewModel.UserView))
 	httpModel.SetStatus(&jsonResponse)
@@ -64,7 +64,7 @@ func (userController UserController) GetCurrentUser(controllerContext interface{
 
 // GetUserById is a controller method for handling an HTTP request to retrieve a user by their ID.
 // It expects a controller context and the user's ID to fetch the corresponding user from the database.
-func (userController UserController) GetUserById(controllerContext interface{}) {
+func (userController UserController) GetUserById(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
@@ -85,7 +85,7 @@ func (userController UserController) GetUserById(controllerContext interface{}) 
 	ginContext.JSON(http.StatusOK, jsonResponse)
 }
 
-func (userController UserController) Register(controllerContext interface{}) {
+func (userController UserController) Register(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
@@ -110,7 +110,7 @@ func (userController UserController) Register(controllerContext interface{}) {
 	ginContext.JSON(http.StatusCreated, jsonResponse)
 }
 
-func (userController UserController) UpdateUserById(controllerContext interface{}) {
+func (userController UserController) UpdateUserById(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
@@ -125,7 +125,7 @@ func (userController UserController) UpdateUserById(controllerContext interface{
 
 	updatedUserData := userViewModel.UserUpdateViewToUserUpdateMapper(updatedUserViewData)
 	updatedUserData.UserID = currentUserID
-	updatedUser, updatedUserError := userController.userUseCase.UpdateUserById(ctx, currentUserID, updatedUserData)
+	updatedUser, updatedUserError := userController.userUseCase.UpdateUserById(ctx, updatedUserData)
 	if validator.IsErrorNotNil(updatedUserError) {
 		updatedUserError := httpError.HandleError(updatedUserError)
 		jsonResponse := httpModel.NewJsonResponseOnFailure(updatedUserError)
@@ -138,7 +138,7 @@ func (userController UserController) UpdateUserById(controllerContext interface{
 	ginContext.JSON(http.StatusCreated, jsonResponse)
 }
 
-func (userController UserController) Delete(controllerContext interface{}) {
+func (userController UserController) Delete(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
@@ -150,7 +150,7 @@ func (userController UserController) Delete(controllerContext interface{}) {
 	ginContext.JSON(http.StatusNoContent, nil)
 }
 
-func (userController UserController) Login(controllerContext interface{}) {
+func (userController UserController) Login(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
@@ -196,7 +196,7 @@ func (userController UserController) Login(controllerContext interface{}) {
 	ginContext.JSON(http.StatusCreated, jsonResponse)
 }
 
-func (userController UserController) RefreshAccessToken(controllerContext interface{}) {
+func (userController UserController) RefreshAccessToken(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	message := "could not refresh access token"
 	currentUser := ginContext.MustGet(constants.UserContext).(userViewModel.UserView)
@@ -235,7 +235,7 @@ func (userController UserController) RefreshAccessToken(controllerContext interf
 	ginContext.JSON(http.StatusCreated, jsonResponse)
 }
 
-func (userController UserController) ForgottenPassword(controllerContext interface{}) {
+func (userController UserController) ForgottenPassword(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
@@ -267,7 +267,7 @@ func (userController UserController) ForgottenPassword(controllerContext interfa
 	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "message": constants.SendingEmailWithInstructionsNotification})
 }
 
-func (userController UserController) ResetUserPassword(controllerContext interface{}) {
+func (userController UserController) ResetUserPassword(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
@@ -294,7 +294,7 @@ func (userController UserController) ResetUserPassword(controllerContext interfa
 
 }
 
-func (userController UserController) Logout(controllerContext interface{}) {
+func (userController UserController) Logout(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	httpGinCookie.CleanCookies(ginContext)
 	ginContext.JSON(http.StatusOK, gin.H{"status": "success"})

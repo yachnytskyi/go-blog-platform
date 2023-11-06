@@ -199,7 +199,7 @@ func (userRepository UserRepository) Register(ctx context.Context, userCreate us
 	return commonModel.NewResultOnSuccess[userModel.User](createdUser)
 }
 
-func (userRepository UserRepository) UpdateUserById(ctx context.Context, userID string, user userModel.UserUpdate) (userModel.User, error) {
+func (userRepository UserRepository) UpdateUserById(ctx context.Context, user userModel.UserUpdate) (userModel.User, error) {
 	userUpdateRepository, userUpdateRepositoryError := userRepositoryModel.UserUpdateToUserUpdateRepositoryMapper(user)
 	if validator.IsErrorNotNil(userUpdateRepositoryError) {
 		return userModel.User{}, userUpdateRepositoryError

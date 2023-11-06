@@ -74,22 +74,22 @@ func (ginFactory *GinFactory) CloseServer(ctx context.Context) {
 	logging.Logger(successfully_closed)
 }
 
-func (ginFactory *GinFactory) NewUserController(domain interface{}) user.UserController {
+func (ginFactory *GinFactory) NewUserController(domain any) user.UserController {
 	userUseCase := domain.(user.UserUseCase)
 	return userDelivery.NewUserController(userUseCase)
 }
 
-func (ginFactory *GinFactory) NewUserRouter(controller interface{}) user.UserRouter {
+func (ginFactory *GinFactory) NewUserRouter(controller any) user.UserRouter {
 	userController := controller.(user.UserController)
 	return userDelivery.NewUserRouter(userController)
 }
 
-func (ginFactory *GinFactory) NewPostController(domain interface{}) post.PostController {
+func (ginFactory *GinFactory) NewPostController(domain any) post.PostController {
 	postUseCase := domain.(post.PostUseCase)
 	return postDelivery.NewPostController(postUseCase)
 }
 
-func (ginFactory *GinFactory) NewPostRouter(controller interface{}) post.PostRouter {
+func (ginFactory *GinFactory) NewPostRouter(controller any) post.PostRouter {
 	postController := controller.(post.PostController)
 	return postDelivery.NewPostRouter(postController)
 }

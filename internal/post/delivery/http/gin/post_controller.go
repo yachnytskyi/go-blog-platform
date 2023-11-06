@@ -22,7 +22,7 @@ func NewPostController(postUseCase post.PostUseCase) PostController {
 	return PostController{postUseCase: postUseCase}
 }
 
-func (postController PostController) GetAllPosts(controllerContext interface{}) {
+func (postController PostController) GetAllPosts(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
@@ -51,7 +51,7 @@ func (postController PostController) GetAllPosts(controllerContext interface{}) 
 	ginContext.JSON(http.StatusOK, postViewModel.PostsToPostsViewMapper(fetchedPosts))
 }
 
-func (postController PostController) GetPostById(controllerContext interface{}) {
+func (postController PostController) GetPostById(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
@@ -71,7 +71,7 @@ func (postController PostController) GetPostById(controllerContext interface{}) 
 	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "data": postViewModel.PostToPostViewMapper(fetchedPost)})
 }
 
-func (postController PostController) CreatePost(controllerContext interface{}) {
+func (postController PostController) CreatePost(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
@@ -99,7 +99,7 @@ func (postController PostController) CreatePost(controllerContext interface{}) {
 	ginContext.JSON(http.StatusCreated, gin.H{"status": "success", "data": createdPost})
 }
 
-func (postController PostController) UpdatePostById(controllerContext interface{}) {
+func (postController PostController) UpdatePostById(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
@@ -131,7 +131,7 @@ func (postController PostController) UpdatePostById(controllerContext interface{
 	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "data": updatedPost})
 }
 
-func (postController PostController) DeletePostByID(controllerContext interface{}) {
+func (postController PostController) DeletePostByID(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()

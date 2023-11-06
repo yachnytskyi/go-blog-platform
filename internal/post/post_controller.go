@@ -1,9 +1,9 @@
 package post
 
 type PostController interface {
-	GetAllPosts(controllerContext interface{})
-	GetPostById(controllerContext interface{})
-	CreatePost(controllerContext interface{})
-	UpdatePostById(controllerContext interface{})
-	DeletePostByID(controllerContext interface{})
+	GetAllPosts(controllerContext any)
+	GetPostById(controllerContext any)
+	CreatePost(controllerContext any)
+	UpdatePostById(controllerContext any)
+	DeletePostByID(controllerContext any)
 }

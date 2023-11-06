@@ -13,7 +13,7 @@ type UserUseCase interface {
 	GetUserById(ctx context.Context, userID string) commonModel.Result[userModel.User]
 	GetUserByEmail(ctx context.Context, email string) (userModel.User, error)
 	Register(ctx context.Context, user userModel.UserCreate) commonModel.Result[userModel.User]
-	UpdateUserById(ctx context.Context, userID string, user userModel.UserUpdate) (userModel.User, error)
+	UpdateUserById(ctx context.Context, user userModel.UserUpdate) (userModel.User, error)
 	DeleteUser(ctx context.Context, userID string) error
 	Login(ctx context.Context, user userModel.UserLogin) (string, error)
 	ResetUserPassword(ctx context.Context, firstKey string, firstValue string, secondKey, passwordKey, password string) error

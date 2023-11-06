@@ -15,7 +15,7 @@ func NewPostRouter(postController post.PostController) PostRouter {
 	return PostRouter{postController: postController}
 }
 
-func (postRouter PostRouter) PostRouter(routerGroup interface{}, userUseCase user.UserUseCase) {
+func (postRouter PostRouter) PostRouter(routerGroup any, userUseCase user.UserUseCase) {
 	ginRouterGroup := routerGroup.(*gin.RouterGroup)
 	router := ginRouterGroup.Group("/posts")
 	router.GET("/", func(ginContext *gin.Context) {

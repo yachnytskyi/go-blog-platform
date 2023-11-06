@@ -1,5 +1,5 @@
 package user
 
 type UserRouter interface {
-	UserRouter(routerGroup interface{}, userUseCase UserUseCase)
+	UserRouter(routerGroup any, userUseCase UserUseCase)
 }

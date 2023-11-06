@@ -1,5 +1,10 @@
 package http
 
+const (
+	success = "success"
+	fail    = "fail"
+)
+
 type JsonResponse struct {
 	Data   any    `json:"data,omitempty"`
 	Error  any    `json:"error,omitempty"`
@@ -28,8 +33,8 @@ func NewJsonResponseOnFailure(err any) JsonResponse {
 
 func SetStatus(jsonResponse *JsonResponse) {
 	if jsonResponse.Data != nil {
-		jsonResponse.Status = "success"
+		jsonResponse.Status = success
 		return
 	}
-	jsonResponse.Status = "fail"
+	jsonResponse.Status = fail
 }

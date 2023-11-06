@@ -14,7 +14,7 @@ func NewUserRouter(userController user.UserController) UserRouter {
 	return UserRouter{userController: userController}
 }
 
-func (userRouter UserRouter) UserRouter(routerGroup interface{}, userUseCase user.UserUseCase) {
+func (userRouter UserRouter) UserRouter(routerGroup any, userUseCase user.UserUseCase) {
 	ginRouterGroup := routerGroup.(*gin.RouterGroup)
 	router := ginRouterGroup.Group("/users")
 	router.GET("/", func(ginContext *gin.Context) {

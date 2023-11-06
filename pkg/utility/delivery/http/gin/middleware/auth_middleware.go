@@ -37,7 +37,6 @@ func AuthContextMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
 			authorizationError := httpError.NewHttpAuthorizationErrorView(constants.LoggingErrorNotification)
 			logging.Logger(authorizationError)
 			jsonResponse := httpModel.NewJsonResponseOnFailure(authorizationError)
-			httpModel.SetStatus(&jsonResponse)
 			ginContext.AbortWithStatusJSON(http.StatusUnauthorized, jsonResponse)
 			return
 		}
@@ -48,7 +47,6 @@ func AuthContextMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
 			internalError := httpError.NewHttpInternalErrorView(constants.InternalErrorNotification)
 			logging.Logger(internalError)
 			jsonResponse := httpModel.NewJsonResponseOnFailure(internalError)
-			httpModel.SetStatus(&jsonResponse)
 			ginContext.AbortWithStatusJSON(http.StatusUnauthorized, jsonResponse)
 			return
 		}
@@ -58,7 +56,6 @@ func AuthContextMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
 			internalError := httpError.NewHttpInternalErrorView(constants.InternalErrorNotification)
 			logging.Logger(internalError)
 			jsonResponse := httpModel.NewJsonResponseOnFailure(internalError)
-			httpModel.SetStatus(&jsonResponse)
 			ginContext.AbortWithStatusJSON(http.StatusUnauthorized, jsonResponse)
 			return
 		}

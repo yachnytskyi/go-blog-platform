@@ -10,6 +10,5 @@ import (
 // It takes a Gin context, an error that occurred, and an HTTP status code.
 func GinNewJsonResponseOnFailure(ginContext *gin.Context, err error, httpCode int) {
 	jsonResponse := httpModel.NewJsonResponseOnFailure(httpError.HandleError(err))
-	httpModel.SetStatus(&jsonResponse)
 	ginContext.JSON(httpCode, jsonResponse)
 }

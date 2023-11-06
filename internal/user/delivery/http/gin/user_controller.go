@@ -51,14 +51,12 @@ func (userController UserController) GetAllUsers(controllerContext any) {
 	// Map the fetched user data to a JSON response and set the status.
 	// Send the JSON response with a successful status code.
 	jsonResponse := httpModel.NewJsonResponseOnSuccess(userViewModel.UsersToUsersViewMapper(fetchedUsers.Data))
-	httpModel.SetStatus(&jsonResponse)
 	ginContext.JSON(http.StatusOK, jsonResponse)
 }
 
 func (userController UserController) GetCurrentUser(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	jsonResponse := httpModel.NewJsonResponseOnSuccess(ginContext.MustGet(constants.UserContext).(userViewModel.UserView))
-	httpModel.SetStatus(&jsonResponse)
 	ginContext.JSON(http.StatusOK, jsonResponse)
 }
 
@@ -81,7 +79,6 @@ func (userController UserController) GetUserById(controllerContext any) {
 	// Map the retrieved user data to a JSON response.
 	// Return the JSON response with a successful status code.
 	jsonResponse := httpModel.NewJsonResponseOnSuccess(userViewModel.UserToUserViewMapper(fetchedUser.Data))
-	httpModel.SetStatus(&jsonResponse)
 	ginContext.JSON(http.StatusOK, jsonResponse)
 }
 
@@ -100,13 +97,11 @@ func (userController UserController) Register(controllerContext any) {
 	if validator.IsErrorNotNil(createdUser.Error) {
 		createdUserError := httpError.HandleError(createdUser.Error)
 		jsonResponse := httpModel.NewJsonResponseOnFailure(createdUserError)
-		httpModel.SetStatus(&jsonResponse)
 		ginContext.JSON(http.StatusBadRequest, jsonResponse)
 		return
 	}
 	welcomeMessage := userViewModel.NewWelcomeMessageView(constants.SendingEmailNotification + createdUser.Data.Email)
 	jsonResponse := httpModel.NewJsonResponseOnSuccess(welcomeMessage)
-	httpModel.SetStatus(&jsonResponse)
 	ginContext.JSON(http.StatusCreated, jsonResponse)
 }
 
@@ -129,12 +124,10 @@ func (userController UserController) UpdateUserById(controllerContext any) {
 	if validator.IsErrorNotNil(updatedUserError) {
 		updatedUserError := httpError.HandleError(updatedUserError)
 		jsonResponse := httpModel.NewJsonResponseOnFailure(updatedUserError)
-		httpModel.SetStatus(&jsonResponse)
 		ginContext.JSON(http.StatusBadRequest, jsonResponse)
 		return
 	}
 	jsonResponse := httpModel.NewJsonResponseOnSuccess(userViewModel.UserToUserViewMapper(updatedUser))
-	httpModel.SetStatus(&jsonResponse)
 	ginContext.JSON(http.StatusCreated, jsonResponse)
 }
 
@@ -166,7 +159,6 @@ func (userController UserController) Login(controllerContext any) {
 	if validator.IsErrorNotNil(loginError) {
 		loginError := httpError.HandleError(loginError)
 		jsonResponse := httpModel.NewJsonResponseOnFailure(loginError)
-		httpModel.SetStatus(&jsonResponse)
 		ginContext.JSON(http.StatusBadRequest, jsonResponse)
 		return
 	}
@@ -176,7 +168,6 @@ func (userController UserController) Login(controllerContext any) {
 	if validator.IsErrorNotNil(createTokenError) {
 		createTokenError := httpError.HandleError(createTokenError)
 		jsonResponse := httpModel.NewJsonResponseOnFailure(createTokenError)
-		httpModel.SetStatus(&jsonResponse)
 		ginContext.JSON(http.StatusBadRequest, jsonResponse)
 		return
 	}
@@ -184,7 +175,6 @@ func (userController UserController) Login(controllerContext any) {
 	if validator.IsErrorNotNil(createTokenError) {
 		createTokenError := httpError.HandleError(createTokenError)
 		jsonResponse := httpModel.NewJsonResponseOnFailure(createTokenError)
-		httpModel.SetStatus(&jsonResponse)
 		ginContext.JSON(http.StatusBadRequest, jsonResponse)
 		return
 	}
@@ -192,7 +182,6 @@ func (userController UserController) Login(controllerContext any) {
 	ginContext.SetCookie(constants.RefreshTokenValue, refreshToken, applicationConfig.RefreshToken.MaxAge, "/", constants.TokenDomainValue, false, true)
 	ginContext.SetCookie(constants.LoggedInValue, "true", applicationConfig.AccessToken.MaxAge, "/", constants.TokenDomainValue, false, false)
 	jsonResponse := httpModel.NewJsonResponseOnSuccess(userViewModel.TokenStringToTokenViewMapper(accessToken))
-	httpModel.SetStatus(&jsonResponse)
 	ginContext.JSON(http.StatusCreated, jsonResponse)
 }
 
@@ -231,7 +220,6 @@ func (userController UserController) RefreshAccessToken(controllerContext any) {
 	ginContext.SetCookie(constants.AccessTokenValue, accessToken, applicationConfig.AccessToken.MaxAge, "/", constants.TokenDomainValue, false, true)
 	ginContext.SetCookie(constants.LoggedInValue, "true", applicationConfig.AccessToken.MaxAge, "/", constants.TokenDomainValue, false, false)
 	jsonResponse := httpModel.NewJsonResponseOnSuccess(userViewModel.TokenStringToTokenViewMapper(accessToken))
-	httpModel.SetStatus(&jsonResponse)
 	ginContext.JSON(http.StatusCreated, jsonResponse)
 }
 

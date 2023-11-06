@@ -27,7 +27,6 @@ func AnonymousContextMiddleware() gin.HandlerFunc {
 			authorizationError := httpError.NewHttpAuthorizationErrorView(constants.AlreadyRegisteredNotification)
 			logging.Logger(authorizationError)
 			jsonResponse := httpModel.NewJsonResponseOnFailure(authorizationError)
-			httpModel.SetStatus(&jsonResponse)
 			ginContext.AbortWithStatusJSON(http.StatusForbidden, jsonResponse)
 			return
 		}

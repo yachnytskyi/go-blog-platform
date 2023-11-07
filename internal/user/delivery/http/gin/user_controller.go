@@ -253,8 +253,8 @@ func (userController UserController) ForgottenPassword(controllerContext any) {
 		return
 	}
 
-	fetchedUser, err := userController.userUseCase.GetUserByEmail(ctx, userViewEmail.Email)
-	if validator.IsErrorNotNil(err) {
+	fetchedUser := userController.userUseCase.GetUserByEmail(ctx, userViewEmail.Email)
+	if validator.IsErrorNotNil(fetchedUser.Error) {
 		ginContext.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": err.Error()})
 		return
 	}
@@ -265,7 +265,7 @@ func (userController UserController) ForgottenPassword(controllerContext any) {
 	passwordResetAt := time.Now().Add(time.Minute * 15)
 
 	// Update the user.
-	err = userController.userUseCase.UpdatePasswordResetTokenUserByEmail(ctx, fetchedUser.Email, "passwordResetToken", passwordResetToken, "passwordResetAt", passwordResetAt)
+	err = userController.userUseCase.UpdatePasswordResetTokenUserByEmail(ctx, fetchedUser.Data.Email, "passwordResetToken", passwordResetToken, "passwordResetAt", passwordResetAt)
 	if validator.IsErrorNotNil(err) {
 		ginContext.JSON(http.StatusBadGateway, gin.H{"status": "success", "message": err.Error()})
 		return

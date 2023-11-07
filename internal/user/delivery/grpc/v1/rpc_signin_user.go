@@ -10,13 +10,13 @@ import (
 )
 
 func (userGrpcServer *UserGrpcServer) Login(ctx context.Context, request *pb.LoginUser) (*pb.LoginUserView, error) {
-	user, err := userGrpcServer.userUseCase.GetUserByEmail(ctx, request.GetEmail())
+	user := userGrpcServer.userUseCase.GetUserByEmail(ctx, request.GetEmail())
 
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, err.Error())
+	if user.Error != nil {
+		return nil, status.Errorf(codes.Internal, user.Error.Error())
 	}
 
-	if !user.Verified {
+	if !user.Data.Verified {
 
 		return nil, status.Errorf(codes.PermissionDenied, "You are not verified, please verify your email to login")
 	}
@@ -26,11 +26,11 @@ func (userGrpcServer *UserGrpcServer) Login(ctx context.Context, request *pb.Log
 	// }
 
 	// Generate tokens
-	accessToken, createTokenError := domainUtility.CreateToken(userGrpcServer.applicationConfig.AccessToken.ExpiredIn, user.UserID, userGrpcServer.applicationConfig.AccessToken.PrivateKey)
+	accessToken, createTokenError := domainUtility.CreateToken(userGrpcServer.applicationConfig.AccessToken.ExpiredIn, user.Data.UserID, userGrpcServer.applicationConfig.AccessToken.PrivateKey)
 	if createTokenError != nil {
 		return nil, status.Errorf(codes.PermissionDenied, createTokenError.Error())
 	}
-	refreshToken, createTokenError := domainUtility.CreateToken(userGrpcServer.applicationConfig.RefreshToken.ExpiredIn, user.UserID, userGrpcServer.applicationConfig.RefreshToken.PrivateKey)
+	refreshToken, createTokenError := domainUtility.CreateToken(userGrpcServer.applicationConfig.RefreshToken.ExpiredIn, user.Data.UserID, userGrpcServer.applicationConfig.RefreshToken.PrivateKey)
 	if createTokenError != nil {
 		return nil, status.Errorf(codes.PermissionDenied, createTokenError.Error())
 	}

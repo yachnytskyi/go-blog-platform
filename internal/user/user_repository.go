@@ -11,7 +11,7 @@ import (
 type UserRepository interface {
 	GetAllUsers(ctx context.Context, paginationQuery commonModel.PaginationQuery) commonModel.Result[userModel.Users]
 	GetUserById(ctx context.Context, userID string) commonModel.Result[userModel.User]
-	GetUserByEmail(ctx context.Context, email string) (userModel.User, error)
+	GetUserByEmail(ctx context.Context, email string) commonModel.Result[userModel.User]
 	CheckEmailDuplicate(ctx context.Context, email string) error
 	SendEmailVerificationMessage(ctx context.Context, user userModel.User, data userModel.EmailData) error
 	SendEmailForgottenPasswordMessage(ctx context.Context, user userModel.User, data userModel.EmailData) error

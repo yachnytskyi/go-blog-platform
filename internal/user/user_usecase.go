@@ -11,7 +11,7 @@ import (
 type UserUseCase interface {
 	GetAllUsers(ctx context.Context, paginationQuery commonModel.PaginationQuery) commonModel.Result[userModel.Users]
 	GetUserById(ctx context.Context, userID string) commonModel.Result[userModel.User]
-	GetUserByEmail(ctx context.Context, email string) (userModel.User, error)
+	GetUserByEmail(ctx context.Context, email string) commonModel.Result[userModel.User]
 	Register(ctx context.Context, user userModel.UserCreate) commonModel.Result[userModel.User]
 	UpdateUserById(ctx context.Context, user userModel.UserUpdate) (userModel.User, error)
 	DeleteUser(ctx context.Context, userID string) error

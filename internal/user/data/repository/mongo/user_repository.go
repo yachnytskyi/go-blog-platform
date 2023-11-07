@@ -128,19 +128,24 @@ func (userRepository UserRepository) GetUserById(ctx context.Context, userID str
 	return commonModel.NewResultOnSuccess[userModel.User](user)
 }
 
-func (userRepository UserRepository) GetUserByEmail(ctx context.Context, email string) (userModel.User, error) {
+// GetUserByEmail retrieves a user by their email from the repository.
+func (userRepository UserRepository) GetUserByEmail(ctx context.Context, email string) commonModel.Result[userModel.User] {
+	// Initialize an empty user from the repository model.
 	fetchedUser := userRepositoryModel.UserRepository{}
 	query := bson.M{"email": email}
+
+	// Find and decode the user.
 	userFindOneError := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
 	if validator.IsErrorNotNil(userFindOneError) {
 		queryString := commonUtility.DatabaseQueryToStringMapper(query)
 		userFindOneError := domainError.NewEntityNotFoundError(location+"GetUserByEmail.FindOne.Decode", queryString, userFindOneError.Error())
 		logging.Logger(userFindOneError)
-		return userModel.User{}, userFindOneError
+		return commonModel.NewResultOnFailure[userModel.User](userFindOneError)
 	}
 
+	// Map the retrieved User to the UserModel and return a success result.
 	user := userRepositoryModel.UserRepositoryToUserMapper(fetchedUser)
-	return user, nil
+	return commonModel.NewResultOnSuccess[userModel.User](user)
 }
 
 func (userRepository UserRepository) CheckEmailDuplicate(ctx context.Context, email string) error {

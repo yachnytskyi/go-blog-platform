@@ -39,7 +39,8 @@ func NewUserUseCase(userRepository user.UserRepository) user.UserUseCase {
 func (userUseCase UserUseCase) GetAllUsers(ctx context.Context, paginationQuery commonModel.PaginationQuery) commonModel.Result[userModel.Users] {
 	fetchedUsers := userUseCase.userRepository.GetAllUsers(ctx, paginationQuery)
 	if validator.IsErrorNotNil(fetchedUsers.Error) {
-		return commonModel.NewResultOnFailure[userModel.Users](domainError.HandleError(fetchedUsers.Error))
+		fetchedUsersError := domainError.HandleError(fetchedUsers.Error)
+		return commonModel.NewResultOnFailure[userModel.Users](fetchedUsersError)
 	}
 	return fetchedUsers
 }
@@ -49,19 +50,24 @@ func (userUseCase UserUseCase) GetAllUsers(ctx context.Context, paginationQuery 
 func (userUseCase UserUseCase) GetUserById(ctx context.Context, userID string) commonModel.Result[userModel.User] {
 	fetchedUser := userUseCase.userRepository.GetUserById(ctx, userID)
 	if validator.IsErrorNotNil(fetchedUser.Error) {
-		return commonModel.NewResultOnFailure[userModel.User](domainError.HandleError(fetchedUser.Error))
+		fetchedUserError := domainError.HandleError(fetchedUser.Error)
+		return commonModel.NewResultOnFailure[userModel.User](fetchedUserError)
 	}
 	return fetchedUser
 }
 
-func (userUseCase UserUseCase) GetUserByEmail(ctx context.Context, email string) (userModel.User, error) {
+func (userUseCase UserUseCase) GetUserByEmail(ctx context.Context, email string) commonModel.Result[userModel.User] {
 	validateEmailError := validateEmail(email, emailRegex)
 	if validator.IsValueNotNil(validateEmailError) {
 		validateEmailError := domainError.HandleError(validateEmailError)
-		return userModel.User{}, validateEmailError
+		return commonModel.NewResultOnFailure[userModel.User](validateEmailError)
 	}
-	fetchedUser, getUserByEmailError := userUseCase.userRepository.GetUserByEmail(ctx, email)
-	return fetchedUser, getUserByEmailError
+	fetchedUser := userUseCase.userRepository.GetUserByEmail(ctx, email)
+	if validator.IsErrorNotNil(fetchedUser.Error) {
+		fetchedUserError := domainError.HandleError(fetchedUser.Error)
+		return commonModel.NewResultOnFailure[userModel.User](fetchedUserError)
+	}
+	return fetchedUser
 }
 
 // Register is a method in the UserUseCase that handles the registration of a new user.
@@ -138,16 +144,16 @@ func (userUseCase UserUseCase) Login(ctx context.Context, userLoginData userMode
 		return "", validationErrors
 	}
 
-	fetchedUser, getUserByEmailError := userUseCase.userRepository.GetUserByEmail(ctx, userLogin.Data.Email)
-	if validator.IsErrorNotNil(getUserByEmailError) {
-		return "", getUserByEmailError
+	fetchedUser := userUseCase.userRepository.GetUserByEmail(ctx, userLogin.Data.Email)
+	if validator.IsErrorNotNil(fetchedUser.Error) {
+		return "", fetchedUser.Error
 	}
-	arePasswordsNotEqualError := arePasswordsNotEqual(fetchedUser.Password, userLoginData.Password)
+	arePasswordsNotEqualError := arePasswordsNotEqual(fetchedUser.Data.Password, userLoginData.Password)
 	if validator.IsValueNotNil(arePasswordsNotEqualError) {
 		arePasswordsNotEqualError.Notification = invalidEmailOrPassword
 		return "", arePasswordsNotEqualError
 	}
-	return fetchedUser.UserID, nil
+	return fetchedUser.Data.UserID, nil
 }
 
 func (userUseCase UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.Context, email string, firstKey string, firstValue string,
@@ -170,25 +176,25 @@ func (userUseCase UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.C
 	tokenExpirationTime := time.Now().Add(time.Minute * 15)
 
 	// Update the user.
-	fetchedUser, fetchedUserError := userUseCase.GetUserByEmail(ctx, email)
-	if validator.IsErrorNotNil(fetchedUserError) {
-		fetchedUserError = domainError.HandleError(fetchedUserError)
+	fetchedUser := userUseCase.GetUserByEmail(ctx, email)
+	if validator.IsErrorNotNil(fetchedUser.Error) {
+		fetchedUserError := domainError.HandleError(fetchedUser.Error)
 		return fetchedUserError
 	}
-	updatedUserPasswordError := userUseCase.userRepository.UpdatePasswordResetTokenUserByEmail(ctx, fetchedUser.Email, "passwordResetToken", encodedTokenValue, "passwordResetAt", tokenExpirationTime)
+	updatedUserPasswordError := userUseCase.userRepository.UpdatePasswordResetTokenUserByEmail(ctx, fetchedUser.Data.Email, "passwordResetToken", encodedTokenValue, "passwordResetAt", tokenExpirationTime)
 	if validator.IsErrorNotNil(updatedUserPasswordError) {
 		updatedUserPasswordError = domainError.HandleError(updatedUserPasswordError)
 		return updatedUserPasswordError
 	}
 
-	emailData := prepareEmailDataForUpdatePasswordResetToken(ctx, fetchedUser.Name, tokenValue)
+	emailData := prepareEmailDataForUpdatePasswordResetToken(ctx, fetchedUser.Data.Name, tokenValue)
 	if validator.IsErrorNotNil(emailData.Error) {
 		logging.Logger(emailData.Error)
 		emailData.Error = domainError.HandleError(emailData.Error)
 		return emailData.Error
 	}
 
-	sendEmailForgottenPasswordMessageError := userUseCase.userRepository.SendEmailForgottenPasswordMessage(ctx, fetchedUser, emailData.Data)
+	sendEmailForgottenPasswordMessageError := userUseCase.userRepository.SendEmailForgottenPasswordMessage(ctx, fetchedUser.Data, emailData.Data)
 	if validator.IsErrorNotNil(sendEmailForgottenPasswordMessageError) {
 		sendEmailForgottenPasswordMessageError = domainError.HandleError(sendEmailForgottenPasswordMessageError)
 		return sendEmailForgottenPasswordMessageError

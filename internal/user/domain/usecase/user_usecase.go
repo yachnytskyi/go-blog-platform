@@ -67,42 +67,42 @@ func (userUseCase UserUseCase) GetUserByEmail(ctx context.Context, email string)
 // Register is a method in the UserUseCase that handles the registration of a new user.
 // It returns a Result containing created user data on success or an error on failure.
 func (userUseCase UserUseCase) Register(ctx context.Context, userCreateData userModel.UserCreate) commonModel.Result[userModel.User] {
-	// Step 1: Validate the user creation data.
+	// Validate the user creation data.
 	userCreate := validateUserCreate(userCreateData)
 	if validator.IsErrorNotNil(userCreate.Error) {
 		return commonModel.NewResultOnFailure[userModel.User](domainError.HandleError(userCreate.Error))
 	}
 
-	// Step 2: Check for duplicate email.
+	// Check for duplicate email.
 	checkEmailDuplicateError := userUseCase.userRepository.CheckEmailDuplicate(ctx, userCreate.Data.Email)
 	if validator.IsErrorNotNil(checkEmailDuplicateError) {
 		checkEmailDuplicateError = domainError.HandleError(checkEmailDuplicateError)
 		return commonModel.NewResultOnFailure[userModel.User](checkEmailDuplicateError)
 	}
 
-	// Step 3: Generate a verification token and set user properties.
+	// Generate a verification token and set user properties.
 	tokenValue := randstr.String(verificationCodeLength)
 	encodedTokenValue := commonUtility.Encode(tokenValue)
 	userCreate.Data.Role = userRole
 	userCreate.Data.Verified = true
 	userCreate.Data.VerificationCode = encodedTokenValue
 
-	// Step 4: Register the user.
+	// Register the user.
 	createdUser := userUseCase.userRepository.Register(ctx, userCreate.Data)
 	if validator.IsErrorNotNil(createdUser.Error) {
 		createdUser.Error = domainError.HandleError(createdUser.Error)
 		return createdUser
 	}
 
-	// Step 5: Prepare email data for user registration.
-	emailData := prepareEmailDataForUserRegister(ctx, createdUser.Data.Name, tokenValue)
+	// Prepare email data for user registration.
+	emailData := prepareEmailDataForRegister(ctx, createdUser.Data.Name, tokenValue)
 	if validator.IsErrorNotNil(emailData.Error) {
 		logging.Logger(emailData.Error)
 		emailData.Error = domainError.HandleError(emailData.Error)
 		return commonModel.NewResultOnFailure[userModel.User](emailData.Error)
 	}
 
-	// Step 6: Send the email verification message and return the created user.
+	// Send the email verification message and return the created user.
 	sendEmailVerificationMessageError := userUseCase.userRepository.SendEmailVerificationMessage(ctx, createdUser.Data, emailData.Data)
 	if validator.IsErrorNotNil(sendEmailVerificationMessageError) {
 		sendEmailVerificationMessageError = domainError.HandleError(sendEmailVerificationMessageError)
@@ -181,7 +181,7 @@ func (userUseCase UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.C
 		return updatedUserPasswordError
 	}
 
-	emailData := prepareEmailDataForUserUpdate(ctx, fetchedUser.Name, tokenValue)
+	emailData := prepareEmailDataForUpdatePasswordResetToken(ctx, fetchedUser.Name, tokenValue)
 	if validator.IsErrorNotNil(emailData.Error) {
 		logging.Logger(emailData.Error)
 		emailData.Error = domainError.HandleError(emailData.Error)
@@ -201,24 +201,30 @@ func (userUseCase UserUseCase) ResetUserPassword(ctx context.Context, firstKey s
 	return updatedUser
 }
 
-func prepareEmailDataForUserRegister(ctx context.Context, userName string, tokenValue string) commonModel.Result[userModel.EmailData] {
+// prepareEmailData is a helper function to create an EmailData model for sending an email.
+// It takes the context, user name, token value, email subject, URL, template name, and template path as input.
+// It constructs an EmailData model and returns it in a Result.
+func prepareEmailData(ctx context.Context, userName, tokenValue, subject, url, templateName, templatePath string) commonModel.Result[userModel.EmailData] {
 	applicationConfig := config.AppConfig
-	subject := emailConfirmationSubject
-	url := emailConfirmationUrl
-	templateName := applicationConfig.Email.UserConfirmationTemplateName
-	templatePath := applicationConfig.Email.UserConfirmationTemplatePath
 	userFirstName := domainUtility.UserFirstName(userName)
 	emailData := userModel.NewEmailData(applicationConfig.Email.ClientOriginUrl+url+tokenValue, templateName, templatePath, userFirstName, subject)
 	return commonModel.NewResultOnSuccess[userModel.EmailData](emailData)
 }
 
-func prepareEmailDataForUserUpdate(ctx context.Context, userName string, tokenValue string) commonModel.Result[userModel.EmailData] {
+// prepareEmailDataForRegister is a helper function to prepare an EmailData model specifically for user registration.
+// It takes the context, user name, and token value as input and uses the constants for email subject, URL, template name, and template path.
+// It internally calls prepareEmailData with the appropriate parameters and returns the result.
+func prepareEmailDataForRegister(ctx context.Context, userName, tokenValue string) commonModel.Result[userModel.EmailData] {
 	applicationConfig := config.AppConfig
-	subject := forgottenPasswordSubject
-	url := forgottenPasswordUrl
-	templateName := applicationConfig.Email.ForgottenPasswordTemplateName
-	templatePath := applicationConfig.Email.ForgottenPasswordTemplatePath
-	userFirstName := domainUtility.UserFirstName(userName)
-	emailData := userModel.NewEmailData(applicationConfig.Email.ClientOriginUrl+url+tokenValue, templateName, templatePath, userFirstName, subject)
-	return commonModel.NewResultOnSuccess[userModel.EmailData](emailData)
+	return prepareEmailData(ctx, userName, tokenValue, emailConfirmationSubject, emailConfirmationUrl,
+		applicationConfig.Email.UserConfirmationTemplateName, applicationConfig.Email.UserConfirmationTemplatePath)
+}
+
+// prepareEmailDataForUserUpdate is a helper function to prepare an EmailData model specifically for updating user information.
+// It takes the context, user name, and token value as input and uses the constants for email subject, URL, template name, and template path.
+// It internally calls prepareEmailData with the appropriate parameters and returns the result.
+func prepareEmailDataForUpdatePasswordResetToken(ctx context.Context, userName, tokenValue string) commonModel.Result[userModel.EmailData] {
+	applicationConfig := config.AppConfig
+	return prepareEmailData(ctx, userName, tokenValue, forgottenPasswordSubject, forgottenPasswordUrl,
+		applicationConfig.Email.ForgottenPasswordTemplateName, applicationConfig.Email.ForgottenPasswordTemplatePath)
 }

@@ -161,11 +161,14 @@ func (userRepository UserRepository) CheckEmailDuplicate(ctx context.Context, em
 }
 
 func (userRepository UserRepository) Register(ctx context.Context, userCreate userModel.UserCreate) commonModel.Result[userModel.User] {
+	// Map the incoming user data to the repository model.
+	// Hash the user's password.
 	userCreateRepository := userRepositoryModel.UserCreateToUserCreateRepositoryMapper(userCreate)
 	userCreateRepository.Password, _ = repositoryUtility.HashPassword(userCreate.Password)
 	userCreateRepository.CreatedAt = time.Now()
 	userCreateRepository.UpdatedAt = userCreate.CreatedAt
 
+	// Insert the user data into the database.
 	insertOneResult, insertOneResultError := userRepository.collection.InsertOne(ctx, &userCreateRepository)
 	if validator.IsErrorNotNil(insertOneResultError) {
 		userCreateInternalError := domainError.NewInternalError(location+"Register.InsertOne", insertOneResultError.Error())
@@ -177,24 +180,25 @@ func (userRepository UserRepository) Register(ctx context.Context, userCreate us
 	option := options.Index()
 	option.SetUnique(true)
 	index := mongo.IndexModel{Keys: bson.M{"email": 1}, Options: option}
-
 	_, userIndexesCreateOneError := userRepository.collection.Indexes().CreateOne(ctx, index)
 	if validator.IsErrorNotNil(userIndexesCreateOneError) {
-		userCreateInternalError := domainError.NewInternalError(location+"Register.Indexes.CreateOne", userIndexesCreateOneError.Error())
-		logging.Logger(userCreateInternalError)
-		return commonModel.NewResultOnFailure[userModel.User](userCreateInternalError)
+		userCreateOneError := domainError.NewInternalError(location+"Register.Indexes.CreateOne", userIndexesCreateOneError.Error())
+		logging.Logger(userCreateOneError)
+		return commonModel.NewResultOnFailure[userModel.User](userCreateOneError)
 	}
 
+	// Retrieve the created user from the database.
 	createdUserRepository := userRepositoryModel.UserRepository{}
 	query := bson.M{"_id": insertOneResult.InsertedID}
 	userFindOneError := userRepository.collection.FindOne(ctx, query).Decode(&createdUserRepository)
 	if validator.IsErrorNotNil(userFindOneError) {
 		queryString := commonUtility.DatabaseQueryToStringMapper(query)
-		userCreateEntityNotFoundError := domainError.NewEntityNotFoundError(location+"Register.FindOne.Decode", queryString, userFindOneError.Error())
-		logging.Logger(userCreateEntityNotFoundError)
-		return commonModel.NewResultOnFailure[userModel.User](userCreateEntityNotFoundError)
+		userFindOneError := domainError.NewEntityNotFoundError(location+"Register.FindOne.Decode", queryString, userFindOneError.Error())
+		logging.Logger(userFindOneError)
+		return commonModel.NewResultOnFailure[userModel.User](userFindOneError)
 	}
 
+	// Map the retrieved user back to the domain model and return it.
 	createdUser := userRepositoryModel.UserRepositoryToUserMapper(createdUserRepository)
 	return commonModel.NewResultOnSuccess[userModel.User](createdUser)
 }

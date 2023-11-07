@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	location = "Post.Data.Repository.MongoDB."
+	location = "post.data.depository.mongo."
 )
 
 func PostsRepositoryToPostsMapper(postsRepository []*PostRepository) []*postModel.Post {

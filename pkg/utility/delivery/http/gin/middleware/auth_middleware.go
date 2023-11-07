@@ -44,18 +44,14 @@ func AuthContextMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
 		applicationConfig := config.AppConfig
 		userID, validateTokenError := httpUtility.ValidateToken(accessToken, applicationConfig.AccessToken.PublicKey)
 		if validator.IsErrorNotNil(validateTokenError) {
-			internalError := httpError.NewHttpInternalErrorView(constants.InternalErrorNotification)
-			logging.Logger(internalError)
-			jsonResponse := httpModel.NewJsonResponseOnFailure(internalError)
+			jsonResponse := httpModel.NewJsonResponseOnFailure(validateTokenError)
 			ginContext.AbortWithStatusJSON(http.StatusUnauthorized, jsonResponse)
 			return
 		}
 		context := ginContext.Request.Context()
 		user := userUseCase.GetUserById(context, fmt.Sprint(userID))
 		if validator.IsErrorNotNil(user.Error) {
-			internalError := httpError.NewHttpInternalErrorView(constants.InternalErrorNotification)
-			logging.Logger(internalError)
-			jsonResponse := httpModel.NewJsonResponseOnFailure(internalError)
+			jsonResponse := httpModel.NewJsonResponseOnFailure(user.Error)
 			ginContext.AbortWithStatusJSON(http.StatusUnauthorized, jsonResponse)
 			return
 		}

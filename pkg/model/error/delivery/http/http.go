@@ -90,15 +90,16 @@ func (httpPaginationErrorView HttpPaginationErrorView) Error() string {
 }
 
 type HttpInternalErrorView struct {
+	Location     string `json:"location,omitempty"`
 	Notification string `json:"notification"`
 }
 
-func NewHttpInternalErrorView(notification string) HttpInternalErrorView {
+func NewHttpInternalErrorView(location, notification string) HttpInternalErrorView {
 	return HttpInternalErrorView{
 		Notification: notification,
 	}
 }
 
 func (err HttpInternalErrorView) Error() string {
-	return fmt.Sprintf("notification: " + err.Notification)
+	return fmt.Sprintf("location " + err.Location + " notification: " + err.Notification)
 }

@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	location = "User.Data.Repository.Mongo.Model."
+	location = "user.data.repository.mongo.model."
 )
 
 func UserRepositoryToUsersRepositoryMapper(usersRepository []UserRepository) UsersRepository {

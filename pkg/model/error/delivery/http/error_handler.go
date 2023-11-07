@@ -1,6 +1,7 @@
 package http
 
 import (
+	"github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
 
@@ -19,6 +20,9 @@ func HandleError(err error) any {
 		return EntityNotFoundErrorToHttpEntityNotFoundErrorViewMapper(errorType)
 	case domainError.PaginationError:
 		return PaginationErrorToHttpPaginationErrorViewMapper(errorType)
+	case HttpInternalErrorView:
+		errorType.Notification = constants.InternalErrorNotification
+		return errorType
 	default:
 		internalError := errorType.(domainError.InternalError)
 		return InternalErrorToHttpInternalErrorViewMapper(internalError)

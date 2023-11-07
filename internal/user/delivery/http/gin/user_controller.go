@@ -15,11 +15,16 @@ import (
 	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
 	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
 	httpGinCommon "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/common"
+	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 
 	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 	commonUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
+)
+
+const (
+	location = "internal.user.delivery.http.gin."
 )
 
 type UserController struct {
@@ -30,13 +35,8 @@ func NewUserController(userUseCase user.UserUseCase) UserController {
 	return UserController{userUseCase: userUseCase}
 }
 
-// GetAllUsers is a controller method for handling an HTTP request to retrieve a list of users.
-// It expects a controller context and retrieves user data based on the provided pagination parameters.
-//
-// Possible Errors:
-// - http.StatusBadRequest: If there is an issue with the request parameters or the user data retrieval.
-// - Other errors depending on userUseCase.GetAllUsers.
-
+// GetAllUsers is a controller method that handles an HTTP request to retrieve a list of users.
+// It retrieves user data based on the provided pagination parameters and returns the JSON response.
 func (userController UserController) GetAllUsers(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
@@ -49,19 +49,22 @@ func (userController UserController) GetAllUsers(controllerContext any) {
 	}
 
 	// Map the fetched user data to a JSON response and set the status.
-	// Send the JSON response with a successful status code.
+	// Return the JSON response with a successful status code.
 	jsonResponse := httpModel.NewJsonResponseOnSuccess(userViewModel.UsersToUsersViewMapper(fetchedUsers.Data))
 	ginContext.JSON(http.StatusOK, jsonResponse)
 }
 
+// GetCurrentUser is a controller method that handles an HTTP request to retrieve the current user.
+// It extracts the current user information from a middleware and returns the JSON response.
 func (userController UserController) GetCurrentUser(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
-	jsonResponse := httpModel.NewJsonResponseOnSuccess(ginContext.MustGet(constants.UserContext).(userViewModel.UserView))
+	currentUser := ginContext.MustGet(constants.UserContext).(userViewModel.UserView)
+	jsonResponse := httpModel.NewJsonResponseOnSuccess(currentUser)
 	ginContext.JSON(http.StatusOK, jsonResponse)
 }
 
-// GetUserById is a controller method for handling an HTTP request to retrieve a user by their ID.
-// It expects a controller context and the user's ID to fetch the corresponding user from the database.
+// GetUserById is a controller method that handles an HTTP request to retrieve a user by their ID.
+// It retrieves user data and returns the JSON response.
 func (userController UserController) GetUserById(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
@@ -82,16 +85,29 @@ func (userController UserController) GetUserById(controllerContext any) {
 	ginContext.JSON(http.StatusOK, jsonResponse)
 }
 
+// Register is a controller method for handling an HTTP request to register a new user.
+// It expects a controller context and performs the following steps:
+// 1. Binds the incoming JSON data to a struct representing user registration details.
+// 2. If the JSON binding fails, it responds with an error message.
+// 3. Converts the user registration view model to a user model and attempts user registration.
+// 4. If the registration fails, it responds with an error message.
+// 5. If registration is successful, it returns a welcome message in the JSON response.
 func (userController UserController) Register(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
+
+	// Bind the incoming JSON data to a struct.
 	var createdUserViewData userViewModel.UserCreateView
 	shouldBindJSON := ginContext.ShouldBindJSON(&createdUserViewData)
 	if validator.IsErrorNotNil(shouldBindJSON) {
-		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": shouldBindJSON.Error()})
+		shouldBindJSONError := httpError.NewHttpInternalErrorView(location+"Register.ShouldBindJSON", shouldBindJSON.Error())
+		logging.Logger(shouldBindJSONError)
+		httpGinCommon.GinNewJsonResponseOnFailure(ginContext, shouldBindJSONError, http.StatusBadRequest)
 		return
 	}
+
+	// Convert the view model to a user model and register the user.
 	userCreate := userViewModel.UserCreateViewToUserCreateMapper(createdUserViewData)
 	createdUser := userController.userUseCase.Register(ctx, userCreate)
 	if validator.IsErrorNotNil(createdUser.Error) {
@@ -100,6 +116,8 @@ func (userController UserController) Register(controllerContext any) {
 		ginContext.JSON(http.StatusBadRequest, jsonResponse)
 		return
 	}
+
+	// Registration was successful. Return the JSON response with a successful status code.
 	welcomeMessage := userViewModel.NewWelcomeMessageView(constants.SendingEmailNotification + createdUser.Data.Email)
 	jsonResponse := httpModel.NewJsonResponseOnSuccess(welcomeMessage)
 	ginContext.JSON(http.StatusCreated, jsonResponse)

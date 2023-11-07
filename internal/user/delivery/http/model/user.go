@@ -61,11 +61,11 @@ type UserResetPasswordView struct {
 
 // [GET].
 type UserWelcomeMessageView struct {
-	Message string `json:"message"`
+	Notification string `json:"notification"`
 }
 
-func NewWelcomeMessageView(message string) UserWelcomeMessageView {
+func NewWelcomeMessageView(notification string) UserWelcomeMessageView {
 	return UserWelcomeMessageView{
-		Message: message,
+		Notification: notification,
 	}
 }

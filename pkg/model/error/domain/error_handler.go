@@ -24,6 +24,8 @@ func HandleError(err error) error {
 		errorType.Notification = constants.PaginationErrorNotification
 		return errorType
 	default:
+		// For unhandled error types, assume an InternalError and provide a standard
+		// notification message.
 		internalError := errorType.(InternalError)
 		internalError.Notification = constants.InternalErrorNotification
 		return internalError

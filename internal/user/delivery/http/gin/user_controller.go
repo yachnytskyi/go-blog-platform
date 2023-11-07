@@ -13,7 +13,7 @@ import (
 
 	httpGinCookie "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin/utility/cookie"
 	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
-	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
+	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
 	httpGinCommon "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/common"
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 
@@ -182,14 +182,14 @@ func (userController UserController) Login(controllerContext any) {
 	}
 
 	applicationConfig := config.AppConfig
-	accessToken, createTokenError := httpUtility.CreateToken(applicationConfig.AccessToken.ExpiredIn, userID, applicationConfig.AccessToken.PrivateKey)
+	accessToken, createTokenError := domainUtility.CreateToken(applicationConfig.AccessToken.ExpiredIn, userID, applicationConfig.AccessToken.PrivateKey)
 	if validator.IsErrorNotNil(createTokenError) {
 		createTokenError := httpError.HandleError(createTokenError)
 		jsonResponse := httpModel.NewJsonResponseOnFailure(createTokenError)
 		ginContext.JSON(http.StatusBadRequest, jsonResponse)
 		return
 	}
-	refreshToken, createTokenError := httpUtility.CreateToken(applicationConfig.RefreshToken.ExpiredIn, userID, applicationConfig.RefreshToken.PrivateKey)
+	refreshToken, createTokenError := domainUtility.CreateToken(applicationConfig.RefreshToken.ExpiredIn, userID, applicationConfig.RefreshToken.PrivateKey)
 	if validator.IsErrorNotNil(createTokenError) {
 		createTokenError := httpError.HandleError(createTokenError)
 		jsonResponse := httpModel.NewJsonResponseOnFailure(createTokenError)
@@ -220,7 +220,7 @@ func (userController UserController) RefreshAccessToken(controllerContext any) {
 	}
 
 	applicationConfig := config.AppConfig
-	userID, validateTokenError := httpUtility.ValidateToken(cookie, applicationConfig.RefreshToken.PublicKey)
+	userID, validateTokenError := domainUtility.ValidateToken(cookie, applicationConfig.RefreshToken.PublicKey)
 	if validator.IsErrorNotNil(validateTokenError) {
 		ginContext.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": validateTokenError.Error()})
 		return
@@ -230,7 +230,7 @@ func (userController UserController) RefreshAccessToken(controllerContext any) {
 		ginContext.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": "the user is belonged to this token no longer exists "})
 	}
 
-	accessToken, createTokenError := httpUtility.CreateToken(applicationConfig.AccessToken.ExpiredIn, userID, applicationConfig.AccessToken.PrivateKey)
+	accessToken, createTokenError := domainUtility.CreateToken(applicationConfig.AccessToken.ExpiredIn, userID, applicationConfig.AccessToken.PrivateKey)
 	if validator.IsErrorNotNil(createTokenError) {
 		ginContext.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": err.Error()})
 		return

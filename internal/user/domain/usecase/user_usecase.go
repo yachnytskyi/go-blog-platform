@@ -23,6 +23,7 @@ const (
 	forgottenPasswordUrl     string = "users/reset-password/"
 	emailConfirmationSubject string = "Your account verification code"
 	forgottenPasswordSubject string = "Your password reset token (it is valid for 15 minutes)"
+	userRole                        = "user"
 )
 
 type UserUseCase struct {
@@ -63,36 +64,45 @@ func (userUseCase UserUseCase) GetUserByEmail(ctx context.Context, email string)
 	return fetchedUser, getUserByEmailError
 }
 
+// Register is a method in the UserUseCase that handles the registration of a new user.
+// It returns a Result containing created user data on success or an error on failure.
 func (userUseCase UserUseCase) Register(ctx context.Context, userCreateData userModel.UserCreate) commonModel.Result[userModel.User] {
+	// Step 1: Validate the user creation data.
 	userCreate := validateUserCreate(userCreateData)
 	if validator.IsErrorNotNil(userCreate.Error) {
 		return commonModel.NewResultOnFailure[userModel.User](domainError.HandleError(userCreate.Error))
 	}
-	checkEmailDublicateError := userUseCase.userRepository.CheckEmailDublicate(ctx, userCreate.Data.Email)
-	if validator.IsErrorNotNil(checkEmailDublicateError) {
-		checkEmailDublicateError = domainError.HandleError(checkEmailDublicateError)
-		return commonModel.NewResultOnFailure[userModel.User](checkEmailDublicateError)
+
+	// Step 2: Check for duplicate email.
+	checkEmailDuplicateError := userUseCase.userRepository.CheckEmailDuplicate(ctx, userCreate.Data.Email)
+	if validator.IsErrorNotNil(checkEmailDuplicateError) {
+		checkEmailDuplicateError = domainError.HandleError(checkEmailDuplicateError)
+		return commonModel.NewResultOnFailure[userModel.User](checkEmailDuplicateError)
 	}
+
+	// Step 3: Generate a verification token and set user properties.
 	tokenValue := randstr.String(verificationCodeLength)
 	encodedTokenValue := commonUtility.Encode(tokenValue)
-	userCreate.Data.Role = "user"
+	userCreate.Data.Role = userRole
 	userCreate.Data.Verified = true
 	userCreate.Data.VerificationCode = encodedTokenValue
 
+	// Step 4: Register the user.
 	createdUser := userUseCase.userRepository.Register(ctx, userCreate.Data)
 	if validator.IsErrorNotNil(createdUser.Error) {
 		createdUser.Error = domainError.HandleError(createdUser.Error)
 		return createdUser
 	}
-	applicationConfig := config.AppConfig
-	templateName := applicationConfig.Email.UserConfirmationTemplateName
-	templatePath := applicationConfig.Email.UserConfirmationTemplatePath
-	emailData := PrepareEmailData(ctx, createdUser.Data.Name, emailConfirmationUrl, emailConfirmationSubject, tokenValue, templateName, templatePath)
+
+	// Step 5: Prepare email data for user registration.
+	emailData := prepareEmailDataForUserRegister(ctx, createdUser.Data.Name, tokenValue)
 	if validator.IsErrorNotNil(emailData.Error) {
 		logging.Logger(emailData.Error)
 		emailData.Error = domainError.HandleError(emailData.Error)
 		return commonModel.NewResultOnFailure[userModel.User](emailData.Error)
 	}
+
+	// Step 6: Send the email verification message and return the created user.
 	sendEmailVerificationMessageError := userUseCase.userRepository.SendEmailVerificationMessage(ctx, createdUser.Data, emailData.Data)
 	if validator.IsErrorNotNil(sendEmailVerificationMessageError) {
 		sendEmailVerificationMessageError = domainError.HandleError(sendEmailVerificationMessageError)
@@ -171,10 +181,7 @@ func (userUseCase UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.C
 		return updatedUserPasswordError
 	}
 
-	applicationConfig := config.AppConfig
-	templateName := applicationConfig.Email.ForgottenPasswordTemplateName
-	templatePath := applicationConfig.Email.ForgottenPasswordTemplatePath
-	emailData := PrepareEmailData(ctx, fetchedUser.Name, forgottenPasswordUrl, forgottenPasswordSubject, tokenValue, templateName, templatePath)
+	emailData := prepareEmailDataForUserUpdate(ctx, fetchedUser.Name, tokenValue)
 	if validator.IsErrorNotNil(emailData.Error) {
 		logging.Logger(emailData.Error)
 		emailData.Error = domainError.HandleError(emailData.Error)
@@ -194,11 +201,24 @@ func (userUseCase UserUseCase) ResetUserPassword(ctx context.Context, firstKey s
 	return updatedUser
 }
 
-func PrepareEmailData(ctx context.Context, userName string, url string, subject string,
-	tokenValue string, templateName string, templatePath string) commonModel.Result[userModel.EmailData] {
+func prepareEmailDataForUserRegister(ctx context.Context, userName string, tokenValue string) commonModel.Result[userModel.EmailData] {
 	applicationConfig := config.AppConfig
+	subject := emailConfirmationSubject
+	url := emailConfirmationUrl
+	templateName := applicationConfig.Email.UserConfirmationTemplateName
+	templatePath := applicationConfig.Email.UserConfirmationTemplatePath
 	userFirstName := domainUtility.UserFirstName(userName)
 	emailData := userModel.NewEmailData(applicationConfig.Email.ClientOriginUrl+url+tokenValue, templateName, templatePath, userFirstName, subject)
 	return commonModel.NewResultOnSuccess[userModel.EmailData](emailData)
+}
 
+func prepareEmailDataForUserUpdate(ctx context.Context, userName string, tokenValue string) commonModel.Result[userModel.EmailData] {
+	applicationConfig := config.AppConfig
+	subject := forgottenPasswordSubject
+	url := forgottenPasswordUrl
+	templateName := applicationConfig.Email.ForgottenPasswordTemplateName
+	templatePath := applicationConfig.Email.ForgottenPasswordTemplatePath
+	userFirstName := domainUtility.UserFirstName(userName)
+	emailData := userModel.NewEmailData(applicationConfig.Email.ClientOriginUrl+url+tokenValue, templateName, templatePath, userFirstName, subject)
+	return commonModel.NewResultOnSuccess[userModel.EmailData](emailData)
 }

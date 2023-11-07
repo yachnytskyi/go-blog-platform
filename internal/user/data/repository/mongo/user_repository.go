@@ -143,7 +143,7 @@ func (userRepository UserRepository) GetUserByEmail(ctx context.Context, email s
 	return user, nil
 }
 
-func (userRepository UserRepository) CheckEmailDublicate(ctx context.Context, email string) error {
+func (userRepository UserRepository) CheckEmailDuplicate(ctx context.Context, email string) error {
 	fetchedUser := userRepositoryModel.UserRepository{}
 	query := bson.M{"email": email}
 	userFindOneError := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)

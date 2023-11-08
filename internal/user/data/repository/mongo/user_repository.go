@@ -48,9 +48,9 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 	// Count the total number of users to set up pagination.
 	totalUsers, countDocumentsError := userRepository.collection.CountDocuments(ctx, query)
 	if validator.IsErrorNotNil(countDocumentsError) {
-		countError := domainError.NewInternalError(location+"GetAllUsers.collection.CountDocuments", countDocumentsError.Error())
-		logging.Logger(countError)
-		return commonModel.NewResultOnFailure[userModel.Users](countError)
+		internalError := domainError.NewInternalError(location+"GetAllUsers.collection.CountDocuments", countDocumentsError.Error())
+		logging.Logger(internalError)
+		return commonModel.NewResultOnFailure[userModel.Users](internalError)
 	}
 
 	// Set up pagination and sorting options using provided parameters.
@@ -64,10 +64,10 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 	// Query the database to fetch users.
 	cursor, cursorFindError := userRepository.collection.Find(ctx, query, &option)
 	if validator.IsErrorNotNil(cursorFindError) {
-		queryString := commonUtility.DatabaseQueryToStringMapper(query)
-		getAllUsersError := domainError.NewEntityNotFoundError(location+"GetAllUsers.Find", queryString, cursorFindError.Error())
-		logging.Logger(getAllUsersError)
-		return commonModel.NewResultOnFailure[userModel.Users](getAllUsersError)
+		queryString := commonUtility.ConvertQueryToString(query)
+		entityNotFoundError := domainError.NewEntityNotFoundError(location+"GetAllUsers.Find", queryString, cursorFindError.Error())
+		logging.Logger(entityNotFoundError)
+		return commonModel.NewResultOnFailure[userModel.Users](entityNotFoundError)
 	}
 	defer cursor.Close(ctx)
 
@@ -77,17 +77,17 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 		user := userRepositoryModel.UserRepository{}
 		cursorDecodeError := cursor.Decode(&user)
 		if validator.IsErrorNotNil(cursorDecodeError) {
-			fetchedUserError := domainError.NewInternalError(location+"GetAllUsers.cursor.decode", cursorDecodeError.Error())
-			logging.Logger(fetchedUserError)
-			return commonModel.NewResultOnFailure[userModel.Users](fetchedUserError)
+			internalError := domainError.NewInternalError(location+"GetAllUsers.cursor.decode", cursorDecodeError.Error())
+			logging.Logger(internalError)
+			return commonModel.NewResultOnFailure[userModel.Users](internalError)
 		}
 		fetchedUsers = append(fetchedUsers, user)
 	}
 	cursorError := cursor.Err()
 	if validator.IsErrorNotNil(cursorError) {
-		cursorError := domainError.NewInternalError(location+"GetAllUsers.cursor.Err", cursorError.Error())
-		logging.Logger(cursorError)
-		return commonModel.NewResultOnFailure[userModel.Users](cursorError)
+		internalError := domainError.NewInternalError(location+"GetAllUsers.cursor.Err", cursorError.Error())
+		logging.Logger(internalError)
+		return commonModel.NewResultOnFailure[userModel.Users](internalError)
 	}
 	if validator.IsSliceEmpty(fetchedUsers) {
 		return commonModel.NewResultOnSuccess[userModel.Users](userModel.Users{})
@@ -105,9 +105,9 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 func (userRepository UserRepository) GetUserById(ctx context.Context, userID string) commonModel.Result[userModel.User] {
 	userObjectID, objectIDFromHexError := primitive.ObjectIDFromHex(userID)
 	if objectIDFromHexError != nil {
-		objectIDFromHexError := domainError.NewInternalError(location+"GetUserById.ObjectIDFromHex", objectIDFromHexError.Error())
-		logging.Logger(objectIDFromHexError)
-		return commonModel.NewResultOnFailure[userModel.User](objectIDFromHexError)
+		internalError := domainError.NewInternalError(location+"GetUserById.ObjectIDFromHex", objectIDFromHexError.Error())
+		logging.Logger(internalError)
+		return commonModel.NewResultOnFailure[userModel.User](internalError)
 	}
 
 	// Initialize a User object and define the query to find the user by ObjectID.
@@ -117,10 +117,10 @@ func (userRepository UserRepository) GetUserById(ctx context.Context, userID str
 	// Find and decode the user.
 	userFindOneError := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
 	if validator.IsErrorNotNil(userFindOneError) {
-		queryString := commonUtility.DatabaseQueryToStringMapper(query)
-		userFindOneError := domainError.NewEntityNotFoundError(location+"GetUserById.FindOne.Decode", queryString, userFindOneError.Error())
-		logging.Logger(userFindOneError)
-		return commonModel.NewResultOnFailure[userModel.User](userFindOneError)
+		queryString := commonUtility.ConvertQueryToString(query)
+		entityNotFoundError := domainError.NewEntityNotFoundError(location+"GetUserById.FindOne.Decode", queryString, userFindOneError.Error())
+		logging.Logger(entityNotFoundError)
+		return commonModel.NewResultOnFailure[userModel.User](entityNotFoundError)
 	}
 
 	// Map the retrieved User to the UserModel and return a success result.
@@ -137,10 +137,10 @@ func (userRepository UserRepository) GetUserByEmail(ctx context.Context, email s
 	// Find and decode the user.
 	userFindOneError := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
 	if validator.IsErrorNotNil(userFindOneError) {
-		queryString := commonUtility.DatabaseQueryToStringMapper(query)
-		userFindOneError := domainError.NewEntityNotFoundError(location+"GetUserByEmail.FindOne.Decode", queryString, userFindOneError.Error())
-		logging.Logger(userFindOneError)
-		return commonModel.NewResultOnFailure[userModel.User](userFindOneError)
+		queryString := commonUtility.ConvertQueryToString(query)
+		entityNotFoundError := domainError.NewEntityNotFoundError(location+"GetUserByEmail.FindOne.Decode", queryString, userFindOneError.Error())
+		logging.Logger(entityNotFoundError)
+		return commonModel.NewResultOnFailure[userModel.User](entityNotFoundError)
 	}
 
 	// Map the retrieved User to the UserModel and return a success result.
@@ -156,9 +156,9 @@ func (userRepository UserRepository) CheckEmailDuplicate(ctx context.Context, em
 		return nil
 	}
 	if validator.IsErrorNotNil(userFindOneError) {
-		userFindOneInternalError := domainError.NewInternalError(location+"CheckEmailDublicate.FindOne.Decode", userFindOneError.Error())
-		logging.Logger(userFindOneInternalError)
-		return userFindOneInternalError
+		internalError := domainError.NewInternalError(location+"CheckEmailDublicate.FindOne.Decode", userFindOneError.Error())
+		logging.Logger(internalError)
+		return internalError
 	}
 	userFindOneValidationError := domainError.NewValidationError(location+"CheckEmailDublicate", userValidator.EmailField, constants.FieldRequired, constants.EmailAlreadyExists)
 	logging.Logger(userFindOneValidationError)
@@ -176,9 +176,9 @@ func (userRepository UserRepository) Register(ctx context.Context, userCreate us
 	// Insert the user data into the database.
 	insertOneResult, insertOneResultError := userRepository.collection.InsertOne(ctx, &userCreateRepository)
 	if validator.IsErrorNotNil(insertOneResultError) {
-		userCreateInternalError := domainError.NewInternalError(location+"Register.InsertOne", insertOneResultError.Error())
-		logging.Logger(userCreateInternalError)
-		return commonModel.NewResultOnFailure[userModel.User](userCreateInternalError)
+		internalError := domainError.NewInternalError(location+"Register.InsertOne", insertOneResultError.Error())
+		logging.Logger(internalError)
+		return commonModel.NewResultOnFailure[userModel.User](internalError)
 	}
 
 	// Create a unique index for the email field.
@@ -187,9 +187,9 @@ func (userRepository UserRepository) Register(ctx context.Context, userCreate us
 	index := mongo.IndexModel{Keys: bson.M{"email": 1}, Options: option}
 	_, userIndexesCreateOneError := userRepository.collection.Indexes().CreateOne(ctx, index)
 	if validator.IsErrorNotNil(userIndexesCreateOneError) {
-		userCreateOneError := domainError.NewInternalError(location+"Register.Indexes.CreateOne", userIndexesCreateOneError.Error())
-		logging.Logger(userCreateOneError)
-		return commonModel.NewResultOnFailure[userModel.User](userCreateOneError)
+		internalError := domainError.NewInternalError(location+"Register.Indexes.CreateOne", userIndexesCreateOneError.Error())
+		logging.Logger(internalError)
+		return commonModel.NewResultOnFailure[userModel.User](internalError)
 	}
 
 	// Retrieve the created user from the database.
@@ -197,10 +197,10 @@ func (userRepository UserRepository) Register(ctx context.Context, userCreate us
 	query := bson.M{"_id": insertOneResult.InsertedID}
 	userFindOneError := userRepository.collection.FindOne(ctx, query).Decode(&createdUserRepository)
 	if validator.IsErrorNotNil(userFindOneError) {
-		queryString := commonUtility.DatabaseQueryToStringMapper(query)
-		userFindOneError := domainError.NewEntityNotFoundError(location+"Register.FindOne.Decode", queryString, userFindOneError.Error())
-		logging.Logger(userFindOneError)
-		return commonModel.NewResultOnFailure[userModel.User](userFindOneError)
+		queryString := commonUtility.ConvertQueryToString(query)
+		entityNotFoundError := domainError.NewEntityNotFoundError(location+"Register.FindOne.Decode", queryString, userFindOneError.Error())
+		logging.Logger(entityNotFoundError)
+		return commonModel.NewResultOnFailure[userModel.User](entityNotFoundError)
 	}
 
 	// Map the retrieved user back to the domain model and return it.

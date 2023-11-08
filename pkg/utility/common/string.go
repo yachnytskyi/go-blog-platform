@@ -22,9 +22,9 @@ func Encode(data string) string {
 func Decode(encodedString string) (string, error) {
 	data, decodeStringError := base64.StdEncoding.DecodeString(encodedString)
 	if validator.IsErrorNotNil(decodeStringError) {
-		decodeStringInternalError := domainError.NewInternalError(location+"Decode.DecodeString", decodeStringError.Error())
-		logging.Logger(decodeStringInternalError)
-		return "", decodeStringInternalError
+		internalError := domainError.NewInternalError(location+"Decode.DecodeString", decodeStringError.Error())
+		logging.Logger(internalError)
+		return "", internalError
 	}
 	return string(data), nil
 }

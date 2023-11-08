@@ -26,11 +26,11 @@ func (userGrpcServer *UserGrpcServer) Login(ctx context.Context, request *pb.Log
 	// }
 
 	// Generate tokens
-	accessToken, createTokenError := domainUtility.CreateToken(userGrpcServer.applicationConfig.AccessToken.ExpiredIn, user.Data.UserID, userGrpcServer.applicationConfig.AccessToken.PrivateKey)
+	accessToken, createTokenError := domainUtility.GenerateJWTToken(userGrpcServer.applicationConfig.AccessToken.ExpiredIn, user.Data.UserID, userGrpcServer.applicationConfig.AccessToken.PrivateKey)
 	if createTokenError != nil {
 		return nil, status.Errorf(codes.PermissionDenied, createTokenError.Error())
 	}
-	refreshToken, createTokenError := domainUtility.CreateToken(userGrpcServer.applicationConfig.RefreshToken.ExpiredIn, user.Data.UserID, userGrpcServer.applicationConfig.RefreshToken.PrivateKey)
+	refreshToken, createTokenError := domainUtility.GenerateJWTToken(userGrpcServer.applicationConfig.RefreshToken.ExpiredIn, user.Data.UserID, userGrpcServer.applicationConfig.RefreshToken.PrivateKey)
 	if createTokenError != nil {
 		return nil, status.Errorf(codes.PermissionDenied, createTokenError.Error())
 	}

@@ -42,7 +42,7 @@ func AuthContextMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
 		}
 
 		applicationConfig := config.AppConfig
-		userID, validateTokenError := domainUtility.ValidateToken(accessToken, applicationConfig.AccessToken.PublicKey)
+		userID, validateTokenError := domainUtility.ValidateJWTToken(accessToken, applicationConfig.AccessToken.PublicKey)
 		if validator.IsErrorNotNil(validateTokenError) {
 			jsonResponse := httpModel.NewJsonResponseOnFailure(validateTokenError)
 			ginContext.AbortWithStatusJSON(http.StatusUnauthorized, jsonResponse)

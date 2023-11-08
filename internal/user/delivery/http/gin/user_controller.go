@@ -182,14 +182,14 @@ func (userController UserController) Login(controllerContext any) {
 	}
 
 	applicationConfig := config.AppConfig
-	accessToken, createTokenError := domainUtility.CreateToken(applicationConfig.AccessToken.ExpiredIn, userID, applicationConfig.AccessToken.PrivateKey)
+	accessToken, createTokenError := domainUtility.GenerateJWTToken(applicationConfig.AccessToken.ExpiredIn, userID, applicationConfig.AccessToken.PrivateKey)
 	if validator.IsErrorNotNil(createTokenError) {
 		createTokenError := httpError.HandleError(createTokenError)
 		jsonResponse := httpModel.NewJsonResponseOnFailure(createTokenError)
 		ginContext.JSON(http.StatusBadRequest, jsonResponse)
 		return
 	}
-	refreshToken, createTokenError := domainUtility.CreateToken(applicationConfig.RefreshToken.ExpiredIn, userID, applicationConfig.RefreshToken.PrivateKey)
+	refreshToken, createTokenError := domainUtility.GenerateJWTToken(applicationConfig.RefreshToken.ExpiredIn, userID, applicationConfig.RefreshToken.PrivateKey)
 	if validator.IsErrorNotNil(createTokenError) {
 		createTokenError := httpError.HandleError(createTokenError)
 		jsonResponse := httpModel.NewJsonResponseOnFailure(createTokenError)
@@ -220,7 +220,7 @@ func (userController UserController) RefreshAccessToken(controllerContext any) {
 	}
 
 	applicationConfig := config.AppConfig
-	userID, validateTokenError := domainUtility.ValidateToken(cookie, applicationConfig.RefreshToken.PublicKey)
+	userID, validateTokenError := domainUtility.ValidateJWTToken(cookie, applicationConfig.RefreshToken.PublicKey)
 	if validator.IsErrorNotNil(validateTokenError) {
 		ginContext.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": validateTokenError.Error()})
 		return
@@ -230,7 +230,7 @@ func (userController UserController) RefreshAccessToken(controllerContext any) {
 		ginContext.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": "the user is belonged to this token no longer exists "})
 	}
 
-	accessToken, createTokenError := domainUtility.CreateToken(applicationConfig.AccessToken.ExpiredIn, userID, applicationConfig.AccessToken.PrivateKey)
+	accessToken, createTokenError := domainUtility.GenerateJWTToken(applicationConfig.AccessToken.ExpiredIn, userID, applicationConfig.AccessToken.PrivateKey)
 	if validator.IsErrorNotNil(createTokenError) {
 		ginContext.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": err.Error()})
 		return

@@ -20,43 +20,78 @@ import (
 const (
 	authorization = "Authorization"
 	bearer        = "Bearer"
+	firstElement  = 0
+	nextElement   = 1
 )
 
-func AuthContextMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
+// AuthMiddleware is a Gin middleware for handling user authentication using JWT tokens.
+func AuthMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
 	return func(ginContext *gin.Context) {
-		var accessToken string
-		cookie, cookieError := ginContext.Cookie(constants.AccessTokenValue)
-		authorizationHeader := ginContext.Request.Header.Get(authorization)
-		fields := strings.Fields(authorizationHeader)
-		if validator.IsSliceNotEmpty(fields) && fields[0] == bearer {
-			accessToken = fields[1]
-		} else if validator.IsErrorNil(cookieError) {
-			accessToken = cookie
-		}
-		if validator.IsStringEmpty(accessToken) {
-			authorizationError := httpError.NewHttpAuthorizationErrorView(constants.LoggingErrorNotification)
-			logging.Logger(authorizationError)
-			jsonResponse := httpModel.NewJsonResponseOnFailure(authorizationError)
-			ginContext.AbortWithStatusJSON(http.StatusUnauthorized, jsonResponse)
+		// Extract the access token from the request.
+		accessToken, extractAccessTokenError := extractAccessToken(ginContext)
+		if extractAccessTokenError != nil {
+			// Abort the request with an unauthorized status and respond with a JSON error.
+			abortWithStatusJSON(ginContext, extractAccessTokenError, http.StatusUnauthorized)
 			return
 		}
 
+		// Get the application configuration.
 		applicationConfig := config.AppConfig
+
+		// Validate the JWT token.
 		userID, validateTokenError := domainUtility.ValidateJWTToken(accessToken, applicationConfig.AccessToken.PublicKey)
 		if validator.IsErrorNotNil(validateTokenError) {
-			jsonResponse := httpModel.NewJsonResponseOnFailure(validateTokenError)
-			ginContext.AbortWithStatusJSON(http.StatusUnauthorized, jsonResponse)
+			// Handle token validation error and respond with an unauthorized status and JSON error.
+			err := httpError.HandleError(validateTokenError)
+			abortWithStatusJSON(ginContext, err, http.StatusUnauthorized)
 			return
 		}
+
+		// Get the user information from the user use case.
 		context := ginContext.Request.Context()
 		user := userUseCase.GetUserById(context, fmt.Sprint(userID))
 		if validator.IsErrorNotNil(user.Error) {
-			jsonResponse := httpModel.NewJsonResponseOnFailure(user.Error)
-			ginContext.AbortWithStatusJSON(http.StatusUnauthorized, jsonResponse)
+			// Handle user retrieval error and respond with an unauthorized status and JSON error.
+			err := httpError.HandleError(user.Error)
+			abortWithStatusJSON(ginContext, err, http.StatusUnauthorized)
 			return
 		}
+
+		// Set user-related information in the Gin context for downstream handlers.
 		ginContext.Set(constants.UserIDContext, userID)
 		ginContext.Set(constants.UserContext, userViewModel.UserToUserViewMapper(user.Data))
+
+		// Continue to the next middleware or handler in the chain.
 		ginContext.Next()
 	}
+}
+
+// extractAccessToken extracts the access token from the request headers or cookies.
+func extractAccessToken(ginContext *gin.Context) (string, error) {
+	accessToken := ""
+	cookie, cookieError := ginContext.Cookie(constants.AccessTokenValue)
+	authorizationHeader := ginContext.Request.Header.Get(authorization)
+	fields := strings.Fields(authorizationHeader)
+
+	if validator.IsSliceNotEmpty(fields) && fields[firstElement] == bearer {
+		accessToken = fields[nextElement]
+	} else if cookieError == nil {
+		accessToken = cookie
+	}
+
+	if validator.IsStringEmpty(accessToken) {
+		// If access token is empty, create and log an HTTP authorization error.
+		httpAuthorizationError := httpError.NewHttpAuthorizationErrorView(constants.LoggingErrorNotification)
+		logging.Logger(httpAuthorizationError)
+		return "", httpAuthorizationError
+	}
+
+	return accessToken, nil
+}
+
+// abortWithStatusJSON aborts the request, logs the error, and responds with a JSON error.
+func abortWithStatusJSON(ginContext *gin.Context, err any, httpCode int) {
+	logging.Logger(err)
+	jsonResponse := httpModel.NewJsonResponseOnFailure(err)
+	ginContext.AbortWithStatusJSON(httpCode, jsonResponse)
 }

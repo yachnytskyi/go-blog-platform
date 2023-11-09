@@ -12,14 +12,14 @@ import (
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
-func AnonymousContextMiddleware() gin.HandlerFunc {
+func AnonymousMiddleware() gin.HandlerFunc {
 	return func(ginContext *gin.Context) {
 		var accessToken string
 		cookie, cookieError := ginContext.Cookie(constants.AccessTokenValue)
 		authorizationHeader := ginContext.Request.Header.Get(authorization)
 		fields := strings.Fields(authorizationHeader)
-		if validator.IsSliceNotEmpty(fields) && fields[0] == bearer {
-			accessToken = fields[1]
+		if validator.IsSliceNotEmpty(fields) && fields[firstElement] == bearer {
+			accessToken = fields[nextElement]
 		} else if validator.IsErrorNil(cookieError) {
 			accessToken = cookie
 		}

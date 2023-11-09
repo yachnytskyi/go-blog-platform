@@ -101,9 +101,9 @@ func (userController UserController) Register(controllerContext any) {
 	var createdUserViewData userViewModel.UserCreateView
 	shouldBindJSON := ginContext.ShouldBindJSON(&createdUserViewData)
 	if validator.IsErrorNotNil(shouldBindJSON) {
-		shouldBindJSONError := httpError.NewHttpInternalErrorView(location+"Register.ShouldBindJSON", shouldBindJSON.Error())
-		logging.Logger(shouldBindJSONError)
-		httpGinCommon.GinNewJsonResponseOnFailure(ginContext, shouldBindJSONError, http.StatusBadRequest)
+		internalError := httpError.NewHttpInternalErrorView(location+"Register.ShouldBindJSON", shouldBindJSON.Error())
+		logging.Logger(internalError)
+		httpGinCommon.GinNewJsonResponseOnFailure(ginContext, internalError, http.StatusBadRequest)
 		return
 	}
 
@@ -111,9 +111,7 @@ func (userController UserController) Register(controllerContext any) {
 	userCreate := userViewModel.UserCreateViewToUserCreateMapper(createdUserViewData)
 	createdUser := userController.userUseCase.Register(ctx, userCreate)
 	if validator.IsErrorNotNil(createdUser.Error) {
-		createdUserError := httpError.HandleError(createdUser.Error)
-		jsonResponse := httpModel.NewJsonResponseOnFailure(createdUserError)
-		ginContext.JSON(http.StatusBadRequest, jsonResponse)
+		httpGinCommon.GinNewJsonResponseOnFailure(ginContext, createdUser.Error, http.StatusBadRequest)
 		return
 	}
 

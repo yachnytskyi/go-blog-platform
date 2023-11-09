@@ -31,7 +31,7 @@ func (userRouter UserRouter) UserRouter(routerGroup any, userUseCase user.UserUs
 	router.POST("/login", func(ginContext *gin.Context) {
 		userRouter.userController.Login(ginContext)
 	})
-	router.POST("/register", httpGinMiddleware.AnonymousContextMiddleware(), func(ginContext *gin.Context) {
+	router.POST("/register", httpGinMiddleware.AnonymousMiddleware(), func(ginContext *gin.Context) {
 		userRouter.userController.Register(ginContext)
 	})
 	router.POST("/forgotten-password", func(ginContext *gin.Context) {
@@ -42,7 +42,7 @@ func (userRouter UserRouter) UserRouter(routerGroup any, userUseCase user.UserUs
 	})
 
 	// Apply the AuthContextMiddleware to routes that require authentication.
-	router.Use(httpGinMiddleware.AuthContextMiddleware(userUseCase))
+	router.Use(httpGinMiddleware.AuthMiddleware(userUseCase))
 	router.GET("/current_user", func(ginContext *gin.Context) {
 		userRouter.userController.GetCurrentUser(ginContext)
 	})

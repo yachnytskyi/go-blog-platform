@@ -68,17 +68,24 @@ func AuthMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
 
 // extractAccessToken extracts the access token from the request headers or cookies.
 func extractAccessToken(ginContext *gin.Context) (string, error) {
+	// Initialize variables to store the access token.
+	// Attempt to retrieve the access token from the cookie.
+	// Retrieve the Authorization header from the request.
 	accessToken := ""
 	cookie, cookieError := ginContext.Cookie(constants.AccessTokenValue)
 	authorizationHeader := ginContext.Request.Header.Get(authorization)
 	fields := strings.Fields(authorizationHeader)
 
+	// Check if the Authorization header contains a Bearer token.
 	if validator.IsSliceNotEmpty(fields) && fields[firstElement] == bearer {
+		// If a Bearer token is present, set the access token.
 		accessToken = fields[nextElement]
 	} else if cookieError == nil {
+		// If no Bearer token in the Authorization header, try to get the token from the cookie.
 		accessToken = cookie
 	}
 
+	// Check if the access token is still empty.
 	if validator.IsStringEmpty(accessToken) {
 		// If access token is empty, create and log an HTTP authorization error.
 		httpAuthorizationError := httpError.NewHttpAuthorizationErrorView(constants.LoggingErrorNotification)
@@ -86,6 +93,7 @@ func extractAccessToken(ginContext *gin.Context) (string, error) {
 		return "", httpAuthorizationError
 	}
 
+	// Return the extracted access token.
 	return accessToken, nil
 }
 

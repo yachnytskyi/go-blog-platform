@@ -128,9 +128,9 @@ func (userController UserController) UpdateUserById(controllerContext any) {
 	currentUserID := ginContext.MustGet(constants.UserIDContext).(string)
 
 	var updatedUserViewData userViewModel.UserUpdateView
-	shouldBindJSONError := ginContext.ShouldBindJSON(&updatedUserViewData)
-	if validator.IsErrorNotNil(shouldBindJSONError) {
-		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": shouldBindJSONError.Error()})
+	shouldBindJSON := ginContext.ShouldBindJSON(&updatedUserViewData)
+	if validator.IsErrorNotNil(shouldBindJSON) {
+		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": shouldBindJSON.Error()})
 		return
 	}
 
@@ -152,9 +152,9 @@ func (userController UserController) Delete(controllerContext any) {
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
 	currentUserID := ginContext.MustGet(constants.UserIDContext).(string)
-	shouldBindJSONError := userController.userUseCase.DeleteUser(ctx, currentUserID)
-	if validator.IsErrorNotNil(shouldBindJSONError) {
-		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": shouldBindJSONError.Error()})
+	shouldBindJSON := userController.userUseCase.DeleteUser(ctx, currentUserID)
+	if validator.IsErrorNotNil(shouldBindJSON) {
+		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": shouldBindJSON.Error()})
 	}
 	ginContext.JSON(http.StatusNoContent, nil)
 }
@@ -164,9 +164,9 @@ func (userController UserController) Login(controllerContext any) {
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
 	var userLoginViewData userViewModel.UserLoginView
-	shouldBindJSONError := ginContext.ShouldBindJSON(&userLoginViewData)
-	if validator.IsErrorNotNil(shouldBindJSONError) {
-		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": shouldBindJSONError.Error()})
+	shouldBindJSON := ginContext.ShouldBindJSON(&userLoginViewData)
+	if validator.IsErrorNotNil(shouldBindJSON) {
+		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": shouldBindJSON.Error()})
 		return
 	}
 
@@ -245,15 +245,15 @@ func (userController UserController) ForgottenPassword(controllerContext any) {
 	defer cancel()
 	var userViewEmail userViewModel.UserForgottenPasswordView
 
-	err := ginContext.ShouldBindJSON(&userViewEmail)
-	if validator.IsErrorNotNil(err) {
-		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+	shouldBindJSON := ginContext.ShouldBindJSON(&userViewEmail)
+	if validator.IsErrorNotNil(shouldBindJSON) {
+		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": shouldBindJSON.Error()})
 		return
 	}
 
 	fetchedUser := userController.userUseCase.GetUserByEmail(ctx, userViewEmail.Email)
 	if validator.IsErrorNotNil(fetchedUser.Error) {
-		ginContext.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": err.Error()})
+		ginContext.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": shouldBindJSON.Error()})
 		return
 	}
 
@@ -263,9 +263,9 @@ func (userController UserController) ForgottenPassword(controllerContext any) {
 	passwordResetAt := time.Now().Add(time.Minute * 15)
 
 	// Update the user.
-	err = userController.userUseCase.UpdatePasswordResetTokenUserByEmail(ctx, fetchedUser.Data.Email, "passwordResetToken", passwordResetToken, "passwordResetAt", passwordResetAt)
-	if validator.IsErrorNotNil(err) {
-		ginContext.JSON(http.StatusBadGateway, gin.H{"status": "success", "message": err.Error()})
+	shouldBindJSON = userController.userUseCase.UpdatePasswordResetTokenUserByEmail(ctx, fetchedUser.Data.Email, "passwordResetToken", passwordResetToken, "passwordResetAt", passwordResetAt)
+	if validator.IsErrorNotNil(shouldBindJSON) {
+		ginContext.JSON(http.StatusBadGateway, gin.H{"status": "success", "message": shouldBindJSON.Error()})
 		return
 	}
 	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "message": constants.SendingEmailWithInstructionsNotification})
@@ -278,16 +278,16 @@ func (userController UserController) ResetUserPassword(controllerContext any) {
 	resetToken := ginContext.Params.ByName("resetToken")
 	var userResetPasswordView userViewModel.UserResetPasswordView
 
-	err := ginContext.ShouldBindJSON(&userResetPasswordView)
-	if validator.IsErrorNotNil(err) {
-		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+	shouldBindJSON := ginContext.ShouldBindJSON(&userResetPasswordView)
+	if validator.IsErrorNotNil(shouldBindJSON) {
+		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": shouldBindJSON.Error()})
 		return
 	}
 
 	passwordResetToken := commonUtility.Encode(resetToken)
 
 	// Update the user.
-	err = userController.userUseCase.ResetUserPassword(ctx, "passwordResetToken", passwordResetToken, "passwordResetAt", "password", userResetPasswordView.Password)
+	err := userController.userUseCase.ResetUserPassword(ctx, "passwordResetToken", passwordResetToken, "passwordResetAt", "password", userResetPasswordView.Password)
 
 	if validator.IsErrorNotNil(err) {
 		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})

@@ -128,9 +128,9 @@ func (userController UserController) UpdateUserById(controllerContext any) {
 	currentUserID := ginContext.MustGet(constants.UserIDContext).(string)
 
 	var updatedUserViewData userViewModel.UserUpdateView
-	err := ginContext.ShouldBindJSON(&updatedUserViewData)
-	if validator.IsErrorNotNil(err) {
-		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+	shouldBindJSONError := ginContext.ShouldBindJSON(&updatedUserViewData)
+	if validator.IsErrorNotNil(shouldBindJSONError) {
+		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": shouldBindJSONError.Error()})
 		return
 	}
 
@@ -152,9 +152,9 @@ func (userController UserController) Delete(controllerContext any) {
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
 	currentUserID := ginContext.MustGet(constants.UserIDContext).(string)
-	err := userController.userUseCase.DeleteUser(ctx, currentUserID)
-	if validator.IsErrorNotNil(err) {
-		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+	shouldBindJSONError := userController.userUseCase.DeleteUser(ctx, currentUserID)
+	if validator.IsErrorNotNil(shouldBindJSONError) {
+		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": shouldBindJSONError.Error()})
 	}
 	ginContext.JSON(http.StatusNoContent, nil)
 }
@@ -164,9 +164,9 @@ func (userController UserController) Login(controllerContext any) {
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
 	var userLoginViewData userViewModel.UserLoginView
-	err := ginContext.ShouldBindJSON(&userLoginViewData)
-	if validator.IsErrorNotNil(err) {
-		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+	shouldBindJSONError := ginContext.ShouldBindJSON(&userLoginViewData)
+	if validator.IsErrorNotNil(shouldBindJSONError) {
+		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": shouldBindJSONError.Error()})
 		return
 	}
 
@@ -210,9 +210,9 @@ func (userController UserController) RefreshAccessToken(controllerContext any) {
 		ginContext.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": message})
 		return
 	}
-	cookie, err := ginContext.Cookie(constants.RefreshTokenValue)
+	cookie, cookieError := ginContext.Cookie(constants.RefreshTokenValue)
 
-	if validator.IsErrorNotNil(err) {
+	if validator.IsErrorNotNil(cookieError) {
 		ginContext.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": message})
 		return
 	}
@@ -224,13 +224,13 @@ func (userController UserController) RefreshAccessToken(controllerContext any) {
 		return
 	}
 
-	if validator.IsErrorNotNil(err) {
+	if validator.IsErrorNotNil(cookieError) {
 		ginContext.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": "the user is belonged to this token no longer exists "})
 	}
 
 	accessToken, createTokenError := domainUtility.GenerateJWTToken(applicationConfig.AccessToken.ExpiredIn, userID, applicationConfig.AccessToken.PrivateKey)
 	if validator.IsErrorNotNil(createTokenError) {
-		ginContext.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": err.Error()})
+		ginContext.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": cookieError.Error()})
 		return
 	}
 	ginContext.SetCookie(constants.AccessTokenValue, accessToken, applicationConfig.AccessToken.MaxAge, "/", constants.TokenDomainValue, false, true)

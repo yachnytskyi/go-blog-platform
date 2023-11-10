@@ -43,17 +43,19 @@ func (httpValidationErrorsView HttpValidationErrorsView) Error() string {
 }
 
 type HttpAuthorizationErrorView struct {
+	Location     string `json:"-"`
 	Notification string `json:"notification"`
 }
 
-func NewHttpAuthorizationErrorView(notification string) HttpAuthorizationErrorView {
+func NewHttpAuthorizationErrorView(location, notification string) HttpAuthorizationErrorView {
 	return HttpAuthorizationErrorView{
+		Location:     location,
 		Notification: notification,
 	}
 }
 
 func (err HttpAuthorizationErrorView) Error() string {
-	return fmt.Sprintf("notification: " + err.Notification)
+	return fmt.Sprintf("location" + err.Location + " notification: " + err.Notification)
 }
 
 type HttpEntityNotFoundErrorView struct {
@@ -90,7 +92,7 @@ func (httpPaginationErrorView HttpPaginationErrorView) Error() string {
 }
 
 type HttpInternalErrorView struct {
-	Location     string `json:"location,omitempty"`
+	Location     string `json:"-"`
 	Notification string `json:"notification"`
 }
 

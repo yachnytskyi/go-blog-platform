@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
@@ -18,6 +19,7 @@ import (
 )
 
 const (
+	location      = "pkg.utility.delivery.http.gin.middleware."
 	authorization = "Authorization"
 	bearer        = "Bearer"
 	firstElement  = 0
@@ -27,11 +29,14 @@ const (
 // AuthMiddleware is a Gin middleware for handling user authentication using JWT tokens.
 func AuthMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
 	return func(ginContext *gin.Context) {
+		ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
+		defer cancel()
+
 		// Extract the access token from the request.
-		accessToken, extractAccessTokenError := extractAccessToken(ginContext)
-		if extractAccessTokenError != nil {
+		accessToken, tokenError := extractAccessToken(ginContext)
+		if tokenError != nil {
 			// Abort the request with an unauthorized status and respond with a JSON error.
-			abortWithStatusJSON(ginContext, extractAccessTokenError, http.StatusUnauthorized)
+			abortWithStatusJSON(ginContext, tokenError, http.StatusUnauthorized)
 			return
 		}
 
@@ -42,18 +47,26 @@ func AuthMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
 		userID, validateTokenError := domainUtility.ValidateJWTToken(accessToken, applicationConfig.AccessToken.PublicKey)
 		if validator.IsErrorNotNil(validateTokenError) {
 			// Handle token validation error and respond with an unauthorized status and JSON error.
-			err := httpError.HandleError(validateTokenError)
-			abortWithStatusJSON(ginContext, err, http.StatusUnauthorized)
+			handledError := httpError.HandleError(validateTokenError)
+			abortWithStatusJSON(ginContext, handledError, http.StatusUnauthorized)
 			return
 		}
 
+		// Check for a deadline error using the handleDeadlineExceeded function.
+		// If a deadline error occurred, respond with a timeout status.
+		deadlineError := handleDeadlineExceeded(ctx)
+		if validator.IsValueNotNil(deadlineError) {
+			// Use the abortWithStatusJSON function to handle the deadline error by sending
+			// a JSON response with an appropriate HTTP status code.
+			abortWithStatusJSON(ginContext, deadlineError, http.StatusUnauthorized)
+		}
+
 		// Get the user information from the user use case.
-		context := ginContext.Request.Context()
-		user := userUseCase.GetUserById(context, fmt.Sprint(userID))
+		user := userUseCase.GetUserById(ctx, fmt.Sprint(userID))
 		if validator.IsErrorNotNil(user.Error) {
 			// Handle user retrieval error and respond with an unauthorized status and JSON error.
-			err := httpError.HandleError(user.Error)
-			abortWithStatusJSON(ginContext, err, http.StatusUnauthorized)
+			handledError := httpError.HandleError(user.Error)
+			abortWithStatusJSON(ginContext, handledError, http.StatusUnauthorized)
 			return
 		}
 
@@ -88,7 +101,7 @@ func extractAccessToken(ginContext *gin.Context) (string, error) {
 	// Check if the access token is still empty.
 	if validator.IsStringEmpty(accessToken) {
 		// If access token is empty, create and log an HTTP authorization error.
-		httpAuthorizationError := httpError.NewHttpAuthorizationErrorView(constants.LoggingErrorNotification)
+		httpAuthorizationError := httpError.NewHttpAuthorizationErrorView(location+"extractAcessToken.accessToken", constants.LoggingErrorNotification)
 		logging.Logger(httpAuthorizationError)
 		return "", httpAuthorizationError
 	}
@@ -99,7 +112,28 @@ func extractAccessToken(ginContext *gin.Context) (string, error) {
 
 // abortWithStatusJSON aborts the request, logs the error, and responds with a JSON error.
 func abortWithStatusJSON(ginContext *gin.Context, err any, httpCode int) {
-	logging.Logger(err)
 	jsonResponse := httpModel.NewJsonResponseOnFailure(err)
 	ginContext.AbortWithStatusJSON(httpCode, jsonResponse)
+}
+
+// handleDeadlineExceeded checks if a context error indicates a deadline exceeded and
+// logs the error appropriately. If the context error is not a deadline exceeded error,
+// it returns nil.
+func handleDeadlineExceeded(ctx context.Context) any {
+	// Check if a timeout occurred.
+	if ctx.Err() == context.DeadlineExceeded {
+		// Log and handle the timeout error as needed.
+		internalError := httpError.NewHttpInternalErrorView(location+"handleDeadlineExceeded.context.DeadLineExceeded", ctx.Err().Error())
+		logging.Logger(internalError)
+		return httpError.HandleError(internalError)
+	}
+
+	// Log the unexpected error.
+	if validator.IsErrorNotNil(ctx.Err()) {
+		// Log unexpected errors in the context.
+		internalError := httpError.NewHttpInternalErrorView(location+"handleDeadlineExceeded.context.Err", ctx.Err().Error())
+		logging.Logger(internalError)
+		return httpError.HandleError(internalError)
+	}
+	return nil
 }

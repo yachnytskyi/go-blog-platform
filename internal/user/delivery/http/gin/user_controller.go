@@ -2,7 +2,6 @@ package gin
 
 import (
 	"context"
-	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -38,34 +37,38 @@ func NewUserController(userUseCase user.UserUseCase) UserController {
 // GetAllUsers is a controller method that handles an HTTP request to retrieve a list of users.
 // It retrieves user data based on the provided pagination parameters and returns the JSON response.
 func (userController UserController) GetAllUsers(controllerContext any) {
+	// Extract the Gin context and create a context with timeout.
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
+
 	paginationQuery := httpGinCommon.ParsePaginationQuery(ginContext)
 	fetchedUsers := userController.userUseCase.GetAllUsers(ctx, paginationQuery)
 	if validator.IsErrorNotNil(fetchedUsers.Error) {
-		httpGinCommon.GinNewJsonResponseOnFailure(ginContext, fetchedUsers.Error, http.StatusBadRequest)
+		httpGinCommon.GinNewJsonResponseOnFailure(ginContext, fetchedUsers.Error, constants.StatusBadRequest)
 		return
 	}
 
 	// Map the fetched user data to a JSON response and set the status.
 	// Return the JSON response with a successful status code.
 	jsonResponse := httpModel.NewJsonResponseOnSuccess(userViewModel.UsersToUsersViewMapper(fetchedUsers.Data))
-	ginContext.JSON(http.StatusOK, jsonResponse)
+	ginContext.JSON(constants.StatusOk, jsonResponse)
 }
 
 // GetCurrentUser is a controller method that handles an HTTP request to retrieve the current user.
 // It extracts the current user information from a middleware and returns the JSON response.
 func (userController UserController) GetCurrentUser(controllerContext any) {
+	// Extract the Gin context and create a context with timeout.
 	ginContext := controllerContext.(*gin.Context)
 	currentUser := ginContext.MustGet(constants.UserContext).(userViewModel.UserView)
 	jsonResponse := httpModel.NewJsonResponseOnSuccess(currentUser)
-	ginContext.JSON(http.StatusOK, jsonResponse)
+	ginContext.JSON(constants.StatusOk, jsonResponse)
 }
 
 // GetUserById is a controller method that handles an HTTP request to retrieve a user by their ID.
 // It retrieves user data and returns the JSON response.
 func (userController UserController) GetUserById(controllerContext any) {
+	// Extract the Gin context and create a context with timeout.
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
@@ -75,14 +78,14 @@ func (userController UserController) GetUserById(controllerContext any) {
 	userID := ginContext.Param(constants.UserIDContext)
 	fetchedUser := userController.userUseCase.GetUserById(ctx, userID)
 	if validator.IsErrorNotNil(fetchedUser.Error) {
-		httpGinCommon.GinNewJsonResponseOnFailure(ginContext, fetchedUser.Error, http.StatusBadRequest)
+		httpGinCommon.GinNewJsonResponseOnFailure(ginContext, fetchedUser.Error, constants.StatusBadRequest)
 		return
 	}
 
 	// Map the retrieved user data to a JSON response.
 	// Return the JSON response with a successful status code.
 	jsonResponse := httpModel.NewJsonResponseOnSuccess(userViewModel.UserToUserViewMapper(fetchedUser.Data))
-	ginContext.JSON(http.StatusOK, jsonResponse)
+	ginContext.JSON(constants.StatusOk, jsonResponse)
 }
 
 // Register is a controller method for handling an HTTP request to register a new user.
@@ -93,6 +96,7 @@ func (userController UserController) GetUserById(controllerContext any) {
 // 4. If the registration fails, it responds with an error message.
 // 5. If registration is successful, it returns a welcome message in the JSON response.
 func (userController UserController) Register(controllerContext any) {
+	// Extract the Gin context and create a context with timeout.
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
@@ -103,48 +107,55 @@ func (userController UserController) Register(controllerContext any) {
 	if validator.IsErrorNotNil(shouldBindJSON) {
 		internalError := httpError.NewHttpInternalErrorView(location+"Register.ShouldBindJSON", shouldBindJSON.Error())
 		logging.Logger(internalError)
-		httpGinCommon.GinNewJsonResponseOnFailure(ginContext, internalError, http.StatusBadRequest)
+		httpGinCommon.GinNewJsonResponseOnFailure(ginContext, internalError, constants.StatusBadRequest)
 		return
 	}
 
-	// Convert the view model to a user model and register the user.
+	// Convert the view model to a domain model and register the user.
 	userCreate := userViewModel.UserCreateViewToUserCreateMapper(createdUserViewData)
 	createdUser := userController.userUseCase.Register(ctx, userCreate)
 	if validator.IsErrorNotNil(createdUser.Error) {
-		httpGinCommon.GinNewJsonResponseOnFailure(ginContext, createdUser.Error, http.StatusBadRequest)
+		httpGinCommon.GinNewJsonResponseOnFailure(ginContext, createdUser.Error, constants.StatusBadRequest)
 		return
 	}
 
 	// Registration was successful. Return the JSON response with a successful status code.
 	welcomeMessage := userViewModel.NewWelcomeMessageView(constants.SendingEmailNotification + createdUser.Data.Email)
 	jsonResponse := httpModel.NewJsonResponseOnSuccess(welcomeMessage)
-	ginContext.JSON(http.StatusCreated, jsonResponse)
+	ginContext.JSON(constants.StatusCreated, jsonResponse)
 }
 
+// UpdateUserById updates a user's information based on the provided JSON data.
 func (userController UserController) UpdateUserById(controllerContext any) {
+	// Extract the Gin context and create a context with timeout.
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
-	currentUserID := ginContext.MustGet(constants.UserIDContext).(string)
 
+	// Get the current user's ID from the Gin context.
+	// Bind the incoming JSON data to a struct.
+	currentUserID := ginContext.MustGet(constants.UserIDContext).(string)
 	var updatedUserViewData userViewModel.UserUpdateView
 	shouldBindJSON := ginContext.ShouldBindJSON(&updatedUserViewData)
 	if validator.IsErrorNotNil(shouldBindJSON) {
-		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": shouldBindJSON.Error()})
+		internalError := httpError.NewHttpInternalErrorView(location+"UpdateUserById.ShouldBindJSON", shouldBindJSON.Error())
+		logging.Logger(internalError)
+		httpGinCommon.GinNewJsonResponseOnFailure(ginContext, internalError, constants.StatusBadRequest)
 		return
 	}
 
+	// Convert the view model to a domain model and update the user.
 	updatedUserData := userViewModel.UserUpdateViewToUserUpdateMapper(updatedUserViewData)
 	updatedUserData.UserID = currentUserID
-	updatedUser, updatedUserError := userController.userUseCase.UpdateUserById(ctx, updatedUserData)
-	if validator.IsErrorNotNil(updatedUserError) {
-		updatedUserError := httpError.HandleError(updatedUserError)
-		jsonResponse := httpModel.NewJsonResponseOnFailure(updatedUserError)
-		ginContext.JSON(http.StatusBadRequest, jsonResponse)
+	updatedUser, updateErr := userController.userUseCase.UpdateUserById(ctx, updatedUserData)
+	if validator.IsErrorNotNil(updateErr) {
+		httpGinCommon.GinNewJsonResponseOnFailure(ginContext, updateErr, constants.StatusBadRequest)
 		return
 	}
+
+	// Return the JSON response with a successful status code.
 	jsonResponse := httpModel.NewJsonResponseOnSuccess(userViewModel.UserToUserViewMapper(updatedUser))
-	ginContext.JSON(http.StatusCreated, jsonResponse)
+	ginContext.JSON(constants.StatusOk, jsonResponse)
 }
 
 func (userController UserController) Delete(controllerContext any) {
@@ -154,9 +165,9 @@ func (userController UserController) Delete(controllerContext any) {
 	currentUserID := ginContext.MustGet(constants.UserIDContext).(string)
 	shouldBindJSON := userController.userUseCase.DeleteUser(ctx, currentUserID)
 	if validator.IsErrorNotNil(shouldBindJSON) {
-		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": shouldBindJSON.Error()})
+		ginContext.JSON(constants.StatusBadRequest, gin.H{"status": "fail", "message": shouldBindJSON.Error()})
 	}
-	ginContext.JSON(http.StatusNoContent, nil)
+	ginContext.JSON(constants.StatusNoContent, nil)
 }
 
 func (userController UserController) Login(controllerContext any) {
@@ -166,7 +177,7 @@ func (userController UserController) Login(controllerContext any) {
 	var userLoginViewData userViewModel.UserLoginView
 	shouldBindJSON := ginContext.ShouldBindJSON(&userLoginViewData)
 	if validator.IsErrorNotNil(shouldBindJSON) {
-		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": shouldBindJSON.Error()})
+		ginContext.JSON(constants.StatusBadRequest, gin.H{"status": "fail", "message": shouldBindJSON.Error()})
 		return
 	}
 
@@ -175,7 +186,7 @@ func (userController UserController) Login(controllerContext any) {
 	if validator.IsErrorNotNil(loginError) {
 		loginError := httpError.HandleError(loginError)
 		jsonResponse := httpModel.NewJsonResponseOnFailure(loginError)
-		ginContext.JSON(http.StatusBadRequest, jsonResponse)
+		ginContext.JSON(constants.StatusBadRequest, jsonResponse)
 		return
 	}
 
@@ -184,21 +195,21 @@ func (userController UserController) Login(controllerContext any) {
 	if validator.IsErrorNotNil(createTokenError) {
 		createTokenError := httpError.HandleError(createTokenError)
 		jsonResponse := httpModel.NewJsonResponseOnFailure(createTokenError)
-		ginContext.JSON(http.StatusBadRequest, jsonResponse)
+		ginContext.JSON(constants.StatusBadRequest, jsonResponse)
 		return
 	}
 	refreshToken, createTokenError := domainUtility.GenerateJWTToken(applicationConfig.RefreshToken.ExpiredIn, userID, applicationConfig.RefreshToken.PrivateKey)
 	if validator.IsErrorNotNil(createTokenError) {
 		createTokenError := httpError.HandleError(createTokenError)
 		jsonResponse := httpModel.NewJsonResponseOnFailure(createTokenError)
-		ginContext.JSON(http.StatusBadRequest, jsonResponse)
+		ginContext.JSON(constants.StatusBadRequest, jsonResponse)
 		return
 	}
 	ginContext.SetCookie(constants.AccessTokenValue, accessToken, applicationConfig.AccessToken.MaxAge, "/", constants.TokenDomainValue, false, true)
 	ginContext.SetCookie(constants.RefreshTokenValue, refreshToken, applicationConfig.RefreshToken.MaxAge, "/", constants.TokenDomainValue, false, true)
 	ginContext.SetCookie(constants.LoggedInValue, "true", applicationConfig.AccessToken.MaxAge, "/", constants.TokenDomainValue, false, false)
 	jsonResponse := httpModel.NewJsonResponseOnSuccess(userViewModel.TokenStringToTokenViewMapper(accessToken))
-	ginContext.JSON(http.StatusCreated, jsonResponse)
+	ginContext.JSON(constants.StatusOk, jsonResponse)
 }
 
 func (userController UserController) RefreshAccessToken(controllerContext any) {
@@ -207,36 +218,36 @@ func (userController UserController) RefreshAccessToken(controllerContext any) {
 	currentUser := ginContext.MustGet(constants.UserContext).(userViewModel.UserView)
 
 	if validator.IsValueNil(currentUser) {
-		ginContext.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": message})
+		ginContext.AbortWithStatusJSON(constants.StatusForbidden, gin.H{"status": "fail", "message": message})
 		return
 	}
 	cookie, cookieError := ginContext.Cookie(constants.RefreshTokenValue)
 
 	if validator.IsErrorNotNil(cookieError) {
-		ginContext.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": message})
+		ginContext.AbortWithStatusJSON(constants.StatusForbidden, gin.H{"status": "fail", "message": message})
 		return
 	}
 
 	applicationConfig := config.AppConfig
 	userID, validateTokenError := domainUtility.ValidateJWTToken(cookie, applicationConfig.RefreshToken.PublicKey)
 	if validator.IsErrorNotNil(validateTokenError) {
-		ginContext.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": validateTokenError.Error()})
+		ginContext.AbortWithStatusJSON(constants.StatusForbidden, gin.H{"status": "fail", "message": validateTokenError.Error()})
 		return
 	}
 
 	if validator.IsErrorNotNil(cookieError) {
-		ginContext.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": "the user is belonged to this token no longer exists "})
+		ginContext.AbortWithStatusJSON(constants.StatusForbidden, gin.H{"status": "fail", "message": "the user is belonged to this token no longer exists "})
 	}
 
 	accessToken, createTokenError := domainUtility.GenerateJWTToken(applicationConfig.AccessToken.ExpiredIn, userID, applicationConfig.AccessToken.PrivateKey)
 	if validator.IsErrorNotNil(createTokenError) {
-		ginContext.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": cookieError.Error()})
+		ginContext.AbortWithStatusJSON(constants.StatusForbidden, gin.H{"status": "fail", "message": cookieError.Error()})
 		return
 	}
 	ginContext.SetCookie(constants.AccessTokenValue, accessToken, applicationConfig.AccessToken.MaxAge, "/", constants.TokenDomainValue, false, true)
 	ginContext.SetCookie(constants.LoggedInValue, "true", applicationConfig.AccessToken.MaxAge, "/", constants.TokenDomainValue, false, false)
 	jsonResponse := httpModel.NewJsonResponseOnSuccess(userViewModel.TokenStringToTokenViewMapper(accessToken))
-	ginContext.JSON(http.StatusCreated, jsonResponse)
+	ginContext.JSON(constants.StatusOk, jsonResponse)
 }
 
 func (userController UserController) ForgottenPassword(controllerContext any) {
@@ -247,13 +258,13 @@ func (userController UserController) ForgottenPassword(controllerContext any) {
 
 	shouldBindJSON := ginContext.ShouldBindJSON(&userViewEmail)
 	if validator.IsErrorNotNil(shouldBindJSON) {
-		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": shouldBindJSON.Error()})
+		ginContext.JSON(constants.StatusBadRequest, gin.H{"status": "fail", "message": shouldBindJSON.Error()})
 		return
 	}
 
 	fetchedUser := userController.userUseCase.GetUserByEmail(ctx, userViewEmail.Email)
 	if validator.IsErrorNotNil(fetchedUser.Error) {
-		ginContext.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": shouldBindJSON.Error()})
+		ginContext.JSON(constants.StatusBadGateway, gin.H{"status": "error", "message": shouldBindJSON.Error()})
 		return
 	}
 
@@ -265,10 +276,10 @@ func (userController UserController) ForgottenPassword(controllerContext any) {
 	// Update the user.
 	shouldBindJSON = userController.userUseCase.UpdatePasswordResetTokenUserByEmail(ctx, fetchedUser.Data.Email, "passwordResetToken", passwordResetToken, "passwordResetAt", passwordResetAt)
 	if validator.IsErrorNotNil(shouldBindJSON) {
-		ginContext.JSON(http.StatusBadGateway, gin.H{"status": "success", "message": shouldBindJSON.Error()})
+		ginContext.JSON(constants.StatusBadGateway, gin.H{"status": "success", "message": shouldBindJSON.Error()})
 		return
 	}
-	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "message": constants.SendingEmailWithInstructionsNotification})
+	ginContext.JSON(constants.StatusOk, gin.H{"status": "success", "message": constants.SendingEmailWithInstructionsNotification})
 }
 
 func (userController UserController) ResetUserPassword(controllerContext any) {
@@ -280,7 +291,7 @@ func (userController UserController) ResetUserPassword(controllerContext any) {
 
 	shouldBindJSON := ginContext.ShouldBindJSON(&userResetPasswordView)
 	if validator.IsErrorNotNil(shouldBindJSON) {
-		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": shouldBindJSON.Error()})
+		ginContext.JSON(constants.StatusBadRequest, gin.H{"status": "fail", "message": shouldBindJSON.Error()})
 		return
 	}
 
@@ -290,16 +301,16 @@ func (userController UserController) ResetUserPassword(controllerContext any) {
 	err := userController.userUseCase.ResetUserPassword(ctx, "passwordResetToken", passwordResetToken, "passwordResetAt", "password", userResetPasswordView.Password)
 
 	if validator.IsErrorNotNil(err) {
-		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+		ginContext.JSON(constants.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 	}
 
 	httpGinCookie.CleanCookies(ginContext)
-	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "message": "Congratulations! Your password was updated successfully! Please sign in again."})
+	ginContext.JSON(constants.StatusOk, gin.H{"status": "success", "message": "Congratulations! Your password was updated successfully! Please sign in again."})
 
 }
 
 func (userController UserController) Logout(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	httpGinCookie.CleanCookies(ginContext)
-	ginContext.JSON(http.StatusOK, gin.H{"status": "success"})
+	ginContext.JSON(constants.StatusOk, gin.H{"status": "success"})
 }

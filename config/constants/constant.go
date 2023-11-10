@@ -1,6 +1,9 @@
 package constants
 
-import "time"
+import (
+	"net/http"
+	"time"
+)
 
 const (
 	// Context timers.
@@ -37,6 +40,15 @@ const (
 	// User Notifications.
 	SendingEmailNotification                 = "We have sent an email with a verification code to the provided address "
 	SendingEmailWithInstructionsNotification = "You will receive an email with detailed instructions shortly."
+
+	// HTTP codes.
+	StatusOk           = http.StatusOK
+	StatusCreated      = http.StatusCreated
+	StatusNoContent    = http.StatusNoContent
+	StatusBadRequest   = http.StatusBadRequest
+	StatusUnauthorized = http.StatusUnauthorized
+	StatusForbidden    = http.StatusForbidden
+	StatusBadGateway   = http.StatusBadGateway
 
 	// Error Messages.
 	StringAllowedLength             = "Can be between %d and %d characters long."

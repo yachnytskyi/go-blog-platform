@@ -74,7 +74,7 @@ func (userUseCase UserUseCase) GetUserByEmail(ctx context.Context, email string)
 	return fetchedUser
 }
 
-// Register handles the registration of a new user based on the provided pagination parameters.
+// Register handles the registration of a new user based on the provided data.
 // It returns a Result containing created user data on success or an error on failure.
 func (userUseCase UserUseCase) Register(ctx context.Context, userCreateData userModel.UserCreate) commonModel.Result[userModel.User] {
 	// Validate the user creation data.

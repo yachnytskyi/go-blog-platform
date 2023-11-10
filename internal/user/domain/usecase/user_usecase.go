@@ -35,7 +35,7 @@ func NewUserUseCase(userRepository user.UserRepository) user.UserUseCase {
 }
 
 // GetAllUsers retrieves a list of users based on the provided pagination parameters.
-// It returns a Result containing user data on success or an error on failure.
+// The result is wrapped in a commonModel.Result containing either the user or an error.
 func (userUseCase UserUseCase) GetAllUsers(ctx context.Context, paginationQuery commonModel.PaginationQuery) commonModel.Result[userModel.Users] {
 	fetchedUsers := userUseCase.userRepository.GetAllUsers(ctx, paginationQuery)
 	if validator.IsErrorNotNil(fetchedUsers.Error) {
@@ -45,8 +45,8 @@ func (userUseCase UserUseCase) GetAllUsers(ctx context.Context, paginationQuery 
 	return fetchedUsers
 }
 
-// GetUserById retrieves a user by their ID using the provided context and user ID.
-// It returns a Result containing user data on success or an error on failure.
+// GetUserById retrieves a user by their ID using the user ID.
+// The result is wrapped in a commonModel.Result containing either the user or an error.
 func (userUseCase UserUseCase) GetUserById(ctx context.Context, userID string) commonModel.Result[userModel.User] {
 	fetchedUser := userUseCase.userRepository.GetUserById(ctx, userID)
 	if validator.IsErrorNotNil(fetchedUser.Error) {
@@ -56,12 +56,16 @@ func (userUseCase UserUseCase) GetUserById(ctx context.Context, userID string) c
 	return fetchedUser
 }
 
+// GetUserByEmail retrieves a user by their ID using the provided user email.
+// It performs email format validation and fetches the user from the repository.
+// The result is wrapped in a commonModel.Result containing either the user or an error.
 func (userUseCase UserUseCase) GetUserByEmail(ctx context.Context, email string) commonModel.Result[userModel.User] {
 	validateEmailError := validateEmail(email, emailRegex)
 	if validator.IsValueNotNil(validateEmailError) {
 		validateEmailError := domainError.HandleError(validateEmailError)
 		return commonModel.NewResultOnFailure[userModel.User](validateEmailError)
 	}
+
 	fetchedUser := userUseCase.userRepository.GetUserByEmail(ctx, email)
 	if validator.IsErrorNotNil(fetchedUser.Error) {
 		fetchedUserError := domainError.HandleError(fetchedUser.Error)
@@ -70,7 +74,7 @@ func (userUseCase UserUseCase) GetUserByEmail(ctx context.Context, email string)
 	return fetchedUser
 }
 
-// Register is a method in the UserUseCase that handles the registration of a new user.
+// Register handles the registration of a new user based on the provided pagination parameters.
 // It returns a Result containing created user data on success or an error on failure.
 func (userUseCase UserUseCase) Register(ctx context.Context, userCreateData userModel.UserCreate) commonModel.Result[userModel.User] {
 	// Validate the user creation data.

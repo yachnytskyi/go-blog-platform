@@ -147,14 +147,14 @@ func (userController UserController) UpdateUserById(controllerContext any) {
 	// Convert the view model to a domain model and update the user.
 	updatedUserData := userViewModel.UserUpdateViewToUserUpdateMapper(updatedUserViewData)
 	updatedUserData.UserID = currentUserID
-	updatedUser, updateErr := userController.userUseCase.UpdateUserById(ctx, updatedUserData)
-	if validator.IsErrorNotNil(updateErr) {
-		httpGinCommon.GinNewJsonResponseOnFailure(ginContext, updateErr, constants.StatusBadRequest)
+	updatedUser := userController.userUseCase.UpdateUserById(ctx, updatedUserData)
+	if validator.IsErrorNotNil(updatedUser.Error) {
+		httpGinCommon.GinNewJsonResponseOnFailure(ginContext, updatedUser.Error, constants.StatusBadRequest)
 		return
 	}
 
 	// Return the JSON response with a successful status code.
-	jsonResponse := httpModel.NewJsonResponseOnSuccess(userViewModel.UserToUserViewMapper(updatedUser))
+	jsonResponse := httpModel.NewJsonResponseOnSuccess(userViewModel.UserToUserViewMapper(updatedUser.Data))
 	ginContext.JSON(constants.StatusOk, jsonResponse)
 }
 

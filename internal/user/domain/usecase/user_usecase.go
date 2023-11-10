@@ -12,7 +12,6 @@ import (
 	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	commonUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
-	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
@@ -39,8 +38,8 @@ func NewUserUseCase(userRepository user.UserRepository) user.UserUseCase {
 func (userUseCase UserUseCase) GetAllUsers(ctx context.Context, paginationQuery commonModel.PaginationQuery) commonModel.Result[userModel.Users] {
 	fetchedUsers := userUseCase.userRepository.GetAllUsers(ctx, paginationQuery)
 	if validator.IsErrorNotNil(fetchedUsers.Error) {
-		fetchedUsersError := domainError.HandleError(fetchedUsers.Error)
-		return commonModel.NewResultOnFailure[userModel.Users](fetchedUsersError)
+		fetchedUsers.Error = domainError.HandleError(fetchedUsers.Error)
+		return commonModel.NewResultOnFailure[userModel.Users](fetchedUsers.Error)
 	}
 	return fetchedUsers
 }
@@ -50,8 +49,8 @@ func (userUseCase UserUseCase) GetAllUsers(ctx context.Context, paginationQuery 
 func (userUseCase UserUseCase) GetUserById(ctx context.Context, userID string) commonModel.Result[userModel.User] {
 	fetchedUser := userUseCase.userRepository.GetUserById(ctx, userID)
 	if validator.IsErrorNotNil(fetchedUser.Error) {
-		fetchedUserError := domainError.HandleError(fetchedUser.Error)
-		return commonModel.NewResultOnFailure[userModel.User](fetchedUserError)
+		fetchedUser.Error = domainError.HandleError(fetchedUser.Error)
+		return commonModel.NewResultOnFailure[userModel.User](fetchedUser.Error)
 	}
 	return fetchedUser
 }
@@ -62,14 +61,14 @@ func (userUseCase UserUseCase) GetUserById(ctx context.Context, userID string) c
 func (userUseCase UserUseCase) GetUserByEmail(ctx context.Context, email string) commonModel.Result[userModel.User] {
 	validateEmailError := validateEmail(email, emailRegex)
 	if validator.IsValueNotNil(validateEmailError) {
-		validateEmailError := domainError.HandleError(validateEmailError)
-		return commonModel.NewResultOnFailure[userModel.User](validateEmailError)
+		processedError := domainError.HandleError(validateEmailError)
+		return commonModel.NewResultOnFailure[userModel.User](processedError)
 	}
 
 	fetchedUser := userUseCase.userRepository.GetUserByEmail(ctx, email)
 	if validator.IsErrorNotNil(fetchedUser.Error) {
-		fetchedUserError := domainError.HandleError(fetchedUser.Error)
-		return commonModel.NewResultOnFailure[userModel.User](fetchedUserError)
+		fetchedUser.Error = domainError.HandleError(fetchedUser.Error)
+		return commonModel.NewResultOnFailure[userModel.User](fetchedUser.Error)
 	}
 	return fetchedUser
 }
@@ -80,7 +79,8 @@ func (userUseCase UserUseCase) Register(ctx context.Context, userCreateData user
 	// Validate the user creation data.
 	userCreate := validateUserCreate(userCreateData)
 	if validator.IsErrorNotNil(userCreate.Error) {
-		return commonModel.NewResultOnFailure[userModel.User](domainError.HandleError(userCreate.Error))
+		userCreate.Error = domainError.HandleError(userCreate.Error)
+		return commonModel.NewResultOnFailure[userModel.User](userCreate.Error)
 	}
 
 	// Check for duplicate email.
@@ -104,16 +104,10 @@ func (userUseCase UserUseCase) Register(ctx context.Context, userCreateData user
 		return createdUser
 	}
 
-	// Prepare email data for user registration.
-	emailData := prepareEmailDataForRegister(ctx, createdUser.Data.Name, tokenValue)
-	if validator.IsErrorNotNil(emailData.Error) {
-		logging.Logger(emailData.Error)
-		emailData.Error = domainError.HandleError(emailData.Error)
-		return commonModel.NewResultOnFailure[userModel.User](emailData.Error)
-	}
-
 	// Send the email verification message and return the created user.
-	sendEmailVerificationMessageError := userUseCase.userRepository.SendEmailVerificationMessage(ctx, createdUser.Data, emailData.Data)
+	// Prepare email data for user registration
+	emailData := prepareEmailDataForRegister(ctx, createdUser.Data.Name, tokenValue)
+	sendEmailVerificationMessageError := userUseCase.userRepository.SendEmailVerificationMessage(ctx, createdUser.Data, emailData)
 	if validator.IsErrorNotNil(sendEmailVerificationMessageError) {
 		sendEmailVerificationMessageError = domainError.HandleError(sendEmailVerificationMessageError)
 		return commonModel.NewResultOnFailure[userModel.User](sendEmailVerificationMessageError)
@@ -121,19 +115,17 @@ func (userUseCase UserUseCase) Register(ctx context.Context, userCreateData user
 	return createdUser
 }
 
-func (userUseCase UserUseCase) UpdateUserById(ctx context.Context, userUpdateData userModel.UserUpdate) (userModel.User, error) {
+func (userUseCase UserUseCase) UpdateUserById(ctx context.Context, userUpdateData userModel.UserUpdate) commonModel.Result[userModel.User] {
 	userUpdate := validateUserUpdate(userUpdateData)
 	if validator.IsErrorNotNil(userUpdate.Error) {
-		validationErrors := domainError.HandleError(userUpdate.Error)
-		return userModel.User{}, validationErrors
+		return commonModel.NewResultOnFailure[userModel.User](domainError.HandleError(userUpdate.Error))
 	}
 
-	updatedUser, userUpdateError := userUseCase.userRepository.UpdateUserById(ctx, userUpdate.Data)
-	if validator.IsErrorNotNil(userUpdateError) {
-		userUpdateError = domainError.HandleError(userUpdateError)
-		return userModel.User{}, userUpdateError
+	updatedUser := userUseCase.userRepository.UpdateUserById(ctx, userUpdate.Data)
+	if validator.IsErrorNotNil(updatedUser.Error) {
+		return commonModel.NewResultOnFailure[userModel.User](domainError.HandleError(userUpdate.Error))
 	}
-	return updatedUser, nil
+	return updatedUser
 }
 
 func (userUseCase UserUseCase) DeleteUser(ctx context.Context, userID string) error {
@@ -144,8 +136,8 @@ func (userUseCase UserUseCase) DeleteUser(ctx context.Context, userID string) er
 func (userUseCase UserUseCase) Login(ctx context.Context, userLoginData userModel.UserLogin) (string, error) {
 	userLogin := validateUserLogin(userLoginData)
 	if validator.IsErrorNotNil(userLogin.Error) {
-		validationErrors := domainError.HandleError(userLogin.Error)
-		return "", validationErrors
+		handledError := domainError.HandleError(userLogin.Error)
+		return "", handledError
 	}
 
 	fetchedUser := userUseCase.userRepository.GetUserByEmail(ctx, userLogin.Data.Email)
@@ -165,8 +157,8 @@ func (userUseCase UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.C
 
 	validateEmailError := validateEmail(email, emailRegex)
 	if validator.IsValueNotNil(validateEmailError) {
-		validateEmailError := domainError.HandleError(validateEmailError)
-		return validateEmailError
+		handledError := domainError.HandleError(validateEmailError)
+		return handledError
 	}
 	updatedUserError := userUseCase.userRepository.UpdatePasswordResetTokenUserByEmail(ctx, email, firstKey, firstValue, secondKey, secondValue)
 	if validator.IsErrorNotNil(updatedUserError) {
@@ -192,13 +184,7 @@ func (userUseCase UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.C
 	}
 
 	emailData := prepareEmailDataForUpdatePasswordResetToken(ctx, fetchedUser.Data.Name, tokenValue)
-	if validator.IsErrorNotNil(emailData.Error) {
-		logging.Logger(emailData.Error)
-		emailData.Error = domainError.HandleError(emailData.Error)
-		return emailData.Error
-	}
-
-	sendEmailForgottenPasswordMessageError := userUseCase.userRepository.SendEmailForgottenPasswordMessage(ctx, fetchedUser.Data, emailData.Data)
+	sendEmailForgottenPasswordMessageError := userUseCase.userRepository.SendEmailForgottenPasswordMessage(ctx, fetchedUser.Data, emailData)
 	if validator.IsErrorNotNil(sendEmailForgottenPasswordMessageError) {
 		sendEmailForgottenPasswordMessageError = domainError.HandleError(sendEmailForgottenPasswordMessageError)
 		return sendEmailForgottenPasswordMessageError
@@ -214,17 +200,17 @@ func (userUseCase UserUseCase) ResetUserPassword(ctx context.Context, firstKey s
 // prepareEmailData is a helper function to create an EmailData model for sending an email.
 // It takes the context, user name, token value, email subject, URL, template name, and template path as input.
 // It constructs an EmailData model and returns it in a Result.
-func prepareEmailData(ctx context.Context, userName, tokenValue, subject, url, templateName, templatePath string) commonModel.Result[userModel.EmailData] {
+func prepareEmailData(ctx context.Context, userName, tokenValue, subject, url, templateName, templatePath string) userModel.EmailData {
 	applicationConfig := config.AppConfig
 	userFirstName := domainUtility.UserFirstName(userName)
 	emailData := userModel.NewEmailData(applicationConfig.Email.ClientOriginUrl+url+tokenValue, templateName, templatePath, userFirstName, subject)
-	return commonModel.NewResultOnSuccess[userModel.EmailData](emailData)
+	return emailData
 }
 
 // prepareEmailDataForRegister is a helper function to prepare an EmailData model specifically for user registration.
 // It takes the context, user name, and token value as input and uses the constants for email subject, URL, template name, and template path.
 // It internally calls prepareEmailData with the appropriate parameters and returns the result.
-func prepareEmailDataForRegister(ctx context.Context, userName, tokenValue string) commonModel.Result[userModel.EmailData] {
+func prepareEmailDataForRegister(ctx context.Context, userName, tokenValue string) userModel.EmailData {
 	applicationConfig := config.AppConfig
 	return prepareEmailData(ctx, userName, tokenValue, emailConfirmationSubject, emailConfirmationUrl,
 		applicationConfig.Email.UserConfirmationTemplateName, applicationConfig.Email.UserConfirmationTemplatePath)
@@ -233,7 +219,7 @@ func prepareEmailDataForRegister(ctx context.Context, userName, tokenValue strin
 // prepareEmailDataForUserUpdate is a helper function to prepare an EmailData model specifically for updating user information.
 // It takes the context, user name, and token value as input and uses the constants for email subject, URL, template name, and template path.
 // It internally calls prepareEmailData with the appropriate parameters and returns the result.
-func prepareEmailDataForUpdatePasswordResetToken(ctx context.Context, userName, tokenValue string) commonModel.Result[userModel.EmailData] {
+func prepareEmailDataForUpdatePasswordResetToken(ctx context.Context, userName, tokenValue string) userModel.EmailData {
 	applicationConfig := config.AppConfig
 	return prepareEmailData(ctx, userName, tokenValue, forgottenPasswordSubject, forgottenPasswordUrl,
 		applicationConfig.Email.ForgottenPasswordTemplateName, applicationConfig.Email.ForgottenPasswordTemplatePath)

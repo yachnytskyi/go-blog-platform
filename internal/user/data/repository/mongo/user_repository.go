@@ -25,7 +25,7 @@ import (
 )
 
 const (
-	location                = "User.Data.Repository.Mongo."
+	location                = "user.data.repository.mongo."
 	updateIsNotSuccessful   = "Update was not successful."
 	delitionIsNotSuccessful = "Delition was not successful."
 )
@@ -208,18 +208,16 @@ func (userRepository UserRepository) Register(ctx context.Context, userCreate us
 	return commonModel.NewResultOnSuccess[userModel.User](createdUser)
 }
 
-func (userRepository UserRepository) UpdateUserById(ctx context.Context, user userModel.UserUpdate) (userModel.User, error) {
-	userUpdateRepository, userUpdateRepositoryError := userRepositoryModel.UserUpdateToUserUpdateRepositoryMapper(user)
-	if validator.IsErrorNotNil(userUpdateRepositoryError) {
-		return userModel.User{}, userUpdateRepositoryError
+func (userRepository UserRepository) UpdateUserById(ctx context.Context, user userModel.UserUpdate) commonModel.Result[userModel.User] {
+	userUpdateRepository, userUpdateError := userRepositoryModel.UserUpdateToUserUpdateRepositoryMapper(user)
+	if validator.IsErrorNotNil(userUpdateError) {
+		return commonModel.NewResultOnFailure[userModel.User](userUpdateError)
 	}
 	userUpdateRepository.UpdatedAt = time.Now()
 
 	userUpdateRepositoryMappedToMongoDB, mongoMapperError := mongoModel.MongoMapper(userUpdateRepository)
 	if validator.IsErrorNotNil(mongoMapperError) {
-		userUpdateError := domainError.NewInternalError(location+"UpdateUserById.MongoMapper", mongoMapperError.Error())
-		logging.Logger(userUpdateError)
-		return userModel.User{}, userUpdateError
+		return commonModel.NewResultOnFailure[userModel.User](mongoMapperError)
 	}
 
 	query := bson.D{{Key: "_id", Value: userUpdateRepository.UserID}}
@@ -230,11 +228,11 @@ func (userRepository UserRepository) UpdateUserById(ctx context.Context, user us
 	if validator.IsErrorNotNil(updateUserRepositoryDecodeError) {
 		userUpdateError := domainError.NewInternalError(location+"UpdateUserById.Decode", updateUserRepositoryDecodeError.Error())
 		logging.Logger(userUpdateError)
-		return userModel.User{}, userUpdateError
+		return commonModel.NewResultOnFailure[userModel.User](userUpdateError)
 	}
 
 	updatedUser := userRepositoryModel.UserRepositoryToUserMapper(updatedUserRepository)
-	return updatedUser, nil
+	return commonModel.NewResultOnSuccess[userModel.User](updatedUser)
 }
 
 func (userRepository UserRepository) DeleteUser(ctx context.Context, userID string) error {

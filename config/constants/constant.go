@@ -18,6 +18,12 @@ const (
 	UserIDContext     = "userID"
 	UserContext       = "user"
 
+	// Email subjects and URLs.
+	EmailConfirmationUrl     string = "users/verifyemail/"
+	ForgottenPasswordUrl     string = "users/reset-password/"
+	EmailConfirmationSubject string = "Your account verification code"
+	ForgottenPasswordSubject string = "Your password reset token (it is valid for 15 minutes)"
+
 	// Pagination.
 	DefaultPage      = "1"
 	DefaultLimit     = "10"

@@ -130,7 +130,7 @@ func (userRepository UserRepository) GetUserById(ctx context.Context, userID str
 
 // GetUserByEmail retrieves a user by their email from the repository.
 func (userRepository UserRepository) GetUserByEmail(ctx context.Context, email string) commonModel.Result[userModel.User] {
-	// Initialize an empty user from the repository model.
+	// Initialize a User object and define the query to find the user by Email.
 	fetchedUser := userRepositoryModel.UserRepository{}
 	query := bson.M{"email": email}
 
@@ -148,18 +148,28 @@ func (userRepository UserRepository) GetUserByEmail(ctx context.Context, email s
 	return commonModel.NewResultOnSuccess[userModel.User](user)
 }
 
+// CheckEmailDuplicate checks if an email already exists in the UserRepository.
+// It returns an error if the email is already associated with a user, or nil if the email is unique.
 func (userRepository UserRepository) CheckEmailDuplicate(ctx context.Context, email string) error {
+	// Initialize a User object and define the query to find the user by Email.
 	fetchedUser := userRepositoryModel.UserRepository{}
 	query := bson.M{"email": email}
+
+	// Find and decode the user.
+	// If no user is found, return nil (indicating that the email is unique).
 	userFindOneError := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
 	if validator.IsValueNil(fetchedUser) {
 		return nil
 	}
+
+	// If an error occurs during the database query, log it as an internal error.
 	if validator.IsErrorNotNil(userFindOneError) {
 		internalError := domainError.NewInternalError(location+"CheckEmailDublicate.FindOne.Decode", userFindOneError.Error())
 		logging.Logger(internalError)
 		return internalError
 	}
+
+	// If a user with the given email is found, return a validation error.
 	userFindOneValidationError := domainError.NewValidationError(location+"CheckEmailDublicate", userValidator.EmailField, constants.FieldRequired, constants.EmailAlreadyExists)
 	logging.Logger(userFindOneValidationError)
 	return userFindOneValidationError
@@ -209,28 +219,36 @@ func (userRepository UserRepository) Register(ctx context.Context, userCreate us
 }
 
 func (userRepository UserRepository) UpdateUserById(ctx context.Context, user userModel.UserUpdate) commonModel.Result[userModel.User] {
+	// Map user update data to a repository model.
+	// Set the update timestamp to the current time.
 	userUpdateRepository, userUpdateError := userRepositoryModel.UserUpdateToUserUpdateRepositoryMapper(user)
 	if validator.IsErrorNotNil(userUpdateError) {
 		return commonModel.NewResultOnFailure[userModel.User](userUpdateError)
 	}
 	userUpdateRepository.UpdatedAt = time.Now()
 
-	userUpdateRepositoryMappedToMongoDB, mongoMapperError := mongoModel.MongoMapper(userUpdateRepository)
+	// Map repository model to a MongoDB model.
+	userUpdateMongo, mongoMapperError := mongoModel.MongoMapper(userUpdateRepository)
 	if validator.IsErrorNotNil(mongoMapperError) {
 		return commonModel.NewResultOnFailure[userModel.User](mongoMapperError)
 	}
 
+	// Define the MongoDB query and update.
+	// Execute the update query.
 	query := bson.D{{Key: "_id", Value: userUpdateRepository.UserID}}
-	update := bson.D{{Key: "$set", Value: userUpdateRepositoryMappedToMongoDB}}
+	update := bson.D{{Key: "$set", Value: userUpdateMongo}}
 	result := userRepository.collection.FindOneAndUpdate(ctx, query, update, options.FindOneAndUpdate().SetReturnDocument(1))
+
+	// Decode the updated user from the result.
 	updatedUserRepository := userRepositoryModel.UserRepository{}
-	updateUserRepositoryDecodeError := result.Decode(&updatedUserRepository)
-	if validator.IsErrorNotNil(updateUserRepositoryDecodeError) {
-		userUpdateError := domainError.NewInternalError(location+"UpdateUserById.Decode", updateUserRepositoryDecodeError.Error())
+	decodeError := result.Decode(&updatedUserRepository)
+	if validator.IsErrorNotNil(decodeError) {
+		userUpdateError := domainError.NewInternalError(location+"UpdateUserById.Decode", decodeError.Error())
 		logging.Logger(userUpdateError)
 		return commonModel.NewResultOnFailure[userModel.User](userUpdateError)
 	}
 
+	// Map the updated repository model to the user model.
 	updatedUser := userRepositoryModel.UserRepositoryToUserMapper(updatedUserRepository)
 	return commonModel.NewResultOnSuccess[userModel.User](updatedUser)
 }

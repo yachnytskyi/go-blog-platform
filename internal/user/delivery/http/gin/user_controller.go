@@ -42,6 +42,7 @@ func (userController UserController) GetAllUsers(controllerContext any) {
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
 
+	// Parse pagination query and fetch the users.
 	paginationQuery := httpGinCommon.ParsePaginationQuery(ginContext)
 	fetchedUsers := userController.userUseCase.GetAllUsers(ctx, paginationQuery)
 	if validator.IsErrorNotNil(fetchedUsers.Error) {
@@ -56,9 +57,9 @@ func (userController UserController) GetAllUsers(controllerContext any) {
 }
 
 // GetCurrentUser is a controller method that handles an HTTP request to retrieve the current user.
-// It extracts the current user information from a middleware and returns the JSON response.
+// It retrieves the current user information from a middleware and returns the JSON response.
 func (userController UserController) GetCurrentUser(controllerContext any) {
-	// Extract the Gin context and create a context with timeout.
+	// Extract the current user from Gin context.
 	ginContext := controllerContext.(*gin.Context)
 	currentUser := ginContext.MustGet(constants.UserContext).(userViewModel.UserView)
 	jsonResponse := httpModel.NewJsonResponseOnSuccess(currentUser)
@@ -125,7 +126,8 @@ func (userController UserController) Register(controllerContext any) {
 	ginContext.JSON(constants.StatusCreated, jsonResponse)
 }
 
-// UpdateUserById updates a user's information based on the provided JSON data.
+// UpdateUserById updates a user's information based on the provided JSON data
+// and returns the JSON response.
 func (userController UserController) UpdateUserById(controllerContext any) {
 	// Extract the Gin context and create a context with timeout.
 	ginContext := controllerContext.(*gin.Context)

@@ -6,6 +6,7 @@ import (
 
 	"github.com/thanhpk/randstr"
 	config "github.com/yachnytskyi/golang-mongo-grpc/config"
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
@@ -16,13 +17,9 @@ import (
 )
 
 const (
-	verificationCodeLength   int    = 20
-	resetTokenLength         int    = 20
-	emailConfirmationUrl     string = "users/verifyemail/"
-	forgottenPasswordUrl     string = "users/reset-password/"
-	emailConfirmationSubject string = "Your account verification code"
-	forgottenPasswordSubject string = "Your password reset token (it is valid for 15 minutes)"
-	userRole                        = "user"
+	verificationCodeLength int = 20
+	resetTokenLength       int = 20
+	userRole                   = "user"
 )
 
 type UserUseCase struct {
@@ -36,6 +33,7 @@ func NewUserUseCase(userRepository user.UserRepository) user.UserUseCase {
 // GetAllUsers retrieves a list of users based on the provided pagination parameters.
 // The result is wrapped in a commonModel.Result containing either the user or an error.
 func (userUseCase UserUseCase) GetAllUsers(ctx context.Context, paginationQuery commonModel.PaginationQuery) commonModel.Result[userModel.Users] {
+	// Fetch the users.
 	fetchedUsers := userUseCase.userRepository.GetAllUsers(ctx, paginationQuery)
 	if validator.IsErrorNotNil(fetchedUsers.Error) {
 		fetchedUsers.Error = domainError.HandleError(fetchedUsers.Error)
@@ -47,6 +45,7 @@ func (userUseCase UserUseCase) GetAllUsers(ctx context.Context, paginationQuery 
 // GetUserById retrieves a user by their ID using the user ID.
 // The result is wrapped in a commonModel.Result containing either the user or an error.
 func (userUseCase UserUseCase) GetUserById(ctx context.Context, userID string) commonModel.Result[userModel.User] {
+	// Fetch the user.
 	fetchedUser := userUseCase.userRepository.GetUserById(ctx, userID)
 	if validator.IsErrorNotNil(fetchedUser.Error) {
 		fetchedUser.Error = domainError.HandleError(fetchedUser.Error)
@@ -59,12 +58,14 @@ func (userUseCase UserUseCase) GetUserById(ctx context.Context, userID string) c
 // It performs email format validation and fetches the user from the repository.
 // The result is wrapped in a commonModel.Result containing either the user or an error.
 func (userUseCase UserUseCase) GetUserByEmail(ctx context.Context, email string) commonModel.Result[userModel.User] {
+	// Validate the email.
 	validateEmailError := validateEmail(email, emailRegex)
 	if validator.IsValueNotNil(validateEmailError) {
 		processedError := domainError.HandleError(validateEmailError)
 		return commonModel.NewResultOnFailure[userModel.User](processedError)
 	}
 
+	// Fetch the user.
 	fetchedUser := userUseCase.userRepository.GetUserByEmail(ctx, email)
 	if validator.IsErrorNotNil(fetchedUser.Error) {
 		fetchedUser.Error = domainError.HandleError(fetchedUser.Error)
@@ -73,8 +74,9 @@ func (userUseCase UserUseCase) GetUserByEmail(ctx context.Context, email string)
 	return fetchedUser
 }
 
-// Register handles the registration of a new user based on the provided data.
-// It returns a Result containing created user data on success or an error on failure.
+// Register registers a new user based on the provided data, generates a verification token,
+// and sends an email verification message. The result is wrapped in a commonModel.Result
+// containing either the user or an error.
 func (userUseCase UserUseCase) Register(ctx context.Context, userCreateData userModel.UserCreate) commonModel.Result[userModel.User] {
 	// Validate the user creation data.
 	userCreate := validateUserCreate(userCreateData)
@@ -104,9 +106,9 @@ func (userUseCase UserUseCase) Register(ctx context.Context, userCreateData user
 		return createdUser
 	}
 
+	// Prepare email data for user registration.
 	// Send the email verification message and return the created user.
-	// Prepare email data for user registration
-	emailData := prepareEmailDataForRegister(ctx, createdUser.Data.Name, tokenValue)
+	emailData := prepareEmailDataForRegistration(ctx, createdUser.Data.Name, tokenValue)
 	sendEmailVerificationMessageError := userUseCase.userRepository.SendEmailVerificationMessage(ctx, createdUser.Data, emailData)
 	if validator.IsErrorNotNil(sendEmailVerificationMessageError) {
 		sendEmailVerificationMessageError = domainError.HandleError(sendEmailVerificationMessageError)
@@ -115,15 +117,19 @@ func (userUseCase UserUseCase) Register(ctx context.Context, userCreateData user
 	return createdUser
 }
 
+// UpdateUserById updates a user's information based on the provided data.
+// The result is wrapped in a commonModel.Result containing either the user or an error.
 func (userUseCase UserUseCase) UpdateUserById(ctx context.Context, userUpdateData userModel.UserUpdate) commonModel.Result[userModel.User] {
+	// Validate the user update data.
 	userUpdate := validateUserUpdate(userUpdateData)
 	if validator.IsErrorNotNil(userUpdate.Error) {
 		return commonModel.NewResultOnFailure[userModel.User](domainError.HandleError(userUpdate.Error))
 	}
 
+	// Update the user.
 	updatedUser := userUseCase.userRepository.UpdateUserById(ctx, userUpdate.Data)
 	if validator.IsErrorNotNil(updatedUser.Error) {
-		return commonModel.NewResultOnFailure[userModel.User](domainError.HandleError(userUpdate.Error))
+		return commonModel.NewResultOnFailure[userModel.User](domainError.HandleError(updatedUser.Error))
 	}
 	return updatedUser
 }
@@ -210,9 +216,9 @@ func prepareEmailData(ctx context.Context, userName, tokenValue, subject, url, t
 // prepareEmailDataForRegister is a helper function to prepare an EmailData model specifically for user registration.
 // It takes the context, user name, and token value as input and uses the constants for email subject, URL, template name, and template path.
 // It internally calls prepareEmailData with the appropriate parameters and returns the result.
-func prepareEmailDataForRegister(ctx context.Context, userName, tokenValue string) userModel.EmailData {
+func prepareEmailDataForRegistration(ctx context.Context, userName, tokenValue string) userModel.EmailData {
 	applicationConfig := config.AppConfig
-	return prepareEmailData(ctx, userName, tokenValue, emailConfirmationSubject, emailConfirmationUrl,
+	return prepareEmailData(ctx, userName, tokenValue, constants.EmailConfirmationSubject, constants.EmailConfirmationUrl,
 		applicationConfig.Email.UserConfirmationTemplateName, applicationConfig.Email.UserConfirmationTemplatePath)
 }
 
@@ -221,6 +227,6 @@ func prepareEmailDataForRegister(ctx context.Context, userName, tokenValue strin
 // It internally calls prepareEmailData with the appropriate parameters and returns the result.
 func prepareEmailDataForUpdatePasswordResetToken(ctx context.Context, userName, tokenValue string) userModel.EmailData {
 	applicationConfig := config.AppConfig
-	return prepareEmailData(ctx, userName, tokenValue, forgottenPasswordSubject, forgottenPasswordUrl,
+	return prepareEmailData(ctx, userName, tokenValue, constants.ForgottenPasswordSubject, constants.ForgottenPasswordUrl,
 		applicationConfig.Email.ForgottenPasswordTemplateName, applicationConfig.Email.ForgottenPasswordTemplatePath)
 }

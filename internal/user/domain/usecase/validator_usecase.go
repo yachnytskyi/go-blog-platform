@@ -49,17 +49,17 @@ func validateUserCreate(userCreate userModel.UserCreate) common.Result[userModel
 
 	validateFieldError := validateEmail(userCreate.Email, emailRegex)
 	if validator.IsValueNotNil(validateFieldError) {
-		validationErrors.ValidationErrors = append(validationErrors.ValidationErrors, validateFieldError)
+		validationErrors = append(validationErrors, validateFieldError)
 	}
 	validateFieldError = domainUtility.ValidateField(userCreate.Name, nameField, usernameRegex, usernameAllowedCharacters)
 	if validator.IsValueNotNil(validateFieldError) {
-		validationErrors.ValidationErrors = append(validationErrors.ValidationErrors, validateFieldError)
+		validationErrors = append(validationErrors, validateFieldError)
 	}
 	validateFieldError = validatePassword(userCreate.Password, userCreate.PasswordConfirm, passwordField, usernameRegex)
 	if validator.IsValueNotNil(validateFieldError) {
-		validationErrors.ValidationErrors = append(validationErrors.ValidationErrors, validateFieldError)
+		validationErrors = append(validationErrors, validateFieldError)
 	}
-	if validator.IsSliceNotEmpty(validationErrors.ValidationErrors) {
+	if validator.IsSliceNotEmpty(validationErrors) {
 		return common.NewResultOnFailure[userModel.UserCreate](validationErrors)
 	}
 	return common.NewResultOnSuccess[userModel.UserCreate](userCreate)
@@ -71,9 +71,9 @@ func validateUserUpdate(userUpdate userModel.UserUpdate) common.Result[userModel
 
 	validateFieldError := domainUtility.ValidateField(userUpdate.Name, nameField, usernameRegex, usernameAllowedCharacters)
 	if validator.IsValueNotNil(validateFieldError) {
-		validationErrors.ValidationErrors = append(validationErrors.ValidationErrors, validateFieldError)
+		validationErrors = append(validationErrors, validateFieldError)
 	}
-	if validator.IsSliceNotEmpty(validationErrors.ValidationErrors) {
+	if validator.IsSliceNotEmpty(validationErrors) {
 		return common.NewResultOnFailure[userModel.UserUpdate](validationErrors)
 	}
 	return common.NewResultOnSuccess[userModel.UserUpdate](userUpdate)
@@ -86,13 +86,13 @@ func validateUserLogin(userLogin userModel.UserLogin) common.Result[userModel.Us
 
 	validateFieldError := validateEmail(userLogin.Email, emailRegex)
 	if validator.IsValueNotNil(validateFieldError) {
-		validationErrors.ValidationErrors = append(validationErrors.ValidationErrors, validateFieldError)
+		validationErrors = append(validationErrors, validateFieldError)
 	}
 	validateFieldError = domainUtility.ValidateField(userLogin.Password, passwordField, passwordRegex, passwordAllowedCharacters)
 	if validator.IsValueNotNil(validateFieldError) {
-		validationErrors.ValidationErrors = append(validationErrors.ValidationErrors, validateFieldError)
+		validationErrors = append(validationErrors, validateFieldError)
 	}
-	if validator.IsSliceNotEmpty(validationErrors.ValidationErrors) {
+	if validator.IsSliceNotEmpty(validationErrors) {
 		return common.NewResultOnFailure[userModel.UserLogin](validationErrors)
 	}
 	return common.NewResultOnSuccess[userModel.UserLogin](userLogin)
@@ -104,9 +104,9 @@ func validateUserForgottenPassword(userForgottenPassword userModel.UserForgotten
 
 	validateFieldError := validateEmail(userForgottenPassword.Email, emailRegex)
 	if validator.IsValueNotNil(validateFieldError) {
-		validationErrors.ValidationErrors = append(validationErrors.ValidationErrors, validateFieldError)
+		validationErrors = append(validationErrors, validateFieldError)
 	}
-	if validator.IsSliceNotEmpty(validationErrors.ValidationErrors) {
+	if validator.IsSliceNotEmpty(validationErrors) {
 		return common.NewResultOnFailure[userModel.UserForgottenPassword](validationErrors)
 	}
 	return common.NewResultOnSuccess[userModel.UserForgottenPassword](userForgottenPassword)
@@ -119,9 +119,9 @@ func validateResetPassword(userResetPassword userModel.UserResetPassword) common
 
 	validateFieldError := validatePassword(userResetPassword.Password, userResetPassword.PasswordConfirm, passwordField, passwordRegex)
 	if validator.IsValueNotNil(validateFieldError) {
-		validationErrors.ValidationErrors = append(validationErrors.ValidationErrors, validateFieldError)
+		validationErrors = append(validationErrors, validateFieldError)
 	}
-	if validator.IsSliceNotEmpty(validationErrors.ValidationErrors) {
+	if validator.IsSliceNotEmpty(validationErrors) {
 		return common.NewResultOnFailure[userModel.UserResetPassword](validationErrors)
 	}
 	return common.NewResultOnSuccess[userModel.UserResetPassword](userResetPassword)

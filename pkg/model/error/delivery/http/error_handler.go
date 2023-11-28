@@ -5,15 +5,14 @@ import (
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
 
-// HandleError takes an error as input and returns any.
+// HandleError takes an error as input and returns error.
 // It performs error type assertions and maps specific domain errors to their corresponding HTTP error views.
-func HandleError(err error) any {
+func HandleError(err error) error {
 	switch errorType := err.(type) {
 	case domainError.ValidationError:
 		return ValidationErrorToHttpValidationErrorViewMapper(errorType)
 	case domainError.ValidationErrors:
-		httpValidationErrors := ValidationErrorsToHttpValidationErrorsViewMapper(errorType)
-		return httpValidationErrors.HttpValidationErrorsView
+		return ValidationErrorsToHttpValidationErrorsViewMapper(errorType)
 	case domainError.AuthorizationError:
 		return AuthorizationErrorToHttpAuthorizationErrorViewMapper(errorType)
 	case domainError.EntityNotFoundError:

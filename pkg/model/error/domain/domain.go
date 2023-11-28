@@ -5,6 +5,11 @@ import (
 	"strings"
 )
 
+type Errors interface {
+	error
+	Errors() string
+}
+
 type ValidationError struct {
 	Location     string
 	Field        string
@@ -25,23 +30,27 @@ func (err ValidationError) Error() string {
 	return fmt.Sprintf("location: " + err.Location + " field: " + err.Field + " " + "type: " + err.FieldType + " notification: " + err.Notification)
 }
 
-type ValidationErrors struct {
-	ValidationErrors []ValidationError
-}
+type ValidationErrors []ValidationError
 
 func NewValidationErrors(validationErrors []ValidationError) ValidationErrors {
-	return ValidationErrors{
-		ValidationErrors: validationErrors,
-	}
+	return ValidationErrors(validationErrors)
 }
 
 func (validationErrors ValidationErrors) Error() string {
 	var result strings.Builder
-	for _, vavalidationError := range validationErrors.ValidationErrors {
-		result.WriteString("field: " + vavalidationError.Field + " " + "type: " + vavalidationError.FieldType + " notification: " + vavalidationError.Notification)
+	for _, validationError := range validationErrors {
+		result.WriteString("field: " + validationError.Field + " " + "type: " + validationError.FieldType + " notification: " + validationError.Notification)
 
 	}
+	return result.String()
+}
 
+func (validationErrors ValidationErrors) Errors() string {
+	var result strings.Builder
+	for _, validationError := range validationErrors {
+		result.WriteString("field: " + validationError.Field + " " + "type: " + validationError.FieldType + " notification: " + validationError.Notification)
+
+	}
 	return result.String()
 }
 

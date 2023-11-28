@@ -24,19 +24,23 @@ func (httpValidationErrorView HttpValidationErrorView) Error() string {
 		httpValidationErrorView.FieldType + " notification: " + httpValidationErrorView.Notification)
 }
 
-type HttpValidationErrorsView struct {
-	HttpValidationErrorsView []HttpValidationErrorView `json:"errors"`
-}
+type HttpValidationErrorsView []HttpValidationErrorView
 
 func NewHttpValidationErrorsView(httpValidationErrorsView []HttpValidationErrorView) HttpValidationErrorsView {
-	return HttpValidationErrorsView{
-		HttpValidationErrorsView: httpValidationErrorsView,
-	}
+	return HttpValidationErrorsView(httpValidationErrorsView)
 }
 
 func (httpValidationErrorsView HttpValidationErrorsView) Error() string {
 	var result strings.Builder
-	for _, validationError := range httpValidationErrorsView.HttpValidationErrorsView {
+	for _, validationError := range httpValidationErrorsView {
+		result.WriteString("field: " + validationError.Field + " " + "type: " + validationError.FieldType + " notification: " + validationError.Notification)
+	}
+	return result.String()
+}
+
+func (httpValidationErrorsView HttpValidationErrorsView) Errors() string {
+	var result strings.Builder
+	for _, validationError := range httpValidationErrorsView {
 		result.WriteString("field: " + validationError.Field + " " + "type: " + validationError.FieldType + " notification: " + validationError.Notification)
 	}
 	return result.String()

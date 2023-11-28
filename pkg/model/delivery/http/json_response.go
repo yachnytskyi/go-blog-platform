@@ -1,5 +1,9 @@
 package http
 
+import (
+	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+)
+
 const (
 	success = "success"
 	fail    = "fail"
@@ -8,8 +12,8 @@ const (
 // JsonResponse represents the structure of an HTTP JSON response.
 type JsonResponse struct {
 	Data   any    `json:"data,omitempty"`
-	Error  any    `json:"error,omitempty"`
-	Errors any    `json:"errors,omitempty"`
+	Error  error  `json:"error,omitempty"`
+	Errors error  `json:"errors,omitempty"`
 	Status string `json:"status"`
 }
 
@@ -27,10 +31,10 @@ func NewJsonResponseOnSuccess(data any) JsonResponse {
 func NewJsonResponseOnFailure(err any) JsonResponse {
 	jsonResponse := JsonResponse{Status: fail}
 	switch errorType := err.(type) {
+	case domainError.Errors:
+		jsonResponse.Errors = errorType
 	case error:
 		jsonResponse.Error = errorType
-	default:
-		jsonResponse.Errors = errorType
 	}
 	return jsonResponse
 }

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -28,13 +29,13 @@ func GenerateJWTToken(tokenLifeTime time.Duration, payload any, privateKey strin
 	// Decode the private key from base64-encoded string.
 	decodedPrivateKey, decodeStringError := decodeBase64String(privateKey)
 	if validator.IsErrorNotNil(decodeStringError) {
-		return "", decodeStringError
+		return constants.EmptyString, decodeStringError
 	}
 
 	// Parse the private key for signing.
 	key, parsePrivateKeyError := parsePrivateKey(decodedPrivateKey)
 	if validator.IsErrorNotNil(parsePrivateKeyError) {
-		return "", parsePrivateKeyError
+		return constants.EmptyString, parsePrivateKeyError
 	}
 
 	// Generate claims for the JWT token.
@@ -43,7 +44,7 @@ func GenerateJWTToken(tokenLifeTime time.Duration, payload any, privateKey strin
 	claims := generateClaims(tokenLifeTime, now, payload)
 	token, newWithClaimsError := createSignedToken(key, claims)
 	if validator.IsErrorNotNil(newWithClaimsError) {
-		return "", newWithClaimsError
+		return constants.EmptyString, newWithClaimsError
 	}
 	return token, nil
 }
@@ -54,7 +55,7 @@ func ValidateJWTToken(token string, publicKey string) (any, error) {
 	// Decode the public key from a base64-encoded string.
 	decodedPublicKey, decodeStringError := decodeBase64String(publicKey)
 	if validator.IsErrorNotNil(decodeStringError) {
-		return "", decodeStringError
+		return constants.EmptyString, decodeStringError
 	}
 
 	// Parse the public key for verification.
@@ -118,7 +119,7 @@ func createSignedToken(key *rsa.PrivateKey, claims jwt.MapClaims) (string, error
 	if newWithClaimsError != nil {
 		internalError := domainError.NewInternalError(location+"createSignedToken.NewWithClaims", newWithClaimsError.Error())
 		logging.Logger(internalError)
-		return "", domainError.HandleError(internalError)
+		return constants.EmptyString, domainError.HandleError(internalError)
 	}
 	return token, nil
 }

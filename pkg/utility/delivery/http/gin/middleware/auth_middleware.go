@@ -84,7 +84,7 @@ func extractAccessToken(ginContext *gin.Context) (string, error) {
 	// Initialize variables to store the access token.
 	// Attempt to retrieve the access token from the cookie.
 	// Retrieve the Authorization header from the request.
-	accessToken := ""
+	var accessToken string
 	cookie, cookieError := ginContext.Cookie(constants.AccessTokenValue)
 	authorizationHeader := ginContext.Request.Header.Get(authorization)
 	fields := strings.Fields(authorizationHeader)
@@ -103,7 +103,7 @@ func extractAccessToken(ginContext *gin.Context) (string, error) {
 		// If access token is empty, create and log an HTTP authorization error.
 		httpAuthorizationError := httpError.NewHttpAuthorizationErrorView(location+"extractAcessToken.accessToken", constants.LoggingErrorNotification)
 		logging.Logger(httpAuthorizationError)
-		return "", httpAuthorizationError
+		return constants.EmptyString, httpAuthorizationError
 	}
 
 	// Return the extracted access token.

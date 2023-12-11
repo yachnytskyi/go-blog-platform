@@ -27,7 +27,7 @@ import (
 const (
 	location                = "user.data.repository.mongo."
 	updateIsNotSuccessful   = "Update was not successful."
-	delitionIsNotSuccessful = "Delition was not successful."
+	deletionIsNotSuccessful = "Deletion was not successful."
 )
 
 type UserRepository struct {
@@ -110,7 +110,7 @@ func (userRepository UserRepository) GetUserById(ctx context.Context, userID str
 		return commonModel.NewResultOnFailure[userModel.User](internalError)
 	}
 
-	// Initialize a User object and define the query to find the user by ObjectID.
+	// Initialize a User object and define the MongoDB query to find the user by ObjectID.
 	fetchedUser := userRepositoryModel.UserRepository{}
 	query := bson.M{"_id": userObjectID}
 
@@ -130,7 +130,7 @@ func (userRepository UserRepository) GetUserById(ctx context.Context, userID str
 
 // GetUserByEmail retrieves a user by their email from the repository.
 func (userRepository UserRepository) GetUserByEmail(ctx context.Context, email string) commonModel.Result[userModel.User] {
-	// Initialize a User object and define the query to find the user by Email.
+	// Initialize a User object and define the MongoDB query to find the user by Email.
 	fetchedUser := userRepositoryModel.UserRepository{}
 	query := bson.M{"email": email}
 
@@ -151,7 +151,7 @@ func (userRepository UserRepository) GetUserByEmail(ctx context.Context, email s
 // CheckEmailDuplicate checks if an email already exists in the UserRepository.
 // It returns an error if the email is already associated with a user, or nil if the email is unique.
 func (userRepository UserRepository) CheckEmailDuplicate(ctx context.Context, email string) error {
-	// Initialize a User object and define the query to find the user by Email.
+	// Initialize a User object and define th MongoDB query to find the user by Email.
 	fetchedUser := userRepositoryModel.UserRepository{}
 	query := bson.M{"email": email}
 
@@ -175,6 +175,13 @@ func (userRepository UserRepository) CheckEmailDuplicate(ctx context.Context, em
 	return userFindOneValidationError
 }
 
+// Register creates a user in the repository based on the provided UserCreate data.
+// It performs the several steps:
+// 1. Maps the incoming data.
+// 2. Hashes the password.
+// 3. Inserts the user into the database by executing the MongoDB insert query.
+// 4. Ensures the uniqueness of the email field by creating a unique index.
+// 5. Retrieves the created user from the database, maps it back to the domain model, and returns the result.
 func (userRepository UserRepository) Register(ctx context.Context, userCreate userModel.UserCreate) commonModel.Result[userModel.User] {
 	// Map the incoming user data to the repository model.
 	// Hash the user's password.
@@ -218,6 +225,13 @@ func (userRepository UserRepository) Register(ctx context.Context, userCreate us
 	return commonModel.NewResultOnSuccess[userModel.User](createdUser)
 }
 
+// UpdateUserById updates a user in the repository based on the provided UserUpdate data.
+// It performs the following steps:
+// 1. Maps the incoming data.
+// 2. Sets the update timestamp to the current time.
+// 3. Maps the repository model to a MongoDB model.
+// 4. Updates the user in the database by executing the MongoDB update query.
+// 5. Retrieves the updated user from the database, maps it back to the domain model, and returns the result.
 func (userRepository UserRepository) UpdateUserById(ctx context.Context, user userModel.UserUpdate) commonModel.Result[userModel.User] {
 	// Map user update data to a repository model.
 	// Set the update timestamp to the current time.
@@ -253,8 +267,12 @@ func (userRepository UserRepository) UpdateUserById(ctx context.Context, user us
 	return commonModel.NewResultOnSuccess[userModel.User](updatedUser)
 }
 
-func (userRepository UserRepository) DeleteUser(ctx context.Context, userID string) error {
+// DeleteUserById deletes a user in the repository based on the provided userID.
+func (userRepository UserRepository) DeleteUserById(ctx context.Context, userID string) error {
 	userIDMappedToMongoDB, _ := primitive.ObjectIDFromHex(userID)
+
+	// Define the MongoDB query to delete the user by ObjectID.
+	// Execute the delete query.
 	query := bson.M{"_id": userIDMappedToMongoDB}
 	result, userDeleteOneError := userRepository.collection.DeleteOne(ctx, query)
 	if validator.IsErrorNotNil(userDeleteOneError) {
@@ -262,8 +280,10 @@ func (userRepository UserRepository) DeleteUser(ctx context.Context, userID stri
 		logging.Logger(deletedUserError)
 		return deletedUserError
 	}
+
+	// Check if any user was deleted
 	if result.DeletedCount == 0 {
-		deletedUserError := domainError.NewInternalError(location+"Delete.DeleteOne.DeletedCount", delitionIsNotSuccessful)
+		deletedUserError := domainError.NewInternalError(location+"Delete.DeleteOne.DeletedCount", deletionIsNotSuccessful)
 		logging.Logger(deletedUserError)
 		return deletedUserError
 	}
@@ -273,7 +293,8 @@ func (userRepository UserRepository) DeleteUser(ctx context.Context, userID stri
 func (userRepository UserRepository) ResetUserPassword(ctx context.Context, firstKey string, firstValue string, secondKey string, passwordKey, password string) error {
 	hashedPassword, _ := repositoryUtility.HashPassword(password)
 	query := bson.D{{Key: firstKey, Value: firstValue}}
-	update := bson.D{{Key: "$set", Value: bson.D{{Key: passwordKey, Value: hashedPassword}}}, {Key: "$unset", Value: bson.D{{Key: firstKey, Value: ""}, {Key: secondKey, Value: ""}}}}
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: passwordKey, Value: hashedPassword}}},
+		{Key: "$unset", Value: bson.D{{Key: firstKey, Value: constants.EmptyString}, {Key: secondKey, Value: constants.EmptyString}}}}
 	result, updateUserPasswordUpdateOneError := userRepository.collection.UpdateOne(ctx, query, update)
 	if validator.IsErrorNotNil(updateUserPasswordUpdateOneError) {
 		updatedUserPasswordError := domainError.NewInternalError(location+"ResetUserPassword.UpdateOne", updateUserPasswordUpdateOneError.Error())

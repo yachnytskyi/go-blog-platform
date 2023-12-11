@@ -50,7 +50,7 @@ func (userRouter UserRouter) UserRouter(routerGroup any, userUseCase user.UserUs
 		userRouter.userController.UpdateUserById(ginContext)
 	})
 	router.DELETE("/delete", func(ginContext *gin.Context) {
-		userRouter.userController.Delete(ginContext)
+		userRouter.userController.DeleteCurrentUser(ginContext)
 	})
 	router.GET("/refresh", func(ginContext *gin.Context) {
 		userRouter.userController.RefreshAccessToken(ginContext)

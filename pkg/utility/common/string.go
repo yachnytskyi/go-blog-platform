@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -24,7 +25,7 @@ func Decode(encodedString string) (string, error) {
 	if validator.IsErrorNotNil(decodeStringError) {
 		internalError := domainError.NewInternalError(location+"Decode.DecodeString", decodeStringError.Error())
 		logging.Logger(internalError)
-		return "", internalError
+		return constants.EmptyString, internalError
 	}
 	return string(data), nil
 }

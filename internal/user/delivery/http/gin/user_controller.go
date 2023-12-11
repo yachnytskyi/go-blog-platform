@@ -103,8 +103,8 @@ func (userController UserController) Register(controllerContext any) {
 	defer cancel()
 
 	// Bind the incoming JSON data to a struct.
-	var createdUserViewData userViewModel.UserCreateView
-	shouldBindJSON := ginContext.ShouldBindJSON(&createdUserViewData)
+	var userCreateViewData userViewModel.UserCreateView
+	shouldBindJSON := ginContext.ShouldBindJSON(&userCreateViewData)
 	if validator.IsErrorNotNil(shouldBindJSON) {
 		internalError := httpError.NewHttpInternalErrorView(location+"Register.ShouldBindJSON", shouldBindJSON.Error())
 		logging.Logger(internalError)
@@ -113,8 +113,8 @@ func (userController UserController) Register(controllerContext any) {
 	}
 
 	// Convert the view model to a domain model and register the user.
-	userCreate := userViewModel.UserCreateViewToUserCreateMapper(createdUserViewData)
-	createdUser := userController.userUseCase.Register(ctx, userCreate)
+	userCreateData := userViewModel.UserCreateViewToUserCreateMapper(userCreateViewData)
+	createdUser := userController.userUseCase.Register(ctx, userCreateData)
 	if validator.IsErrorNotNil(createdUser.Error) {
 		httpGinCommon.GinNewJsonResponseOnFailure(ginContext, createdUser.Error, constants.StatusBadRequest)
 		return
@@ -137,8 +137,8 @@ func (userController UserController) UpdateUserById(controllerContext any) {
 	// Get the current user's ID from the Gin context.
 	// Bind the incoming JSON data to a struct.
 	currentUserID := ginContext.MustGet(constants.UserIDContext).(string)
-	var updatedUserViewData userViewModel.UserUpdateView
-	shouldBindJSON := ginContext.ShouldBindJSON(&updatedUserViewData)
+	var userUpdateViewData userViewModel.UserUpdateView
+	shouldBindJSON := ginContext.ShouldBindJSON(&userUpdateViewData)
 	if validator.IsErrorNotNil(shouldBindJSON) {
 		internalError := httpError.NewHttpInternalErrorView(location+"UpdateUserById.ShouldBindJSON", shouldBindJSON.Error())
 		logging.Logger(internalError)
@@ -147,28 +147,39 @@ func (userController UserController) UpdateUserById(controllerContext any) {
 	}
 
 	// Convert the view model to a domain model and update the user.
-	updatedUserData := userViewModel.UserUpdateViewToUserUpdateMapper(updatedUserViewData)
-	updatedUserData.UserID = currentUserID
-	updatedUser := userController.userUseCase.UpdateUserById(ctx, updatedUserData)
+	userUpdateData := userViewModel.UserUpdateViewToUserUpdateMapper(userUpdateViewData)
+	userUpdateData.UserID = currentUserID
+	updatedUser := userController.userUseCase.UpdateUserById(ctx, userUpdateData)
 	if validator.IsErrorNotNil(updatedUser.Error) {
 		httpGinCommon.GinNewJsonResponseOnFailure(ginContext, updatedUser.Error, constants.StatusBadRequest)
 		return
 	}
 
-	// Return the JSON response with a successful status code.
+	// Update was successful. Return the JSON response with a successful status code.
 	jsonResponse := httpModel.NewJsonResponseOnSuccess(userViewModel.UserToUserViewMapper(updatedUser.Data))
 	ginContext.JSON(constants.StatusOk, jsonResponse)
 }
 
-func (userController UserController) Delete(controllerContext any) {
+// Delete deletes a user based on the provided JSON token.
+func (userController UserController) DeleteCurrentUser(controllerContext any) {
+	// Extract the Gin context and create a context with timeout.
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
+
+	// Extract the current user ID from the gin context.
+	// Delete the user using the user use case.
 	currentUserID := ginContext.MustGet(constants.UserIDContext).(string)
-	shouldBindJSON := userController.userUseCase.DeleteUser(ctx, currentUserID)
-	if validator.IsErrorNotNil(shouldBindJSON) {
-		ginContext.JSON(constants.StatusBadRequest, gin.H{"status": "fail", "message": shouldBindJSON.Error()})
+	deletedUser := userController.userUseCase.DeleteUserById(ctx, currentUserID)
+	if validator.IsErrorNotNil(deletedUser) {
+		httpGinCommon.GinNewJsonResponseOnFailure(ginContext, deletedUser, constants.StatusBadRequest)
+		return
 	}
+
+	// Deletion was successful. Clean cookies to ensure the user is logged out, and return a JSON response
+	// with a successful status code (StatusNoContent). Cleaning cookies is necessary to prevent any
+	// lingering session information after the user has been deleted.
+	httpGinCookie.CleanCookies(ginContext)
 	ginContext.JSON(constants.StatusNoContent, nil)
 }
 

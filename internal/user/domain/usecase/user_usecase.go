@@ -134,9 +134,15 @@ func (userUseCase UserUseCase) UpdateUserById(ctx context.Context, userUpdateDat
 	return updatedUser
 }
 
-func (userUseCase UserUseCase) DeleteUser(ctx context.Context, userID string) error {
-	deletedUser := userUseCase.userRepository.DeleteUser(ctx, userID)
-	return deletedUser
+// DeleteUserById deletes a user based on the provided user ID.
+func (userUseCase UserUseCase) DeleteUserById(ctx context.Context, userID string) error {
+	deletedUser := userUseCase.userRepository.DeleteUserById(ctx, userID)
+	if validator.IsErrorNotNil(deletedUser) {
+		return domainError.HandleError(deletedUser)
+	}
+
+	// User deletion was successful. Return nil to indicate no error.
+	return nil
 }
 
 func (userUseCase UserUseCase) Login(ctx context.Context, userLoginData userModel.UserLogin) (string, error) {

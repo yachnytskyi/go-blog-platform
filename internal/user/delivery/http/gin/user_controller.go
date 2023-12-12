@@ -128,7 +128,7 @@ func (userController UserController) Register(controllerContext any) {
 
 // UpdateUserById updates a user's information based on the provided JSON data
 // and returns the JSON response.
-func (userController UserController) UpdateUserById(controllerContext any) {
+func (userController UserController) UpdateCurrentUser(controllerContext any) {
 	// Extract the Gin context and create a context with timeout.
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
@@ -149,7 +149,7 @@ func (userController UserController) UpdateUserById(controllerContext any) {
 	// Convert the view model to a domain model and update the user.
 	userUpdateData := userViewModel.UserUpdateViewToUserUpdateMapper(userUpdateViewData)
 	userUpdateData.UserID = currentUserID
-	updatedUser := userController.userUseCase.UpdateUserById(ctx, userUpdateData)
+	updatedUser := userController.userUseCase.UpdateCurrentUser(ctx, userUpdateData)
 	if validator.IsErrorNotNil(updatedUser.Error) {
 		httpGinCommon.GinNewJsonResponseOnFailure(ginContext, updatedUser.Error, constants.StatusBadRequest)
 		return

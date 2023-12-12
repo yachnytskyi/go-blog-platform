@@ -119,7 +119,7 @@ func (userUseCase UserUseCase) Register(ctx context.Context, userCreateData user
 
 // UpdateUserById updates a user's information based on the provided data.
 // The result is wrapped in a commonModel.Result containing either the user or an error.
-func (userUseCase UserUseCase) UpdateUserById(ctx context.Context, userUpdateData userModel.UserUpdate) commonModel.Result[userModel.User] {
+func (userUseCase UserUseCase) UpdateCurrentUser(ctx context.Context, userUpdateData userModel.UserUpdate) commonModel.Result[userModel.User] {
 	// Validate the user update data.
 	userUpdate := validateUserUpdate(userUpdateData)
 	if validator.IsErrorNotNil(userUpdate.Error) {
@@ -127,7 +127,7 @@ func (userUseCase UserUseCase) UpdateUserById(ctx context.Context, userUpdateDat
 	}
 
 	// Update the user.
-	updatedUser := userUseCase.userRepository.UpdateUserById(ctx, userUpdate.Data)
+	updatedUser := userUseCase.userRepository.UpdateCurrentUser(ctx, userUpdate.Data)
 	if validator.IsErrorNotNil(updatedUser.Error) {
 		return commonModel.NewResultOnFailure[userModel.User](domainError.HandleError(updatedUser.Error))
 	}

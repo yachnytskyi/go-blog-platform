@@ -5,7 +5,7 @@ type UserController interface {
 	GetCurrentUser(controllerContext any)
 	GetUserById(controllerContext any)
 	Register(controllerContext any)
-	UpdateUserById(controllerContext any)
+	UpdateCurrentUser(controllerContext any)
 	DeleteCurrentUser(controllerContext any)
 	Login(controllerContext any)
 	RefreshAccessToken(controllerContext any)

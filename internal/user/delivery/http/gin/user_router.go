@@ -47,7 +47,7 @@ func (userRouter UserRouter) UserRouter(routerGroup any, userUseCase user.UserUs
 		userRouter.userController.GetCurrentUser(ginContext)
 	})
 	router.PUT("/update", func(ginContext *gin.Context) {
-		userRouter.userController.UpdateUserById(ginContext)
+		userRouter.userController.UpdateCurrentUser(ginContext)
 	})
 	router.DELETE("/delete", func(ginContext *gin.Context) {
 		userRouter.userController.DeleteCurrentUser(ginContext)

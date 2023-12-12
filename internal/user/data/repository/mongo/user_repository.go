@@ -187,8 +187,11 @@ func (userRepository UserRepository) Register(ctx context.Context, userCreate us
 	// Hash the user's password.
 	userCreateRepository := userRepositoryModel.UserCreateToUserCreateRepositoryMapper(userCreate)
 	userCreateRepository.Password, _ = repositoryUtility.HashPassword(userCreate.Password)
-	userCreateRepository.CreatedAt = time.Now()
-	userCreateRepository.UpdatedAt = userCreate.CreatedAt
+
+	// Set CreatedAt and UpdatedAt to the current time.
+	currentTime := time.Now()
+	userCreateRepository.CreatedAt = currentTime
+	userCreateRepository.UpdatedAt = currentTime
 
 	// Insert the user data into the database.
 	insertOneResult, insertOneResultError := userRepository.collection.InsertOne(ctx, &userCreateRepository)
@@ -232,7 +235,7 @@ func (userRepository UserRepository) Register(ctx context.Context, userCreate us
 // 3. Maps the repository model to a MongoDB model.
 // 4. Updates the user in the database by executing the MongoDB update query.
 // 5. Retrieves the updated user from the database, maps it back to the domain model, and returns the result.
-func (userRepository UserRepository) UpdateUserById(ctx context.Context, user userModel.UserUpdate) commonModel.Result[userModel.User] {
+func (userRepository UserRepository) UpdateCurrentUser(ctx context.Context, user userModel.UserUpdate) commonModel.Result[userModel.User] {
 	// Map user update data to a repository model.
 	// Set the update timestamp to the current time.
 	userUpdateRepository, userUpdateError := userRepositoryModel.UserUpdateToUserUpdateRepositoryMapper(user)

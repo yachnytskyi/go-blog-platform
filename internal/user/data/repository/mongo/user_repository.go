@@ -83,6 +83,7 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 		}
 		fetchedUsers = append(fetchedUsers, user)
 	}
+
 	cursorError := cursor.Err()
 	if validator.IsErrorNotNil(cursorError) {
 		internalError := domainError.NewInternalError(location+"GetAllUsers.cursor.Err", cursorError.Error())
@@ -110,63 +111,37 @@ func (userRepository UserRepository) GetUserById(ctx context.Context, userID str
 		return commonModel.NewResultOnFailure[userModel.User](internalError)
 	}
 
-	// Initialize a User object and define the MongoDB query to find the user by ObjectID.
-	fetchedUser := userRepositoryModel.UserRepository{}
+	// Define the MongoDB query to find the user by ObjectID.
+	// Retrieve the user from the database.
 	query := bson.M{"_id": userObjectID}
-
-	// Find and decode the user.
-	userFindOneError := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
-	if validator.IsErrorNotNil(userFindOneError) {
-		queryString := commonUtility.ConvertQueryToString(query)
-		entityNotFoundError := domainError.NewEntityNotFoundError(location+"GetUserById.FindOne.Decode", queryString, userFindOneError.Error())
-		logging.Logger(entityNotFoundError)
-		return commonModel.NewResultOnFailure[userModel.User](entityNotFoundError)
-	}
-
-	// Map the retrieved User to the UserModel and return a success result.
-	user := userRepositoryModel.UserRepositoryToUserMapper(fetchedUser)
-	return commonModel.NewResultOnSuccess[userModel.User](user)
+	return userRepository.getUserByQuery(ctx, query)
 }
 
 // GetUserByEmail retrieves a user by their email from the repository.
 func (userRepository UserRepository) GetUserByEmail(ctx context.Context, email string) commonModel.Result[userModel.User] {
 	// Initialize a User object and define the MongoDB query to find the user by Email.
-	fetchedUser := userRepositoryModel.UserRepository{}
 	query := bson.M{"email": email}
 
-	// Find and decode the user.
-	userFindOneError := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
-	if validator.IsErrorNotNil(userFindOneError) {
-		queryString := commonUtility.ConvertQueryToString(query)
-		entityNotFoundError := domainError.NewEntityNotFoundError(location+"GetUserByEmail.FindOne.Decode", queryString, userFindOneError.Error())
-		logging.Logger(entityNotFoundError)
-		return commonModel.NewResultOnFailure[userModel.User](entityNotFoundError)
-	}
-
-	// Map the retrieved User to the UserModel and return a success result.
-	user := userRepositoryModel.UserRepositoryToUserMapper(fetchedUser)
-	return commonModel.NewResultOnSuccess[userModel.User](user)
+	// Retrieve the user from the database.
+	return userRepository.getUserByQuery(ctx, query)
 }
 
 // CheckEmailDuplicate checks if an email already exists in the UserRepository.
 // It returns an error if the email is already associated with a user, or nil if the email is unique.
 func (userRepository UserRepository) CheckEmailDuplicate(ctx context.Context, email string) error {
 	// Initialize a User object and define th MongoDB query to find the user by Email.
-	fetchedUser := userRepositoryModel.UserRepository{}
 	query := bson.M{"email": email}
 
 	// Find and decode the user.
 	// If no user is found, return nil (indicating that the email is unique).
-	userFindOneError := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
-	if validator.IsValueNil(fetchedUser) {
+	user := userRepository.getUserByQuery(ctx, query)
+	if validator.IsValueNil(user) {
 		return nil
 	}
 
 	// If an error occurs during the database query, log it as an internal error.
-	if validator.IsErrorNotNil(userFindOneError) {
-		internalError := domainError.NewInternalError(location+"CheckEmailDublicate.FindOne.Decode", userFindOneError.Error())
-		logging.Logger(internalError)
-		return internalError
+	if validator.IsErrorNotNil(user.Error) {
+		return user.Error
 	}
 
 	// If a user with the given email is found, return a validation error.
@@ -201,31 +176,16 @@ func (userRepository UserRepository) Register(ctx context.Context, userCreate us
 		return commonModel.NewResultOnFailure[userModel.User](internalError)
 	}
 
-	// Create a unique index for the email field.
-	option := options.Index()
-	option.SetUnique(true)
-	index := mongo.IndexModel{Keys: bson.M{"email": 1}, Options: option}
-	_, userIndexesCreateOneError := userRepository.collection.Indexes().CreateOne(ctx, index)
-	if validator.IsErrorNotNil(userIndexesCreateOneError) {
-		internalError := domainError.NewInternalError(location+"Register.Indexes.CreateOne", userIndexesCreateOneError.Error())
-		logging.Logger(internalError)
-		return commonModel.NewResultOnFailure[userModel.User](internalError)
+	// Ensure uniqueness of the email field by creating a unique index.
+	ensureUniqueEmailIndexError := userRepository.ensureUniqueEmailIndex(ctx)
+	if validator.IsErrorNotNil(ensureUniqueEmailIndexError) {
+		return commonModel.NewResultOnFailure[userModel.User](ensureUniqueEmailIndexError)
 	}
 
 	// Retrieve the created user from the database.
-	createdUserRepository := userRepositoryModel.UserRepository{}
 	query := bson.M{"_id": insertOneResult.InsertedID}
-	userFindOneError := userRepository.collection.FindOne(ctx, query).Decode(&createdUserRepository)
-	if validator.IsErrorNotNil(userFindOneError) {
-		queryString := commonUtility.ConvertQueryToString(query)
-		entityNotFoundError := domainError.NewEntityNotFoundError(location+"Register.FindOne.Decode", queryString, userFindOneError.Error())
-		logging.Logger(entityNotFoundError)
-		return commonModel.NewResultOnFailure[userModel.User](entityNotFoundError)
-	}
-
-	// Map the retrieved user back to the domain model and return it.
-	createdUser := userRepositoryModel.UserRepositoryToUserMapper(createdUserRepository)
-	return commonModel.NewResultOnSuccess[userModel.User](createdUser)
+	createdUser := userRepository.getUserByQuery(ctx, query)
+	return createdUser
 }
 
 // UpdateUserById updates a user in the repository based on the provided UserUpdate data.
@@ -242,6 +202,8 @@ func (userRepository UserRepository) UpdateCurrentUser(ctx context.Context, user
 	if validator.IsErrorNotNil(userUpdateError) {
 		return commonModel.NewResultOnFailure[userModel.User](userUpdateError)
 	}
+
+	// Set the update timestamp to the current time.
 	userUpdateRepository.UpdatedAt = time.Now()
 
 	// Map repository model to a MongoDB model.
@@ -250,8 +212,9 @@ func (userRepository UserRepository) UpdateCurrentUser(ctx context.Context, user
 		return commonModel.NewResultOnFailure[userModel.User](mongoMapperError)
 	}
 
-	// Define the MongoDB query and update.
-	// Execute the update query.
+	// Define the MongoDB query.
+	// Define the update operation.
+	// Execute the update query and retrieve the updated user.
 	query := bson.D{{Key: "_id", Value: userUpdateRepository.UserID}}
 	update := bson.D{{Key: "$set", Value: userUpdateMongo}}
 	result := userRepository.collection.FindOneAndUpdate(ctx, query, update, options.FindOneAndUpdate().SetReturnDocument(1))
@@ -347,4 +310,40 @@ func (userRepository UserRepository) SendEmailForgottenPasswordMessage(ctx conte
 		return sendEmailError
 	}
 	return nil
+}
+
+// ensureUniqueEmailIndex creates a unique index on the email field to enforce email uniqueness in the repository.
+// This ensures that each user has a unique email address in the database.
+func (userRepository UserRepository) ensureUniqueEmailIndex(ctx context.Context) error {
+	// Create options for the index, setting it as unique.
+	option := options.Index()
+	option.SetUnique(true)
+
+	// Define the index model based on the email field.
+	// Create the unique index in the collection.
+	index := mongo.IndexModel{Keys: bson.M{"email": 1}, Options: option}
+	_, userIndexesCreateOneError := userRepository.collection.Indexes().CreateOne(ctx, index)
+	if validator.IsErrorNotNil(userIndexesCreateOneError) {
+		internalError := domainError.NewInternalError(location+"ensureUniqueEmailIndex.Indexes.CreateOne", userIndexesCreateOneError.Error())
+		logging.Logger(internalError)
+		return internalError
+	}
+	return nil
+}
+
+// getUserByQuery retrieves a user based on the provided query from the repository.
+func (userRepository UserRepository) getUserByQuery(ctx context.Context, query bson.M) commonModel.Result[userModel.User] {
+	// Initialize a User object and find the user based on the provided query.
+	fetchedUser := userRepositoryModel.UserRepository{}
+	userFindOneError := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
+	if validator.IsErrorNotNil(userFindOneError) {
+		queryString := commonUtility.ConvertQueryToString(query)
+		entityNotFoundError := domainError.NewEntityNotFoundError(location+".getUserByQuery.Decode", queryString, userFindOneError.Error())
+		logging.Logger(entityNotFoundError)
+		return commonModel.NewResultOnFailure[userModel.User](entityNotFoundError)
+	}
+
+	// Map the repository model to domain ones.
+	user := userRepositoryModel.UserRepositoryToUserMapper(fetchedUser)
+	return commonModel.NewResultOnSuccess[userModel.User](user)
 }

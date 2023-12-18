@@ -112,7 +112,7 @@ func extractAccessToken(ginContext *gin.Context) (string, error) {
 
 // abortWithStatusJSON aborts the request, logs the error, and responds with a JSON error.
 func abortWithStatusJSON(ginContext *gin.Context, err any, httpCode int) {
-	jsonResponse := httpModel.NewJsonResponseOnFailure(err)
+	jsonResponse := httpModel.NewJSONResponseOnFailure(err)
 	ginContext.AbortWithStatusJSON(httpCode, jsonResponse)
 }
 

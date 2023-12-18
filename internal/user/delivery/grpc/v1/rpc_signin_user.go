@@ -25,12 +25,12 @@ func (userGrpcServer *UserGrpcServer) Login(ctx context.Context, request *pb.Log
 	// 	return nil, status.Errorf(codes.InvalidArgument, "Invalid email or Password")
 	// }
 
-	// Generate tokens
-	accessToken, createTokenError := domainUtility.GenerateJWTToken(userGrpcServer.applicationConfig.AccessToken.ExpiredIn, user.Data.UserID, userGrpcServer.applicationConfig.AccessToken.PrivateKey)
+	// Generate tokens.
+	accessToken, createTokenError := domainUtility.GenerateJWTToken(ctx, userGrpcServer.applicationConfig.AccessToken.ExpiredIn, user.Data.UserID, userGrpcServer.applicationConfig.AccessToken.PrivateKey)
 	if createTokenError != nil {
 		return nil, status.Errorf(codes.PermissionDenied, createTokenError.Error())
 	}
-	refreshToken, createTokenError := domainUtility.GenerateJWTToken(userGrpcServer.applicationConfig.RefreshToken.ExpiredIn, user.Data.UserID, userGrpcServer.applicationConfig.RefreshToken.PrivateKey)
+	refreshToken, createTokenError := domainUtility.GenerateJWTToken(ctx, userGrpcServer.applicationConfig.RefreshToken.ExpiredIn, user.Data.UserID, userGrpcServer.applicationConfig.RefreshToken.PrivateKey)
 	if createTokenError != nil {
 		return nil, status.Errorf(codes.PermissionDenied, createTokenError.Error())
 	}

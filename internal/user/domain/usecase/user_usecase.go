@@ -81,8 +81,7 @@ func (userUseCase UserUseCase) Register(ctx context.Context, userCreateData user
 	// Validate the user creation data.
 	userCreate := validateUserCreate(userCreateData)
 	if validator.IsErrorNotNil(userCreate.Error) {
-		userCreate.Error = domainError.HandleError(userCreate.Error)
-		return commonModel.NewResultOnFailure[userModel.User](userCreate.Error)
+		return commonModel.NewResultOnFailure[userModel.User](domainError.HandleError(userCreate.Error))
 	}
 
 	// Check for duplicate email.
@@ -145,23 +144,33 @@ func (userUseCase UserUseCase) DeleteUserById(ctx context.Context, userID string
 	return nil
 }
 
-func (userUseCase UserUseCase) Login(ctx context.Context, userLoginData userModel.UserLogin) (string, error) {
+// Login performs the user authentication process.
+// It takes a userLoginData object, validates it, fetches the user by email,
+// checks if the provided password matches the stored password, and generates
+// access and refresh tokens upon successful authentication.
+// The result is wrapped in a commonModel.Result containing either the user or an error.
+func (userUseCase UserUseCase) Login(ctx context.Context, userLoginData userModel.UserLogin) commonModel.Result[userModel.UserLogin] {
+	// Validate the user login data.
 	userLogin := validateUserLogin(userLoginData)
 	if validator.IsErrorNotNil(userLogin.Error) {
-		handledError := domainError.HandleError(userLogin.Error)
-		return "", handledError
+		return commonModel.NewResultOnFailure[userModel.UserLogin](domainError.HandleError(userLogin.Error))
 	}
 
+	// Fetch the user by email from the repository.
 	fetchedUser := userUseCase.userRepository.GetUserByEmail(ctx, userLogin.Data.Email)
-	if validator.IsErrorNotNil(fetchedUser.Error) {
-		return "", fetchedUser.Error
-	}
+
+	// Check if the provided password matches the stored password.
 	arePasswordsNotEqualError := arePasswordsNotEqual(fetchedUser.Data.Password, userLoginData.Password)
 	if validator.IsValueNotNil(arePasswordsNotEqualError) {
 		arePasswordsNotEqualError.Notification = invalidEmailOrPassword
-		return "", arePasswordsNotEqualError
+		return commonModel.NewResultOnFailure[userModel.UserLogin](domainError.HandleError(arePasswordsNotEqualError))
 	}
-	return fetchedUser.Data.UserID, nil
+
+	// Generate access and refresh tokens.
+	userLogin = generateToken(ctx, fetchedUser.Data.UserID)
+
+	// Return the result containing userLogin information.
+	return userLogin
 }
 
 func (userUseCase UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.Context, email string, firstKey string, firstValue string,
@@ -235,4 +244,37 @@ func prepareEmailDataForUpdatePasswordResetToken(ctx context.Context, userName, 
 	applicationConfig := config.AppConfig
 	return prepareEmailData(ctx, userName, tokenValue, constants.ForgottenPasswordSubject, constants.ForgottenPasswordUrl,
 		applicationConfig.Email.ForgottenPasswordTemplateName, applicationConfig.Email.ForgottenPasswordTemplatePath)
+}
+
+// generateToken generates access and refresh tokens for a user.
+// It takes the user ID as input and uses the application configuration
+// to create both access and refresh tokens using domainUtility.GenerateJWTToken.
+// If there are errors during token generation, it returns a failure result
+// with the corresponding error. Otherwise, it returns a success result
+// containing the generated access and refresh tokens.
+func generateToken(ctx context.Context, userID string) commonModel.Result[userModel.UserLogin] {
+	// Create a userLogin struct to store the generated tokens.
+	var userLogin userModel.UserLogin
+
+	// Retrieve application configuration.
+	applicationConfig := config.AppConfig
+
+	// Generate the access token.
+	accessToken, accessTokenGenerationError := domainUtility.GenerateJWTToken(ctx, applicationConfig.AccessToken.ExpiredIn, userID, applicationConfig.AccessToken.PrivateKey)
+	if validator.IsErrorNotNil(accessTokenGenerationError) {
+		return commonModel.NewResultOnFailure[userModel.UserLogin](domainError.HandleError(accessTokenGenerationError))
+	}
+
+	// Generate the refresh token.
+	refreshToken, refreshTokenGenerationError := domainUtility.GenerateJWTToken(ctx, applicationConfig.RefreshToken.ExpiredIn, userID, applicationConfig.RefreshToken.PrivateKey)
+	if validator.IsErrorNotNil(refreshTokenGenerationError) {
+		return commonModel.NewResultOnFailure[userModel.UserLogin](domainError.HandleError(refreshTokenGenerationError))
+	}
+
+	// Update the userLogin struct with the generated tokens.
+	userLogin.AccessToken = accessToken
+	userLogin.RefreshToken = refreshToken
+
+	// Return a success result with the userLogin struct.
+	return commonModel.NewResultOnSuccess[userModel.UserLogin](userLogin)
 }

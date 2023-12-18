@@ -1,6 +1,7 @@
 package utility
 
 import (
+	"context"
 	"crypto/rsa"
 	"encoding/base64"
 	"time"
@@ -25,7 +26,7 @@ const (
 
 // GenerateJWTToken generates a JWT token with the provided payload, using the given private key,
 // and sets the token's expiration based on the specified token lifetime.
-func GenerateJWTToken(tokenLifeTime time.Duration, payload any, privateKey string) (string, error) {
+func GenerateJWTToken(ctx context.Context, tokenLifeTime time.Duration, payload any, privateKey string) (string, error) {
 	// Decode the private key from base64-encoded string.
 	decodedPrivateKey, decodeStringError := decodeBase64String(privateKey)
 	if validator.IsErrorNotNil(decodeStringError) {

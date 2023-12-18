@@ -35,7 +35,7 @@ func AnonymousMiddleware() gin.HandlerFunc {
 			// Create a custom error message indicating that the user is already authenticated.
 			authorizationError := httpError.NewHttpAuthorizationErrorView(location+"AnonymousMiddleware.anonymousAccessToken", constants.AlreadyRegisteredNotification)
 			logging.Logger(authorizationError)
-			jsonResponse := httpModel.NewJsonResponseOnFailure(authorizationError)
+			jsonResponse := httpModel.NewJSONResponseOnFailure(authorizationError)
 			ginContext.AbortWithStatusJSON(constants.StatusForbidden, jsonResponse)
 			return
 		}

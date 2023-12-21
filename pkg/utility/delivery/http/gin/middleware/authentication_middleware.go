@@ -126,7 +126,7 @@ func extractRefreshToken(ginContext *gin.Context) (string, error) {
 }
 
 // abortWithStatusJSON aborts the request, logs the error, and responds with a JSON error.
-func abortWithStatusJSON(ginContext *gin.Context, err any, httpCode int) {
+func abortWithStatusJSON(ginContext *gin.Context, err error, httpCode int) {
 	jsonResponse := httpModel.NewJSONResponseOnFailure(err)
 	ginContext.AbortWithStatusJSON(httpCode, jsonResponse)
 }
@@ -134,7 +134,7 @@ func abortWithStatusJSON(ginContext *gin.Context, err any, httpCode int) {
 // handleDeadlineExceeded checks if a context error indicates a deadline exceeded and
 // logs the error appropriately. If the context error is not a deadline exceeded error,
 // it returns nil.
-func handleDeadlineExceeded(ctx context.Context) any {
+func handleDeadlineExceeded(ctx context.Context) error {
 	// Check if a timeout occurred.
 	if ctx.Err() == context.DeadlineExceeded {
 		// Log and handle the timeout error as needed.

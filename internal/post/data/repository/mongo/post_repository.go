@@ -12,7 +12,7 @@ import (
 	mongoModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
+	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"

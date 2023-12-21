@@ -47,7 +47,7 @@ func AnonymousMiddleware() gin.HandlerFunc {
 
 // isUserAnonymous checks if the user is anonymous and returns the access token if present.
 func isUserAnonymous(ginContext *gin.Context) string {
-	var anonymousAccessToken = ""
+	var anonymousAccessToken string
 
 	// Attempt to retrieve the access token from the Authorization header.
 	authorizationHeader := ginContext.Request.Header.Get(authorization)

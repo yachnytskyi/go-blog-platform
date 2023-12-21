@@ -2,7 +2,8 @@ package mongo
 
 import (
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
+	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
+	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -15,7 +16,7 @@ const (
 func MongoMapper(incomingData any) (document *bson.D, err error) {
 	// Marshal incoming data to BSON format.
 	data, err := bson.Marshal(incomingData)
-	if err != nil {
+	if validator.IsErrorNotNil(err) {
 		// Log and handle the marshaling error.
 		internalError := domainError.NewInternalError(location+"MongoMapper.bson.Marshal", err.Error())
 		logging.Logger(internalError)
@@ -24,7 +25,7 @@ func MongoMapper(incomingData any) (document *bson.D, err error) {
 
 	// Unmarshal the BSON data into a BSON document.
 	err = bson.Unmarshal(data, &document)
-	if err != nil {
+	if validator.IsErrorNotNil(err) {
 		// Log and handle the unmarshaling error.
 		internalError := domainError.NewInternalError(location+"MongoMapper.bson.UnMarshal", err.Error())
 		logging.Logger(internalError)

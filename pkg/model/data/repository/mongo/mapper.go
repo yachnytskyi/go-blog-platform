@@ -8,18 +8,14 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-const (
-	location = "pkg.model.data.repository.mongo."
-)
-
-// DataToMongoDocument converts the incoming data to a BSON document.
+// DataToMongoDocumentMapper converts the incoming data to a BSON document.
 // It uses BSON marshaling and unmarshaling to perform the conversion.
-func DataToMongoDocumentMapper(incomingData any) (document *bson.D, err error) {
+func DataToMongoDocumentMapper(location string, incomingData any) (document *bson.D, err error) {
 	// Marshal incoming data to BSON format.
 	data, err := bson.Marshal(incomingData)
 	if validator.IsErrorNotNil(err) {
 		// Log and handle the marshaling error.
-		internalError := domainError.NewInternalError(location+"MongoMapper.bson.Marshal", err.Error())
+		internalError := domainError.NewInternalError(location+"HexToObjectIDMapper.bson.Marshal", err.Error())
 		logging.Logger(internalError)
 		return document, err
 	}
@@ -28,14 +24,14 @@ func DataToMongoDocumentMapper(incomingData any) (document *bson.D, err error) {
 	err = bson.Unmarshal(data, &document)
 	if validator.IsErrorNotNil(err) {
 		// Log and handle the unmarshaling error.
-		internalError := domainError.NewInternalError(location+"MongoMapper.bson.UnMarshal", err.Error())
+		internalError := domainError.NewInternalError(location+"HexToObjectIDMapper.bson.UnMarshal", err.Error())
 		logging.Logger(internalError)
 		return document, err
 	}
 	return
 }
 
-// HexToObjectID converts a hexadecimal string representation of MongoDB ObjectID
+// HexToObjectIDMapper converts a hexadecimal string representation of MongoDB ObjectID
 // to its corresponding primitive.ObjectID type.
 // It takes a location string for context in error messages and the id as a string.
 // Returns the converted ObjectID or an error if the conversion fails.
@@ -44,7 +40,7 @@ func HexToObjectIDMapper(location, id string) (primitive.ObjectID, error) {
 	objectID, objectIDFromHexError := primitive.ObjectIDFromHex(id)
 	if validator.IsErrorNotNil(objectIDFromHexError) {
 		// If an error occurs, create an internal error with context and log it.
-		internalError := domainError.NewInternalError(location+".HexToObjectID", objectIDFromHexError.Error())
+		internalError := domainError.NewInternalError(location+".HexToObjectIDMapper.primitive.ObjectIDFromHex", objectIDFromHexError.Error())
 		logging.Logger(internalError)
 		// Return a default ObjectID and the error.
 		return primitive.NilObjectID, internalError

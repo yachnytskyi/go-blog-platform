@@ -142,7 +142,7 @@ func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID
 	}
 
 	postUpdateRepository.UpdatedAt = time.Now()
-	postMappedToMongoDB, dataToMongoDocumentMapper := mongoModel.DataToMongoDocumentMapper(postUpdateRepository)
+	postMappedToMongoDB, dataToMongoDocumentMapper := mongoModel.DataToMongoDocumentMapper(location+"UpdatePostById", postUpdateRepository)
 	if validator.IsErrorNotNil(dataToMongoDocumentMapper) {
 		return nil, dataToMongoDocumentMapper
 	}

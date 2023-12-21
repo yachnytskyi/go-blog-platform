@@ -211,9 +211,9 @@ func (userRepository UserRepository) UpdateCurrentUser(ctx context.Context, user
 	userUpdateRepository.UpdatedAt = time.Now()
 
 	// Map repository model to a MongoDB model.
-	userUpdateMongo, DataToMongoDocumentMapper := mongoModel.DataToMongoDocumentMapper(userUpdateRepository)
-	if validator.IsErrorNotNil(DataToMongoDocumentMapper) {
-		return commonModel.NewResultOnFailure[userModel.User](DataToMongoDocumentMapper)
+	userUpdateMongo, dataToMongoDocumentMapper := mongoModel.DataToMongoDocumentMapper(location+"UpdateCurrentUser", userUpdateRepository)
+	if validator.IsErrorNotNil(dataToMongoDocumentMapper) {
+		return commonModel.NewResultOnFailure[userModel.User](dataToMongoDocumentMapper)
 	}
 
 	// Define the MongoDB query.

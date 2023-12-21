@@ -2,6 +2,7 @@ package http
 
 import (
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
 const (
@@ -41,9 +42,9 @@ func NewJSONResponseOnFailure(err any) JSONResponse {
 
 // SetStatus sets the "Status" field based on the presence of "Data," "Error," or "Errors."
 func SetStatus(jsonResponse *JSONResponse) {
-	if jsonResponse.Data != nil {
+	if validator.IsValueNotNil(jsonResponse.Data) {
 		jsonResponse.Status = success
-	} else if jsonResponse.Error != nil || jsonResponse.Errors != nil {
+	} else if validator.IsErrorNotNil(jsonResponse.Error) || validator.IsErrorNotNil(jsonResponse.Error) {
 		jsonResponse.Status = fail
 	}
 }

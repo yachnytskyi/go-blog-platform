@@ -34,6 +34,7 @@ type ApplicationConfig struct {
 	MongoDB      MongoDB      `mapstructure:"MongoDB"`
 	Gin          Gin          `mapstructure:"Gin"`
 	GRPC         GRPC         `mapstructure:"Grpc"`
+	Token        Token        `mapstructure:"Token"`
 	AccessToken  AccessToken  `mapstructure:"Access_Token"`
 	RefreshToken RefreshToken `mapstructure:"Refresh_Token"`
 	Email        Email        `mapstructure:"Email"`
@@ -59,6 +60,11 @@ type Gin struct {
 
 type GRPC struct {
 	ServerUrl string `mapstructure:"Server_Url"`
+}
+
+type Token struct {
+	CookieSecure bool `mapstructure:"Cookie_Secure"`
+	HttpOnly     bool `mapstructure:"Http_Only"`
 }
 
 type AccessToken struct {

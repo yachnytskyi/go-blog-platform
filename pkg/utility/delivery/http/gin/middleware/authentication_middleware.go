@@ -27,14 +27,14 @@ const (
 )
 
 // AuthMiddleware is a Gin middleware for handling user authentication using JWT tokens.
-func AuthMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
+func AuthenticationMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
 	return func(ginContext *gin.Context) {
 		ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 		defer cancel()
 
 		// Extract the access token from the request.
 		accessToken, tokenError := extractAccessToken(ginContext)
-		if tokenError != nil {
+		if validator.IsErrorNotNil(tokenError) {
 			// Abort the request with an unauthorized status and respond with a JSON error.
 			abortWithStatusJSON(ginContext, tokenError, http.StatusUnauthorized)
 			return
@@ -44,11 +44,11 @@ func AuthMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
 		applicationConfig := config.AppConfig
 
 		// Validate the JWT token.
-		userID, validateTokenError := domainUtility.ValidateJWTToken(accessToken, applicationConfig.AccessToken.PublicKey)
-		if validator.IsErrorNotNil(validateTokenError) {
+		userID, validateAccessTokenError := domainUtility.ValidateJWTToken(accessToken, applicationConfig.AccessToken.PublicKey)
+		if validator.IsErrorNotNil(validateAccessTokenError) {
 			// Handle token validation error and respond with an unauthorized status and JSON error.
-			handledError := httpError.HandleError(validateTokenError)
-			abortWithStatusJSON(ginContext, handledError, http.StatusUnauthorized)
+			httpAuthorizationError := httpError.NewHttpAuthorizationErrorView(constants.EmptyString, constants.LoggingErrorNotification)
+			abortWithStatusJSON(ginContext, httpAuthorizationError, http.StatusUnauthorized)
 			return
 		}
 
@@ -108,6 +108,21 @@ func extractAccessToken(ginContext *gin.Context) (string, error) {
 
 	// Return the extracted access token.
 	return accessToken, nil
+}
+
+// extractRefreshToken extracts the refresh token from the request cookies.
+func extractRefreshToken(ginContext *gin.Context) (string, error) {
+	// Attempt to retrieve the refresh token from the cookie.
+	refreshToken, refreshTokenError := ginContext.Cookie(constants.RefreshTokenValue)
+	if validator.IsErrorNotNil(refreshTokenError) {
+		// If refresh token is missing, create and log an HTTP authorization error.
+		httpAuthorizationError := httpError.NewHttpAuthorizationErrorView(location+"extractRefreshToken.refreshToken", constants.LoggingErrorNotification)
+		logging.Logger(httpAuthorizationError)
+		return constants.EmptyString, httpAuthorizationError
+	}
+
+	// Return the extracted refresh token.
+	return refreshToken, nil
 }
 
 // abortWithStatusJSON aborts the request, logs the error, and responds with a JSON error.

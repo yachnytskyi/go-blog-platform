@@ -12,7 +12,7 @@ func CleanCookies(ctx *gin.Context) {
 	ctx.SetCookie(constants.AccessTokenValue, constants.EmptyString, constants.LogoutMaxAgeValue, "/", constants.TokenDomainValue, false, true)
 
 	// Clear the refresh token cookie in a similar manner.
-	ctx.SetCookie("refresh_token", constants.EmptyString, constants.LogoutMaxAgeValue, "/", constants.TokenDomainValue, false, true)
+	ctx.SetCookie(constants.RefreshTokenValue, constants.EmptyString, constants.LogoutMaxAgeValue, "/", constants.TokenDomainValue, false, true)
 
 	// Clear the "loggedIn" cookie in the same way.
 	ctx.SetCookie(constants.LoggedInValue, constants.EmptyString, constants.LogoutMaxAgeValue, "/", constants.TokenDomainValue, false, true)

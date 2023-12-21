@@ -47,6 +47,7 @@ func GenerateJWTToken(ctx context.Context, tokenLifeTime time.Duration, payload 
 	if validator.IsErrorNotNil(newWithClaimsError) {
 		return constants.EmptyString, newWithClaimsError
 	}
+
 	return token, nil
 }
 
@@ -60,15 +61,15 @@ func ValidateJWTToken(token string, publicKey string) (any, error) {
 	}
 
 	// Parse the public key for verification.
-	key, parseError := parsePublicKey(decodedPublicKey)
-	if validator.IsErrorNotNil(parseError) {
-		return nil, parseError
+	key, parsePublicKeyError := parsePublicKey(decodedPublicKey)
+	if validator.IsErrorNotNil(parsePublicKeyError) {
+		return nil, parsePublicKeyError
 	}
 
 	// Parse and verify the token using the public key.
-	parsedToken, err := parseToken(token, key)
-	if err != nil {
-		return nil, err
+	parsedToken, parseTokenError := parseToken(token, key)
+	if validator.IsErrorNotNil(parseTokenError) {
+		return nil, parseTokenError
 	}
 
 	// Extract and validate the claims from the parsed token.
@@ -117,7 +118,7 @@ func generateClaims(tokenLifeTime time.Duration, now time.Time, payload any) jwt
 // createSignedToken creates a signed JWT token using the provided private key and claims.
 func createSignedToken(key *rsa.PrivateKey, claims jwt.MapClaims) (string, error) {
 	token, newWithClaimsError := jwt.NewWithClaims(jwt.GetSigningMethod(signingMethod), claims).SignedString(key)
-	if newWithClaimsError != nil {
+	if validator.IsErrorNotNil(newWithClaimsError) {
 		internalError := domainError.NewInternalError(location+"createSignedToken.NewWithClaims", newWithClaimsError.Error())
 		logging.Logger(internalError)
 		return constants.EmptyString, domainError.HandleError(internalError)

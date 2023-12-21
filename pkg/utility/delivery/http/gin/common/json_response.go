@@ -17,7 +17,7 @@ func GinNewJSONResponseOnFailure(ginContext *gin.Context, err error, httpCode in
 
 // HandleJSONBindingError handles errors that occur during JSON data binding.
 // It logs the error, generates a JSON response, and sets the HTTP status code.
-func HandleJsonBindingError(ginContext *gin.Context, location string, err error) {
+func HandleJSONBindingError(ginContext *gin.Context, location string, err error) {
 	internalError := httpError.NewHttpInternalErrorView(location+".ShouldBindJSON", err.Error())
 	logging.Logger(internalError)
 	GinNewJSONResponseOnFailure(ginContext, internalError, constants.StatusBadRequest)

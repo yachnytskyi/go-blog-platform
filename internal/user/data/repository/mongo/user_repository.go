@@ -105,7 +105,7 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 // GetUserById retrieves a user by their ID from the database.
 func (userRepository UserRepository) GetUserById(ctx context.Context, userID string) commonModel.Result[userModel.User] {
 	userObjectID, objectIDFromHexError := primitive.ObjectIDFromHex(userID)
-	if objectIDFromHexError != nil {
+	if validator.IsErrorNotNil(objectIDFromHexError) {
 		internalError := domainError.NewInternalError(location+"GetUserById.ObjectIDFromHex", objectIDFromHexError.Error())
 		logging.Logger(internalError)
 		return commonModel.NewResultOnFailure[userModel.User](internalError)
@@ -159,9 +159,16 @@ func (userRepository UserRepository) CheckEmailDuplicate(ctx context.Context, em
 // 5. Retrieves the created user from the database, maps it back to the domain model, and returns the result.
 func (userRepository UserRepository) Register(ctx context.Context, userCreate userModel.UserCreate) commonModel.Result[userModel.User] {
 	// Map the incoming user data to the repository model.
-	// Hash the user's password.
 	userCreateRepository := userRepositoryModel.UserCreateToUserCreateRepositoryMapper(userCreate)
-	userCreateRepository.Password, _ = repositoryUtility.HashPassword(userCreate.Password)
+
+	// Hash the user's password.
+	hashedPassword, hashPasswordError := repositoryUtility.HashPassword(location+"Register", userCreate.Password)
+	if validator.IsErrorNotNil(hashPasswordError) {
+		return commonModel.NewResultOnFailure[userModel.User](hashPasswordError)
+	}
+
+	// Set the hashed password in the repository model.
+	userCreateRepository.Password = hashedPassword
 
 	// Set CreatedAt and UpdatedAt to the current time.
 	currentTime := time.Now()
@@ -257,7 +264,12 @@ func (userRepository UserRepository) DeleteUserById(ctx context.Context, userID 
 }
 
 func (userRepository UserRepository) ResetUserPassword(ctx context.Context, firstKey string, firstValue string, secondKey string, passwordKey, password string) error {
-	hashedPassword, _ := repositoryUtility.HashPassword(password)
+	// Hash the user's password.
+	hashedPassword, hashPasswordError := repositoryUtility.HashPassword(location+"ResetUserPassword", password)
+	if validator.IsErrorNotNil(hashPasswordError) {
+		return hashPasswordError
+	}
+
 	query := bson.D{{Key: firstKey, Value: firstValue}}
 	update := bson.D{{Key: "$set", Value: bson.D{{Key: passwordKey, Value: hashedPassword}}},
 		{Key: "$unset", Value: bson.D{{Key: firstKey, Value: constants.EmptyString}, {Key: secondKey, Value: constants.EmptyString}}}}

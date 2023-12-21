@@ -43,6 +43,8 @@ const (
 	FieldRequired           = "required"
 	FieldOptional           = "optional"
 	EmptyString             = ""
+	True                    = "true"
+	False                   = "false"
 
 	// User Notifications.
 	SendingEmailNotification                 = "We have sent an email with a verification code to the provided address "

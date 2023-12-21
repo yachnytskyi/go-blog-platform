@@ -25,7 +25,7 @@ func (postRouter PostRouter) PostRouter(routerGroup any, userUseCase user.UserUs
 		postRouter.postController.GetPostById(ginContext)
 	})
 
-	router.Use(httpGinMiddleware.AuthMiddleware(userUseCase))
+	router.Use(httpGinMiddleware.AuthenticationMiddleware(userUseCase))
 	router.POST("/", func(ginContext *gin.Context) {
 		postRouter.postController.CreatePost(ginContext)
 	})

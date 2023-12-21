@@ -56,7 +56,7 @@ func (ginFactory *GinFactory) LaunchServer(ctx context.Context, container *appli
 
 	go func() {
 		runError := ginFactory.Router.Run(":" + applicationConfig.Gin.Port)
-		if runError != nil {
+		if validator.IsErrorNotNil(runError) {
 			container.RepositoryFactory.CloseRepository(ctx)
 			runInternalError := domainError.NewInternalError(location+"LaunchServer.Router.Run", runError.Error())
 			logging.Logger(runInternalError)

@@ -19,7 +19,6 @@ import (
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -104,11 +103,9 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 
 // GetUserById retrieves a user by their ID from the database.
 func (userRepository UserRepository) GetUserById(ctx context.Context, userID string) commonModel.Result[userModel.User] {
-	userObjectID, objectIDFromHexError := primitive.ObjectIDFromHex(userID)
-	if validator.IsErrorNotNil(objectIDFromHexError) {
-		internalError := domainError.NewInternalError(location+"GetUserById.ObjectIDFromHex", objectIDFromHexError.Error())
-		logging.Logger(internalError)
-		return commonModel.NewResultOnFailure[userModel.User](internalError)
+	userObjectID, hexToObjectIDMapperError := mongoModel.HexToObjectIDMapper(location+"GetUserById", userID)
+	if validator.IsErrorNotNil(hexToObjectIDMapperError) {
+		return commonModel.NewResultOnFailure[userModel.User](hexToObjectIDMapperError)
 	}
 
 	// Define the MongoDB query to find the user by ObjectID.
@@ -214,9 +211,9 @@ func (userRepository UserRepository) UpdateCurrentUser(ctx context.Context, user
 	userUpdateRepository.UpdatedAt = time.Now()
 
 	// Map repository model to a MongoDB model.
-	userUpdateMongo, mongoMapperError := mongoModel.MongoMapper(userUpdateRepository)
-	if validator.IsErrorNotNil(mongoMapperError) {
-		return commonModel.NewResultOnFailure[userModel.User](mongoMapperError)
+	userUpdateMongo, DataToMongoDocumentMapper := mongoModel.DataToMongoDocumentMapper(userUpdateRepository)
+	if validator.IsErrorNotNil(DataToMongoDocumentMapper) {
+		return commonModel.NewResultOnFailure[userModel.User](DataToMongoDocumentMapper)
 	}
 
 	// Define the MongoDB query.
@@ -242,11 +239,14 @@ func (userRepository UserRepository) UpdateCurrentUser(ctx context.Context, user
 
 // DeleteUserById deletes a user in the repository based on the provided userID.
 func (userRepository UserRepository) DeleteUserById(ctx context.Context, userID string) error {
-	userIDMappedToMongoDB, _ := primitive.ObjectIDFromHex(userID)
+	userObjectID, hexToObjectIDMapperError := mongoModel.HexToObjectIDMapper(location+"GetUserById", userID)
+	if validator.IsErrorNotNil(hexToObjectIDMapperError) {
+		return hexToObjectIDMapperError
+	}
 
 	// Define the MongoDB query to delete the user by ObjectID.
 	// Execute the delete query.
-	query := bson.M{"_id": userIDMappedToMongoDB}
+	query := bson.M{"_id": userObjectID}
 	result, userDeleteOneError := userRepository.collection.DeleteOne(ctx, query)
 	if validator.IsErrorNotNil(userDeleteOneError) {
 		deletedUserError := domainError.NewInternalError(location+"Delete.DeleteOne", userDeleteOneError.Error())

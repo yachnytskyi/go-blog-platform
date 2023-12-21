@@ -2,10 +2,8 @@ package model
 
 import (
 	postModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
-	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	mongoModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
+	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
 const (
@@ -34,11 +32,9 @@ func PostRepositoryToPostMapper(postRepository *PostRepository) *postModel.Post 
 }
 
 func PostCreateToPostCreateRepositoryMapper(postCreate *postModel.PostCreate) (*PostCreateRepository, error) {
-	userObjectID, objectIDFromHexError := primitive.ObjectIDFromHex(postCreate.UserID)
-	if validator.IsErrorNotNil(objectIDFromHexError) {
-		objectIDFromHexErrorInternalError := domainError.NewInternalError(location+"PostCreateToPostCreateRepositoryMapper.ObjectIDFromHex", objectIDFromHexError.Error())
-		logging.Logger(objectIDFromHexErrorInternalError)
-		return nil, objectIDFromHexErrorInternalError
+	userObjectID, hexToObjectIDMapperError := mongoModel.HexToObjectIDMapper(location+"PostCreateToPostCreateRepositoryMapper", postCreate.UserID)
+	if validator.IsErrorNotNil(hexToObjectIDMapperError) {
+		return &PostCreateRepository{}, hexToObjectIDMapperError
 	}
 	return &PostCreateRepository{
 		UserID:    userObjectID,
@@ -52,18 +48,14 @@ func PostCreateToPostCreateRepositoryMapper(postCreate *postModel.PostCreate) (*
 }
 
 func PostUpdateToPostUpdateRepositoryMapper(postUpdate *postModel.PostUpdate) (*PostUpdateRepository, error) {
-	postObjectID, objectIDFromHexError := primitive.ObjectIDFromHex(postUpdate.PostID)
-	if validator.IsErrorNotNil(objectIDFromHexError) {
-		objectIDFromHexErrorInternalError := domainError.NewInternalError(location+"PostCreateToPostCreateRepositoryMapper.PostID.ObjectIDFromHex", objectIDFromHexError.Error())
-		logging.Logger(objectIDFromHexErrorInternalError)
-		return nil, objectIDFromHexErrorInternalError
+	postObjectID, hexToObjectIDMapperError := mongoModel.HexToObjectIDMapper(location+"PostUpdateToPostUpdateRepositoryMapper.postObjectID", postUpdate.PostID)
+	if validator.IsErrorNotNil(hexToObjectIDMapperError) {
+		return &PostUpdateRepository{}, hexToObjectIDMapperError
 	}
 
-	userObjectID, objectIDFromHexError := primitive.ObjectIDFromHex(postUpdate.UserID)
-	if validator.IsErrorNotNil(objectIDFromHexError) {
-		objectIDFromHexErrorInternalError := domainError.NewInternalError("location+PostCreateToPostCreateRepositoryMapper.UserID.ObjectIDFromHex", objectIDFromHexError.Error())
-		logging.Logger(objectIDFromHexErrorInternalError)
-		return nil, objectIDFromHexErrorInternalError
+	userObjectID, hexToObjectIDMapperError := mongoModel.HexToObjectIDMapper(location+"PostUpdateToPostUpdateRepositoryMapper.userObjectID", postUpdate.UserID)
+	if validator.IsErrorNotNil(hexToObjectIDMapperError) {
+		return &PostUpdateRepository{}, hexToObjectIDMapperError
 	}
 	return &PostUpdateRepository{
 		PostID:    postObjectID,

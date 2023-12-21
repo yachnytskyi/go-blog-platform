@@ -5,22 +5,19 @@ import (
 	"errors"
 	"time"
 
-	"github.com/yachnytskyi/golang-mongo-grpc/internal/post"
+	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
 	postRepositoryModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/data/repository/mongo/model"
 	postModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
 
 	mongoModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
-	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 const (
-	objectIDFromHex = "Post.Data.Repository.MongoDB.UpdatePostById.ObjectIDFromHex"
+	location = "post.data.repository.mongo."
 )
 
 type PostRepository struct {
@@ -84,12 +81,13 @@ func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int,
 }
 
 func (postRepository *PostRepository) GetPostById(ctx context.Context, postID string) (*postModel.Post, error) {
-	postIDMappedToMongoDB, _ := primitive.ObjectIDFromHex(postID)
+	postObjectID, hexToObjectIDMapperError := mongoModel.HexToObjectIDMapper(location+"GetPostById", postID)
+	if validator.IsErrorNotNil(hexToObjectIDMapperError) {
+		return nil, hexToObjectIDMapperError
+	}
 
-	query := bson.M{"_id": postIDMappedToMongoDB}
-
+	query := bson.M{"_id": postObjectID}
 	var fetchedPost *postRepositoryModel.PostRepository
-
 	err := postRepository.collection.FindOne(ctx, query).Decode(&fetchedPost)
 	if validator.IsErrorNotNil(err) {
 		if err == mongo.ErrNoDocuments {
@@ -142,17 +140,16 @@ func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID
 	if validator.IsErrorNotNil(postUpdateToPostUpdateRepositoryMapper) {
 		return nil, postUpdateToPostUpdateRepositoryMapper
 	}
+
 	postUpdateRepository.UpdatedAt = time.Now()
-	postMappedToMongoDB, mongoMapperError := mongoModel.MongoMapper(postUpdateRepository)
-	if validator.IsErrorNotNil(mongoMapperError) {
-		return nil, mongoMapperError
+	postMappedToMongoDB, dataToMongoDocumentMapper := mongoModel.DataToMongoDocumentMapper(postUpdateRepository)
+	if validator.IsErrorNotNil(dataToMongoDocumentMapper) {
+		return nil, dataToMongoDocumentMapper
 	}
 
-	postObjectID, objectIDFromHexError := primitive.ObjectIDFromHex(postID)
-	if validator.IsErrorNotNil(objectIDFromHexError) {
-		objectIDFromHexErrorInternalError := domainError.NewInternalError(objectIDFromHex, objectIDFromHexError.Error())
-		logging.Logger(objectIDFromHexErrorInternalError)
-		return nil, objectIDFromHexErrorInternalError
+	postObjectID, hexToObjectIDMapperError := mongoModel.HexToObjectIDMapper(location+"UpdatePostById", postID)
+	if validator.IsErrorNotNil(hexToObjectIDMapperError) {
+		return nil, hexToObjectIDMapperError
 	}
 
 	query := bson.D{{Key: "_id", Value: postObjectID}}
@@ -168,9 +165,12 @@ func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID
 }
 
 func (postRepository *PostRepository) DeletePostByID(ctx context.Context, postID string) error {
-	postIDMappedToMongoDB, _ := primitive.ObjectIDFromHex(postID)
+	postObjectID, hexToObjectIDMapperError := mongoModel.HexToObjectIDMapper(location+"GetPostById", postID)
+	if validator.IsErrorNotNil(hexToObjectIDMapperError) {
+		return hexToObjectIDMapperError
+	}
 
-	query := bson.M{"_id": postIDMappedToMongoDB}
+	query := bson.M{"_id": postObjectID}
 	result, err := postRepository.collection.DeleteOne(ctx, query)
 	if validator.IsErrorNotNil(err) {
 		return err
@@ -178,6 +178,5 @@ func (postRepository *PostRepository) DeletePostByID(ctx context.Context, postID
 	if result.DeletedCount == 0 {
 		return errors.New("no document with that Id exists")
 	}
-
 	return nil
 }

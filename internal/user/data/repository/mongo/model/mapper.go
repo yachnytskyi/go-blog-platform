@@ -2,10 +2,8 @@ package model
 
 import (
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
-	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
+	mongoModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 const (
@@ -43,11 +41,9 @@ func UserCreateToUserCreateRepositoryMapper(userCreate userModel.UserCreate) Use
 }
 
 func UserUpdateToUserUpdateRepositoryMapper(userUpdate userModel.UserUpdate) (UserUpdateRepository, error) {
-	userObjectID, objectIDFromHexError := primitive.ObjectIDFromHex(userUpdate.UserID)
-	if validator.IsErrorNotNil(objectIDFromHexError) {
-		objectIDFromHexError := domainError.NewInternalError(location+"UserUpdateToUserUpdateRepositoryMapper.ObjectIDFromHex", objectIDFromHexError.Error())
-		logging.Logger(objectIDFromHexError)
-		return UserUpdateRepository{}, objectIDFromHexError
+	userObjectID, hexToObjectIDMapperError := mongoModel.HexToObjectIDMapper(location+"UserUpdateToUserUpdateRepositoryMapper", userUpdate.UserID)
+	if validator.IsErrorNotNil(hexToObjectIDMapperError) {
+		return UserUpdateRepository{}, hexToObjectIDMapperError
 	}
 	return UserUpdateRepository{
 		UserID:    userObjectID,
@@ -67,13 +63,4 @@ func UserRepositoryToUserMapper(userRepository UserRepository) userModel.User {
 		CreatedAt: userRepository.CreatedAt,
 		UpdatedAt: userRepository.UpdatedAt,
 	}
-}
-
-func ObjectIDFromHex(userID string) primitive.ObjectID {
-	userObjectID, objectIDFromHexError := primitive.ObjectIDFromHex(userID)
-	if validator.IsErrorNotNil(objectIDFromHexError) {
-		objectIDFromHexError := domainError.NewInternalError(location+"GetUserById.ObjectIDFromHex", objectIDFromHexError.Error())
-		logging.Logger(objectIDFromHexError)
-	}
-	return userObjectID
 }

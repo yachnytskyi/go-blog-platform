@@ -5,15 +5,16 @@ import (
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 const (
 	location = "pkg.model.data.repository.mongo."
 )
 
-// MongoMapper converts the incoming data to a BSON document.
+// DataToMongoDocument converts the incoming data to a BSON document.
 // It uses BSON marshaling and unmarshaling to perform the conversion.
-func MongoMapper(incomingData any) (document *bson.D, err error) {
+func DataToMongoDocumentMapper(incomingData any) (document *bson.D, err error) {
 	// Marshal incoming data to BSON format.
 	data, err := bson.Marshal(incomingData)
 	if validator.IsErrorNotNil(err) {
@@ -32,4 +33,22 @@ func MongoMapper(incomingData any) (document *bson.D, err error) {
 		return document, err
 	}
 	return
+}
+
+// HexToObjectID converts a hexadecimal string representation of MongoDB ObjectID
+// to its corresponding primitive.ObjectID type.
+// It takes a location string for context in error messages and the id as a string.
+// Returns the converted ObjectID or an error if the conversion fails.
+func HexToObjectIDMapper(location, id string) (primitive.ObjectID, error) {
+	// Convert the hexadecimal string to primitive.ObjectID.
+	objectID, objectIDFromHexError := primitive.ObjectIDFromHex(id)
+	if validator.IsErrorNotNil(objectIDFromHexError) {
+		// If an error occurs, create an internal error with context and log it.
+		internalError := domainError.NewInternalError(location+".HexToObjectID", objectIDFromHexError.Error())
+		logging.Logger(internalError)
+		// Return a default ObjectID and the error.
+		return primitive.NilObjectID, internalError
+	}
+	// Return the successfully converted ObjectID and nil error.
+	return objectID, nil
 }

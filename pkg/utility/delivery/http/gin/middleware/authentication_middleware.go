@@ -99,7 +99,7 @@ func extractAccessToken(ginContext *gin.Context) (string, error) {
 	}
 
 	// Check if the access token is still empty.
-	if validator.IsStringEmpty(accessToken) {
+	if accessToken == constants.EmptyString {
 		// If access token is empty, create and log an HTTP authorization error.
 		httpAuthorizationError := httpError.NewHttpAuthorizationErrorView(location+"extractAcessToken.accessToken", constants.LoggingErrorNotification)
 		logging.Logger(httpAuthorizationError)

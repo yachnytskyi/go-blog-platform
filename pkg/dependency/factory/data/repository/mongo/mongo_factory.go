@@ -33,12 +33,12 @@ func (mongoDBFactory *MongoDBFactory) NewRepository(ctx context.Context) any {
 	mongoConnection := options.Client().ApplyURI(mongoDBFactory.MongoDB.URI)
 	mongoDBFactory.MongoClient, connectError = mongo.Connect(ctx, mongoConnection)
 	db := mongoDBFactory.MongoClient.Database(mongoDBFactory.MongoDB.Name)
-	if validator.IsErrorNotNil(connectError) {
+	if validator.IsError(connectError) {
 		logging.Logger(domainError.NewInternalError(location+"mongoClient.Database", connectError.Error()))
 		return nil
 	}
 	connectError = mongoDBFactory.MongoClient.Ping(ctx, readpref.Primary())
-	if validator.IsErrorNotNil(connectError) {
+	if validator.IsError(connectError) {
 		logging.Logger(domainError.NewInternalError(location+"mongoClient.Ping", connectError.Error()))
 		return nil
 	}

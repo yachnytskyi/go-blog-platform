@@ -35,7 +35,7 @@ func NewPaginationQuery(page, limit int, orderBy, sortOrder string) PaginationQu
 // GetPage converts a string to an integer representing the page number.
 func GetPage(page string) int {
 	intPage, stringConversionError := strconv.Atoi(page)
-	if validator.IsErrorNotNil(stringConversionError) {
+	if validator.IsError(stringConversionError) {
 		intPage, _ = strconv.Atoi(constants.DefaultPage)
 	}
 	if validator.IsIntegerZeroOrNegative(intPage) {
@@ -47,7 +47,7 @@ func GetPage(page string) int {
 // GetLimit converts a string to an integer representing the maximum items per page.
 func GetLimit(limit string) int {
 	intLimit, stringConversionError := strconv.Atoi(limit)
-	if validator.IsErrorNotNil(stringConversionError) {
+	if validator.IsError(stringConversionError) {
 		intLimit, _ = strconv.Atoi(constants.DefaultLimit)
 	}
 	if isLimitNotValid(intLimit) {

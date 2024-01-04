@@ -63,7 +63,7 @@ func (ginFactory *GinFactory) LaunchServer(ctx context.Context, container *appli
 
 	go func() {
 		runError := ginFactory.Router.Run(":" + ginConfig.Port)
-		if validator.IsErrorNotNil(runError) {
+		if validator.IsError(runError) {
 			container.RepositoryFactory.CloseRepository(ctx)
 			runInternalError := domainError.NewInternalError(location+"LaunchServer.Router.Run", runError.Error())
 			logging.Logger(runInternalError)
@@ -74,7 +74,7 @@ func (ginFactory *GinFactory) LaunchServer(ctx context.Context, container *appli
 
 func (ginFactory *GinFactory) CloseServer(ctx context.Context) {
 	shutDownError := ginFactory.Server.Shutdown(ctx)
-	if validator.IsErrorNotNil(shutDownError) {
+	if validator.IsError(shutDownError) {
 		shutDownInternalError := domainError.NewInternalError(location+"CloseServer.Server.Shutdown", shutDownError.Error())
 		logging.Logger(shutDownInternalError)
 	}

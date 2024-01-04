@@ -170,12 +170,12 @@ func validatePassword(password, passwordConfirm, fieldName, fieldRegex string) d
 func isEmailDomainNotValid(emailString string) bool {
 	host := strings.Split(emailString, "@")[1]
 	_, lookupMXError := net.LookupMX(host)
-	return validator.IsErrorNotNil(lookupMXError)
+	return validator.IsError(lookupMXError)
 }
 
 // Compare the encrypted and the user provided passwords.
 func arePasswordsNotEqual(hashedPassword string, checkedPassword string) domainError.ValidationError {
-	if validator.IsErrorNotNil(bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(checkedPassword))) {
+	if validator.IsError(bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(checkedPassword))) {
 		validationError := domainError.NewValidationError(location+"arePasswordsNotEqual.CompareHashAndPassword", emailOrPasswordFields, constants.FieldRequired, passwordsDoNotMatch)
 		logging.Logger(validationError)
 		return validationError

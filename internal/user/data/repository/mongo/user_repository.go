@@ -46,7 +46,7 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 
 	// Count the total number of users to set up pagination.
 	totalUsers, countDocumentsError := userRepository.collection.CountDocuments(ctx, query)
-	if validator.IsErrorNotNil(countDocumentsError) {
+	if validator.IsError(countDocumentsError) {
 		internalError := domainError.NewInternalError(location+"GetAllUsers.collection.CountDocuments", countDocumentsError.Error())
 		logging.Logger(internalError)
 		return commonModel.NewResultOnFailure[userModel.Users](internalError)
@@ -62,7 +62,7 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 
 	// Query the database to fetch users.
 	cursor, cursorFindError := userRepository.collection.Find(ctx, query, &option)
-	if validator.IsErrorNotNil(cursorFindError) {
+	if validator.IsError(cursorFindError) {
 		queryString := commonUtility.ConvertQueryToString(query)
 		entityNotFoundError := domainError.NewEntityNotFoundError(location+"GetAllUsers.Find", queryString, cursorFindError.Error())
 		logging.Logger(entityNotFoundError)
@@ -75,7 +75,7 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 	for cursor.Next(ctx) {
 		user := userRepositoryModel.UserRepository{}
 		cursorDecodeError := cursor.Decode(&user)
-		if validator.IsErrorNotNil(cursorDecodeError) {
+		if validator.IsError(cursorDecodeError) {
 			internalError := domainError.NewInternalError(location+"GetAllUsers.cursor.decode", cursorDecodeError.Error())
 			logging.Logger(internalError)
 			return commonModel.NewResultOnFailure[userModel.Users](internalError)
@@ -84,7 +84,7 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 	}
 
 	cursorError := cursor.Err()
-	if validator.IsErrorNotNil(cursorError) {
+	if validator.IsError(cursorError) {
 		internalError := domainError.NewInternalError(location+"GetAllUsers.cursor.Err", cursorError.Error())
 		logging.Logger(internalError)
 		return commonModel.NewResultOnFailure[userModel.Users](internalError)
@@ -104,7 +104,7 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 // GetUserById retrieves a user by their ID from the database.
 func (userRepository UserRepository) GetUserById(ctx context.Context, userID string) commonModel.Result[userModel.User] {
 	userObjectID, hexToObjectIDMapperError := mongoModel.HexToObjectIDMapper(location+"GetUserById", userID)
-	if validator.IsErrorNotNil(hexToObjectIDMapperError) {
+	if validator.IsError(hexToObjectIDMapperError) {
 		return commonModel.NewResultOnFailure[userModel.User](hexToObjectIDMapperError)
 	}
 
@@ -138,7 +138,7 @@ func (userRepository UserRepository) CheckEmailDuplicate(ctx context.Context, em
 	}
 
 	// If an error occurs during the database query, log it as an internal error.
-	if validator.IsErrorNotNil(userFindOneError) {
+	if validator.IsError(userFindOneError) {
 		userFindOneInternalError := domainError.NewInternalError(location+"CheckEmailDublicate.FindOne.Decode", userFindOneError.Error())
 		logging.Logger(userFindOneInternalError)
 		return userFindOneInternalError
@@ -163,7 +163,7 @@ func (userRepository UserRepository) Register(ctx context.Context, userCreate us
 
 	// Hash the user's password.
 	hashedPassword, hashPasswordError := repositoryUtility.HashPassword(location+"Register", userCreate.Password)
-	if validator.IsErrorNotNil(hashPasswordError) {
+	if validator.IsError(hashPasswordError) {
 		return commonModel.NewResultOnFailure[userModel.User](hashPasswordError)
 	}
 
@@ -177,7 +177,7 @@ func (userRepository UserRepository) Register(ctx context.Context, userCreate us
 
 	// Insert the user data into the database.
 	insertOneResult, insertOneResultError := userRepository.collection.InsertOne(ctx, &userCreateRepository)
-	if validator.IsErrorNotNil(insertOneResultError) {
+	if validator.IsError(insertOneResultError) {
 		internalError := domainError.NewInternalError(location+"Register.InsertOne", insertOneResultError.Error())
 		logging.Logger(internalError)
 		return commonModel.NewResultOnFailure[userModel.User](internalError)
@@ -185,7 +185,7 @@ func (userRepository UserRepository) Register(ctx context.Context, userCreate us
 
 	// Ensure uniqueness of the email field by creating a unique index.
 	ensureUniqueEmailIndexError := userRepository.ensureUniqueEmailIndex(ctx)
-	if validator.IsErrorNotNil(ensureUniqueEmailIndexError) {
+	if validator.IsError(ensureUniqueEmailIndexError) {
 		return commonModel.NewResultOnFailure[userModel.User](ensureUniqueEmailIndexError)
 	}
 
@@ -206,7 +206,7 @@ func (userRepository UserRepository) UpdateCurrentUser(ctx context.Context, user
 	// Map user update data to a repository model.
 	// Set the update timestamp to the current time.
 	userUpdateRepository, userUpdateError := userRepositoryModel.UserUpdateToUserUpdateRepositoryMapper(user)
-	if validator.IsErrorNotNil(userUpdateError) {
+	if validator.IsError(userUpdateError) {
 		return commonModel.NewResultOnFailure[userModel.User](userUpdateError)
 	}
 
@@ -215,7 +215,7 @@ func (userRepository UserRepository) UpdateCurrentUser(ctx context.Context, user
 
 	// Map repository model to a MongoDB model.
 	userUpdateMongo, dataToMongoDocumentMapper := mongoModel.DataToMongoDocumentMapper(location+"UpdateCurrentUser", userUpdateRepository)
-	if validator.IsErrorNotNil(dataToMongoDocumentMapper) {
+	if validator.IsError(dataToMongoDocumentMapper) {
 		return commonModel.NewResultOnFailure[userModel.User](dataToMongoDocumentMapper)
 	}
 
@@ -229,7 +229,7 @@ func (userRepository UserRepository) UpdateCurrentUser(ctx context.Context, user
 	// Decode the updated user from the result.
 	updatedUserRepository := userRepositoryModel.UserRepository{}
 	decodeError := result.Decode(&updatedUserRepository)
-	if validator.IsErrorNotNil(decodeError) {
+	if validator.IsError(decodeError) {
 		userUpdateError := domainError.NewInternalError(location+"UpdateUserById.Decode", decodeError.Error())
 		logging.Logger(userUpdateError)
 		return commonModel.NewResultOnFailure[userModel.User](userUpdateError)
@@ -243,7 +243,7 @@ func (userRepository UserRepository) UpdateCurrentUser(ctx context.Context, user
 // DeleteUserById deletes a user in the repository based on the provided userID.
 func (userRepository UserRepository) DeleteUserById(ctx context.Context, userID string) error {
 	userObjectID, hexToObjectIDMapperError := mongoModel.HexToObjectIDMapper(location+"GetUserById", userID)
-	if validator.IsErrorNotNil(hexToObjectIDMapperError) {
+	if validator.IsError(hexToObjectIDMapperError) {
 		return hexToObjectIDMapperError
 	}
 
@@ -251,7 +251,7 @@ func (userRepository UserRepository) DeleteUserById(ctx context.Context, userID 
 	// Execute the delete query.
 	query := bson.M{"_id": userObjectID}
 	result, userDeleteOneError := userRepository.collection.DeleteOne(ctx, query)
-	if validator.IsErrorNotNil(userDeleteOneError) {
+	if validator.IsError(userDeleteOneError) {
 		deletedUserError := domainError.NewInternalError(location+"Delete.DeleteOne", userDeleteOneError.Error())
 		logging.Logger(deletedUserError)
 		return deletedUserError
@@ -269,7 +269,7 @@ func (userRepository UserRepository) DeleteUserById(ctx context.Context, userID 
 func (userRepository UserRepository) ResetUserPassword(ctx context.Context, firstKey string, firstValue string, secondKey string, passwordKey, password string) error {
 	// Hash the user's password.
 	hashedPassword, hashPasswordError := repositoryUtility.HashPassword(location+"ResetUserPassword", password)
-	if validator.IsErrorNotNil(hashPasswordError) {
+	if validator.IsError(hashPasswordError) {
 		return hashPasswordError
 	}
 
@@ -277,7 +277,7 @@ func (userRepository UserRepository) ResetUserPassword(ctx context.Context, firs
 	update := bson.D{{Key: "$set", Value: bson.D{{Key: passwordKey, Value: hashedPassword}}},
 		{Key: "$unset", Value: bson.D{{Key: firstKey, Value: constants.EmptyString}, {Key: secondKey, Value: constants.EmptyString}}}}
 	result, updateUserPasswordUpdateOneError := userRepository.collection.UpdateOne(ctx, query, update)
-	if validator.IsErrorNotNil(updateUserPasswordUpdateOneError) {
+	if validator.IsError(updateUserPasswordUpdateOneError) {
 		updatedUserPasswordError := domainError.NewInternalError(location+"ResetUserPassword.UpdateOne", updateUserPasswordUpdateOneError.Error())
 		logging.Logger(updatedUserPasswordError)
 		return updatedUserPasswordError
@@ -296,7 +296,7 @@ func (userRepository UserRepository) UpdatePasswordResetTokenUserByEmail(ctx con
 	query := bson.D{{Key: "email", Value: strings.ToLower(email)}}
 	update := bson.D{{Key: "$set", Value: bson.D{{Key: firstKey, Value: firstValue}, {Key: secondKey, Value: secondKey}}}}
 	result, updateUserResetTokenUpdateOneError := userRepository.collection.UpdateOne(ctx, query, update)
-	if validator.IsErrorNotNil(updateUserResetTokenUpdateOneError) {
+	if validator.IsError(updateUserResetTokenUpdateOneError) {
 		updatedUserResetTokenError := domainError.NewInternalError(location+"UpdatePasswordResetTokenUserByEmail.UpdateOne", updateUserResetTokenUpdateOneError.Error())
 		logging.Logger(updatedUserResetTokenError)
 		return updatedUserResetTokenError
@@ -311,7 +311,7 @@ func (userRepository UserRepository) UpdatePasswordResetTokenUserByEmail(ctx con
 
 func (userRepository UserRepository) SendEmailVerificationMessage(ctx context.Context, user userModel.User, data userModel.EmailData) error {
 	sendEmailError := userRepositoryMail.SendEmail(ctx, user, data)
-	if validator.IsErrorNotNil(sendEmailError) {
+	if validator.IsError(sendEmailError) {
 		logging.Logger(sendEmailError)
 		return sendEmailError
 	}
@@ -320,7 +320,7 @@ func (userRepository UserRepository) SendEmailVerificationMessage(ctx context.Co
 
 func (userRepository UserRepository) SendEmailForgottenPasswordMessage(ctx context.Context, user userModel.User, data userModel.EmailData) error {
 	sendEmailError := userRepositoryMail.SendEmail(ctx, user, data)
-	if validator.IsErrorNotNil(sendEmailError) {
+	if validator.IsError(sendEmailError) {
 		logging.Logger(sendEmailError)
 		return sendEmailError
 	}
@@ -338,7 +338,7 @@ func (userRepository UserRepository) ensureUniqueEmailIndex(ctx context.Context)
 	// Create the unique index in the collection.
 	index := mongo.IndexModel{Keys: bson.M{"email": 1}, Options: option}
 	_, userIndexesCreateOneError := userRepository.collection.Indexes().CreateOne(ctx, index)
-	if validator.IsErrorNotNil(userIndexesCreateOneError) {
+	if validator.IsError(userIndexesCreateOneError) {
 		internalError := domainError.NewInternalError(location+"ensureUniqueEmailIndex.Indexes.CreateOne", userIndexesCreateOneError.Error())
 		logging.Logger(internalError)
 		return internalError
@@ -351,7 +351,7 @@ func (userRepository UserRepository) getUserByQuery(ctx context.Context, query b
 	// Initialize a User object and find the user based on the provided query.
 	fetchedUser := userRepositoryModel.UserRepository{}
 	userFindOneError := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
-	if validator.IsErrorNotNil(userFindOneError) {
+	if validator.IsError(userFindOneError) {
 		queryString := commonUtility.ConvertQueryToString(query)
 		entityNotFoundError := domainError.NewEntityNotFoundError(location+"getUserByQuery.Decode", queryString, userFindOneError.Error())
 		logging.Logger(entityNotFoundError)

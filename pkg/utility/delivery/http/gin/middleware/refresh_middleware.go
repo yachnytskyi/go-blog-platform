@@ -22,7 +22,7 @@ func RefreshTokenAuthenticationMiddleware(userUseCase user.UserUseCase) gin.Hand
 
 		// Extract the refresh token from the request.
 		refreshToken, tokenError := extractRefreshToken(ginContext)
-		if validator.IsErrorNotNil(tokenError) {
+		if validator.IsError(tokenError) {
 			// Abort the request with an unauthorized status and respond with a JSON error.
 			abortWithStatusJSON(ginContext, tokenError, http.StatusUnauthorized)
 			return
@@ -33,7 +33,7 @@ func RefreshTokenAuthenticationMiddleware(userUseCase user.UserUseCase) gin.Hand
 
 		// Validate the JWT token.
 		userID, validateRefreshTokenError := domainUtility.ValidateJWTToken(refreshToken, applicationConfig.PublicKey)
-		if validator.IsErrorNotNil(validateRefreshTokenError) {
+		if validator.IsError(validateRefreshTokenError) {
 			// Handle token validation error and respond with an unauthorized status and JSON error.
 			httpAuthorizationError := httpError.NewHttpAuthorizationErrorView(constants.EmptyString, constants.LoggingErrorNotification)
 			abortWithStatusJSON(ginContext, httpAuthorizationError, http.StatusUnauthorized)
@@ -51,7 +51,7 @@ func RefreshTokenAuthenticationMiddleware(userUseCase user.UserUseCase) gin.Hand
 
 		// Get the user information from the user use case.
 		user := userUseCase.GetUserById(ctx, fmt.Sprint(userID))
-		if validator.IsErrorNotNil(user.Error) {
+		if validator.IsError(user.Error) {
 			// Handle user retrieval error and respond with an unauthorized status and JSON error.
 			handledError := httpError.HandleError(user.Error)
 			abortWithStatusJSON(ginContext, handledError, http.StatusUnauthorized)

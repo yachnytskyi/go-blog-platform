@@ -10,7 +10,7 @@ import (
 
 func HashPassword(location, password string) (string, error) {
 	hashedPassword, generateFromPasswordError := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if validator.IsErrorNotNil(generateFromPasswordError) {
+	if validator.IsError(generateFromPasswordError) {
 		internalError := domainError.NewInternalError(location+".HashPassword.bcrypt.GenerateFromPassword", generateFromPasswordError.Error())
 		logging.Logger(internalError)
 		return constants.EmptyString, internalError

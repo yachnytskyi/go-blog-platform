@@ -42,7 +42,7 @@ func UserCreateToUserCreateRepositoryMapper(userCreate userModel.UserCreate) Use
 
 func UserUpdateToUserUpdateRepositoryMapper(userUpdate userModel.UserUpdate) (UserUpdateRepository, error) {
 	userObjectID, hexToObjectIDMapperError := mongoModel.HexToObjectIDMapper(location+"UserUpdateToUserUpdateRepositoryMapper", userUpdate.UserID)
-	if validator.IsErrorNotNil(hexToObjectIDMapperError) {
+	if validator.IsError(hexToObjectIDMapperError) {
 		return UserUpdateRepository{}, hexToObjectIDMapperError
 	}
 	return UserUpdateRepository{

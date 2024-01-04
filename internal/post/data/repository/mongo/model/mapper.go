@@ -33,7 +33,7 @@ func PostRepositoryToPostMapper(postRepository *PostRepository) *postModel.Post 
 
 func PostCreateToPostCreateRepositoryMapper(postCreate *postModel.PostCreate) (*PostCreateRepository, error) {
 	userObjectID, hexToObjectIDMapperError := mongoModel.HexToObjectIDMapper(location+"PostCreateToPostCreateRepositoryMapper", postCreate.UserID)
-	if validator.IsErrorNotNil(hexToObjectIDMapperError) {
+	if validator.IsError(hexToObjectIDMapperError) {
 		return &PostCreateRepository{}, hexToObjectIDMapperError
 	}
 	return &PostCreateRepository{
@@ -49,12 +49,12 @@ func PostCreateToPostCreateRepositoryMapper(postCreate *postModel.PostCreate) (*
 
 func PostUpdateToPostUpdateRepositoryMapper(postUpdate *postModel.PostUpdate) (*PostUpdateRepository, error) {
 	postObjectID, hexToObjectIDMapperError := mongoModel.HexToObjectIDMapper(location+"PostUpdateToPostUpdateRepositoryMapper.postObjectID", postUpdate.PostID)
-	if validator.IsErrorNotNil(hexToObjectIDMapperError) {
+	if validator.IsError(hexToObjectIDMapperError) {
 		return &PostUpdateRepository{}, hexToObjectIDMapperError
 	}
 
 	userObjectID, hexToObjectIDMapperError := mongoModel.HexToObjectIDMapper(location+"PostUpdateToPostUpdateRepositoryMapper.userObjectID", postUpdate.UserID)
-	if validator.IsErrorNotNil(hexToObjectIDMapperError) {
+	if validator.IsError(hexToObjectIDMapperError) {
 		return &PostUpdateRepository{}, hexToObjectIDMapperError
 	}
 	return &PostUpdateRepository{

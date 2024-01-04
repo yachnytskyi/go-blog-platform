@@ -34,7 +34,7 @@ func AuthenticationMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
 
 		// Extract the access token from the request.
 		accessToken, tokenError := extractAccessToken(ginContext)
-		if validator.IsErrorNotNil(tokenError) {
+		if validator.IsError(tokenError) {
 			// Abort the request with an unauthorized status and respond with a JSON error.
 			abortWithStatusJSON(ginContext, tokenError, http.StatusUnauthorized)
 			return
@@ -45,7 +45,7 @@ func AuthenticationMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
 
 		// Validate the JWT token.
 		userID, validateAccessTokenError := domainUtility.ValidateJWTToken(accessToken, accessTokenConfig.PublicKey)
-		if validator.IsErrorNotNil(validateAccessTokenError) {
+		if validator.IsError(validateAccessTokenError) {
 			// Handle token validation error and respond with an unauthorized status and JSON error.
 			httpAuthorizationError := httpError.NewHttpAuthorizationErrorView(constants.EmptyString, constants.LoggingErrorNotification)
 			abortWithStatusJSON(ginContext, httpAuthorizationError, http.StatusUnauthorized)
@@ -63,7 +63,7 @@ func AuthenticationMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
 
 		// Get the user information from the user use case.
 		user := userUseCase.GetUserById(ctx, fmt.Sprint(userID))
-		if validator.IsErrorNotNil(user.Error) {
+		if validator.IsError(user.Error) {
 			// Handle user retrieval error and respond with an unauthorized status and JSON error.
 			handledError := httpError.HandleError(user.Error)
 			abortWithStatusJSON(ginContext, handledError, http.StatusUnauthorized)
@@ -114,7 +114,7 @@ func extractAccessToken(ginContext *gin.Context) (string, error) {
 func extractRefreshToken(ginContext *gin.Context) (string, error) {
 	// Attempt to retrieve the refresh token from the cookie.
 	refreshToken, refreshTokenError := ginContext.Cookie(constants.RefreshTokenValue)
-	if validator.IsErrorNotNil(refreshTokenError) {
+	if validator.IsError(refreshTokenError) {
 		// If refresh token is missing, create and log an HTTP authorization error.
 		httpAuthorizationError := httpError.NewHttpAuthorizationErrorView(location+"extractRefreshToken.refreshToken", constants.LoggingErrorNotification)
 		logging.Logger(httpAuthorizationError)
@@ -145,7 +145,7 @@ func handleDeadlineExceeded(ctx context.Context) error {
 	}
 
 	// Log the unexpected error.
-	if validator.IsErrorNotNil(ctx.Err()) {
+	if validator.IsError(ctx.Err()) {
 		// Log unexpected errors in the context.
 		internalError := httpError.NewHttpInternalErrorView(location+"handleDeadlineExceeded.context.Err", ctx.Err().Error())
 		logging.Logger(internalError)

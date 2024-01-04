@@ -109,7 +109,7 @@ type Email struct {
 
 func LoadConfig() (unmarshalError error) {
 	loadEnvironmentsError := godotenv.Load(environmentsPath + devInvironmentName)
-	if validator.IsErrorNotNil(loadEnvironmentsError) {
+	if validator.IsError(loadEnvironmentsError) {
 		loadEnvironmentsInternalError := domainError.NewInternalError(location+"Load", loadEnvironmentsError.Error())
 		logging.Logger(loadEnvironmentsInternalError)
 		return loadEnvironmentsInternalError
@@ -118,7 +118,7 @@ func LoadConfig() (unmarshalError error) {
 	viper.SetConfigFile(configPath)
 	viper.AutomaticEnv()
 	readInConfigError := viper.ReadInConfig()
-	if validator.IsErrorNotNil(readInConfigError) {
+	if validator.IsError(readInConfigError) {
 		readInInternalError := domainError.NewInternalError(location+"ReadInConfig", readInConfigError.Error())
 		logging.Logger(readInInternalError)
 		return readInInternalError

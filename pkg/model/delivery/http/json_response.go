@@ -44,7 +44,7 @@ func NewJSONResponseOnFailure(err error) JSONResponse {
 func SetStatus(jsonResponse *JSONResponse) {
 	if validator.IsValueNotNil(jsonResponse.Data) {
 		jsonResponse.Status = success
-	} else if validator.IsErrorNotNil(jsonResponse.Error) || validator.IsErrorNotNil(jsonResponse.Errors) {
+	} else if validator.IsError(jsonResponse.Error) || validator.IsError(jsonResponse.Errors) {
 		jsonResponse.Status = fail
 	}
 }

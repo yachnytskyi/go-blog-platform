@@ -59,7 +59,7 @@ func isUserAnonymous(ginContext *gin.Context) string {
 	} else {
 		// If no Bearer token in the Authorization header, try to get the token from the cookie.
 		cookie, cookieError := ginContext.Cookie(constants.AccessTokenValue)
-		if validator.IsErrorNil(cookieError) {
+		if cookieError == nil {
 			anonymousAccessToken = cookie
 		}
 	}

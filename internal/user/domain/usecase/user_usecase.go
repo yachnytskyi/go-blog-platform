@@ -35,7 +35,7 @@ func NewUserUseCase(userRepository user.UserRepository) user.UserUseCase {
 func (userUseCase UserUseCase) GetAllUsers(ctx context.Context, paginationQuery commonModel.PaginationQuery) commonModel.Result[userModel.Users] {
 	// Fetch the users.
 	fetchedUsers := userUseCase.userRepository.GetAllUsers(ctx, paginationQuery)
-	if validator.IsErrorNotNil(fetchedUsers.Error) {
+	if validator.IsError(fetchedUsers.Error) {
 		fetchedUsers.Error = domainError.HandleError(fetchedUsers.Error)
 		return commonModel.NewResultOnFailure[userModel.Users](fetchedUsers.Error)
 	}
@@ -47,7 +47,7 @@ func (userUseCase UserUseCase) GetAllUsers(ctx context.Context, paginationQuery 
 func (userUseCase UserUseCase) GetUserById(ctx context.Context, userID string) commonModel.Result[userModel.User] {
 	// Fetch the user.
 	fetchedUser := userUseCase.userRepository.GetUserById(ctx, userID)
-	if validator.IsErrorNotNil(fetchedUser.Error) {
+	if validator.IsError(fetchedUser.Error) {
 		fetchedUser.Error = domainError.HandleError(fetchedUser.Error)
 		return commonModel.NewResultOnFailure[userModel.User](fetchedUser.Error)
 	}
@@ -67,7 +67,7 @@ func (userUseCase UserUseCase) GetUserByEmail(ctx context.Context, email string)
 
 	// Fetch the user.
 	fetchedUser := userUseCase.userRepository.GetUserByEmail(ctx, email)
-	if validator.IsErrorNotNil(fetchedUser.Error) {
+	if validator.IsError(fetchedUser.Error) {
 		fetchedUser.Error = domainError.HandleError(fetchedUser.Error)
 		return commonModel.NewResultOnFailure[userModel.User](fetchedUser.Error)
 	}
@@ -80,13 +80,13 @@ func (userUseCase UserUseCase) GetUserByEmail(ctx context.Context, email string)
 func (userUseCase UserUseCase) Register(ctx context.Context, userCreateData userModel.UserCreate) commonModel.Result[userModel.User] {
 	// Validate the user creation data.
 	userCreate := validateUserCreate(userCreateData)
-	if validator.IsErrorNotNil(userCreate.Error) {
+	if validator.IsError(userCreate.Error) {
 		return commonModel.NewResultOnFailure[userModel.User](domainError.HandleError(userCreate.Error))
 	}
 
 	// Check for duplicate email.
 	checkEmailDuplicateError := userUseCase.userRepository.CheckEmailDuplicate(ctx, userCreate.Data.Email)
-	if validator.IsErrorNotNil(checkEmailDuplicateError) {
+	if validator.IsError(checkEmailDuplicateError) {
 		checkEmailDuplicateError = domainError.HandleError(checkEmailDuplicateError)
 		return commonModel.NewResultOnFailure[userModel.User](checkEmailDuplicateError)
 	}
@@ -100,7 +100,7 @@ func (userUseCase UserUseCase) Register(ctx context.Context, userCreateData user
 
 	// Register the user.
 	createdUser := userUseCase.userRepository.Register(ctx, userCreate.Data)
-	if validator.IsErrorNotNil(createdUser.Error) {
+	if validator.IsError(createdUser.Error) {
 		createdUser.Error = domainError.HandleError(createdUser.Error)
 		return createdUser
 	}
@@ -109,7 +109,7 @@ func (userUseCase UserUseCase) Register(ctx context.Context, userCreateData user
 	// Send the email verification message and return the created user.
 	emailData := prepareEmailDataForRegistration(ctx, createdUser.Data.Name, tokenValue)
 	sendEmailVerificationMessageError := userUseCase.userRepository.SendEmailVerificationMessage(ctx, createdUser.Data, emailData)
-	if validator.IsErrorNotNil(sendEmailVerificationMessageError) {
+	if validator.IsError(sendEmailVerificationMessageError) {
 		sendEmailVerificationMessageError = domainError.HandleError(sendEmailVerificationMessageError)
 		return commonModel.NewResultOnFailure[userModel.User](sendEmailVerificationMessageError)
 	}
@@ -121,13 +121,13 @@ func (userUseCase UserUseCase) Register(ctx context.Context, userCreateData user
 func (userUseCase UserUseCase) UpdateCurrentUser(ctx context.Context, userUpdateData userModel.UserUpdate) commonModel.Result[userModel.User] {
 	// Validate the user update data.
 	userUpdate := validateUserUpdate(userUpdateData)
-	if validator.IsErrorNotNil(userUpdate.Error) {
+	if validator.IsError(userUpdate.Error) {
 		return commonModel.NewResultOnFailure[userModel.User](domainError.HandleError(userUpdate.Error))
 	}
 
 	// Update the user.
 	updatedUser := userUseCase.userRepository.UpdateCurrentUser(ctx, userUpdate.Data)
-	if validator.IsErrorNotNil(updatedUser.Error) {
+	if validator.IsError(updatedUser.Error) {
 		return commonModel.NewResultOnFailure[userModel.User](domainError.HandleError(updatedUser.Error))
 	}
 	return updatedUser
@@ -136,7 +136,7 @@ func (userUseCase UserUseCase) UpdateCurrentUser(ctx context.Context, userUpdate
 // DeleteUserById deletes a user based on the provided user ID.
 func (userUseCase UserUseCase) DeleteUserById(ctx context.Context, userID string) error {
 	deletedUser := userUseCase.userRepository.DeleteUserById(ctx, userID)
-	if validator.IsErrorNotNil(deletedUser) {
+	if validator.IsError(deletedUser) {
 		return domainError.HandleError(deletedUser)
 	}
 
@@ -152,7 +152,7 @@ func (userUseCase UserUseCase) DeleteUserById(ctx context.Context, userID string
 func (userUseCase UserUseCase) Login(ctx context.Context, userLoginData userModel.UserLogin) commonModel.Result[userModel.UserLogin] {
 	// Validate the user login data.
 	userLogin := validateUserLogin(userLoginData)
-	if validator.IsErrorNotNil(userLogin.Error) {
+	if validator.IsError(userLogin.Error) {
 		return commonModel.NewResultOnFailure[userModel.UserLogin](domainError.HandleError(userLogin.Error))
 	}
 
@@ -182,7 +182,7 @@ func (userUseCase UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.C
 		return handledError
 	}
 	updatedUserError := userUseCase.userRepository.UpdatePasswordResetTokenUserByEmail(ctx, email, firstKey, firstValue, secondKey, secondValue)
-	if validator.IsErrorNotNil(updatedUserError) {
+	if validator.IsError(updatedUserError) {
 		updatedUserError = domainError.HandleError(updatedUserError)
 		return updatedUserError
 	}
@@ -194,19 +194,19 @@ func (userUseCase UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.C
 
 	// Update the user.
 	fetchedUser := userUseCase.GetUserByEmail(ctx, email)
-	if validator.IsErrorNotNil(fetchedUser.Error) {
+	if validator.IsError(fetchedUser.Error) {
 		fetchedUserError := domainError.HandleError(fetchedUser.Error)
 		return fetchedUserError
 	}
 	updatedUserPasswordError := userUseCase.userRepository.UpdatePasswordResetTokenUserByEmail(ctx, fetchedUser.Data.Email, "passwordResetToken", encodedTokenValue, "passwordResetAt", tokenExpirationTime)
-	if validator.IsErrorNotNil(updatedUserPasswordError) {
+	if validator.IsError(updatedUserPasswordError) {
 		updatedUserPasswordError = domainError.HandleError(updatedUserPasswordError)
 		return updatedUserPasswordError
 	}
 
 	emailData := prepareEmailDataForUpdatePasswordResetToken(ctx, fetchedUser.Data.Name, tokenValue)
 	sendEmailForgottenPasswordMessageError := userUseCase.userRepository.SendEmailForgottenPasswordMessage(ctx, fetchedUser.Data, emailData)
-	if validator.IsErrorNotNil(sendEmailForgottenPasswordMessageError) {
+	if validator.IsError(sendEmailForgottenPasswordMessageError) {
 		sendEmailForgottenPasswordMessageError = domainError.HandleError(sendEmailForgottenPasswordMessageError)
 		return sendEmailForgottenPasswordMessageError
 	}
@@ -262,13 +262,13 @@ func generateToken(ctx context.Context, userID string) commonModel.Result[userMo
 
 	// Generate the access token.
 	accessToken, accessTokenGenerationError := domainUtility.GenerateJWTToken(ctx, accessTokenConfig.ExpiredIn, userID, accessTokenConfig.PrivateKey)
-	if validator.IsErrorNotNil(accessTokenGenerationError) {
+	if validator.IsError(accessTokenGenerationError) {
 		return commonModel.NewResultOnFailure[userModel.UserLogin](domainError.HandleError(accessTokenGenerationError))
 	}
 
 	// Generate the refresh token.
 	refreshToken, refreshTokenGenerationError := domainUtility.GenerateJWTToken(ctx, refreshTokenConfig.ExpiredIn, userID, refreshTokenConfig.PrivateKey)
-	if validator.IsErrorNotNil(refreshTokenGenerationError) {
+	if validator.IsError(refreshTokenGenerationError) {
 		return commonModel.NewResultOnFailure[userModel.UserLogin](domainError.HandleError(refreshTokenGenerationError))
 	}
 

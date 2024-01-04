@@ -13,7 +13,7 @@ import (
 func DataToMongoDocumentMapper(location string, incomingData any) (document *bson.D, err error) {
 	// Marshal incoming data to BSON format.
 	data, err := bson.Marshal(incomingData)
-	if validator.IsErrorNotNil(err) {
+	if validator.IsError(err) {
 		// Log and handle the marshaling error.
 		internalError := domainError.NewInternalError(location+"HexToObjectIDMapper.bson.Marshal", err.Error())
 		logging.Logger(internalError)
@@ -22,7 +22,7 @@ func DataToMongoDocumentMapper(location string, incomingData any) (document *bso
 
 	// Unmarshal the BSON data into a BSON document.
 	err = bson.Unmarshal(data, &document)
-	if validator.IsErrorNotNil(err) {
+	if validator.IsError(err) {
 		// Log and handle the unmarshaling error.
 		internalError := domainError.NewInternalError(location+"HexToObjectIDMapper.bson.UnMarshal", err.Error())
 		logging.Logger(internalError)
@@ -38,7 +38,7 @@ func DataToMongoDocumentMapper(location string, incomingData any) (document *bso
 func HexToObjectIDMapper(location, id string) (primitive.ObjectID, error) {
 	// Convert the hexadecimal string to primitive.ObjectID.
 	objectID, objectIDFromHexError := primitive.ObjectIDFromHex(id)
-	if validator.IsErrorNotNil(objectIDFromHexError) {
+	if validator.IsError(objectIDFromHexError) {
 		// If an error occurs, create an internal error with context and log it.
 		internalError := domainError.NewInternalError(location+".HexToObjectIDMapper.primitive.ObjectIDFromHex", objectIDFromHexError.Error())
 		logging.Logger(internalError)

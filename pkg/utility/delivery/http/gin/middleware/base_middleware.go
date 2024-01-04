@@ -21,11 +21,6 @@ import (
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
-const (
-	incomingRequest   = "Incoming request"
-	outcomingResponse = "Outcoming response"
-)
-
 // SecureHeadersMiddleware is a middleware function for adding secure headers.
 func SecureHeadersMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {

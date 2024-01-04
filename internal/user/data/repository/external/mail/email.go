@@ -30,9 +30,10 @@ func ParseTemplateDirectory(templatePath string) (*template.Template, error) {
 			sendEmailInternalError := domainError.NewInternalError(location+"ParseTemplateDirectory.Walk", walkError.Error())
 			return sendEmailInternalError
 		}
-		if validator.IsBooleanNotTrue(info.IsDir()) {
-			paths = append(paths, path)
+		if info.IsDir() {
+			return nil
 		}
+		paths = append(paths, path)
 		return nil
 	})
 	logging.Logger(loggerMessage)

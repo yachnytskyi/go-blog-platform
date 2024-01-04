@@ -74,13 +74,13 @@ func ValidateJWTToken(token string, publicKey string) (any, error) {
 
 	// Extract and validate the claims from the parsed token.
 	claims, ok := parsedToken.Claims.(jwt.MapClaims)
-	if validator.IsBooleanNotTrue(ok) || validator.IsBooleanNotTrue(parsedToken.Valid) {
-		internalError := domainError.NewInternalError(location+"parsedToken.Claims.NotOk", invalidTokenMessage)
-		logging.Logger(internalError)
-		return nil, domainError.HandleError(internalError)
+	if ok && parsedToken.Valid {
+		// claims := value.
+		return claims[userIDClaim], nil
 	}
-	// claims := value.
-	return claims[userIDClaim], nil
+	internalError := domainError.NewInternalError(location+"parsedToken.Claims.NotOk", invalidTokenMessage)
+	logging.Logger(internalError)
+	return nil, domainError.HandleError(internalError)
 }
 
 // decodeBase64String decodes a base64-encoded string into a byte slice.
@@ -141,12 +141,12 @@ func parsePublicKey(decodedPublicKey []byte) (*rsa.PublicKey, error) {
 func parseToken(token string, key *rsa.PublicKey) (*jwt.Token, error) {
 	parsedToken, parseError := jwt.Parse(token, func(t *jwt.Token) (any, error) {
 		_, ok := t.Method.(*jwt.SigningMethodRSA)
-		if validator.IsBooleanNotTrue(ok) {
-			internalError := domainError.NewInternalError(location+"parseToken.jwt.Parse.NotOk", unexpectedMethod+" t.Header[alg]")
-			logging.Logger(internalError)
-			return nil, domainError.HandleError(internalError)
+		if ok {
+			return key, nil
 		}
-		return key, nil
+		internalError := domainError.NewInternalError(location+"parseToken.jwt.Parse.NotOk", unexpectedMethod+" t.Header[alg]")
+		logging.Logger(internalError)
+		return nil, domainError.HandleError(internalError)
 	})
 	if validator.IsErrorNotNil(parseError) {
 		internalError := domainError.NewInternalError(location+"parseToken.jwt.Parse", parseError.Error())

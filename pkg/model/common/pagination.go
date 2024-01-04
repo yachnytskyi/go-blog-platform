@@ -38,7 +38,7 @@ func GetPage(page string) int {
 	if validator.IsError(stringConversionError) {
 		intPage, _ = strconv.Atoi(constants.DefaultPage)
 	}
-	if validator.IsIntegerZeroOrNegative(intPage) {
+	if intPage <= 0 {
 		intPage, _ = strconv.Atoi(constants.DefaultPage)
 	}
 	return intPage
@@ -58,7 +58,7 @@ func GetLimit(limit string) int {
 
 // getSkip calculates the number of items to skip based on the current page and limit.
 func getSkip(page, limit int) int {
-	if validator.IsIntegerZero(page) {
+	if page == 0 {
 		return page
 	}
 	return (page - 1) * limit
@@ -118,7 +118,7 @@ func getPagesLeft(page, totalItems, limit int) int {
 
 // getItemsLeft calculates the number of items remaining on the current page.
 func getItemsLeft(page, totalItems, limit int) int {
-	if validator.IsIntegerNegative(totalItems - (page * limit)) {
+	if (totalItems - (page * limit)) < 0 {
 		return zero
 	}
 	return totalItems - (page * limit)

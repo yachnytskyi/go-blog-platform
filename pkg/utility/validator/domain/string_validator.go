@@ -28,14 +28,14 @@ func SanitizeAndToLowerString(data string) string {
 }
 
 func ValidateField(field, fieldName, fieldRegex, notification string) domainError.ValidationError {
-	if IsStringLengthNotValid(field, constants.MinStringLength, constants.MaxStringLength) {
+	if IsStringLengthInvalid(field, constants.MinStringLength, constants.MaxStringLength) {
 		notification = fmt.Sprintf(constants.StringAllowedLength, constants.MinStringLength, constants.MaxStringLength)
-		validationError := domainError.NewValidationError(location+"ValidateField.IsStringLengthNotValid", fieldName, constants.FieldRequired, notification)
+		validationError := domainError.NewValidationError(location+"ValidateField.IsStringLengthInvalid", fieldName, constants.FieldRequired, notification)
 		logging.Logger(validationError)
 		return validationError
 	}
-	if IsStringCharactersNotValid(field, fieldRegex) {
-		validationError := domainError.NewValidationError(location+"ValidateField.IsStringCharactersNotValid", fieldName, constants.FieldRequired, notification)
+	if AreStringCharactersInvalid(field, fieldRegex) {
+		validationError := domainError.NewValidationError(location+"ValidateField.AreStringCharactersInvalid", fieldName, constants.FieldRequired, notification)
 		logging.Logger(validationError)
 		return validationError
 	}
@@ -43,50 +43,32 @@ func ValidateField(field, fieldName, fieldRegex, notification string) domainErro
 }
 
 func ValidateOptionalField(field, fieldName, fieldType, fieldRegex, notification string) domainError.ValidationError {
-	if IsStringLengthNotValid(field, constants.MinOptionalStringLength, constants.MaxStringLength) {
+	if IsStringLengthInvalid(field, constants.MinOptionalStringLength, constants.MaxStringLength) {
 		notification = fmt.Sprintf(constants.StringOptionalAllowedLength, constants.MaxStringLength)
-		validationError := domainError.NewValidationError(location+"ValidateOptionalField.IsStringLengthNotValid", fieldName, fieldType, notification)
+		validationError := domainError.NewValidationError(location+"ValidateOptionalField.IsStringLengthInvalid", fieldName, fieldType, notification)
 		logging.Logger(validationError)
 		return validationError
 	}
-	if IsStringCharactersNotValid(field, fieldRegex) {
-		validationError := domainError.NewValidationError(location+"ValidateField.IsStringCharactersNotValid", fieldName, fieldType, notification)
+	if AreStringCharactersInvalid(field, fieldRegex) {
+		validationError := domainError.NewValidationError(location+"ValidateField.AreStringCharactersInvalid", fieldName, fieldType, notification)
 		logging.Logger(validationError)
 		return validationError
 	}
 	return domainError.ValidationError{}
 }
 
-func IsStringLengthValid(checkedString string, minLength int, maxLength int) bool {
-	if len(checkedString) < minLength || len(checkedString) > maxLength {
-		return false
-	}
-	return true
-}
-
-func IsStringLengthNotValid(checkedString string, minLength int, maxLength int) bool {
+func IsStringLengthInvalid(checkedString string, minLength int, maxLength int) bool {
 	if len(checkedString) < minLength || len(checkedString) > maxLength {
 		return true
 	}
 	return false
 }
 
-func IsStringCharactersValid(checkedString string, regexString string) bool {
-	return regexp.MustCompile(regexString).MatchString(checkedString)
-}
-
-func IsStringCharactersNotValid(checkedString string, regexString string) bool {
+func AreStringCharactersInvalid(checkedString string, regexString string) bool {
 	return !regexp.MustCompile(regexString).MatchString(checkedString)
 }
 
-func CheckCorrectLengthOptionalString(checkedString string, minLength int, maxLength int) bool {
-	if len(checkedString) < minLength || len(checkedString) > maxLength {
-		return false
-	}
-	return true
-}
-
-func CheckIncorrectLengthOptionalString(checkedString string, minLength int, maxLength int) bool {
+func IsOptionalStringLengthInvalid(checkedString string, minLength int, maxLength int) bool {
 	if len(checkedString) < minLength || len(checkedString) > maxLength {
 		return true
 	}

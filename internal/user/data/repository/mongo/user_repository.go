@@ -89,7 +89,7 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 		logging.Logger(internalError)
 		return commonModel.NewResultOnFailure[userModel.Users](internalError)
 	}
-	if validator.IsSliceEmpty(fetchedUsers) {
+	if len(fetchedUsers) == 0 {
 		return commonModel.NewResultOnSuccess[userModel.Users](userModel.Users{})
 	}
 

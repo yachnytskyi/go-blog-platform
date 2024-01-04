@@ -127,18 +127,21 @@ func (userRepository UserRepository) GetUserByEmail(ctx context.Context, email s
 // It returns an error if the email is already associated with a user, or nil if the email is unique.
 func (userRepository UserRepository) CheckEmailDuplicate(ctx context.Context, email string) error {
 	// Initialize a User object and define th MongoDB query to find the user by Email.
+	fetchedUser := userRepositoryModel.UserRepository{}
 	query := bson.M{"email": email}
 
 	// Find and decode the user.
 	// If no user is found, return nil (indicating that the email is unique).
-	user := userRepository.getUserByQuery(ctx, query)
-	if validator.IsValueNil(user) {
+	userFindOneError := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
+	if validator.IsValueNil(fetchedUser) {
 		return nil
 	}
 
 	// If an error occurs during the database query, log it as an internal error.
-	if validator.IsErrorNotNil(user.Error) {
-		return user.Error
+	if validator.IsErrorNotNil(userFindOneError) {
+		userFindOneInternalError := domainError.NewInternalError(location+"CheckEmailDublicate.FindOne.Decode", userFindOneError.Error())
+		logging.Logger(userFindOneInternalError)
+		return userFindOneInternalError
 	}
 
 	// If a user with the given email is found, return a validation error.
@@ -350,7 +353,7 @@ func (userRepository UserRepository) getUserByQuery(ctx context.Context, query b
 	userFindOneError := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
 	if validator.IsErrorNotNil(userFindOneError) {
 		queryString := commonUtility.ConvertQueryToString(query)
-		entityNotFoundError := domainError.NewEntityNotFoundError(location+".getUserByQuery.Decode", queryString, userFindOneError.Error())
+		entityNotFoundError := domainError.NewEntityNotFoundError(location+"getUserByQuery.Decode", queryString, userFindOneError.Error())
 		logging.Logger(entityNotFoundError)
 		return commonModel.NewResultOnFailure[userModel.User](entityNotFoundError)
 	}

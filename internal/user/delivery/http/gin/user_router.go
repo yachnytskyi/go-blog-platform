@@ -39,6 +39,10 @@ func (userRouter UserRouter) UserRouter(routerGroup any, userUseCase user.UserUs
 	router := ginRouterGroup.Group(groupPath)
 
 	// Public routes.
+	router.GET(constants.EmptyString, func(ginContext *gin.Context) {
+		userRouter.userController.GetAllUsers(ginContext)
+	})
+
 	router.GET(getUserByIdPath+constants.UserIDContext, func(ginContext *gin.Context) {
 		userRouter.userController.GetUserById(ginContext)
 	})
@@ -63,10 +67,6 @@ func (userRouter UserRouter) UserRouter(routerGroup any, userUseCase user.UserUs
 	authRoutes := router.Group("").Use(httpGinMiddleware.AuthenticationMiddleware(userUseCase))
 	{
 		// User actions.
-		authRoutes.GET(constants.EmptyString, func(ginContext *gin.Context) {
-			userRouter.userController.GetAllUsers(ginContext)
-		})
-
 		authRoutes.GET(getCurrentUserPath, func(ginContext *gin.Context) {
 			userRouter.userController.GetCurrentUser(ginContext)
 		})

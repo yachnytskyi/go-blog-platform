@@ -59,7 +59,7 @@ func NewHttpAuthorizationErrorView(location, notification string) HttpAuthorizat
 }
 
 func (err HttpAuthorizationErrorView) Error() string {
-	return fmt.Sprintf("location" + err.Location + " notification: " + err.Notification)
+	return fmt.Sprintf("location: " + err.Location + " notification: " + err.Notification)
 }
 
 type HttpEntityNotFoundErrorView struct {
@@ -93,6 +93,22 @@ func NewHttpPaginationErrorView(currentPage, totalPages, notification string) Ht
 func (httpPaginationErrorView HttpPaginationErrorView) Error() string {
 	return fmt.Sprintf("current page: " + httpPaginationErrorView.CurrentPage + " total pages: " +
 		httpPaginationErrorView.TotalPages + " notification: " + httpPaginationErrorView.Notification)
+}
+
+type HttpRequestErrorView struct {
+	RequestType  string `json:"request_type"`
+	Notification string `json:"notification"`
+}
+
+func NewHttpRequestErrorView(requestType, notification string) HttpRequestErrorView {
+	return HttpRequestErrorView{
+		RequestType:  requestType,
+		Notification: notification,
+	}
+}
+
+func (httpRequestErrorView HttpRequestErrorView) Error() string {
+	return fmt.Sprintf("request type: " + httpRequestErrorView.RequestType + " notification: " + httpRequestErrorView.Notification)
 }
 
 type HttpInternalErrorView struct {

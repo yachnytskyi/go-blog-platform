@@ -41,10 +41,10 @@ func AuthenticationMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
 		}
 
 		// Get the application configuration.
-		applicationConfig := config.AppConfig
+		accessTokenConfig := config.AppConfig.AccessToken
 
 		// Validate the JWT token.
-		userID, validateAccessTokenError := domainUtility.ValidateJWTToken(accessToken, applicationConfig.AccessToken.PublicKey)
+		userID, validateAccessTokenError := domainUtility.ValidateJWTToken(accessToken, accessTokenConfig.PublicKey)
 		if validator.IsErrorNotNil(validateAccessTokenError) {
 			// Handle token validation error and respond with an unauthorized status and JSON error.
 			httpAuthorizationError := httpError.NewHttpAuthorizationErrorView(constants.EmptyString, constants.LoggingErrorNotification)
@@ -127,6 +127,7 @@ func extractRefreshToken(ginContext *gin.Context) (string, error) {
 
 // abortWithStatusJSON aborts the request, logs the error, and responds with a JSON error.
 func abortWithStatusJSON(ginContext *gin.Context, err error, httpCode int) {
+	logging.Logger(err)
 	jsonResponse := httpModel.NewJSONResponseOnFailure(err)
 	ginContext.AbortWithStatusJSON(httpCode, jsonResponse)
 }

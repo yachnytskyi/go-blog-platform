@@ -29,7 +29,7 @@ func NewJSONResponseOnSuccess(data any) JSONResponse {
 
 // NewJSONResponseOnFailure creates a JSON response for a failed operation.
 // It sets the "Status" field to fail and determines whether to populate "Error" or "Errors" based on the provided error.
-func NewJSONResponseOnFailure(err any) JSONResponse {
+func NewJSONResponseOnFailure(err error) JSONResponse {
 	jsonResponse := JSONResponse{Status: fail}
 	switch errorType := err.(type) {
 	case domainError.Errors:
@@ -44,7 +44,7 @@ func NewJSONResponseOnFailure(err any) JSONResponse {
 func SetStatus(jsonResponse *JSONResponse) {
 	if validator.IsValueNotNil(jsonResponse.Data) {
 		jsonResponse.Status = success
-	} else if validator.IsErrorNotNil(jsonResponse.Error) || validator.IsErrorNotNil(jsonResponse.Error) {
+	} else if validator.IsErrorNotNil(jsonResponse.Error) || validator.IsErrorNotNil(jsonResponse.Errors) {
 		jsonResponse.Status = fail
 	}
 }

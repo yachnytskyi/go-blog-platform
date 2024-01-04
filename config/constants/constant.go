@@ -69,6 +69,9 @@ const (
 	EntityNotFoundErrorNotification = "Sorry, the requested item does not exist in our records."
 	PaginationErrorNotification     = "Sorry, there was an issue with the pagination request. Please check your parameters and try again."
 	InternalErrorNotification       = "Oops! Something went wrong on our end. Please try again later or contact our support team for assistance."
+	InvalidHTTPMethodNotification   = "Invalid HTTP method"
+	InvalidContentTypeNotification  = "Invalid content type"
+	InvalidHeaderFormat             = "Invalid header format"
 
 	// Databases.
 	MongoDB = "MongoDB"

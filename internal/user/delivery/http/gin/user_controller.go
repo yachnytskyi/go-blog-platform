@@ -227,15 +227,16 @@ func (userController UserController) RefreshAccessToken(controllerContext any) {
 		return
 	}
 
-	applicationConfig := config.AppConfig
-	userID, validateTokenError := domainUtility.ValidateJWTToken(cookie, applicationConfig.RefreshToken.PublicKey)
+	accessTokenConfig := config.AppConfig.AccessToken
+	refreshTokenConfig := config.AppConfig.RefreshToken
+	userID, validateTokenError := domainUtility.ValidateJWTToken(cookie, refreshTokenConfig.PublicKey)
 	if validator.IsErrorNotNil(validateTokenError) {
 		jsonResponse := httpModel.NewJSONResponseOnFailure(httpError.HandleError(validateTokenError))
 		ginContext.JSON(constants.StatusBadRequest, jsonResponse)
 		return
 	}
 
-	accessToken, createTokenError := domainUtility.GenerateJWTToken(ctx, applicationConfig.AccessToken.ExpiredIn, userID, applicationConfig.AccessToken.PrivateKey)
+	accessToken, createTokenError := domainUtility.GenerateJWTToken(ctx, accessTokenConfig.ExpiredIn, userID, accessTokenConfig.PrivateKey)
 	if validator.IsErrorNotNil(createTokenError) {
 		jsonResponse := httpModel.NewJSONResponseOnFailure(httpError.HandleError(createTokenError))
 		ginContext.JSON(constants.StatusBadRequest, jsonResponse)
@@ -243,7 +244,7 @@ func (userController UserController) RefreshAccessToken(controllerContext any) {
 	}
 
 	// Generate a new refresh token (optional, based on your requirements).
-	newRefreshToken, newRefreshTokenError := domainUtility.GenerateJWTToken(ctx, applicationConfig.RefreshToken.ExpiredIn, userID, applicationConfig.RefreshToken.PrivateKey)
+	newRefreshToken, newRefreshTokenError := domainUtility.GenerateJWTToken(ctx, refreshTokenConfig.ExpiredIn, userID, refreshTokenConfig.PrivateKey)
 	if validator.IsErrorNotNil(newRefreshTokenError) {
 		jsonResponse := httpModel.NewJSONResponseOnFailure(httpError.HandleError(newRefreshTokenError))
 		ginContext.JSON(constants.StatusBadRequest, jsonResponse)
@@ -325,38 +326,42 @@ func (userController UserController) ResetUserPassword(controllerContext any) {
 // It is typically used during user login to store authentication-related information.
 func setLoginCookies(ginContext *gin.Context, accessToken, refreshToken string) {
 	// Retrieve application configuration for cookie settings.
-	applicationConfig := config.AppConfig
+	accessTokenConfig := config.AppConfig.AccessToken
+	refreshTokenConfig := config.AppConfig.RefreshToken
+	securityConfig := config.AppConfig.Security
 
 	// Set the access token cookie with the provided value and configuration.
-	ginContext.SetCookie(constants.AccessTokenValue, accessToken, applicationConfig.AccessToken.MaxAge, "/", constants.TokenDomainValue,
-		applicationConfig.Token.CookieSecure, true)
+	ginContext.SetCookie(constants.AccessTokenValue, accessToken, accessTokenConfig.MaxAge, "/", constants.TokenDomainValue,
+		securityConfig.CookieSecure, true)
 
 	// Set the refresh token cookie with the provided value and configuration.
-	ginContext.SetCookie(constants.RefreshTokenValue, refreshToken, applicationConfig.RefreshToken.MaxAge, "/", constants.TokenDomainValue,
-		applicationConfig.Token.CookieSecure, true)
+	ginContext.SetCookie(constants.RefreshTokenValue, refreshToken, refreshTokenConfig.MaxAge, "/", constants.TokenDomainValue,
+		securityConfig.CookieSecure, true)
 
 	// Set the "Logged In" flag cookie to indicate the user is authenticated.
-	ginContext.SetCookie(constants.LoggedInValue, constants.True, applicationConfig.AccessToken.MaxAge, "/", constants.TokenDomainValue,
-		applicationConfig.Token.CookieSecure, false)
+	ginContext.SetCookie(constants.LoggedInValue, constants.True, accessTokenConfig.MaxAge, "/", constants.TokenDomainValue,
+		securityConfig.CookieSecure, false)
 }
 
 // setRefreshTokenCookies sets cookies in the response for the given access and refresh tokens.
 // It is typically used when refreshing the access token.
 func setRefreshTokenCookies(ginContext *gin.Context, accessToken, refreshToken string) {
 	// Retrieve application configuration for cookie settings.
-	applicationConfig := config.AppConfig
+	accessTokenConfig := config.AppConfig.AccessToken
+	refreshTokenConfig := config.AppConfig.RefreshToken
+	securityConfig := config.AppConfig.Security
 
 	// Set the access token cookie with the provided value and configuration.
-	ginContext.SetCookie(constants.AccessTokenValue, accessToken, applicationConfig.AccessToken.MaxAge, "/", constants.TokenDomainValue,
-		applicationConfig.Token.CookieSecure, true)
+	ginContext.SetCookie(constants.AccessTokenValue, accessToken, accessTokenConfig.MaxAge, "/", constants.TokenDomainValue,
+		securityConfig.CookieSecure, true)
 
 	// Set the refresh token cookie with the provided value and configuration (optional).
 	if validator.IsStringNotEmpty(refreshToken) {
-		ginContext.SetCookie(constants.RefreshTokenValue, refreshToken, applicationConfig.RefreshToken.MaxAge, "/", constants.TokenDomainValue,
-			applicationConfig.Token.CookieSecure, true)
+		ginContext.SetCookie(constants.RefreshTokenValue, refreshToken, refreshTokenConfig.MaxAge, "/", constants.TokenDomainValue,
+			securityConfig.CookieSecure, true)
 	}
 
 	// Set the "Logged In" flag cookie to indicate the user is still logged in.
-	ginContext.SetCookie(constants.LoggedInValue, constants.True, applicationConfig.AccessToken.MaxAge, "/", constants.TokenDomainValue,
-		applicationConfig.Token.CookieSecure, false)
+	ginContext.SetCookie(constants.LoggedInValue, constants.True, accessTokenConfig.MaxAge, "/", constants.TokenDomainValue,
+		securityConfig.CookieSecure, false)
 }

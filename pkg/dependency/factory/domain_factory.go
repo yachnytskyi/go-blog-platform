@@ -17,13 +17,14 @@ const (
 )
 
 func InjectDomain(ctx context.Context, container *applicationModel.Container) {
-	applicationConfig := config.AppConfig
-	switch applicationConfig.Core.Domain {
+	coreConfig := config.AppConfig.Core
+
+	switch coreConfig.Domain {
 	case constants.UseCase:
 		container.DomainFactory = useCaseFactory.UseCaseFactory{}
 	// Add other domain options here as needed.
 	default:
-		notification := fmt.Sprintf(unsupportedDomain, applicationConfig.Core.Domain)
+		notification := fmt.Sprintf(unsupportedDomain, coreConfig.Domain)
 		logging.Logger(domainError.NewInternalError(location+".loadConfig.Domain:", notification))
 		applicationModel.GracefulShutdown(ctx, container)
 	}

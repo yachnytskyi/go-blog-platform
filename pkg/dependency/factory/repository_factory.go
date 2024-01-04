@@ -18,13 +18,15 @@ const (
 )
 
 func InjectRepository(ctx context.Context, container *applicationModel.Container) {
-	applicationConfig := config.AppConfig
-	switch applicationConfig.Core.Database {
+	coreConfig := config.AppConfig.Core
+	mongoDBConfig := config.AppConfig.MongoDB
+
+	switch coreConfig.Database {
 	case constants.MongoDB:
-		container.RepositoryFactory = &mongoDBFactory.MongoDBFactory{MongoDB: applicationConfig.MongoDB}
+		container.RepositoryFactory = &mongoDBFactory.MongoDBFactory{MongoDB: mongoDBConfig}
 	// Add other database cases here as needed.
 	default:
-		notification := fmt.Sprintf(unsupportedDatabase, applicationConfig.Core.Database)
+		notification := fmt.Sprintf(unsupportedDatabase, coreConfig.Database)
 		logging.Logger(domainError.NewInternalError(location+".applicationConfig.Core.Database:", notification))
 		applicationModel.GracefulShutdown(ctx, container)
 	}

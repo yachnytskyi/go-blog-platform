@@ -28,11 +28,11 @@ func RefreshTokenAuthenticationMiddleware(userUseCase user.UserUseCase) gin.Hand
 			return
 		}
 
-		// Get the application configuration.
-		applicationConfig := config.AppConfig
+		// Get the refresh token configuration.
+		applicationConfig := config.AppConfig.RefreshToken
 
 		// Validate the JWT token.
-		userID, validateRefreshTokenError := domainUtility.ValidateJWTToken(refreshToken, applicationConfig.RefreshToken.PublicKey)
+		userID, validateRefreshTokenError := domainUtility.ValidateJWTToken(refreshToken, applicationConfig.PublicKey)
 		if validator.IsErrorNotNil(validateRefreshTokenError) {
 			// Handle token validation error and respond with an unauthorized status and JSON error.
 			httpAuthorizationError := httpError.NewHttpAuthorizationErrorView(constants.EmptyString, constants.LoggingErrorNotification)

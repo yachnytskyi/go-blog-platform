@@ -32,9 +32,9 @@ const (
 type ApplicationConfig struct {
 	Core         Core         `mapstructure:"Core"`
 	MongoDB      MongoDB      `mapstructure:"MongoDB"`
+	Security     Security     `mapstructure:"Security"`
 	Gin          Gin          `mapstructure:"Gin"`
 	GRPC         GRPC         `mapstructure:"Grpc"`
-	Token        Token        `mapstructure:"Token"`
 	AccessToken  AccessToken  `mapstructure:"Access_Token"`
 	RefreshToken RefreshToken `mapstructure:"Refresh_Token"`
 	Email        Email        `mapstructure:"Email"`
@@ -44,6 +44,24 @@ type Core struct {
 	Database string `mapstructure:"Database"`
 	Domain   string `mapstructure:"Domain"`
 	Delivery string `mapstructure:"Delivery"`
+}
+
+type Security struct {
+	CookieSecure                    bool     `mapstructure:"Cookie_Secure"`
+	HttpOnly                        bool     `mapstructure:"Http_Only"`
+	RateLimit                       float64  `mapstructure:"Rate_Limit"`
+	ContentSecurityPolicyHeader     Header   `mapstructure:"Content_Security_Policy_Header"`
+	ContentSecurityPolicyHeaderFull Header   `mapstructure:"Content_Security_Policy_Header_Full"`
+	StrictTransportSecurityHeader   Header   `mapstructure:"Strict_Transport_Security_Header"`
+	XContentTypeOptionsHeader       Header   `mapstructure:"X_Content_Type_Options_Header"`
+	AllowedHTTPMethods              []string `mapstructure:"Allowed_HTTP_Methods"`
+	AllowedContentTypes             []string `mapstructure:"Allowed_Content_Types"`
+}
+
+type Header struct {
+	Key   string `mapstructure:"Key"`
+	Value string `mapstructure:"Value"`
+	// You can add more fields if needed
 }
 
 type MongoDB struct {
@@ -60,11 +78,6 @@ type Gin struct {
 
 type GRPC struct {
 	ServerUrl string `mapstructure:"Server_Url"`
-}
-
-type Token struct {
-	CookieSecure bool `mapstructure:"Cookie_Secure"`
-	HttpOnly     bool `mapstructure:"Http_Only"`
 }
 
 type AccessToken struct {

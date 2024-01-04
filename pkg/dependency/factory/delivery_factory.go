@@ -17,13 +17,15 @@ const (
 )
 
 func InjectDelivery(ctx context.Context, container *applicationModel.Container) {
-	applicationConfig := config.AppConfig
-	switch applicationConfig.Core.Delivery {
+	coreConfig := config.AppConfig.Core
+	ginConfig := config.AppConfig.Gin
+
+	switch coreConfig.Delivery {
 	case constants.Gin:
-		container.DeliveryFactory = &ginFactory.GinFactory{Gin: applicationConfig.Gin}
+		container.DeliveryFactory = &ginFactory.GinFactory{Gin: ginConfig}
 	// Add other domain options here as needed.
 	default:
-		notification := fmt.Sprintf(unsupportedDelivery, applicationConfig.Core.Delivery)
+		notification := fmt.Sprintf(unsupportedDelivery, coreConfig.Delivery)
 		logging.Logger(domainError.NewInternalError(location+".loadConfig.Delivery:", notification))
 		applicationModel.GracefulShutdown(ctx, container)
 	}

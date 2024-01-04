@@ -21,6 +21,8 @@ func HandleError(err error) error {
 		return PaginationErrorToHttpPaginationErrorViewMapper(errorType)
 	case HttpAuthorizationErrorView:
 		return errorType
+	case HttpRequestErrorView:
+		return errorType
 	case HttpInternalErrorView:
 		errorType.Notification = constants.InternalErrorNotification
 		return errorType

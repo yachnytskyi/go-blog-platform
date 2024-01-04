@@ -222,9 +222,9 @@ func (userUseCase UserUseCase) ResetUserPassword(ctx context.Context, firstKey s
 // It takes the context, user name, token value, email subject, URL, template name, and template path as input.
 // It constructs an EmailData model and returns it in a Result.
 func prepareEmailData(ctx context.Context, userName, tokenValue, subject, url, templateName, templatePath string) userModel.EmailData {
-	applicationConfig := config.AppConfig
+	emailConfig := config.AppConfig.Email
 	userFirstName := domainUtility.UserFirstName(userName)
-	emailData := userModel.NewEmailData(applicationConfig.Email.ClientOriginUrl+url+tokenValue, templateName, templatePath, userFirstName, subject)
+	emailData := userModel.NewEmailData(emailConfig.ClientOriginUrl+url+tokenValue, templateName, templatePath, userFirstName, subject)
 	return emailData
 }
 
@@ -232,18 +232,18 @@ func prepareEmailData(ctx context.Context, userName, tokenValue, subject, url, t
 // It takes the context, user name, and token value as input and uses the constants for email subject, URL, template name, and template path.
 // It internally calls prepareEmailData with the appropriate parameters and returns the result.
 func prepareEmailDataForRegistration(ctx context.Context, userName, tokenValue string) userModel.EmailData {
-	applicationConfig := config.AppConfig
+	emailConfig := config.AppConfig.Email
 	return prepareEmailData(ctx, userName, tokenValue, constants.EmailConfirmationSubject, constants.EmailConfirmationUrl,
-		applicationConfig.Email.UserConfirmationTemplateName, applicationConfig.Email.UserConfirmationTemplatePath)
+		emailConfig.UserConfirmationTemplateName, emailConfig.UserConfirmationTemplatePath)
 }
 
 // prepareEmailDataForUserUpdate is a helper function to prepare an EmailData model specifically for updating user information.
 // It takes the context, user name, and token value as input and uses the constants for email subject, URL, template name, and template path.
 // It internally calls prepareEmailData with the appropriate parameters and returns the result.
 func prepareEmailDataForUpdatePasswordResetToken(ctx context.Context, userName, tokenValue string) userModel.EmailData {
-	applicationConfig := config.AppConfig
+	emailConfig := config.AppConfig.Email
 	return prepareEmailData(ctx, userName, tokenValue, constants.ForgottenPasswordSubject, constants.ForgottenPasswordUrl,
-		applicationConfig.Email.ForgottenPasswordTemplateName, applicationConfig.Email.ForgottenPasswordTemplatePath)
+		emailConfig.ForgottenPasswordTemplateName, emailConfig.ForgottenPasswordTemplatePath)
 }
 
 // generateToken generates access and refresh tokens for a user.
@@ -257,16 +257,17 @@ func generateToken(ctx context.Context, userID string) commonModel.Result[userMo
 	var userLogin userModel.UserLogin
 
 	// Retrieve application configuration.
-	applicationConfig := config.AppConfig
+	accessTokenConfig := config.AppConfig.AccessToken
+	refreshTokenConfig := config.AppConfig.RefreshToken
 
 	// Generate the access token.
-	accessToken, accessTokenGenerationError := domainUtility.GenerateJWTToken(ctx, applicationConfig.AccessToken.ExpiredIn, userID, applicationConfig.AccessToken.PrivateKey)
+	accessToken, accessTokenGenerationError := domainUtility.GenerateJWTToken(ctx, accessTokenConfig.ExpiredIn, userID, accessTokenConfig.PrivateKey)
 	if validator.IsErrorNotNil(accessTokenGenerationError) {
 		return commonModel.NewResultOnFailure[userModel.UserLogin](domainError.HandleError(accessTokenGenerationError))
 	}
 
 	// Generate the refresh token.
-	refreshToken, refreshTokenGenerationError := domainUtility.GenerateJWTToken(ctx, applicationConfig.RefreshToken.ExpiredIn, userID, applicationConfig.RefreshToken.PrivateKey)
+	refreshToken, refreshTokenGenerationError := domainUtility.GenerateJWTToken(ctx, refreshTokenConfig.ExpiredIn, userID, refreshTokenConfig.PrivateKey)
 	if validator.IsErrorNotNil(refreshTokenGenerationError) {
 		return commonModel.NewResultOnFailure[userModel.UserLogin](domainError.HandleError(refreshTokenGenerationError))
 	}

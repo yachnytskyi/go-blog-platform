@@ -3,6 +3,34 @@ Core:
   Domain: UseCase
   Delivery: Gin
 
+Security:
+  Cookie_Secure: true
+  Http_Only: false
+  Rate_Limit: 5.0
+  Content_Security_Policy_Header:
+    Key: "Content-Security-Policy"
+    Value: "default-src 'self'"
+  Content_Security_Policy_Header_Full:
+    Key: "Content-Security-Policy"
+    Value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';"
+  Strict_Transport_Security_Header:
+    Key: "X-Content-Type-Options"
+    Value: "max-age=31536000; includeSubDomains; preload"
+  X_Content_Type_Options_Header:
+    Key: "X-Content-Type-Options"
+    Value: "nosniff"
+  Allowed_HTTP_Methods: 
+    - GET
+    - POST
+    - PUT
+    - PATCH
+    - DELETE
+    # Add other allowed http methods as needed
+  Allowed_Content_Types:
+    - application/json
+    - application/grpc
+    # Add other allowed content types as needed
+
 MongoDB:
   Name:  golang_mongodb
   URI: mongodb://root:root@localhost:27017/golang_mongodb

@@ -13,6 +13,7 @@ import (
 	userDelivery "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin"
 	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	httpGinMiddleware "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/middleware"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
@@ -33,12 +34,18 @@ const (
 )
 
 func (ginFactory *GinFactory) InitializeServer(serverConfig applicationModel.ServerRouters) {
-	applicationConfig := config.AppConfig
+	ginConfig := config.AppConfig.Gin
 	ginFactory.Router = gin.Default()
+	ginFactory.Router.Use(httpGinMiddleware.ValidateInput())
+	ginFactory.Router.Use(httpGinMiddleware.SecureHeadersMiddleware())
+	ginFactory.Router.Use(httpGinMiddleware.CSPMiddleware())
+	ginFactory.Router.Use(httpGinMiddleware.RateLimitMiddleware())
+	ginFactory.Router.Use(httpGinMiddleware.LoggingMiddleware())
+
 	corsConfig := cors.DefaultConfig()
-	corsConfig.AllowOrigins = []string{applicationConfig.Gin.AllowOrigins}
-	corsConfig.AllowCredentials = applicationConfig.Gin.AllowCredentials
-	router := ginFactory.Router.Group(applicationConfig.Gin.ServerGroup)
+	corsConfig.AllowOrigins = []string{ginConfig.AllowOrigins}
+	corsConfig.AllowCredentials = ginConfig.AllowCredentials
+	router := ginFactory.Router.Group(ginConfig.ServerGroup)
 	ginFactory.Router.Use(cors.New(corsConfig))
 
 	// Routers
@@ -52,10 +59,10 @@ func (ginFactory *GinFactory) InitializeServer(serverConfig applicationModel.Ser
 }
 
 func (ginFactory *GinFactory) LaunchServer(ctx context.Context, container *applicationModel.Container) {
-	applicationConfig := config.AppConfig
+	ginConfig := config.AppConfig.Gin
 
 	go func() {
-		runError := ginFactory.Router.Run(":" + applicationConfig.Gin.Port)
+		runError := ginFactory.Router.Run(":" + ginConfig.Port)
 		if validator.IsErrorNotNil(runError) {
 			container.RepositoryFactory.CloseRepository(ctx)
 			runInternalError := domainError.NewInternalError(location+"LaunchServer.Router.Run", runError.Error())

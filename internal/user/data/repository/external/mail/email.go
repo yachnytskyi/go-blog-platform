@@ -44,11 +44,11 @@ func ParseTemplateDirectory(templatePath string) (*template.Template, error) {
 }
 
 func SendEmail(ctx context.Context, user userModel.User, data userModel.EmailData) error {
-	applicationConfig := config.AppConfig
-	smtpPass := applicationConfig.Email.SMTPPassword
-	smtpUser := applicationConfig.Email.SMTPUser
-	smtpHost := applicationConfig.Email.SMTPHost
-	smtpPort := applicationConfig.Email.SMTPPort
+	emailConfig := config.AppConfig.Email
+	smtpPass := emailConfig.SMTPPassword
+	smtpUser := emailConfig.SMTPUser
+	smtpHost := emailConfig.SMTPHost
+	smtpPort := emailConfig.SMTPPort
 
 	dialer := gomail.NewDialer(smtpHost, smtpPort, smtpUser, smtpPass)
 	dialer.TLSConfig = &tls.Config{InsecureSkipVerify: true}
@@ -67,10 +67,10 @@ func SendEmail(ctx context.Context, user userModel.User, data userModel.EmailDat
 }
 
 func PrepareSendMessage(ctx context.Context, userEmail string, data userModel.EmailData) (*gomail.Message, error) {
-	applicationConfig := config.AppConfig
+	emailConfig := config.AppConfig.Email
 
 	// Prepare data.
-	from := applicationConfig.Email.EmailFrom
+	from := emailConfig.EmailFrom
 	to := userEmail
 
 	var body bytes.Buffer

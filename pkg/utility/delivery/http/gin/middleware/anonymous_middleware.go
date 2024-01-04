@@ -24,7 +24,7 @@ func AnonymousMiddleware() gin.HandlerFunc {
 		// Check for a deadline error using the handleDeadlineExceeded function.
 		// If a deadline error occurred, respond with a timeout status.
 		deadlineError := handleDeadlineExceeded(ctx)
-		if validator.IsValueNotNil(deadlineError) {
+		if validator.IsError(deadlineError) {
 			// Use the abortWithStatusJSON function to handle the deadline error by sending
 			// a JSON response with an appropriate HTTP status code.
 			abortWithStatusJSON(ginContext, deadlineError, constants.StatusUnauthorized)

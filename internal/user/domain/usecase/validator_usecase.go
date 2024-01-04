@@ -48,15 +48,15 @@ func validateUserCreate(userCreate userModel.UserCreate) common.Result[userModel
 	userCreate.PasswordConfirm = domainUtility.SanitizeString(userCreate.PasswordConfirm)
 
 	validateFieldError := validateEmail(userCreate.Email, emailRegex)
-	if validator.IsValueNotNil(validateFieldError) {
+	if validator.IsError(validateFieldError) {
 		validationErrors = append(validationErrors, validateFieldError)
 	}
 	validateFieldError = domainUtility.ValidateField(userCreate.Name, nameField, usernameRegex, usernameAllowedCharacters)
-	if validator.IsValueNotNil(validateFieldError) {
+	if validator.IsError(validateFieldError) {
 		validationErrors = append(validationErrors, validateFieldError)
 	}
 	validateFieldError = validatePassword(userCreate.Password, userCreate.PasswordConfirm, passwordField, usernameRegex)
-	if validator.IsValueNotNil(validateFieldError) {
+	if validator.IsError(validateFieldError) {
 		validationErrors = append(validationErrors, validateFieldError)
 	}
 	if validator.IsSliceNotEmpty(validationErrors) {
@@ -70,7 +70,7 @@ func validateUserUpdate(userUpdate userModel.UserUpdate) common.Result[userModel
 	userUpdate.Name = domainUtility.SanitizeString(userUpdate.Name)
 
 	validateFieldError := domainUtility.ValidateField(userUpdate.Name, nameField, usernameRegex, usernameAllowedCharacters)
-	if validator.IsValueNotNil(validateFieldError) {
+	if validator.IsError(validateFieldError) {
 		validationErrors = append(validationErrors, validateFieldError)
 	}
 	if validator.IsSliceNotEmpty(validationErrors) {
@@ -85,11 +85,11 @@ func validateUserLogin(userLogin userModel.UserLogin) common.Result[userModel.Us
 	userLogin.Password = domainUtility.SanitizeString(userLogin.Password)
 
 	validateFieldError := validateEmail(userLogin.Email, emailRegex)
-	if validator.IsValueNotNil(validateFieldError) {
+	if validator.IsError(validateFieldError) {
 		validationErrors = append(validationErrors, validateFieldError)
 	}
 	validateFieldError = domainUtility.ValidateField(userLogin.Password, passwordField, passwordRegex, passwordAllowedCharacters)
-	if validator.IsValueNotNil(validateFieldError) {
+	if validator.IsError(validateFieldError) {
 		validationErrors = append(validationErrors, validateFieldError)
 	}
 	if validator.IsSliceNotEmpty(validationErrors) {
@@ -103,7 +103,7 @@ func validateUserForgottenPassword(userForgottenPassword userModel.UserForgotten
 	userForgottenPassword.Email = domainUtility.SanitizeAndToLowerString(userForgottenPassword.Email)
 
 	validateFieldError := validateEmail(userForgottenPassword.Email, emailRegex)
-	if validator.IsValueNotNil(validateFieldError) {
+	if validator.IsError(validateFieldError) {
 		validationErrors = append(validationErrors, validateFieldError)
 	}
 	if validator.IsSliceNotEmpty(validationErrors) {
@@ -118,7 +118,7 @@ func validateResetPassword(userResetPassword userModel.UserResetPassword) common
 	userResetPassword.PasswordConfirm = domainUtility.SanitizeString(userResetPassword.PasswordConfirm)
 
 	validateFieldError := validatePassword(userResetPassword.Password, userResetPassword.PasswordConfirm, passwordField, passwordRegex)
-	if validator.IsValueNotNil(validateFieldError) {
+	if validator.IsError(validateFieldError) {
 		validationErrors = append(validationErrors, validateFieldError)
 	}
 	if validator.IsSliceNotEmpty(validationErrors) {

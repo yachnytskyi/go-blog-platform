@@ -60,7 +60,7 @@ func (userUseCase UserUseCase) GetUserById(ctx context.Context, userID string) c
 func (userUseCase UserUseCase) GetUserByEmail(ctx context.Context, email string) commonModel.Result[userModel.User] {
 	// Validate the email.
 	validateEmailError := validateEmail(email, emailRegex)
-	if validator.IsValueNotNil(validateEmailError) {
+	if validator.IsError(validateEmailError) {
 		processedError := domainError.HandleError(validateEmailError)
 		return commonModel.NewResultOnFailure[userModel.User](processedError)
 	}
@@ -161,7 +161,7 @@ func (userUseCase UserUseCase) Login(ctx context.Context, userLoginData userMode
 
 	// Check if the provided password matches the stored password.
 	arePasswordsNotEqualError := arePasswordsNotEqual(fetchedUser.Data.Password, userLoginData.Password)
-	if validator.IsValueNotNil(arePasswordsNotEqualError) {
+	if validator.IsError(arePasswordsNotEqualError) {
 		arePasswordsNotEqualError.Notification = invalidEmailOrPassword
 		return commonModel.NewResultOnFailure[userModel.UserLogin](domainError.HandleError(arePasswordsNotEqualError))
 	}
@@ -177,7 +177,7 @@ func (userUseCase UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.C
 	secondKey string, secondValue time.Time) error {
 
 	validateEmailError := validateEmail(email, emailRegex)
-	if validator.IsValueNotNil(validateEmailError) {
+	if validator.IsError(validateEmailError) {
 		handledError := domainError.HandleError(validateEmailError)
 		return handledError
 	}

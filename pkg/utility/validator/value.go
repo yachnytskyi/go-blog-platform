@@ -1,11 +1,11 @@
 package validator
 
-func IsValueNil[T comparable](data T) bool {
+func IsValueEmpty[T comparable](data T) bool {
 	var t T
 	return data == t
 }
 
-func IsValueNotNil[T comparable](data T) bool {
+func IsValueNotEmpty[T comparable](data T) bool {
 	var t T
 	return data != t
 }

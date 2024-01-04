@@ -133,7 +133,7 @@ func (userRepository UserRepository) CheckEmailDuplicate(ctx context.Context, em
 	// Find and decode the user.
 	// If no user is found, return nil (indicating that the email is unique).
 	userFindOneError := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
-	if validator.IsValueNil(fetchedUser) {
+	if validator.IsValueEmpty(fetchedUser) {
 		return nil
 	}
 

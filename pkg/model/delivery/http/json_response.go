@@ -42,7 +42,7 @@ func NewJSONResponseOnFailure(err error) JSONResponse {
 
 // SetStatus sets the "Status" field based on the presence of "Data," "Error," or "Errors."
 func SetStatus(jsonResponse *JSONResponse) {
-	if validator.IsValueNotNil(jsonResponse.Data) {
+	if validator.IsValueNotEmpty(jsonResponse.Data) {
 		jsonResponse.Status = success
 	} else if validator.IsError(jsonResponse.Error) || validator.IsError(jsonResponse.Errors) {
 		jsonResponse.Status = fail

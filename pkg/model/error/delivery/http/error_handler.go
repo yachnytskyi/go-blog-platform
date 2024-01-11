@@ -5,6 +5,10 @@ import (
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
 
+const (
+	location = "pkg.model.error.delivery.http."
+)
+
 // HandleError takes an error as input and returns error.
 // It performs error type assertions and maps specific domain errors to their corresponding HTTP error views.
 func HandleError(err error) error {
@@ -26,9 +30,9 @@ func HandleError(err error) error {
 	case HttpInternalErrorView:
 		errorType.Notification = constants.InternalErrorNotification
 		return errorType
+	case HttpInternalErrorsView:
+		return NewHttpInternalErrorView(location+"case HttpInternalErrorsView", constants.InternalErrorNotification)
 	default:
-		internalError := errorType.(domainError.InternalError)
-		internalError.Notification = constants.InternalErrorNotification
-		return InternalErrorToHttpInternalErrorViewMapper(internalError)
+		return NewHttpInternalErrorView(location+"case HttpInternalErrorView", constants.InternalErrorNotification)
 	}
 }

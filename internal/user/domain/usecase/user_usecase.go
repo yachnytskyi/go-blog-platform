@@ -167,8 +167,7 @@ func (userUseCase UserUseCase) Login(ctx context.Context, userLoginData userMode
 
 	// Check if the provided password matches the stored password.
 	arePasswordsNotEqualError := arePasswordsNotEqual(fetchedUser.Data.Password, userLoginData.Password)
-	if validator.IsValueNotEmpty(arePasswordsNotEqualError) {
-		arePasswordsNotEqualError.Notification = invalidEmailOrPassword
+	if validator.IsError(arePasswordsNotEqualError) {
 		return commonModel.NewResultOnFailure[userModel.UserToken](domainError.HandleError(arePasswordsNotEqualError))
 	}
 

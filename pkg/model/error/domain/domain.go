@@ -30,26 +30,30 @@ func (err ValidationError) Error() string {
 	return fmt.Sprintf("location: " + err.Location + " field: " + err.Field + " " + "type: " + err.FieldType + " notification: " + err.Notification)
 }
 
-type ValidationErrors []ValidationError
+type ValidationErrors []error
 
-func NewValidationErrors(validationErrors []ValidationError) ValidationErrors {
+func NewValidationErrors(validationErrors []error) ValidationErrors {
 	return ValidationErrors(validationErrors)
 }
 
 func (validationErrors ValidationErrors) Error() string {
 	var result strings.Builder
-	for _, validationError := range validationErrors {
-		result.WriteString("field: " + validationError.Field + " " + "type: " + validationError.FieldType + " notification: " + validationError.Notification)
-
+	for i, validationError := range validationErrors {
+		if i > 0 {
+			result.WriteString(": ")
+		}
+		result.WriteString(validationError.Error())
 	}
 	return result.String()
 }
 
 func (validationErrors ValidationErrors) Errors() string {
 	var result strings.Builder
-	for _, validationError := range validationErrors {
-		result.WriteString("field: " + validationError.Field + " " + "type: " + validationError.FieldType + " notification: " + validationError.Notification)
-
+	for i, validationError := range validationErrors {
+		if i > 0 {
+			result.WriteString(": ")
+		}
+		result.WriteString(validationError.Error())
 	}
 	return result.String()
 }

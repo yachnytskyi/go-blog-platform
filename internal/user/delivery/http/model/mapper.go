@@ -3,8 +3,10 @@ package model
 import (
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	http "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
+	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
-	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
+	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
+	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
 const (
@@ -43,14 +45,20 @@ func UserToUserViewMapper(user userModel.User) UserView {
 }
 
 func UserViewToUserMapper(user UserView) (userModel.User, error) {
-	created_at, parseError := common.ParseDate(location+"UserViewToUserMapper.created_at", user.CreatedAt)
-	if validator.IsError(parseError) {
-		return userModel.User{}, parseError
+	var httpInternalErrorsView httpError.HttpInternalErrorsView
+	created_at, parseDateError := common.ParseDate(location+"UserViewToUserMapper.created_at", user.CreatedAt)
+	if validator.IsError(parseDateError) {
+		httpInternalErrorsView = append(httpInternalErrorsView, parseDateError)
 	}
 
-	updated_at, parseError := common.ParseDate(location+"UserViewToUserMapper.updated_at", user.UpdatedAt)
-	if validator.IsError(parseError) {
-		return userModel.User{}, parseError
+	updated_at, parseDateError := common.ParseDate(location+"UserViewToUserMapper.updated_at", user.UpdatedAt)
+	if validator.IsError(parseDateError) {
+		httpInternalErrorsView = append(httpInternalErrorsView, parseDateError)
+	}
+
+	if validator.IsSliceNotEmpty(httpInternalErrorsView) {
+		logging.Logger(httpInternalErrorsView)
+		return userModel.User{}, httpInternalErrorsView
 	}
 
 	return userModel.User{

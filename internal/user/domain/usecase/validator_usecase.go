@@ -11,7 +11,6 @@ import (
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
-
 	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator/domain"
 	bcrypt "golang.org/x/crypto/bcrypt"
 )
@@ -38,72 +37,72 @@ const (
 	EmailField            = "email"
 	passwordField         = "password"
 	emailOrPasswordFields = "email or password"
+
+	// Amount of expected possinle errors
+	expectedErrors = 4
 )
 
 func validateUserCreate(userCreate userModel.UserCreate) common.Result[userModel.UserCreate] {
-	validationErrors := domainError.ValidationErrors{}
+	validationErrors := make([]error, 0, expectedErrors)
 	userCreate.Email = domainUtility.SanitizeAndToLowerString(userCreate.Email)
 	userCreate.Name = domainUtility.SanitizeString(userCreate.Name)
 	userCreate.Password = domainUtility.SanitizeString(userCreate.Password)
 	userCreate.PasswordConfirm = domainUtility.SanitizeString(userCreate.PasswordConfirm)
 
-	validateFieldError := validateEmail(userCreate.Email, emailRegex)
-	if validator.IsValueNotEmpty(validateFieldError) {
-		validationErrors = append(validationErrors, validateFieldError)
+	validateEmailError := validateEmail(userCreate.Email, emailRegex)
+	if validator.IsError(validateEmailError) {
+		validationErrors = append(validationErrors, validateEmailError)
 	}
-	validateFieldError = domainUtility.ValidateField(userCreate.Name, nameField, usernameRegex, usernameAllowedCharacters)
-	if validator.IsValueNotEmpty(validateFieldError) {
-		validationErrors = append(validationErrors, validateFieldError)
+	validateNameError := domainUtility.ValidateField(userCreate.Name, nameField, usernameRegex, usernameAllowedCharacters)
+	if validator.IsError(validateNameError) {
+		validationErrors = append(validationErrors, validateNameError)
 	}
-	validateFieldError = validatePassword(userCreate.Password, userCreate.PasswordConfirm, passwordField, usernameRegex)
-	if validator.IsValueNotEmpty(validateFieldError) {
-		validationErrors = append(validationErrors, validateFieldError)
+	validatePasswordError := validatePassword(userCreate.Password, userCreate.PasswordConfirm, passwordField, usernameRegex)
+	if validator.IsError(validatePasswordError) {
+		validationErrors = append(validationErrors, validatePasswordError)
 	}
 	if validator.IsSliceNotEmpty(validationErrors) {
-		return common.NewResultOnFailure[userModel.UserCreate](validationErrors)
+		return common.NewResultOnFailure[userModel.UserCreate](domainError.ValidationErrors(validationErrors))
 	}
 	return common.NewResultOnSuccess[userModel.UserCreate](userCreate)
 }
 
 func validateUserUpdate(userUpdate userModel.UserUpdate) common.Result[userModel.UserUpdate] {
-	validationErrors := domainError.ValidationErrors{}
+	validationErrors := make([]error, 0, expectedErrors)
 	userUpdate.Name = domainUtility.SanitizeString(userUpdate.Name)
-
 	validateFieldError := domainUtility.ValidateField(userUpdate.Name, nameField, usernameRegex, usernameAllowedCharacters)
-	if validator.IsValueNotEmpty(validateFieldError) {
+	if validator.IsError(validateFieldError) {
 		validationErrors = append(validationErrors, validateFieldError)
 	}
 	if validator.IsSliceNotEmpty(validationErrors) {
-		return common.NewResultOnFailure[userModel.UserUpdate](validationErrors)
+		return common.NewResultOnFailure[userModel.UserUpdate](domainError.ValidationErrors(validationErrors))
 	}
 	return common.NewResultOnSuccess[userModel.UserUpdate](userUpdate)
 }
 
 func validateUserLogin(userLogin userModel.UserLogin) common.Result[userModel.UserLogin] {
-	validationErrors := domainError.ValidationErrors{}
+	validationErrors := make([]error, 0, expectedErrors)
 	userLogin.Email = domainUtility.SanitizeAndToLowerString(userLogin.Email)
 	userLogin.Password = domainUtility.SanitizeString(userLogin.Password)
-
 	validateFieldError := validateEmail(userLogin.Email, emailRegex)
-	if validator.IsValueNotEmpty(validateFieldError) {
+	if validator.IsError(validateFieldError) {
 		validationErrors = append(validationErrors, validateFieldError)
 	}
 	validateFieldError = domainUtility.ValidateField(userLogin.Password, passwordField, passwordRegex, passwordAllowedCharacters)
-	if validator.IsValueNotEmpty(validateFieldError) {
+	if validator.IsError(validateFieldError) {
 		validationErrors = append(validationErrors, validateFieldError)
 	}
 	if validator.IsSliceNotEmpty(validationErrors) {
-		return common.NewResultOnFailure[userModel.UserLogin](validationErrors)
+		return common.NewResultOnFailure[userModel.UserLogin](domainError.NewValidationErrors(validationErrors))
 	}
 	return common.NewResultOnSuccess[userModel.UserLogin](userLogin)
 }
 
 func validateUserForgottenPassword(userForgottenPassword userModel.UserForgottenPassword) common.Result[userModel.UserForgottenPassword] {
-	validationErrors := domainError.ValidationErrors{}
+	var validationErrors domainError.ValidationErrors
 	userForgottenPassword.Email = domainUtility.SanitizeAndToLowerString(userForgottenPassword.Email)
-
 	validateFieldError := validateEmail(userForgottenPassword.Email, emailRegex)
-	if validator.IsValueNotEmpty(validateFieldError) {
+	if validator.IsError(validateFieldError) {
 		validationErrors = append(validationErrors, validateFieldError)
 	}
 	if validator.IsSliceNotEmpty(validationErrors) {
@@ -113,12 +112,12 @@ func validateUserForgottenPassword(userForgottenPassword userModel.UserForgotten
 }
 
 func validateResetPassword(userResetPassword userModel.UserResetPassword) common.Result[userModel.UserResetPassword] {
-	validationErrors := domainError.ValidationErrors{}
+	var validationErrors domainError.ValidationErrors
 	userResetPassword.Password = domainUtility.SanitizeString(userResetPassword.Password)
 	userResetPassword.PasswordConfirm = domainUtility.SanitizeString(userResetPassword.PasswordConfirm)
 
 	validateFieldError := validatePassword(userResetPassword.Password, userResetPassword.PasswordConfirm, passwordField, passwordRegex)
-	if validator.IsValueNotEmpty(validateFieldError) {
+	if validator.IsError(validateFieldError) {
 		validationErrors = append(validationErrors, validateFieldError)
 	}
 	if validator.IsSliceNotEmpty(validationErrors) {
@@ -127,7 +126,7 @@ func validateResetPassword(userResetPassword userModel.UserResetPassword) common
 	return common.NewResultOnSuccess[userModel.UserResetPassword](userResetPassword)
 }
 
-func validateEmail(email, fieldRegex string) domainError.ValidationError {
+func validateEmail(email, fieldRegex string) error {
 	if domainUtility.IsStringLengthInvalid(email, constants.MinStringLength, constants.MaxStringLength) {
 		notification := fmt.Sprintf(constants.StringAllowedLength, constants.MinStringLength, constants.MaxStringLength)
 		validationError := domainError.NewValidationError(location+"validateEmail.IsStringLengthInvalid", EmailField, constants.FieldRequired, notification)
@@ -144,10 +143,10 @@ func validateEmail(email, fieldRegex string) domainError.ValidationError {
 		logging.Logger(validationError)
 		return validationError
 	}
-	return domainError.ValidationError{}
+	return nil
 }
 
-func validatePassword(password, passwordConfirm, fieldName, fieldRegex string) domainError.ValidationError {
+func validatePassword(password, passwordConfirm, fieldName, fieldRegex string) error {
 	if domainUtility.IsStringLengthInvalid(password, constants.MinStringLength, constants.MaxStringLength) {
 		notification := fmt.Sprintf(constants.StringAllowedLength, constants.MinStringLength, constants.MaxStringLength)
 		validationError := domainError.NewValidationError(location+"validatePassword.IsStringLengthInvalid", fieldName, constants.FieldRequired, notification)
@@ -164,21 +163,22 @@ func validatePassword(password, passwordConfirm, fieldName, fieldRegex string) d
 		logging.Logger(validationError)
 		return validationError
 	}
-	return domainError.ValidationError{}
+	return nil
 }
 
 func isEmailDomainNotValid(emailString string) bool {
 	host := strings.Split(emailString, "@")[1]
 	_, lookupMXError := net.LookupMX(host)
-	return validator.IsValueNotEmpty(lookupMXError)
+	return validator.IsError(lookupMXError)
 }
 
 // Compare the encrypted and the user provided passwords.
-func arePasswordsNotEqual(hashedPassword string, checkedPassword string) domainError.ValidationError {
-	if validator.IsValueNotEmpty(bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(checkedPassword))) {
+func arePasswordsNotEqual(hashedPassword string, checkedPassword string) error {
+	if validator.IsError(bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(checkedPassword))) {
 		validationError := domainError.NewValidationError(location+"arePasswordsNotEqual.CompareHashAndPassword", emailOrPasswordFields, constants.FieldRequired, passwordsDoNotMatch)
 		logging.Logger(validationError)
+		validationError.Notification = invalidEmailOrPassword
 		return validationError
 	}
-	return domainError.ValidationError{}
+	return nil
 }

@@ -125,3 +125,31 @@ func NewHttpInternalErrorView(location, notification string) HttpInternalErrorVi
 func (err HttpInternalErrorView) Error() string {
 	return fmt.Sprintf("location " + err.Location + " notification: " + err.Notification)
 }
+
+type HttpInternalErrorsView []error
+
+func NewHttpInternalErrorsView(internalErrors []error) HttpInternalErrorsView {
+	return HttpInternalErrorsView(internalErrors)
+}
+
+func (httpInternalErrorsView HttpInternalErrorsView) Error() string {
+	var result strings.Builder
+	for i, httpInternalView := range httpInternalErrorsView {
+		if i > 0 {
+			result.WriteString(": ")
+		}
+		result.WriteString(httpInternalView.Error())
+	}
+	return result.String()
+}
+
+func (httpInternalErrorsView HttpInternalErrorsView) Errors() string {
+	var result strings.Builder
+	for i, httpInternalView := range httpInternalErrorsView {
+		if i > 0 {
+			result.WriteString(": ")
+		}
+		result.WriteString(httpInternalView.Error())
+	}
+	return result.String()
+}

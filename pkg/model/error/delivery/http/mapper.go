@@ -15,11 +15,12 @@ func ValidationErrorToHttpValidationErrorViewMapper(validationError domainError.
 func ValidationErrorsToHttpValidationErrorsViewMapper(validationErrors domainError.ValidationErrors) HttpValidationErrorsView {
 	httpValidationErrorsView := make([]HttpValidationErrorView, 0, len(validationErrors))
 	for _, validationError := range validationErrors {
-		httpValidationErrorView := HttpValidationErrorView{}
-		httpValidationErrorView.Field = validationError.Field
-		httpValidationErrorView.FieldType = validationError.FieldType
-		httpValidationErrorView.Notification = validationError.Notification
-		httpValidationErrorsView = append(httpValidationErrorsView, httpValidationErrorView)
+		validationError, ok := validationError.(domainError.ValidationError)
+		if ok {
+			// Map the specific validation error to the HTTP view.
+			httpValidationErrorView := NewHttpValidationError(validationError.Field, validationError.FieldType, validationError.Notification)
+			httpValidationErrorsView = append(httpValidationErrorsView, httpValidationErrorView)
+		}
 	}
 	return HttpValidationErrorsView(httpValidationErrorsView)
 }

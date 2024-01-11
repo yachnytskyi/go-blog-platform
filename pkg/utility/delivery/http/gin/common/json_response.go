@@ -10,8 +10,8 @@ import (
 
 // GinNewJSONResponseOnFailure generates a JSON response for a failed operation.
 // It takes a Gin context, an error that occurred, and an HTTP status code.
-func GinNewJSONResponseOnFailure(ginContext *gin.Context, err error, httpCode int) {
-	jsonResponse := httpModel.NewJSONResponseOnFailure(httpError.HandleError(err))
+func GinNewJSONFailureResponse(ginContext *gin.Context, err error, httpCode int) {
+	jsonResponse := httpModel.NewJSONFailureResponse(httpError.HandleError(err))
 	ginContext.JSON(httpCode, jsonResponse)
 }
 
@@ -20,5 +20,5 @@ func GinNewJSONResponseOnFailure(ginContext *gin.Context, err error, httpCode in
 func HandleJSONBindingError(ginContext *gin.Context, location string, err error) {
 	internalError := httpError.NewHttpInternalErrorView(location+".ShouldBindJSON", err.Error())
 	logging.Logger(internalError)
-	GinNewJSONResponseOnFailure(ginContext, internalError, constants.StatusBadRequest)
+	GinNewJSONFailureResponse(ginContext, internalError, constants.StatusBadRequest)
 }

@@ -3,6 +3,8 @@ package http
 import (
 	"fmt"
 	"strings"
+
+	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
 
 type HttpValidationErrorView struct {
@@ -44,6 +46,10 @@ func (httpValidationErrorsView HttpValidationErrorsView) Errors() string {
 		result.WriteString("field: " + validationError.Field + " " + "type: " + validationError.FieldType + " notification: " + validationError.Notification)
 	}
 	return result.String()
+}
+
+func (httpValidationErrorsView HttpValidationErrorsView) Len(domainError.Errors) int {
+	return len(httpValidationErrorsView)
 }
 
 type HttpAuthorizationErrorView struct {
@@ -152,4 +158,8 @@ func (httpInternalErrorsView HttpInternalErrorsView) Errors() string {
 		result.WriteString(httpInternalView.Error())
 	}
 	return result.String()
+}
+
+func (httpInternalErrorsView HttpInternalErrorsView) Len(domainError.Errors) int {
+	return len(httpInternalErrorsView)
 }

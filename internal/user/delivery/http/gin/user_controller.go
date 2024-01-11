@@ -44,13 +44,13 @@ func (userController UserController) GetAllUsers(controllerContext any) {
 	paginationQuery := httpGinCommon.ParsePaginationQuery(ginContext)
 	fetchedUsers := userController.userUseCase.GetAllUsers(ctx, paginationQuery)
 	if validator.IsError(fetchedUsers.Error) {
-		httpGinCommon.GinNewJSONResponseOnFailure(ginContext, fetchedUsers.Error, constants.StatusBadRequest)
+		httpGinCommon.GinNewJSONFailureResponse(ginContext, fetchedUsers.Error, constants.StatusBadRequest)
 		return
 	}
 
 	// Map the fetched user data to a JSON response and set the status.
 	// Return the JSON response with a successful status code.
-	jsonResponse := httpModel.NewJSONResponseOnSuccess(userViewModel.UsersToUsersViewMapper(fetchedUsers.Data))
+	jsonResponse := httpModel.NewJSONSuccessResponse(userViewModel.UsersToUsersViewMapper(fetchedUsers.Data))
 	ginContext.JSON(constants.StatusOk, jsonResponse)
 }
 
@@ -60,7 +60,7 @@ func (userController UserController) GetCurrentUser(controllerContext any) {
 	// Extract the current user from Gin context.
 	ginContext := controllerContext.(*gin.Context)
 	currentUser := ginContext.MustGet(constants.UserContext).(userViewModel.UserView)
-	jsonResponse := httpModel.NewJSONResponseOnSuccess(currentUser)
+	jsonResponse := httpModel.NewJSONSuccessResponse(currentUser)
 	ginContext.JSON(constants.StatusOk, jsonResponse)
 }
 
@@ -77,13 +77,13 @@ func (userController UserController) GetUserById(controllerContext any) {
 	userID := ginContext.Param(constants.UserIDContext)
 	fetchedUser := userController.userUseCase.GetUserById(ctx, userID)
 	if validator.IsError(fetchedUser.Error) {
-		httpGinCommon.GinNewJSONResponseOnFailure(ginContext, fetchedUser.Error, constants.StatusBadRequest)
+		httpGinCommon.GinNewJSONFailureResponse(ginContext, fetchedUser.Error, constants.StatusBadRequest)
 		return
 	}
 
 	// Map the retrieved user data to a JSON response.
 	// Return the JSON response with a successful status code.
-	jsonResponse := httpModel.NewJSONResponseOnSuccess(userViewModel.UserToUserViewMapper(fetchedUser.Data))
+	jsonResponse := httpModel.NewJSONSuccessResponse(userViewModel.UserToUserViewMapper(fetchedUser.Data))
 	ginContext.JSON(constants.StatusOk, jsonResponse)
 }
 
@@ -112,13 +112,13 @@ func (userController UserController) Register(controllerContext any) {
 	userCreateData := userViewModel.UserCreateViewToUserCreateMapper(userCreateViewData)
 	createdUser := userController.userUseCase.Register(ctx, userCreateData)
 	if validator.IsError(createdUser.Error) {
-		httpGinCommon.GinNewJSONResponseOnFailure(ginContext, createdUser.Error, constants.StatusBadRequest)
+		httpGinCommon.GinNewJSONFailureResponse(ginContext, createdUser.Error, constants.StatusBadRequest)
 		return
 	}
 
 	// Registration was successful. Return the JSON response with a successful status code.
 	welcomeMessage := userViewModel.NewWelcomeMessageView(constants.SendingEmailNotification + createdUser.Data.Email)
-	jsonResponse := httpModel.NewJSONResponseOnSuccess(welcomeMessage)
+	jsonResponse := httpModel.NewJSONSuccessResponse(welcomeMessage)
 	ginContext.JSON(constants.StatusCreated, jsonResponse)
 }
 
@@ -147,12 +147,12 @@ func (userController UserController) UpdateCurrentUser(controllerContext any) {
 	userUpdateData.UserID = currentUserID
 	updatedUser := userController.userUseCase.UpdateCurrentUser(ctx, userUpdateData)
 	if validator.IsError(updatedUser.Error) {
-		httpGinCommon.GinNewJSONResponseOnFailure(ginContext, updatedUser.Error, constants.StatusBadRequest)
+		httpGinCommon.GinNewJSONFailureResponse(ginContext, updatedUser.Error, constants.StatusBadRequest)
 		return
 	}
 
 	// Update was successful. Return the JSON response with a successful status code.
-	jsonResponse := httpModel.NewJSONResponseOnSuccess(userViewModel.UserToUserViewMapper(updatedUser.Data))
+	jsonResponse := httpModel.NewJSONSuccessResponse(userViewModel.UserToUserViewMapper(updatedUser.Data))
 	ginContext.JSON(constants.StatusOk, jsonResponse)
 }
 
@@ -168,7 +168,7 @@ func (userController UserController) DeleteCurrentUser(controllerContext any) {
 	currentUserID := ginContext.MustGet(constants.UserIDContext).(string)
 	deletedUser := userController.userUseCase.DeleteUserById(ctx, currentUserID)
 	if validator.IsError(deletedUser) {
-		httpGinCommon.GinNewJSONResponseOnFailure(ginContext, deletedUser, constants.StatusBadRequest)
+		httpGinCommon.GinNewJSONFailureResponse(ginContext, deletedUser, constants.StatusBadRequest)
 		return
 	}
 
@@ -201,7 +201,7 @@ func (userController UserController) Login(controllerContext any) {
 	userLoginData := userViewModel.UserLoginViewToUserLoginMapper(userLoginViewData)
 	userToken := userController.userUseCase.Login(ctx, userLoginData)
 	if validator.IsError(userToken.Error) {
-		jsonResponse := httpModel.NewJSONResponseOnFailure(httpError.HandleError(userToken.Error))
+		jsonResponse := httpModel.NewJSONFailureResponse(httpError.HandleError(userToken.Error))
 		ginContext.JSON(constants.StatusBadRequest, jsonResponse)
 		return
 	}
@@ -213,7 +213,7 @@ func (userController UserController) Login(controllerContext any) {
 	setLoginCookies(ginContext, userTokenView.AccessToken, userTokenView.RefreshToken)
 
 	// Respond with a success JSON containing the user's access and refresh tokens.
-	jsonResponse := httpModel.NewJSONResponseOnSuccess(userTokenView)
+	jsonResponse := httpModel.NewJSONSuccessResponse(userTokenView)
 	ginContext.JSON(constants.StatusOk, jsonResponse)
 }
 
@@ -231,7 +231,7 @@ func (userController UserController) RefreshAccessToken(controllerContext any) {
 	currentUser := ginContext.MustGet(constants.UserContext).(userViewModel.UserView)
 	user, userError := userViewModel.UserViewToUserMapper(currentUser)
 	if validator.IsError(userError) {
-		jsonResponse := httpModel.NewJSONResponseOnFailure(httpError.HandleError(userError))
+		jsonResponse := httpModel.NewJSONFailureResponse(httpError.HandleError(userError))
 		ginContext.JSON(constants.StatusBadRequest, jsonResponse)
 		return
 	}
@@ -239,7 +239,7 @@ func (userController UserController) RefreshAccessToken(controllerContext any) {
 	// Refresh the access token using the provided refresh token.
 	userToken := userController.userUseCase.RefreshAccessToken(ctx, user)
 	if validator.IsError(userToken.Error) {
-		jsonResponse := httpModel.NewJSONResponseOnFailure(httpError.HandleError(userToken.Error))
+		jsonResponse := httpModel.NewJSONFailureResponse(httpError.HandleError(userToken.Error))
 		ginContext.JSON(constants.StatusBadRequest, jsonResponse)
 		return
 	}
@@ -251,7 +251,7 @@ func (userController UserController) RefreshAccessToken(controllerContext any) {
 	setRefreshTokenCookies(ginContext, userTokenView.AccessToken, userTokenView.RefreshToken)
 
 	// Respond with a success JSON containing the user's updated access and refresh tokens.
-	jsonResponse := httpModel.NewJSONResponseOnSuccess(userTokenView)
+	jsonResponse := httpModel.NewJSONSuccessResponse(userTokenView)
 	ginContext.JSON(constants.StatusOk, jsonResponse)
 }
 

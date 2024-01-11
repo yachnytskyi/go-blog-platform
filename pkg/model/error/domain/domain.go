@@ -8,6 +8,7 @@ import (
 type Errors interface {
 	error
 	Errors() string
+	Len(Errors) int
 }
 
 type ValidationError struct {
@@ -45,6 +46,10 @@ func (validationErrors ValidationErrors) Error() string {
 		result.WriteString(validationError.Error())
 	}
 	return result.String()
+}
+
+func (validationErrors ValidationErrors) Len(Errors) int {
+	return len(validationErrors)
 }
 
 func (validationErrors ValidationErrors) Errors() string {

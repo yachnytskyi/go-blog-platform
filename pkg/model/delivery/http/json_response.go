@@ -18,22 +18,26 @@ type JSONResponse struct {
 	Status string `json:"status"`
 }
 
-// NewJSONResponseOnSuccess creates a JSON response for a successful operation.
+// NewJSONSuccessResponse creates a JSON response for a successful JSON operation.
 // It sets the "Data" field and the "Status" field to success.
-func NewJSONResponseOnSuccess(data any) JSONResponse {
+func NewJSONSuccessResponse(data any) JSONResponse {
 	return JSONResponse{
 		Data:   data,
 		Status: success,
 	}
 }
 
-// NewJSONResponseOnFailure creates a JSON response for a failed operation.
+// NewJSONFailureResponse creates a JSON response for a failed JSON operation.
 // It sets the "Status" field to fail and determines whether to populate "Error" or "Errors" based on the provided error.
-func NewJSONResponseOnFailure(err error) JSONResponse {
+func NewJSONFailureResponse(err error) JSONResponse {
 	jsonResponse := JSONResponse{Status: fail}
 	switch errorType := err.(type) {
 	case domainError.Errors:
-		jsonResponse.Errors = errorType
+		if errorType.Len(errorType) == 1 {
+			jsonResponse.Error = errorType
+		} else {
+			jsonResponse.Errors = errorType
+		}
 	case error:
 		jsonResponse.Error = errorType
 	}

@@ -149,11 +149,11 @@ func (userUseCase UserUseCase) DeleteUserById(ctx context.Context, userID string
 // checks if the provided password matches the stored password, and generates
 // access and refresh tokens upon successful authentication.
 // The result is wrapped in a commonModel.Result containing either the user or an error.
-func (userUseCase UserUseCase) Login(ctx context.Context, userLoginData userModel.UserLogin) commonModel.Result[userModel.UserLogin] {
+func (userUseCase UserUseCase) Login(ctx context.Context, userLoginData userModel.UserLogin) commonModel.Result[userModel.UserToken] {
 	// Validate the user login data.
 	userLogin := validateUserLogin(userLoginData)
 	if validator.IsError(userLogin.Error) {
-		return commonModel.NewResultOnFailure[userModel.UserLogin](domainError.HandleError(userLogin.Error))
+		return commonModel.NewResultOnFailure[userModel.UserToken](domainError.HandleError(userLogin.Error))
 	}
 
 	// Fetch the user by email from the repository.
@@ -161,16 +161,24 @@ func (userUseCase UserUseCase) Login(ctx context.Context, userLoginData userMode
 
 	// Check if the provided password matches the stored password.
 	arePasswordsNotEqualError := arePasswordsNotEqual(fetchedUser.Data.Password, userLoginData.Password)
-	if validator.IsError(arePasswordsNotEqualError) {
+	if validator.IsValueNotEmpty(arePasswordsNotEqualError) {
 		arePasswordsNotEqualError.Notification = invalidEmailOrPassword
-		return commonModel.NewResultOnFailure[userModel.UserLogin](domainError.HandleError(arePasswordsNotEqualError))
+		return commonModel.NewResultOnFailure[userModel.UserToken](domainError.HandleError(arePasswordsNotEqualError))
 	}
 
 	// Generate access and refresh tokens.
-	userLogin = generateToken(ctx, fetchedUser.Data.UserID)
+	userToken := generateToken(ctx, fetchedUser.Data.UserID)
 
-	// Return the result containing userLogin information.
-	return userLogin
+	// Return the result containing userToken information.
+	return userToken
+}
+
+func (userUseCase UserUseCase) RefreshAccessToken(ctx context.Context, user userModel.User) commonModel.Result[userModel.UserToken] {
+	// Generate access and refresh tokens.
+	userToken := generateToken(ctx, user.UserID)
+
+	// Return the result containing userToken information.
+	return userToken
 }
 
 func (userUseCase UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.Context, email string, firstKey string, firstValue string,
@@ -252,9 +260,9 @@ func prepareEmailDataForUpdatePasswordResetToken(ctx context.Context, userName, 
 // If there are errors during token generation, it returns a failure result
 // with the corresponding error. Otherwise, it returns a success result
 // containing the generated access and refresh tokens.
-func generateToken(ctx context.Context, userID string) commonModel.Result[userModel.UserLogin] {
-	// Create a userLogin struct to store the generated tokens.
-	var userLogin userModel.UserLogin
+func generateToken(ctx context.Context, userID string) commonModel.Result[userModel.UserToken] {
+	// Create a userToken struct to store the generated tokens.
+	var userToken userModel.UserToken
 
 	// Retrieve application configuration.
 	accessTokenConfig := config.AppConfig.AccessToken
@@ -263,19 +271,19 @@ func generateToken(ctx context.Context, userID string) commonModel.Result[userMo
 	// Generate the access token.
 	accessToken, accessTokenGenerationError := domainUtility.GenerateJWTToken(ctx, accessTokenConfig.ExpiredIn, userID, accessTokenConfig.PrivateKey)
 	if validator.IsError(accessTokenGenerationError) {
-		return commonModel.NewResultOnFailure[userModel.UserLogin](domainError.HandleError(accessTokenGenerationError))
+		return commonModel.NewResultOnFailure[userModel.UserToken](domainError.HandleError(accessTokenGenerationError))
 	}
 
 	// Generate the refresh token.
 	refreshToken, refreshTokenGenerationError := domainUtility.GenerateJWTToken(ctx, refreshTokenConfig.ExpiredIn, userID, refreshTokenConfig.PrivateKey)
 	if validator.IsError(refreshTokenGenerationError) {
-		return commonModel.NewResultOnFailure[userModel.UserLogin](domainError.HandleError(refreshTokenGenerationError))
+		return commonModel.NewResultOnFailure[userModel.UserToken](domainError.HandleError(refreshTokenGenerationError))
 	}
 
-	// Update the userLogin struct with the generated tokens.
-	userLogin.AccessToken = accessToken
-	userLogin.RefreshToken = refreshToken
+	// Update the userToken struct with the generated tokens.
+	userToken.AccessToken = accessToken
+	userToken.RefreshToken = refreshToken
 
-	// Return a success result with the userLogin struct.
-	return commonModel.NewResultOnSuccess[userModel.UserLogin](userLogin)
+	// Return a success result with the userToken struct.
+	return commonModel.NewResultOnSuccess[userModel.UserToken](userToken)
 }

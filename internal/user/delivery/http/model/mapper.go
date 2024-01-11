@@ -2,14 +2,8 @@ package model
 
 import (
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
+	http "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 )
-
-func TokenStringToTokenViewMapper(token string) TokenView {
-	return TokenView{
-		Token: token,
-	}
-}
 
 func UsersToUsersViewMapper(users userModel.Users) UsersView {
 	usersView := make([]UserView, len(users.Users))
@@ -33,6 +27,17 @@ func UsersToUsersViewMapper(users userModel.Users) UsersView {
 
 func UserToUserViewMapper(user userModel.User) UserView {
 	return UserView{
+		UserID:    user.UserID,
+		Name:      user.Name,
+		Email:     user.Email,
+		Role:      user.Role,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+	}
+}
+
+func UserViewToUserMapper(user UserView) userModel.User {
+	return userModel.User{
 		UserID:    user.UserID,
 		Name:      user.Name,
 		Email:     user.Email,
@@ -70,6 +75,13 @@ func UserLoginToUserLoginViewMapper(user userModel.UserLogin) UserLoginView {
 	return UserLoginView{
 		Email:        user.Email,
 		Password:     user.Password,
+		AccessToken:  user.AccessToken,
+		RefreshToken: user.RefreshToken,
+	}
+}
+
+func UserTokenToUserTokenViewMapper(user userModel.UserToken) UserTokenView {
+	return UserTokenView{
 		AccessToken:  user.AccessToken,
 		RefreshToken: user.RefreshToken,
 	}

@@ -50,6 +50,12 @@ type UserLoginView struct {
 	RefreshToken string `json:"refresh_token"`
 }
 
+// [GET].
+type UserTokenView struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+}
+
 // [POST].
 type UserForgottenPasswordView struct {
 	Email string `json:"email"`

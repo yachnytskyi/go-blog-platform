@@ -12,7 +12,6 @@ import (
 
 	httpGinCookie "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin/utility/cookie"
 	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
-	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
 	httpGinCommon "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/common"
 
 	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
@@ -200,58 +199,54 @@ func (userController UserController) Login(controllerContext any) {
 
 	// Map the user login view data to the internal user login data model and perform user authentication using the user use case.
 	userLoginData := userViewModel.UserLoginViewToUserLoginMapper(userLoginViewData)
-	userLogin := userController.userUseCase.Login(ctx, userLoginData)
-	if validator.IsError(userLogin.Error) {
-		jsonResponse := httpModel.NewJSONResponseOnFailure(httpError.HandleError(userLogin.Error))
+	userToken := userController.userUseCase.Login(ctx, userLoginData)
+	if validator.IsError(userToken.Error) {
+		jsonResponse := httpModel.NewJSONResponseOnFailure(httpError.HandleError(userToken.Error))
 		ginContext.JSON(constants.StatusBadRequest, jsonResponse)
 		return
 	}
 
-	// Set cookies for the authenticated user.
-	setLoginCookies(ginContext, userLogin.Data.AccessToken, userLogin.Data.RefreshToken)
+	// Map user token data to the corresponding user token view data model.
+	userTokenView := userViewModel.UserTokenToUserTokenViewMapper(userToken.Data)
 
-	// Respond with a success JSON containing the user's access token.
-	jsonResponse := httpModel.NewJSONResponseOnSuccess(userViewModel.TokenStringToTokenViewMapper(userLogin.Data.AccessToken))
+	// Set cookies for the authenticated user.
+	setLoginCookies(ginContext, userTokenView.AccessToken, userTokenView.RefreshToken)
+
+	// Respond with a success JSON containing the user's access and refresh tokens.
+	jsonResponse := httpModel.NewJSONResponseOnSuccess(userTokenView)
 	ginContext.JSON(constants.StatusOk, jsonResponse)
 }
 
+// RefreshAccessToken handles the refreshing of the user's access token using the provided refresh token.
+// It extracts the refresh token from the request cookie, performs the token refresh,
+// and responds with a success JSON containing the updated access and refresh tokens.
+// In case of errors, it handles them and responds with an appropriate error JSON.
 func (userController UserController) RefreshAccessToken(controllerContext any) {
+	// Extract the Gin context and create a context with timeout.
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
 
-	cookie, cookieError := ginContext.Cookie(constants.RefreshTokenValue)
-	if validator.IsError(cookieError) {
-		jsonResponse := httpModel.NewJSONResponseOnFailure(httpError.HandleError(cookieError))
-		ginContext.JSON(constants.StatusUnauthorized, jsonResponse)
-		return
-	}
+	// Extract the current user from Gin context.
+	currentUser := ginContext.MustGet(constants.UserContext).(userViewModel.UserView)
+	user := userViewModel.UserViewToUserMapper(currentUser)
 
-	accessTokenConfig := config.AppConfig.AccessToken
-	refreshTokenConfig := config.AppConfig.RefreshToken
-	userID, validateTokenError := domainUtility.ValidateJWTToken(cookie, refreshTokenConfig.PublicKey)
-	if validator.IsError(validateTokenError) {
-		jsonResponse := httpModel.NewJSONResponseOnFailure(httpError.HandleError(validateTokenError))
+	// Refresh the access token using the provided refresh token.
+	userToken := userController.userUseCase.RefreshAccessToken(ctx, user)
+	if validator.IsError(userToken.Error) {
+		jsonResponse := httpModel.NewJSONResponseOnFailure(httpError.HandleError(userToken.Error))
 		ginContext.JSON(constants.StatusBadRequest, jsonResponse)
 		return
 	}
 
-	accessToken, createTokenError := domainUtility.GenerateJWTToken(ctx, accessTokenConfig.ExpiredIn, userID, accessTokenConfig.PrivateKey)
-	if validator.IsError(createTokenError) {
-		jsonResponse := httpModel.NewJSONResponseOnFailure(httpError.HandleError(createTokenError))
-		ginContext.JSON(constants.StatusBadRequest, jsonResponse)
-		return
-	}
+	// Map user token data to the corresponding user token view data model.
+	userTokenView := userViewModel.UserTokenToUserTokenViewMapper(userToken.Data)
 
-	// Generate a new refresh token (optional, based on your requirements).
-	newRefreshToken, newRefreshTokenError := domainUtility.GenerateJWTToken(ctx, refreshTokenConfig.ExpiredIn, userID, refreshTokenConfig.PrivateKey)
-	if validator.IsError(newRefreshTokenError) {
-		jsonResponse := httpModel.NewJSONResponseOnFailure(httpError.HandleError(newRefreshTokenError))
-		ginContext.JSON(constants.StatusBadRequest, jsonResponse)
-		return
-	}
-	setRefreshTokenCookies(ginContext, accessToken, newRefreshToken)
-	jsonResponse := httpModel.NewJSONResponseOnSuccess(userViewModel.TokenStringToTokenViewMapper(accessToken))
+	// Set cookies with the updated access and refresh tokens.
+	setRefreshTokenCookies(ginContext, userTokenView.AccessToken, userTokenView.RefreshToken)
+
+	// Respond with a success JSON containing the user's updated access and refresh tokens.
+	jsonResponse := httpModel.NewJSONResponseOnSuccess(userTokenView)
 	ginContext.JSON(constants.StatusOk, jsonResponse)
 }
 

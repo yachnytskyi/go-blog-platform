@@ -47,6 +47,11 @@ type UserLogin struct {
 	RefreshToken string
 }
 
+type UserToken struct {
+	AccessToken  string
+	RefreshToken string
+}
+
 type UserForgottenPassword struct {
 	Email string
 }

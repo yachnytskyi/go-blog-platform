@@ -15,7 +15,8 @@ type UserUseCase interface {
 	Register(ctx context.Context, user userModel.UserCreate) commonModel.Result[userModel.User]
 	UpdateCurrentUser(ctx context.Context, user userModel.UserUpdate) commonModel.Result[userModel.User]
 	DeleteUserById(ctx context.Context, userID string) error
-	Login(ctx context.Context, user userModel.UserLogin) commonModel.Result[userModel.UserLogin]
+	Login(ctx context.Context, user userModel.UserLogin) commonModel.Result[userModel.UserToken]
+	RefreshAccessToken(ctx context.Context, user userModel.User) commonModel.Result[userModel.UserToken]
 	ResetUserPassword(ctx context.Context, firstKey string, firstValue string, secondKey, passwordKey, password string) error
 	UpdatePasswordResetTokenUserByEmail(ctx context.Context, email string, firstKey string, firstValue string, secondKey string, secondValue time.Time) error
 }

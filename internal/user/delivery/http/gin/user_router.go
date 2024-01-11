@@ -64,31 +64,24 @@ func (userRouter UserRouter) UserRouter(routerGroup any, userUseCase user.UserUs
 	})
 
 	// Authenticated routes.
-	authRoutes := router.Group("").Use(httpGinMiddleware.AuthenticationMiddleware(userUseCase))
-	{
-		// User actions.
-		authRoutes.GET(getCurrentUserPath, func(ginContext *gin.Context) {
-			userRouter.userController.GetCurrentUser(ginContext)
-		})
+	router.GET(getCurrentUserPath, httpGinMiddleware.AuthenticationMiddleware(userUseCase), func(ginContext *gin.Context) {
+		userRouter.userController.GetCurrentUser(ginContext)
+	})
 
-		authRoutes.PUT(updateCurrentUserPath, func(ginContext *gin.Context) {
-			userRouter.userController.UpdateCurrentUser(ginContext)
-		})
+	router.PUT(updateCurrentUserPath, httpGinMiddleware.AuthenticationMiddleware(userUseCase), func(ginContext *gin.Context) {
+		userRouter.userController.UpdateCurrentUser(ginContext)
+	})
 
-		authRoutes.DELETE(deleteCurrentUserPath, func(ginContext *gin.Context) {
-			userRouter.userController.DeleteCurrentUser(ginContext)
-		})
-	}
+	router.DELETE(deleteCurrentUserPath, httpGinMiddleware.AuthenticationMiddleware(userUseCase), func(ginContext *gin.Context) {
+		userRouter.userController.DeleteCurrentUser(ginContext)
+	})
 
 	// Token-related routes.
-	tokenRoutes := router.Group("").Use(httpGinMiddleware.RefreshTokenAuthenticationMiddleware(userUseCase))
-	{
-		tokenRoutes.GET(refreshTokenPath, httpGinMiddleware.RefreshTokenAuthenticationMiddleware(userUseCase), func(ginContext *gin.Context) {
-			userRouter.userController.RefreshAccessToken(ginContext)
-		})
+	router.GET(refreshTokenPath, httpGinMiddleware.RefreshTokenAuthenticationMiddleware(userUseCase), func(ginContext *gin.Context) {
+		userRouter.userController.RefreshAccessToken(ginContext)
+	})
 
-		tokenRoutes.GET(logoutPath, httpGinMiddleware.RefreshTokenAuthenticationMiddleware(userUseCase), func(ginContext *gin.Context) {
-			userRouter.userController.Logout(ginContext)
-		})
-	}
+	router.GET(logoutPath, httpGinMiddleware.RefreshTokenAuthenticationMiddleware(userUseCase), func(ginContext *gin.Context) {
+		userRouter.userController.Logout(ginContext)
+	})
 }

@@ -1,8 +1,6 @@
 package model
 
 import (
-	"time"
-
 	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 )
 
@@ -19,12 +17,12 @@ type UsersView struct {
 
 // [GET].
 type UserView struct {
-	UserID    string    `json:"user_id"`
-	Name      string    `json:"name"`
-	Email     string    `json:"email"`
-	Role      string    `json:"role"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	UserID    string `json:"user_id"`
+	Name      string `json:"name"`
+	Email     string `json:"email"`
+	Role      string `json:"role"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
 }
 
 // [POST].
@@ -37,9 +35,8 @@ type UserCreateView struct {
 
 // [PUT].
 type UserUpdateView struct {
-	UserID    string    `json:"user_id"`
-	Name      string    `json:"name"`
-	UpdatedAt time.Time `json:"updated_at"`
+	UserID string `json:"user_id"`
+	Name   string `json:"name"`
 }
 
 // [POST].

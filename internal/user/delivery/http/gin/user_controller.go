@@ -229,7 +229,12 @@ func (userController UserController) RefreshAccessToken(controllerContext any) {
 
 	// Extract the current user from Gin context.
 	currentUser := ginContext.MustGet(constants.UserContext).(userViewModel.UserView)
-	user := userViewModel.UserViewToUserMapper(currentUser)
+	user, userError := userViewModel.UserViewToUserMapper(currentUser)
+	if validator.IsError(userError) {
+		jsonResponse := httpModel.NewJSONResponseOnFailure(httpError.HandleError(userError))
+		ginContext.JSON(constants.StatusBadRequest, jsonResponse)
+		return
+	}
 
 	// Refresh the access token using the provided refresh token.
 	userToken := userController.userUseCase.RefreshAccessToken(ctx, user)

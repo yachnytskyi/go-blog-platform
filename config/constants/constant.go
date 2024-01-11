@@ -9,6 +9,9 @@ const (
 	// Context timers.
 	DefaultContextTimer = time.Duration(time.Second * 5)
 
+	// Datetime format.
+	DateTimeFormat = "02-Jan-2006 03:04 PM MST"
+
 	// Tokens
 	AccessTokenValue  = "access_token"
 	RefreshTokenValue = "refresh_token"

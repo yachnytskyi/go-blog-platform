@@ -3,6 +3,12 @@ package model
 import (
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	http "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
+	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
+	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
+)
+
+const (
+	location = "user.delivery.http.model."
 )
 
 func UsersToUsersViewMapper(users userModel.Users) UsersView {
@@ -31,20 +37,30 @@ func UserToUserViewMapper(user userModel.User) UserView {
 		Name:      user.Name,
 		Email:     user.Email,
 		Role:      user.Role,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
+		CreatedAt: common.FormatDate(user.CreatedAt),
+		UpdatedAt: common.FormatDate(user.UpdatedAt),
 	}
 }
 
-func UserViewToUserMapper(user UserView) userModel.User {
+func UserViewToUserMapper(user UserView) (userModel.User, error) {
+	created_at, parseError := common.ParseDate(location+"UserViewToUserMapper.created_at", user.CreatedAt)
+	if validator.IsError(parseError) {
+		return userModel.User{}, parseError
+	}
+
+	updated_at, parseError := common.ParseDate(location+"UserViewToUserMapper.updated_at", user.UpdatedAt)
+	if validator.IsError(parseError) {
+		return userModel.User{}, parseError
+	}
+
 	return userModel.User{
 		UserID:    user.UserID,
 		Name:      user.Name,
 		Email:     user.Email,
 		Role:      user.Role,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
-	}
+		CreatedAt: created_at,
+		UpdatedAt: updated_at,
+	}, nil
 }
 
 func UserCreateViewToUserCreateMapper(user UserCreateView) userModel.UserCreate {
@@ -58,9 +74,8 @@ func UserCreateViewToUserCreateMapper(user UserCreateView) userModel.UserCreate 
 
 func UserUpdateViewToUserUpdateMapper(user UserUpdateView) userModel.UserUpdate {
 	return userModel.UserUpdate{
-		UserID:    user.UserID,
-		Name:      user.Name,
-		UpdatedAt: user.UpdatedAt,
+		UserID: user.UserID,
+		Name:   user.Name,
 	}
 }
 

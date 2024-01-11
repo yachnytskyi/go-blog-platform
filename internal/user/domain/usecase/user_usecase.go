@@ -97,6 +97,9 @@ func (userUseCase UserUseCase) Register(ctx context.Context, userCreateData user
 	userCreate.Data.Role = userRole
 	userCreate.Data.Verified = true
 	userCreate.Data.VerificationCode = encodedTokenValue
+	currentTime := time.Now()
+	userCreate.Data.CreatedAt = currentTime
+	userCreate.Data.UpdatedAt = currentTime
 
 	// Register the user.
 	createdUser := userUseCase.userRepository.Register(ctx, userCreate.Data)
@@ -124,6 +127,9 @@ func (userUseCase UserUseCase) UpdateCurrentUser(ctx context.Context, userUpdate
 	if validator.IsError(userUpdate.Error) {
 		return commonModel.NewResultOnFailure[userModel.User](domainError.HandleError(userUpdate.Error))
 	}
+
+	// Set the update timestamp to the current time.
+	userUpdate.Data.UpdatedAt = time.Now()
 
 	// Update the user.
 	updatedUser := userUseCase.userRepository.UpdateCurrentUser(ctx, userUpdate.Data)

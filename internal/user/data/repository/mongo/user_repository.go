@@ -170,11 +170,6 @@ func (userRepository UserRepository) Register(ctx context.Context, userCreate us
 	// Set the hashed password in the repository model.
 	userCreateRepository.Password = hashedPassword
 
-	// Set CreatedAt and UpdatedAt to the current time.
-	currentTime := time.Now()
-	userCreateRepository.CreatedAt = currentTime
-	userCreateRepository.UpdatedAt = currentTime
-
 	// Insert the user data into the database.
 	insertOneResult, insertOneResultError := userRepository.collection.InsertOne(ctx, &userCreateRepository)
 	if validator.IsError(insertOneResultError) {
@@ -198,20 +193,15 @@ func (userRepository UserRepository) Register(ctx context.Context, userCreate us
 // UpdateUserById updates a user in the repository based on the provided UserUpdate data.
 // It performs the following steps:
 // 1. Maps the incoming data.
-// 2. Sets the update timestamp to the current time.
-// 3. Maps the repository model to a MongoDB model.
-// 4. Updates the user in the database by executing the MongoDB update query.
-// 5. Retrieves the updated user from the database, maps it back to the domain model, and returns the result.
+// 2. Maps the repository model to a MongoDB model.
+// 3. Updates the user in the database by executing the MongoDB update query.
+// 4. Retrieves the updated user from the database, maps it back to the domain model, and returns the result.
 func (userRepository UserRepository) UpdateCurrentUser(ctx context.Context, user userModel.UserUpdate) commonModel.Result[userModel.User] {
 	// Map user update data to a repository model.
-	// Set the update timestamp to the current time.
 	userUpdateRepository, userUpdateError := userRepositoryModel.UserUpdateToUserUpdateRepositoryMapper(user)
 	if validator.IsError(userUpdateError) {
 		return commonModel.NewResultOnFailure[userModel.User](userUpdateError)
 	}
-
-	// Set the update timestamp to the current time.
-	userUpdateRepository.UpdatedAt = time.Now()
 
 	// Map repository model to a MongoDB model.
 	userUpdateMongo, dataToMongoDocumentMapper := mongoModel.DataToMongoDocumentMapper(location+"UpdateCurrentUser", userUpdateRepository)

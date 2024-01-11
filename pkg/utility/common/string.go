@@ -10,20 +10,16 @@ import (
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
-const (
-	location string = "common.string."
-)
-
 // Encode encodes the input data to a base64 string.
 func Encode(data string) string {
 	return base64.StdEncoding.EncodeToString([]byte(data))
 }
 
 // Decode decodes a base64 encoded string and returns the original data.
-func Decode(encodedString string) (string, error) {
+func Decode(location, encodedString string) (string, error) {
 	data, decodeStringError := base64.StdEncoding.DecodeString(encodedString)
 	if validator.IsError(decodeStringError) {
-		internalError := domainError.NewInternalError(location+"Decode.DecodeString", decodeStringError.Error())
+		internalError := domainError.NewInternalError(location+".Decode.DecodeString", decodeStringError.Error())
 		logging.Logger(internalError)
 		return constants.EmptyString, internalError
 	}

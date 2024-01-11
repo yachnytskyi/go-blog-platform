@@ -28,6 +28,7 @@ func HandleError(err error) error {
 		return errorType
 	default:
 		internalError := errorType.(domainError.InternalError)
+		internalError.Notification = constants.InternalErrorNotification
 		return InternalErrorToHttpInternalErrorViewMapper(internalError)
 	}
 }

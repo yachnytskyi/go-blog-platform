@@ -51,7 +51,7 @@ func (userRouter UserRouter) UserRouter(routerGroup any, userUseCase user.UserUs
 		userRouter.userController.Register(ginContext)
 	})
 
-	router.POST(loginPath, func(ginContext *gin.Context) {
+	router.POST(loginPath, httpGinMiddleware.AnonymousMiddleware(), func(ginContext *gin.Context) {
 		userRouter.userController.Login(ginContext)
 	})
 

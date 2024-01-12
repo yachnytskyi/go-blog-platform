@@ -33,7 +33,7 @@ func NewJSONFailureResponse(err error) JSONResponse {
 	jsonResponse := JSONResponse{Status: fail}
 	switch errorType := err.(type) {
 	case domainError.Errors:
-		if errorType.Len(errorType) == 1 {
+		if errorType.Len() == 1 {
 			jsonResponse.Error = errorType
 		} else {
 			jsonResponse.Errors = errorType
@@ -46,9 +46,10 @@ func NewJSONFailureResponse(err error) JSONResponse {
 
 // SetStatus sets the "Status" field based on the presence of "Data," "Error," or "Errors."
 func SetStatus(jsonResponse *JSONResponse) {
-	if validator.IsValueNotEmpty(jsonResponse.Data) {
+	switch {
+	case validator.IsValueNotEmpty(jsonResponse.Data):
 		jsonResponse.Status = success
-	} else if validator.IsError(jsonResponse.Error) || validator.IsError(jsonResponse.Errors) {
+	case validator.IsError(jsonResponse.Error) || validator.IsError(jsonResponse.Errors):
 		jsonResponse.Status = fail
 	}
 }

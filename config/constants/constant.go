@@ -68,7 +68,7 @@ const (
 	EmailAlreadyExists              = "An account with this email address already exists."
 	AuthorizationErrorNotification  = "Access denied. You do not have the required permissions to perform this action. Please try again or contact our support team for assistance."
 	LoggingErrorNotification        = "You are not logged in."
-	AlreadyRegisteredNotification   = "You are already registered, and registration is not allowed for existing users."
+	AlreadyLoggedInNotification     = "Already logged in. This action is not allowed."
 	EntityNotFoundErrorNotification = "Sorry, the requested item does not exist in our records."
 	PaginationErrorNotification     = "Sorry, there was an issue with the pagination request. Please check your parameters and try again."
 	InternalErrorNotification       = "Oops! Something went wrong on our end. Please try again later or contact our support team for assistance."

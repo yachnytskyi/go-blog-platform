@@ -7,8 +7,7 @@ import (
 
 type Errors interface {
 	error
-	Errors() string
-	Len(Errors) int
+	Len() int
 }
 
 type ValidationError struct {
@@ -48,19 +47,8 @@ func (validationErrors ValidationErrors) Error() string {
 	return result.String()
 }
 
-func (validationErrors ValidationErrors) Len(Errors) int {
+func (validationErrors ValidationErrors) Len() int {
 	return len(validationErrors)
-}
-
-func (validationErrors ValidationErrors) Errors() string {
-	var result strings.Builder
-	for i, validationError := range validationErrors {
-		if i > 0 {
-			result.WriteString(": ")
-		}
-		result.WriteString(validationError.Error())
-	}
-	return result.String()
 }
 
 type AuthorizationError struct {

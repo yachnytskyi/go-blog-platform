@@ -33,7 +33,7 @@ func AnonymousMiddleware() gin.HandlerFunc {
 		// Check if the access token is not empty, indicating that the user is already authenticated.
 		if validator.IsStringNotEmpty(anonymousAccessToken) {
 			// Create a custom error message indicating that the user is already authenticated.
-			authorizationError := httpError.NewHttpAuthorizationErrorView(location+"AnonymousMiddleware.anonymousAccessToken", constants.AlreadyRegisteredNotification)
+			authorizationError := httpError.NewHttpAuthorizationErrorView(location+"AnonymousMiddleware.anonymousAccessToken", constants.AlreadyLoggedInNotification)
 			logging.Logger(authorizationError)
 			jsonResponse := httpModel.NewJSONFailureResponse(authorizationError)
 			ginContext.AbortWithStatusJSON(constants.StatusForbidden, jsonResponse)

@@ -3,8 +3,6 @@ package http
 import (
 	"fmt"
 	"strings"
-
-	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
 
 type HttpValidationErrorView struct {
@@ -40,15 +38,7 @@ func (httpValidationErrorsView HttpValidationErrorsView) Error() string {
 	return result.String()
 }
 
-func (httpValidationErrorsView HttpValidationErrorsView) Errors() string {
-	var result strings.Builder
-	for _, validationError := range httpValidationErrorsView {
-		result.WriteString("field: " + validationError.Field + " " + "type: " + validationError.FieldType + " notification: " + validationError.Notification)
-	}
-	return result.String()
-}
-
-func (httpValidationErrorsView HttpValidationErrorsView) Len(domainError.Errors) int {
+func (httpValidationErrorsView HttpValidationErrorsView) Len() int {
 	return len(httpValidationErrorsView)
 }
 
@@ -149,17 +139,6 @@ func (httpInternalErrorsView HttpInternalErrorsView) Error() string {
 	return result.String()
 }
 
-func (httpInternalErrorsView HttpInternalErrorsView) Errors() string {
-	var result strings.Builder
-	for i, httpInternalView := range httpInternalErrorsView {
-		if i > 0 {
-			result.WriteString(": ")
-		}
-		result.WriteString(httpInternalView.Error())
-	}
-	return result.String()
-}
-
-func (httpInternalErrorsView HttpInternalErrorsView) Len(domainError.Errors) int {
+func (httpInternalErrorsView HttpInternalErrorsView) Len() int {
 	return len(httpInternalErrorsView)
 }

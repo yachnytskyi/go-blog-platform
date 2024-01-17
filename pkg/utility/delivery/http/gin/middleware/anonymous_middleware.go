@@ -6,9 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
-	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
@@ -34,9 +32,7 @@ func AnonymousMiddleware() gin.HandlerFunc {
 		if validator.IsStringNotEmpty(anonymousAccessToken) {
 			// Create a custom error message indicating that the user is already authenticated.
 			authorizationError := httpError.NewHttpAuthorizationErrorView(location+"AnonymousMiddleware.anonymousAccessToken", constants.AlreadyLoggedInNotification)
-			logging.Logger(authorizationError)
-			jsonResponse := httpModel.NewJSONFailureResponse(authorizationError)
-			ginContext.AbortWithStatusJSON(constants.StatusForbidden, jsonResponse)
+			abortWithStatusJSON(ginContext, authorizationError, constants.StatusForbidden)
 			return
 		}
 

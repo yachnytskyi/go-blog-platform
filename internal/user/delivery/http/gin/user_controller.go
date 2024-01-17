@@ -72,9 +72,16 @@ func (userController UserController) GetUserById(controllerContext any) {
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
 
+	// Check context timeout.
+	contextError := commonUtility.HandleWithContextError("internal.user.delivery.http.gin.GetUserById", ctx)
+	if validator.IsError(contextError) {
+		httpGinCommon.GinNewJSONFailureResponse(ginContext, contextError, constants.StatusBadRequest)
+	}
+
 	// Get the user ID from the request parameters.
 	// Fetch the user using the user use case.
 	userID := ginContext.Param(constants.UserIDContext)
+
 	fetchedUser := userController.userUseCase.GetUserById(ctx, userID)
 	if validator.IsError(fetchedUser.Error) {
 		httpGinCommon.GinNewJSONFailureResponse(ginContext, fetchedUser.Error, constants.StatusBadRequest)

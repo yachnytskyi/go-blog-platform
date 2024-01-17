@@ -33,6 +33,6 @@ func HandleError(err error) error {
 	case HttpInternalErrorsView:
 		return NewHttpInternalErrorView(location+"case HttpInternalErrorsView", constants.InternalErrorNotification)
 	default:
-		return NewHttpInternalErrorView(location+"case HttpInternalErrorView", constants.InternalErrorNotification)
+		return NewHttpInternalErrorView(location+"case default", constants.InternalErrorNotification)
 	}
 }

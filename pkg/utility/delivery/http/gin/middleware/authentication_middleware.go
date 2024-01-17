@@ -128,7 +128,7 @@ func extractRefreshToken(ginContext *gin.Context) (string, error) {
 // abortWithStatusJSON aborts the request, logs the error, and responds with a JSON error.
 func abortWithStatusJSON(ginContext *gin.Context, err error, httpCode int) {
 	logging.Logger(err)
-	jsonResponse := httpModel.NewJSONFailureResponse(err)
+	jsonResponse := httpModel.NewJSONFailureResponse(httpError.HandleError(err))
 	ginContext.AbortWithStatusJSON(httpCode, jsonResponse)
 }
 

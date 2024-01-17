@@ -36,6 +36,7 @@ const (
 func (ginFactory *GinFactory) InitializeServer(serverConfig applicationModel.ServerRouters) {
 	ginConfig := config.AppConfig.Gin
 	ginFactory.Router = gin.Default()
+	ginFactory.Router.Use(httpGinMiddleware.TimeoutMiddleware())
 	ginFactory.Router.Use(httpGinMiddleware.ValidateInput())
 	ginFactory.Router.Use(httpGinMiddleware.SecureHeadersMiddleware())
 	ginFactory.Router.Use(httpGinMiddleware.CSPMiddleware())

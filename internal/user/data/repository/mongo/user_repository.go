@@ -103,6 +103,12 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 
 // GetUserById retrieves a user by their ID from the database.
 func (userRepository UserRepository) GetUserById(ctx context.Context, userID string) commonModel.Result[userModel.User] {
+	// Check context timeout.
+	contextError := commonUtility.HandleWithContextError("internal.user.data.repository.mongo.GetUserById", ctx)
+	if validator.IsError(contextError) {
+		return commonModel.NewResultOnFailure[userModel.User](domainError.HandleError(contextError))
+	}
+
 	userObjectID, hexToObjectIDMapperError := mongoModel.HexToObjectIDMapper(location+"GetUserById", userID)
 	if validator.IsError(hexToObjectIDMapperError) {
 		return commonModel.NewResultOnFailure[userModel.User](hexToObjectIDMapperError)
@@ -111,7 +117,7 @@ func (userRepository UserRepository) GetUserById(ctx context.Context, userID str
 	// Define the MongoDB query to find the user by ObjectID.
 	// Retrieve the user from the database.
 	query := bson.M{"_id": userObjectID}
-	return userRepository.getUserByQuery(ctx, query)
+	return userRepository.getUserByQuery(location+"GetUserById", ctx, query)
 }
 
 // GetUserByEmail retrieves a user by their email from the repository.
@@ -120,7 +126,7 @@ func (userRepository UserRepository) GetUserByEmail(ctx context.Context, email s
 	query := bson.M{"email": email}
 
 	// Retrieve the user from the database.
-	return userRepository.getUserByQuery(ctx, query)
+	return userRepository.getUserByQuery(location+"GetUserByEmail", ctx, query)
 }
 
 // CheckEmailDuplicate checks if an email already exists in the UserRepository.
@@ -186,7 +192,7 @@ func (userRepository UserRepository) Register(ctx context.Context, userCreate us
 
 	// Retrieve the created user from the database.
 	query := bson.M{"_id": insertOneResult.InsertedID}
-	createdUser := userRepository.getUserByQuery(ctx, query)
+	createdUser := userRepository.getUserByQuery(location+"Register", ctx, query)
 	return createdUser
 }
 
@@ -337,13 +343,19 @@ func (userRepository UserRepository) ensureUniqueEmailIndex(ctx context.Context)
 }
 
 // getUserByQuery retrieves a user based on the provided query from the repository.
-func (userRepository UserRepository) getUserByQuery(ctx context.Context, query bson.M) commonModel.Result[userModel.User] {
+func (userRepository UserRepository) getUserByQuery(location string, ctx context.Context, query bson.M) commonModel.Result[userModel.User] {
+	// Check context timeout.
+	contextError := commonUtility.HandleWithContextError("internal.user.data.repository.mongo.GetUserById", ctx)
+	if validator.IsError(contextError) {
+		return commonModel.NewResultOnFailure[userModel.User](domainError.HandleError(contextError))
+	}
+
 	// Initialize a User object and find the user based on the provided query.
 	fetchedUser := userRepositoryModel.UserRepository{}
 	userFindOneError := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
 	if validator.IsError(userFindOneError) {
 		queryString := commonUtility.ConvertQueryToString(query)
-		entityNotFoundError := domainError.NewEntityNotFoundError(location+"getUserByQuery.Decode", queryString, userFindOneError.Error())
+		entityNotFoundError := domainError.NewEntityNotFoundError(location+".getUserByQuery.Decode", queryString, userFindOneError.Error())
 		logging.Logger(entityNotFoundError)
 		return commonModel.NewResultOnFailure[userModel.User](entityNotFoundError)
 	}

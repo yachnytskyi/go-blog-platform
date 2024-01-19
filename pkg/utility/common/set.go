@@ -63,10 +63,10 @@ type OrderedSet[T comparable] struct {
 }
 
 // NewOrderedSet creates a new ordered set with map and slice.
-func NewOrderedSet[T comparable](cap uint) OrderedSet[T] {
+func NewOrderedSet[T comparable](capacity uint) OrderedSet[T] {
 	return OrderedSet[T]{
-		setMap:   make(map[T]struct{}, cap),
-		setSlice: make([]T, 0, cap),
+		setMap:   make(map[T]struct{}, capacity),
+		setSlice: make([]T, 0, capacity),
 	}
 }
 

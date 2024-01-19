@@ -12,6 +12,7 @@ import (
 	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
 	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
+	commonUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
@@ -19,6 +20,12 @@ func RefreshTokenAuthenticationMiddleware(userUseCase user.UserUseCase) gin.Hand
 	return func(ginContext *gin.Context) {
 		ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 		defer cancel()
+
+		// Check context timeout.
+		contextError := commonUtility.HandleWithContextError(location+"RefreshTokenAuthenticationMiddleware", ctx)
+		if validator.IsError(contextError) {
+			abortWithStatusJSON(ginContext, contextError, http.StatusUnauthorized)
+		}
 
 		// Extract the refresh token from the request.
 		refreshToken, tokenError := extractRefreshToken(ginContext)
@@ -38,15 +45,6 @@ func RefreshTokenAuthenticationMiddleware(userUseCase user.UserUseCase) gin.Hand
 			httpAuthorizationError := httpError.NewHttpAuthorizationErrorView(constants.EmptyString, constants.LoggingErrorNotification)
 			abortWithStatusJSON(ginContext, httpAuthorizationError, http.StatusUnauthorized)
 			return
-		}
-
-		// Check for a deadline error using the handleDeadlineExceeded function.
-		// If a deadline error occurred, respond with a timeout status.
-		deadlineError := handleDeadlineExceeded(ctx)
-		if validator.IsError(deadlineError) {
-			// Use the abortWithStatusJSON function to handle the deadline error by sending
-			// a JSON response with an appropriate HTTP status code.
-			abortWithStatusJSON(ginContext, deadlineError, http.StatusUnauthorized)
 		}
 
 		// Get the user information from the user use case.

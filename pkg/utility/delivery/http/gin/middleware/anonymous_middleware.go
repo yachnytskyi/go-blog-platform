@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"context"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -13,20 +12,8 @@ import (
 // AnonymousMiddleware is a Gin middleware to check if the user is anonymous based on the presence of an access token.
 func AnonymousMiddleware() gin.HandlerFunc {
 	return func(ginContext *gin.Context) {
-		ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
-		defer cancel()
-
 		// Check if a user is anonymous
 		anonymousAccessToken := isUserAnonymous(ginContext)
-
-		// Check for a deadline error using the handleDeadlineExceeded function.
-		// If a deadline error occurred, respond with a timeout status.
-		deadlineError := handleDeadlineExceeded(ctx)
-		if validator.IsError(deadlineError) {
-			// Use the abortWithStatusJSON function to handle the deadline error by sending
-			// a JSON response with an appropriate HTTP status code.
-			abortWithStatusJSON(ginContext, deadlineError, constants.StatusUnauthorized)
-		}
 
 		// Check if the access token is not empty, indicating that the user is already authenticated.
 		if validator.IsStringNotEmpty(anonymousAccessToken) {

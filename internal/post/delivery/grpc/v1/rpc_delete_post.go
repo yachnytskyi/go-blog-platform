@@ -18,6 +18,7 @@ func (PostGrpcServer *PostGrpcServer) DeletePostById(ctx context.Context, postDa
 		if strings.Contains(err.Error(), "Id exists") {
 			return nil, status.Errorf(codes.NotFound, err.Error())
 		}
+
 		return nil, status.Errorf(codes.Internal, err.Error())
 	}
 

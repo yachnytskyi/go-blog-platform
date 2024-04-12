@@ -161,6 +161,7 @@ func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID
 	if validator.IsError(err) {
 		return nil, errors.New("sorry, but this title already exists. Please choose another one")
 	}
+
 	return updatedPost, nil
 }
 
@@ -178,5 +179,6 @@ func (postRepository *PostRepository) DeletePostByID(ctx context.Context, postID
 	if result.DeletedCount == 0 {
 		return errors.New("no document with that Id exists")
 	}
+
 	return nil
 }

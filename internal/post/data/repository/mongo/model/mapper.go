@@ -15,6 +15,7 @@ func PostsRepositoryToPostsMapper(postsRepository []*PostRepository) []*postMode
 	for index, postRepository := range postsRepository {
 		posts[index] = PostRepositoryToPostMapper(postRepository)
 	}
+
 	return posts
 }
 
@@ -36,6 +37,7 @@ func PostCreateToPostCreateRepositoryMapper(postCreate *postModel.PostCreate) (*
 	if validator.IsError(hexToObjectIDMapperError) {
 		return &PostCreateRepository{}, hexToObjectIDMapperError
 	}
+
 	return &PostCreateRepository{
 		UserID:    userObjectID,
 		Title:     postCreate.Title,
@@ -57,6 +59,7 @@ func PostUpdateToPostUpdateRepositoryMapper(postUpdate *postModel.PostUpdate) (*
 	if validator.IsError(hexToObjectIDMapperError) {
 		return &PostUpdateRepository{}, hexToObjectIDMapperError
 	}
+
 	return &PostUpdateRepository{
 		PostID:    postObjectID,
 		UserID:    userObjectID,

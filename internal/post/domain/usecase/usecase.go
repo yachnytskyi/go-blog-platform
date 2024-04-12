@@ -18,19 +18,16 @@ func NewPostUseCase(postRepository post.PostRepository) post.PostUseCase {
 
 func (postUseCase *PostUseCase) GetAllPosts(ctx context.Context, page int, limit int) (*postModel.Posts, error) {
 	fetchedPosts, err := postUseCase.postRepository.GetAllPosts(ctx, page, limit)
-
 	return fetchedPosts, err
 }
 
 func (postUseCase *PostUseCase) GetPostById(ctx context.Context, postID string) (*postModel.Post, error) {
 	fetchedPost, err := postUseCase.postRepository.GetPostById(ctx, postID)
-
 	return fetchedPost, err
 }
 
 func (postUseCase *PostUseCase) CreatePost(ctx context.Context, post *postModel.PostCreate) (*postModel.Post, error) {
 	createdPost, err := postUseCase.postRepository.CreatePost(ctx, post)
-
 	return createdPost, err
 }
 
@@ -49,7 +46,6 @@ func (postUseCase *PostUseCase) UpdatePostById(ctx context.Context, postID strin
 	}
 
 	updatedPost, err := postUseCase.postRepository.UpdatePostById(ctx, postID, post)
-
 	return updatedPost, err
 }
 
@@ -68,6 +64,5 @@ func (postUseCase *PostUseCase) DeletePostByID(ctx context.Context, postID strin
 	}
 
 	deletedPost := postUseCase.postRepository.DeletePostByID(ctx, postID)
-
 	return deletedPost
 }

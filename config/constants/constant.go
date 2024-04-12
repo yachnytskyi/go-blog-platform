@@ -6,6 +6,17 @@ import (
 )
 
 const (
+	// Schemes.
+	HTTP  = "http"
+	HTTPS = "https"
+
+	// Page arguments.
+	PageValue            = "page"
+	LimitValue           = "limit"
+	OrderByValue         = "order_by"
+	SortOrderValue       = "sort_order"
+	DefaultAmountOfPages = 10
+
 	// Context timers.
 	DefaultContextTimer = time.Duration(time.Second * 5)
 

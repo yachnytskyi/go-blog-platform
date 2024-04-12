@@ -28,6 +28,8 @@ func UsersToUsersViewMapper(users userModel.Users) UsersView {
 			ItemsLeft:   users.PaginationResponse.ItemsLeft,
 			Limit:       users.PaginationResponse.Limit,
 			OrderBy:     users.PaginationResponse.OrderBy,
+			SortOrder:   users.PaginationResponse.SortOrder,
+			PageLinks:   users.PaginationResponse.PageLinks,
 		},
 		UsersView: usersView,
 	}

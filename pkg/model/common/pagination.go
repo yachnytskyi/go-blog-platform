@@ -64,6 +64,7 @@ func getSkip(page, limit int) int {
 	if page == 0 {
 		return page
 	}
+
 	return (page - 1) * limit
 }
 
@@ -82,6 +83,7 @@ func SetCorrectPage(paginationQuery PaginationQuery) PaginationQuery {
 		paginationQuery.Page = getTotalPages(paginationQuery.TotalItems, paginationQuery.Limit)
 		paginationQuery.Skip = getSkip(paginationQuery.Page, paginationQuery.Limit)
 	}
+
 	return paginationQuery
 }
 
@@ -112,6 +114,7 @@ func NewPaginationResponse(paginationQuery PaginationQuery) PaginationResponse {
 		SortOrder:  paginationQuery.SortOrder,
 		BaseURL:    paginationQuery.BaseURL,
 	}
+
 	paginationResponse.PageLinks = paginationResponse.getPageLinks(constants.DefaultAmountOfPages) // You can specify the number of pages to show here.
 	return paginationResponse
 }

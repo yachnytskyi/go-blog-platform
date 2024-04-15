@@ -136,6 +136,7 @@ func (httpInternalErrorsView HttpInternalErrorsView) Error() string {
 		}
 		result.WriteString(httpInternalView.Error())
 	}
+
 	return result.String()
 }
 

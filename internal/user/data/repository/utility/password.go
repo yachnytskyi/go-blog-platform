@@ -15,5 +15,6 @@ func HashPassword(location, password string) (string, error) {
 		logging.Logger(internalError)
 		return constants.EmptyString, internalError
 	}
+
 	return string(hashedPassword), nil
 }

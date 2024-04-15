@@ -41,6 +41,7 @@ func ParseTemplateDirectory(templatePath string) (*template.Template, error) {
 		sendEmailInternalError := domainError.NewInternalError(location+"ParseTemplateDirectory."+loggerMessage, filePathWalkError.Error())
 		return nil, sendEmailInternalError
 	}
+
 	return template.ParseFiles(paths...)
 }
 
@@ -64,6 +65,7 @@ func SendEmail(ctx context.Context, user userModel.User, data userModel.EmailDat
 		sendEmailInternalError := domainError.NewInternalError(location+"SendEmail.DialAndSend", dialAndSendError.Error())
 		return sendEmailInternalError
 	}
+
 	return nil
 }
 

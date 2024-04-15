@@ -39,6 +39,7 @@ func ValidateField(field, fieldName, fieldRegex, notification string) error {
 		logging.Logger(validationError)
 		return validationError
 	}
+
 	return nil
 }
 
@@ -54,6 +55,7 @@ func ValidateOptionalField(field, fieldName, fieldType, fieldRegex, notification
 		logging.Logger(validationError)
 		return validationError
 	}
+
 	return nil
 }
 
@@ -61,6 +63,7 @@ func IsStringLengthInvalid(checkedString string, minLength int, maxLength int) b
 	if len(checkedString) < minLength || len(checkedString) > maxLength {
 		return true
 	}
+
 	return false
 }
 
@@ -72,5 +75,6 @@ func IsOptionalStringLengthInvalid(checkedString string, minLength int, maxLengt
 	if len(checkedString) < minLength || len(checkedString) > maxLength {
 		return true
 	}
+
 	return false
 }

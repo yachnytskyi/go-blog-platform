@@ -10,5 +10,6 @@ func IsUserOwner(currentUserID string, userID string) error {
 	if validator.AreStringsNotEqual(currentUserID, userID) {
 		return domainError.NewAuthorizationError(location+"IsUserOwner.AreStringsNotEqual", constants.AuthorizationErrorNotification)
 	}
+
 	return nil
 }

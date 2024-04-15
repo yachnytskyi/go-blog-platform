@@ -91,6 +91,7 @@ func decodeBase64String(base64String string) ([]byte, error) {
 		logging.Logger(internalError)
 		return []byte{}, domainError.HandleError(internalError)
 	}
+
 	return decodedPrivateKey, nil
 }
 
@@ -102,6 +103,7 @@ func parsePrivateKey(decodedPrivateKey []byte) (*rsa.PrivateKey, error) {
 		logging.Logger(internalError)
 		return nil, domainError.HandleError(internalError)
 	}
+
 	return key, nil
 }
 
@@ -123,6 +125,7 @@ func createSignedToken(key *rsa.PrivateKey, claims jwt.MapClaims) (string, error
 		logging.Logger(internalError)
 		return constants.EmptyString, domainError.HandleError(internalError)
 	}
+
 	return token, nil
 }
 
@@ -134,6 +137,7 @@ func parsePublicKey(decodedPublicKey []byte) (*rsa.PublicKey, error) {
 		logging.Logger(internalError)
 		return nil, domainError.HandleError(internalError)
 	}
+
 	return key, nil
 }
 
@@ -153,5 +157,6 @@ func parseToken(token string, key *rsa.PublicKey) (*jwt.Token, error) {
 		logging.Logger(internalError)
 		return nil, domainError.HandleError(internalError)
 	}
+
 	return parsedToken, nil
 }

@@ -38,5 +38,6 @@ func (userGrpcServer *UserGrpcServer) Register(ctx context.Context, request *pb.
 		Status:  "success",
 		Message: message,
 	}
+
 	return response, nil
 }

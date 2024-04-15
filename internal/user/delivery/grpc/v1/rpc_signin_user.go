@@ -40,5 +40,6 @@ func (userGrpcServer *UserGrpcServer) Login(ctx context.Context, request *pb.Log
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}
+
 	return response, nil
 }

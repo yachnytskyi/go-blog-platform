@@ -41,6 +41,7 @@ func NewJSONFailureResponse(err error) JSONResponse {
 	case error:
 		jsonResponse.Error = errorType
 	}
+
 	return jsonResponse
 }
 

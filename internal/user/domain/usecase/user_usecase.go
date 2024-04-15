@@ -38,6 +38,7 @@ func (userUseCase UserUseCase) GetAllUsers(ctx context.Context, paginationQuery 
 	if validator.IsError(fetchedUsers.Error) {
 		return commonModel.NewResultOnFailure[userModel.Users](domainError.HandleError(fetchedUsers.Error))
 	}
+
 	return fetchedUsers
 }
 
@@ -55,6 +56,7 @@ func (userUseCase UserUseCase) GetUserById(ctx context.Context, userID string) c
 	if validator.IsError(fetchedUser.Error) {
 		return commonModel.NewResultOnFailure[userModel.User](domainError.HandleError(fetchedUser.Error))
 	}
+
 	return fetchedUser
 }
 
@@ -73,6 +75,7 @@ func (userUseCase UserUseCase) GetUserByEmail(ctx context.Context, email string)
 	if validator.IsError(fetchedUser.Error) {
 		return commonModel.NewResultOnFailure[userModel.User](domainError.HandleError(fetchedUser.Error))
 	}
+
 	return fetchedUser
 }
 
@@ -116,6 +119,7 @@ func (userUseCase UserUseCase) Register(ctx context.Context, userCreateData user
 	if validator.IsError(sendEmailVerificationMessageError) {
 		return commonModel.NewResultOnFailure[userModel.User](domainError.HandleError(sendEmailVerificationMessageError))
 	}
+
 	return createdUser
 }
 
@@ -136,6 +140,7 @@ func (userUseCase UserUseCase) UpdateCurrentUser(ctx context.Context, userUpdate
 	if validator.IsError(updatedUser.Error) {
 		return commonModel.NewResultOnFailure[userModel.User](domainError.HandleError(updatedUser.Error))
 	}
+
 	return updatedUser
 }
 
@@ -222,6 +227,7 @@ func (userUseCase UserUseCase) UpdatePasswordResetTokenUserByEmail(ctx context.C
 		sendEmailForgottenPasswordMessageError = domainError.HandleError(sendEmailForgottenPasswordMessageError)
 		return sendEmailForgottenPasswordMessageError
 	}
+
 	return nil
 }
 

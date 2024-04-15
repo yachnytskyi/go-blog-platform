@@ -22,6 +22,7 @@ func ValidationErrorsToHttpValidationErrorsViewMapper(validationErrors domainErr
 			httpValidationErrorsView = append(httpValidationErrorsView, httpValidationErrorView)
 		}
 	}
+
 	return HttpValidationErrorsView(httpValidationErrorsView)
 }
 

@@ -25,6 +25,7 @@ func SetSortOrder(sortOrder string) int {
 		if constants.DefaultSortOrder == constants.SortAscend {
 			return sortAscend
 		}
+
 		return sortDescend
 	}
 }

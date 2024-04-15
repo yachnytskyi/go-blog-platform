@@ -56,6 +56,7 @@ func (set *Set[T]) Values() []T {
 	for value := range set.data {
 		values = append(values, value)
 	}
+
 	return values
 }
 

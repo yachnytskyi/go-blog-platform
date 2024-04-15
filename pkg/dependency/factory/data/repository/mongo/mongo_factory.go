@@ -42,6 +42,7 @@ func (mongoDBFactory *MongoDBFactory) NewRepository(ctx context.Context) any {
 		logging.Logger(domainError.NewInternalError(location+"mongoClient.Ping", connectError.Error()))
 		return nil
 	}
+
 	logging.Logger(successfully_connected)
 	return db
 }

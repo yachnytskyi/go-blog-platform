@@ -64,6 +64,7 @@ func validateUserCreate(userCreate userModel.UserCreate) common.Result[userModel
 	if validator.IsSliceNotEmpty(validationErrors) {
 		return common.NewResultOnFailure[userModel.UserCreate](domainError.ValidationErrors(validationErrors))
 	}
+
 	return common.NewResultOnSuccess[userModel.UserCreate](userCreate)
 }
 
@@ -77,6 +78,7 @@ func validateUserUpdate(userUpdate userModel.UserUpdate) common.Result[userModel
 	if validator.IsSliceNotEmpty(validationErrors) {
 		return common.NewResultOnFailure[userModel.UserUpdate](domainError.ValidationErrors(validationErrors))
 	}
+
 	return common.NewResultOnSuccess[userModel.UserUpdate](userUpdate)
 }
 
@@ -95,6 +97,7 @@ func validateUserLogin(userLogin userModel.UserLogin) common.Result[userModel.Us
 	if validator.IsSliceNotEmpty(validationErrors) {
 		return common.NewResultOnFailure[userModel.UserLogin](domainError.NewValidationErrors(validationErrors))
 	}
+
 	return common.NewResultOnSuccess[userModel.UserLogin](userLogin)
 }
 
@@ -108,6 +111,7 @@ func validateUserForgottenPassword(userForgottenPassword userModel.UserForgotten
 	if validator.IsSliceNotEmpty(validationErrors) {
 		return common.NewResultOnFailure[userModel.UserForgottenPassword](validationErrors)
 	}
+
 	return common.NewResultOnSuccess[userModel.UserForgottenPassword](userForgottenPassword)
 }
 
@@ -123,6 +127,7 @@ func validateResetPassword(userResetPassword userModel.UserResetPassword) common
 	if validator.IsSliceNotEmpty(validationErrors) {
 		return common.NewResultOnFailure[userModel.UserResetPassword](validationErrors)
 	}
+
 	return common.NewResultOnSuccess[userModel.UserResetPassword](userResetPassword)
 }
 
@@ -143,6 +148,7 @@ func validateEmail(email, fieldRegex string) error {
 		logging.Logger(validationError)
 		return validationError
 	}
+
 	return nil
 }
 
@@ -163,6 +169,7 @@ func validatePassword(password, passwordConfirm, fieldName, fieldRegex string) e
 		logging.Logger(validationError)
 		return validationError
 	}
+
 	return nil
 }
 
@@ -180,5 +187,6 @@ func arePasswordsNotEqual(hashedPassword string, checkedPassword string) error {
 		validationError.Notification = invalidEmailOrPassword
 		return validationError
 	}
+
 	return nil
 }

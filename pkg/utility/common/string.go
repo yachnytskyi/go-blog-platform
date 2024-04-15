@@ -23,6 +23,7 @@ func Decode(location, encodedString string) (string, error) {
 		logging.Logger(internalError)
 		return constants.EmptyString, internalError
 	}
+
 	return string(data), nil
 }
 

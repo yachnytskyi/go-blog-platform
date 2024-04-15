@@ -75,6 +75,7 @@ func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int,
 			Posts: make([]*postModel.Post, 0),
 		}, nil
 	}
+
 	return &postModel.Posts{
 		Posts: postRepositoryModel.PostsRepositoryToPostsMapper(fetchedPosts),
 	}, nil
@@ -96,6 +97,7 @@ func (postRepository *PostRepository) GetPostById(ctx context.Context, postID st
 
 		return nil, err
 	}
+
 	return postRepositoryModel.PostRepositoryToPostMapper(fetchedPost), nil
 }
 

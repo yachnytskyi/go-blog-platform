@@ -46,5 +46,6 @@ func isUserAnonymous(ginContext *gin.Context) string {
 			anonymousAccessToken = cookie
 		}
 	}
+
 	return anonymousAccessToken
 }

@@ -21,5 +21,6 @@ func NewGrpcUserServer(userUseCase user.UserUseCase, userCollection *mongo.Colle
 		userUseCase:       userUseCase,
 		userCollection:    userCollection,
 	}
+
 	return userGrpcServer, nil
 }

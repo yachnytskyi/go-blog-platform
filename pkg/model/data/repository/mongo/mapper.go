@@ -28,6 +28,7 @@ func DataToMongoDocumentMapper(location string, incomingData any) (document *bso
 		logging.Logger(internalError)
 		return document, err
 	}
+
 	return
 }
 
@@ -45,6 +46,7 @@ func HexToObjectIDMapper(location, id string) (primitive.ObjectID, error) {
 		// Return a default ObjectID and the error.
 		return primitive.NilObjectID, internalError
 	}
+
 	// Return the successfully converted ObjectID and nil error.
 	return objectID, nil
 }

@@ -21,6 +21,7 @@ func UsersRepositoryToUsersMapper(usersRepository UsersRepository) userModel.Use
 	for index, userRepository := range usersRepository.Users {
 		users[index] = UserRepositoryToUserMapper(userRepository)
 	}
+
 	return userModel.Users{
 		PaginationResponse: usersRepository.PaginationResponse,
 		Users:              users,
@@ -45,6 +46,7 @@ func UserUpdateToUserUpdateRepositoryMapper(userUpdate userModel.UserUpdate) (Us
 	if validator.IsError(hexToObjectIDMapperError) {
 		return UserUpdateRepository{}, hexToObjectIDMapperError
 	}
+
 	return UserUpdateRepository{
 		UserID:    userObjectID,
 		Name:      userUpdate.Name,

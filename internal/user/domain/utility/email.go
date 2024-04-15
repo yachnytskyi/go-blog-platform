@@ -10,5 +10,6 @@ func UserFirstName(firstName string) string {
 	if strings.Contains(firstName, " ") {
 		firstName = strings.Split(firstName, " ")[firstElement]
 	}
+
 	return firstName
 }

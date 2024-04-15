@@ -292,6 +292,7 @@ func (userRepository UserRepository) ResetUserPassword(ctx context.Context, firs
 		logging.Logger(updatedUserPasswordError)
 		return updatedUserPasswordError
 	}
+
 	return nil
 }
 
@@ -348,6 +349,7 @@ func (userRepository UserRepository) ensureUniqueEmailIndex(ctx context.Context)
 		logging.Logger(internalError)
 		return internalError
 	}
+
 	return nil
 }
 

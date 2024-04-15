@@ -24,5 +24,6 @@ func ParseDate(location, data string) (time.Time, error) {
 		// Return a default date and the error.
 		return time.Time{}, internalError
 	}
+
 	return parsedTime, nil
 }

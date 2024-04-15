@@ -1,6 +1,8 @@
 package common
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
@@ -16,15 +18,30 @@ import (
 // - commonModel.PaginationQuery: The parsed pagination parameters.
 func ParsePaginationQuery(ginContext *gin.Context) commonModel.PaginationQuery {
 	// Extract the page, limit, orderBy, and sortOrder query parameters from the Gin context.
-	page := ginContext.DefaultQuery("page", constants.DefaultPage)
-	limit := ginContext.DefaultQuery("limit", constants.DefaultLimit)
-	orderBy := ginContext.DefaultQuery("order-by", constants.DefaultOrderBy)
-	sortOrder := ginContext.DefaultQuery("sort-order", constants.DefaultSortOrder)
+	page := ginContext.DefaultQuery(constants.PageValue, constants.DefaultPage)
+	limit := ginContext.DefaultQuery(constants.LimitValue, constants.DefaultLimit)
+	orderBy := ginContext.DefaultQuery(constants.OrderByValue, constants.DefaultOrderBy)
+	sortOrder := ginContext.DefaultQuery(constants.SortOrderValue, constants.DefaultSortOrder)
 
 	// Convert and validate the extracted values.
 	convertedPage := commonModel.GetPage(page)
 	convertedLimit := commonModel.GetLimit(limit)
 
+	// Extract the scheme from the request.
+	scheme := constants.HTTP
+	if ginContext.Request.TLS != nil {
+		scheme = constants.HTTPS
+	}
+
+	// Extract the full URL path including query parameters.
+	rawURL := ginContext.Request.URL
+
+	// Get the scheme and host from the original request.
+	host := ginContext.Request.Host
+
+	// Construct the full URL by combining scheme, host, and the URL path.
+	baseURL := fmt.Sprintf("%s://%s%s", scheme, host, rawURL.Path)
+
 	// Create and return a commonModel.PaginationQuery struct.
-	return commonModel.NewPaginationQuery(convertedPage, convertedLimit, orderBy, sortOrder)
+	return commonModel.NewPaginationQuery(convertedPage, convertedLimit, orderBy, sortOrder, baseURL)
 }

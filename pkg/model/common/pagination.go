@@ -1,6 +1,7 @@
 package common
 
 import (
+	"fmt"
 	"math"
 	"strconv"
 
@@ -8,27 +9,27 @@ import (
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
-const (
-	zero = 0
-)
-
 // PaginationQuery represents the parameters for paginating a list of items.
 type PaginationQuery struct {
-	Page      int    // Page number to retrieve.
-	Limit     int    // Maximum number of items per page.
-	OrderBy   string // Field to order by.
-	SortOrder string // Sorting direction ("asc" for ascending, "desc" for descending).
-	Skip      int    // Number of items to skip for pagination.
+	Page       int    // Page number to retrieve.
+	Limit      int    // Maximum number of items per page.
+	OrderBy    string // Field to order by.
+	SortOrder  string // Sorting direction ("asc" for ascending, "desc" for descending).
+	Skip       int    // Number of items to skip for pagination.
+	BaseURL    string // Base URL for pagination.
+	TotalItems int    // Total number of items.
+
 }
 
 // NewPaginationQuery creates a new PaginationQuery with the given parameters.
-func NewPaginationQuery(page, limit int, orderBy, sortOrder string) PaginationQuery {
+func NewPaginationQuery(page, limit int, orderBy, sortOrder, baseURL string) PaginationQuery {
 	return PaginationQuery{
 		Page:      page,
 		Limit:     limit,
 		OrderBy:   orderBy,
 		SortOrder: sortOrder,
 		Skip:      getSkip(page, limit),
+		BaseURL:   baseURL,
 	}
 }
 
@@ -41,6 +42,7 @@ func GetPage(page string) int {
 	if intPage <= 0 {
 		intPage, _ = strconv.Atoi(constants.DefaultPage)
 	}
+
 	return intPage
 }
 
@@ -50,9 +52,10 @@ func GetLimit(limit string) int {
 	if validator.IsError(stringConversionError) {
 		intLimit, _ = strconv.Atoi(constants.DefaultLimit)
 	}
-	if isLimitNotValid(intLimit) {
+	if isLimitInvalid(intLimit) {
 		intLimit, _ = strconv.Atoi(constants.DefaultLimit)
 	}
+
 	return intLimit
 }
 
@@ -64,18 +67,19 @@ func getSkip(page, limit int) int {
 	return (page - 1) * limit
 }
 
-// isLimitNotValid checks if a limit value is valid.
-func isLimitNotValid(data int) bool {
-	if data == zero || data < zero || data > constants.MaxItemsPerPage {
+// isLimitInvalid checks if a limit value is valid.
+func isLimitInvalid(data int) bool {
+	if data == 0 || data < 0 || data > constants.MaxItemsPerPage {
 		return true
 	}
+
 	return false
 }
 
 // SetCorrectPage adjusts the PaginationQuery to ensure it's valid, especially when there are not enough items to reach the current page.
-func SetCorrectPage(totalItems int, paginationQuery PaginationQuery) PaginationQuery {
-	if totalItems <= paginationQuery.Skip {
-		paginationQuery.Page = getTotalPages(totalItems, paginationQuery.Limit)
+func SetCorrectPage(paginationQuery PaginationQuery) PaginationQuery {
+	if paginationQuery.TotalItems <= paginationQuery.Skip {
+		paginationQuery.Page = getTotalPages(paginationQuery.TotalItems, paginationQuery.Limit)
 		paginationQuery.Skip = getSkip(paginationQuery.Page, paginationQuery.Limit)
 	}
 	return paginationQuery
@@ -83,26 +87,33 @@ func SetCorrectPage(totalItems int, paginationQuery PaginationQuery) PaginationQ
 
 // PaginationResponse represents information about the current page, total pages, and more for a paginated list.
 type PaginationResponse struct {
-	Page       int    // Current page number.
-	TotalPages int    // Total number of pages.
-	PagesLeft  int    // Number of pages remaining.
-	TotalItems int    // Total number of items.
-	ItemsLeft  int    // Number of items remaining on the current page.
-	Limit      int    // Maximum items per page.
-	OrderBy    string // Field used for ordering.
+	Page       int      // Current page number.
+	TotalPages int      // Total number of pages.
+	PagesLeft  int      // Number of pages remaining.
+	TotalItems int      // Total number of items.
+	ItemsLeft  int      // Number of items remaining on the current page.
+	Limit      int      // Maximum items per page.
+	OrderBy    string   // Field used for ordering.
+	SortOrder  string   // Sorting direction ("asc" for ascending, "desc" for descending).
+	PageLinks  []string // Array of page links.
+	BaseURL    string   // Base URL for pagination.
 }
 
 // NewPaginationResponse creates a new PaginationResponse with the given parameters.
-func NewPaginationResponse(page, totalItems, limit int, orderBy string) PaginationResponse {
-	return PaginationResponse{
-		Page:       page,
-		TotalPages: getTotalPages(totalItems, limit),
-		PagesLeft:  getPagesLeft(page, totalItems, limit),
-		TotalItems: totalItems,
-		ItemsLeft:  getItemsLeft(page, totalItems, limit),
-		Limit:      limit,
-		OrderBy:    orderBy,
+func NewPaginationResponse(paginationQuery PaginationQuery) PaginationResponse {
+	paginationResponse := PaginationResponse{
+		Page:       paginationQuery.Page,
+		TotalPages: getTotalPages(paginationQuery.TotalItems, paginationQuery.Limit),
+		PagesLeft:  getPagesLeft(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit),
+		TotalItems: paginationQuery.TotalItems,
+		ItemsLeft:  getItemsLeft(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit),
+		Limit:      paginationQuery.Limit,
+		OrderBy:    paginationQuery.OrderBy,
+		SortOrder:  paginationQuery.SortOrder,
+		BaseURL:    paginationQuery.BaseURL,
 	}
+	paginationResponse.PageLinks = paginationResponse.getPageLinks(constants.DefaultAmountOfPages) // You can specify the number of pages to show here.
+	return paginationResponse
 }
 
 // getTotalPages calculates the total number of pages based on total items and limit.
@@ -119,7 +130,63 @@ func getPagesLeft(page, totalItems, limit int) int {
 // getItemsLeft calculates the number of items remaining on the current page.
 func getItemsLeft(page, totalItems, limit int) int {
 	if (totalItems - (page * limit)) < 0 {
-		return zero
+		return 0
 	}
+
 	return totalItems - (page * limit)
+}
+
+func (paginationResponse PaginationResponse) getPageLinks(amountOfPages int) []string {
+	// Preallocate memory for the pageLinks slice based on amountOfPages, adding space for potential first and last page links.
+	pageLinks := make([]string, 0, amountOfPages+2)
+
+	// Calculate the range of pages to show before and after the current page.
+	startPage := paginationResponse.Page - (amountOfPages / 2)
+	if startPage < 1 {
+		startPage = 1
+	}
+
+	// If the start page is not the first page, add the first page link to the pageLinks slice.
+	if startPage != 1 {
+		pageLinks = append(pageLinks, paginationResponse.buildPageLink(1))
+	}
+
+	// Calculate the end page based on the adjusted start page and amountOfPages.
+	endPage := startPage + amountOfPages
+	if endPage > paginationResponse.TotalPages {
+		// Adjust the end page if it exceeds the total number of pages.
+		endPage = paginationResponse.TotalPages
+		startPage = endPage - amountOfPages
+		if startPage < 1 {
+			startPage = 1
+		}
+	}
+
+	// Append the page links to the list, excluding the current page link.
+	for i := startPage; i <= endPage; i++ {
+		if i != paginationResponse.Page {
+			pageLinks = append(pageLinks, paginationResponse.buildPageLink(i))
+		}
+	}
+
+	// If the last page is not included in the page links, add the last page link to the pageLinks slice.
+	if endPage != paginationResponse.TotalPages {
+		pageLinks = append(pageLinks, paginationResponse.buildPageLink(paginationResponse.TotalPages))
+	}
+
+	return pageLinks
+}
+
+// buildPageLink builds the page link with given page number.
+func (paginationResponse PaginationResponse) buildPageLink(pageNumber int) string {
+	baseURL := paginationResponse.BaseURL
+
+	// Construct the query parameters string.
+	queryParams := fmt.Sprintf("%s=%d&%s=%d&%s=%s&%s=%s",
+		constants.PageValue, pageNumber, constants.LimitValue, paginationResponse.Limit,
+		constants.OrderByValue, paginationResponse.OrderBy,
+		constants.SortOrderValue, paginationResponse.SortOrder)
+
+	// Combine the base URL and query parameters.
+	return fmt.Sprintf("%s?%s", baseURL, queryParams)
 }

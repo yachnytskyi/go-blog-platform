@@ -39,21 +39,24 @@ func NewUserRepository(db *mongo.Database) user.UserRepository {
 
 // GetAllUsers retrieves a list of users from the database based on pagination parameters.
 func (userRepository UserRepository) GetAllUsers(ctx context.Context, paginationQuery commonModel.PaginationQuery) commonModel.Result[userModel.Users] {
-	// Initialize the query with an empty BSON document
-	// and determine the sort order based on the pagination query.
+	// Initialize the query with an empty BSON document.
 	query := bson.M{}
+
+	// Determine the sort order based on the pagination query.
 	sortOrder := mongoModel.SetSortOrder(paginationQuery.SortOrder)
 
 	// Count the total number of users to set up pagination.
 	totalUsers, countDocumentsError := userRepository.collection.CountDocuments(ctx, query)
 	if validator.IsError(countDocumentsError) {
+		// If an error occurs while counting documents, log and return an internal error.
 		internalError := domainError.NewInternalError(location+"GetAllUsers.collection.CountDocuments", countDocumentsError.Error())
 		logging.Logger(internalError)
 		return commonModel.NewResultOnFailure[userModel.Users](internalError)
 	}
 
 	// Set up pagination and sorting options using provided parameters.
-	paginationQuery = commonModel.SetCorrectPage(int(totalUsers), paginationQuery)
+	paginationQuery.TotalItems = int(totalUsers)
+	paginationQuery = commonModel.SetCorrectPage(paginationQuery)
 	option := options.FindOptions{}
 	option.SetLimit(int64(paginationQuery.Limit))
 	option.SetSkip(int64(paginationQuery.Skip))
@@ -63,6 +66,7 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 	// Query the database to fetch users.
 	cursor, cursorFindError := userRepository.collection.Find(ctx, query, &option)
 	if validator.IsError(cursorFindError) {
+		// If an error occurs while finding documents, log and return an entity not found error.
 		queryString := commonUtility.ConvertQueryToString(query)
 		entityNotFoundError := domainError.NewEntityNotFoundError(location+"GetAllUsers.Find", queryString, cursorFindError.Error())
 		logging.Logger(entityNotFoundError)
@@ -76,6 +80,7 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 		user := userRepositoryModel.UserRepository{}
 		cursorDecodeError := cursor.Decode(&user)
 		if validator.IsError(cursorDecodeError) {
+			// If an error occurs while decoding documents, log and return an internal error.
 			internalError := domainError.NewInternalError(location+"GetAllUsers.cursor.decode", cursorDecodeError.Error())
 			logging.Logger(internalError)
 			return commonModel.NewResultOnFailure[userModel.Users](internalError)
@@ -83,19 +88,23 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 		fetchedUsers = append(fetchedUsers, user)
 	}
 
+	// Check for cursor errors.
 	cursorError := cursor.Err()
 	if validator.IsError(cursorError) {
+		// If an error occurs with the cursor, log and return an internal error.
 		internalError := domainError.NewInternalError(location+"GetAllUsers.cursor.Err", cursorError.Error())
 		logging.Logger(internalError)
 		return commonModel.NewResultOnFailure[userModel.Users](internalError)
 	}
+
+	// If no users are fetched, return an empty result.
 	if len(fetchedUsers) == 0 {
 		return commonModel.NewResultOnSuccess[userModel.Users](userModel.Users{})
 	}
 
 	// Map the repository model to domain ones.
 	usersRepository := userRepositoryModel.UserRepositoryToUsersRepositoryMapper(fetchedUsers)
-	paginationResponse := commonModel.NewPaginationResponse(paginationQuery.Page, int(totalUsers), paginationQuery.Limit, paginationQuery.OrderBy)
+	paginationResponse := commonModel.NewPaginationResponse(paginationQuery)
 	usersRepository.PaginationResponse = paginationResponse
 	users := userRepositoryModel.UsersRepositoryToUsersMapper(usersRepository)
 	return commonModel.NewResultOnSuccess[userModel.Users](users)

@@ -112,12 +112,6 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 
 // GetUserById retrieves a user by their ID from the database.
 func (userRepository UserRepository) GetUserById(ctx context.Context, userID string) commonModel.Result[userModel.User] {
-	// Check context timeout.
-	contextError := commonUtility.HandleWithContextError("internal.user.data.repository.mongo.GetUserById", ctx)
-	if validator.IsError(contextError) {
-		return commonModel.NewResultOnFailure[userModel.User](domainError.HandleError(contextError))
-	}
-
 	userObjectID, hexToObjectIDMapperError := mongoModel.HexToObjectIDMapper(location+"GetUserById", userID)
 	if validator.IsError(hexToObjectIDMapperError) {
 		return commonModel.NewResultOnFailure[userModel.User](hexToObjectIDMapperError)
@@ -138,8 +132,6 @@ func (userRepository UserRepository) GetUserByEmail(ctx context.Context, email s
 	return userRepository.getUserByQuery(location+"GetUserByEmail", ctx, query)
 }
 
-// CheckEmailDuplicate checks if an email already exists in the UserRepository.
-// It returns an error if the email is already associated with a user, or nil if the email is unique.
 func (userRepository UserRepository) CheckEmailDuplicate(ctx context.Context, email string) error {
 	// Initialize a User object and define th MongoDB query to find the user by Email.
 	fetchedUser := userRepositoryModel.UserRepository{}
@@ -148,19 +140,20 @@ func (userRepository UserRepository) CheckEmailDuplicate(ctx context.Context, em
 	// Find and decode the user.
 	// If no user is found, return nil (indicating that the email is unique).
 	userFindOneError := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
-	if validator.IsValueEmpty(fetchedUser) {
-		return nil
-	}
-
-	// If an error occurs during the database query, log it as an internal error.
 	if validator.IsError(userFindOneError) {
-		userFindOneInternalError := domainError.NewInternalError(location+"CheckEmailDublicate.FindOne.Decode", userFindOneError.Error())
-		logging.Logger(userFindOneInternalError)
-		return userFindOneInternalError
+		if userFindOneError == mongo.ErrNoDocuments {
+			// No user found, email is unique
+			return nil
+		}
+
+		// If an error occurs during the database query, log it as an internal error.
+		internalError := domainError.NewInternalError(location+"CheckEmailDuplicate.FindOne.Decode", userFindOneError.Error())
+		logging.Logger(internalError)
+		return internalError
 	}
 
 	// If a user with the given email is found, return a validation error.
-	userFindOneValidationError := domainError.NewValidationError(location+"CheckEmailDublicate", userValidator.EmailField, constants.FieldRequired, constants.EmailAlreadyExists)
+	userFindOneValidationError := domainError.NewValidationError(location+"CheckEmailDuplicate", userValidator.EmailField, constants.FieldRequired, constants.EmailAlreadyExists)
 	logging.Logger(userFindOneValidationError)
 	return userFindOneValidationError
 }
@@ -355,12 +348,6 @@ func (userRepository UserRepository) ensureUniqueEmailIndex(ctx context.Context)
 
 // getUserByQuery retrieves a user based on the provided query from the repository.
 func (userRepository UserRepository) getUserByQuery(location string, ctx context.Context, query bson.M) commonModel.Result[userModel.User] {
-	// Check context timeout.
-	contextError := commonUtility.HandleWithContextError("internal.user.data.repository.mongo.GetUserById", ctx)
-	if validator.IsError(contextError) {
-		return commonModel.NewResultOnFailure[userModel.User](domainError.HandleError(contextError))
-	}
-
 	// Initialize a User object and find the user based on the provided query.
 	fetchedUser := userRepositoryModel.UserRepository{}
 	userFindOneError := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)

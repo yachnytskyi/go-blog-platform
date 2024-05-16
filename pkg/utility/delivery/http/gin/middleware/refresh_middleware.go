@@ -12,7 +12,6 @@ import (
 	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
 	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
-	commonUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
@@ -20,12 +19,6 @@ func RefreshTokenAuthenticationMiddleware(userUseCase user.UserUseCase) gin.Hand
 	return func(ginContext *gin.Context) {
 		ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 		defer cancel()
-
-		// Check context timeout.
-		contextError := commonUtility.HandleWithContextError(location+"RefreshTokenAuthenticationMiddleware", ctx)
-		if validator.IsError(contextError) {
-			abortWithStatusJSON(ginContext, contextError, http.StatusUnauthorized)
-		}
 
 		// Extract the refresh token from the request.
 		refreshToken, tokenError := extractRefreshToken(ginContext)

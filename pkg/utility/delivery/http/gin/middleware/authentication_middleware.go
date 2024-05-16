@@ -14,7 +14,6 @@ import (
 	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
 	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
-	commonUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
@@ -32,12 +31,6 @@ func AuthenticationMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
 	return func(ginContext *gin.Context) {
 		ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 		defer cancel()
-
-		// Check context timeout.
-		contextError := commonUtility.HandleWithContextError(location+"AuthMiddleware", ctx)
-		if validator.IsError(contextError) {
-			abortWithStatusJSON(ginContext, contextError, http.StatusUnauthorized)
-		}
 
 		// Extract the access token from the request.
 		accessToken, tokenError := extractAccessToken(ginContext)

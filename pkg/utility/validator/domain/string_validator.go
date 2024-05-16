@@ -27,36 +27,51 @@ func SanitizeAndToLowerString(data string) string {
 	return strings.ToLower(data)
 }
 
-func ValidateField(field, fieldName, fieldRegex, notification string) error {
-	if IsStringLengthInvalid(field, constants.MinStringLength, constants.MaxStringLength) {
-		notification = fmt.Sprintf(constants.StringAllowedLength, constants.MinStringLength, constants.MaxStringLength)
-		validationError := domainError.NewValidationError(location+"ValidateField.IsStringLengthInvalid", fieldName, constants.FieldRequired, notification)
+func ValidateField(field string, commonValidator CommonValidator, validationErrors []error) []error {
+	errors := make([]error, len(validationErrors))
+	errors = append(errors, validationErrors...)
+	fmt.Println(errors)
+	if IsStringLengthInvalid(field, commonValidator.MinLength, commonValidator.MaxLength) {
+		commonValidator.Notification = fmt.Sprintf(constants.StringAllowedLength, commonValidator.MinLength, commonValidator.MaxLength)
+		validationError := domainError.NewValidationError(location+"ValidateField.IsStringLengthInvalid",
+			commonValidator.FieldName, constants.FieldRequired, commonValidator.Notification)
 		logging.Logger(validationError)
-		return validationError
+		errors = append(errors, validationError)
+		return errors
 	}
-	if AreStringCharactersInvalid(field, fieldRegex) {
-		validationError := domainError.NewValidationError(location+"ValidateField.AreStringCharactersInvalid", fieldName, constants.FieldRequired, notification)
+	if AreStringCharactersInvalid(field, commonValidator.FieldRegex) {
+		validationError := domainError.NewValidationError(location+"ValidateField.AreStringCharactersInvalid",
+			commonValidator.FieldName, constants.FieldRequired, commonValidator.Notification)
 		logging.Logger(validationError)
-		return validationError
+		errors = append(errors, validationError)
+		return errors
 	}
 
-	return nil
+	return errors
 }
 
-func ValidateOptionalField(field, fieldName, fieldType, fieldRegex, notification string) error {
-	if IsStringLengthInvalid(field, constants.MinOptionalStringLength, constants.MaxStringLength) {
-		notification = fmt.Sprintf(constants.StringOptionalAllowedLength, constants.MaxStringLength)
-		validationError := domainError.NewValidationError(location+"ValidateOptionalField.IsStringLengthInvalid", fieldName, fieldType, notification)
+func ValidateOptionalField(field string, commonValidator CommonValidator, validationErrors []error) []error {
+	errors := make([]error, len(validationErrors))
+	errors = append(errors, validationErrors...)
+
+	if IsStringLengthInvalid(field, commonValidator.MinLength, commonValidator.MaxLength) {
+		commonValidator.Notification = fmt.Sprintf(constants.StringOptionalAllowedLength, constants.MaxStringLength)
+		validationError := domainError.NewValidationError(location+"ValidateOptionalField.IsStringLengthInvalid",
+			commonValidator.FieldName, constants.FieldOptional, commonValidator.Notification)
 		logging.Logger(validationError)
-		return validationError
-	}
-	if AreStringCharactersInvalid(field, fieldRegex) {
-		validationError := domainError.NewValidationError(location+"ValidateField.AreStringCharactersInvalid", fieldName, fieldType, notification)
-		logging.Logger(validationError)
-		return validationError
+		errors = append(errors, validationError)
+		return errors
 	}
 
-	return nil
+	if AreStringCharactersInvalid(field, commonValidator.FieldRegex) {
+		validationError := domainError.NewValidationError(location+"ValidateField.AreStringCharactersInvalid",
+			commonValidator.FieldName, constants.FieldOptional, commonValidator.Notification)
+		logging.Logger(validationError)
+		errors = append(errors, validationError)
+		return errors
+	}
+
+	return errors
 }
 
 func IsStringLengthInvalid(checkedString string, minLength int, maxLength int) bool {

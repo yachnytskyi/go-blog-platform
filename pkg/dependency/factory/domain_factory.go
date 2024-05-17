@@ -6,7 +6,7 @@ import (
 
 	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	useCaseFactory "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/domain/usecase"
+	domainFactory "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/domain"
 	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
@@ -21,7 +21,7 @@ func InjectDomain(ctx context.Context, container *applicationModel.Container) {
 
 	switch coreConfig.Domain {
 	case constants.UseCase:
-		container.DomainFactory = useCaseFactory.UseCaseFactory{}
+		container.DomainFactory = domainFactory.UseCaseFactory{}
 	// Add other domain options here as needed.
 	default:
 		notification := fmt.Sprintf(unsupportedDomain, coreConfig.Domain)

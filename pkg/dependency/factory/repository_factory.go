@@ -6,7 +6,7 @@ import (
 
 	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	mongoDBFactory "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/data/repository/mongo"
+	repositoryFactory "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/data/repository"
 	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
@@ -23,7 +23,7 @@ func InjectRepository(ctx context.Context, container *applicationModel.Container
 
 	switch coreConfig.Database {
 	case constants.MongoDB:
-		container.RepositoryFactory = &mongoDBFactory.MongoDBFactory{MongoDB: mongoDBConfig}
+		container.RepositoryFactory = &repositoryFactory.MongoDBFactory{MongoDB: mongoDBConfig}
 	// Add other database cases here as needed.
 	default:
 		notification := fmt.Sprintf(unsupportedDatabase, coreConfig.Database)

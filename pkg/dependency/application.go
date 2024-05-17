@@ -19,12 +19,12 @@ func CreateApplication(ctx context.Context) *applicationModel.Container {
 
 	// Domains.
 	factory.InjectDomain(ctx, container)
-	serverRouters.UserUseCase = container.DomainFactory.NewUserUseCase(userRepository)
+	userUseCase := container.DomainFactory.NewUserUseCase(userRepository)
 	postDomain := container.DomainFactory.NewPostUseCase(postRepository)
 
 	// Deliveries.
 	factory.InjectDelivery(ctx, container)
-	userController := container.DeliveryFactory.NewUserController(serverRouters.UserUseCase)
+	userController := container.DeliveryFactory.NewUserController(userUseCase)
 	postController := container.DeliveryFactory.NewPostController(postDomain)
 	serverRouters.UserRouter = container.DeliveryFactory.NewUserRouter(userController)
 	serverRouters.PostRouter = container.DeliveryFactory.NewPostRouter(postController)

@@ -14,9 +14,8 @@ type Container struct {
 }
 
 type ServerRouters struct {
-	UserUseCase user.UserUseCase
-	UserRouter  user.UserRouter
-	PostRouter  post.PostRouter
+	UserRouter user.UserRouter
+	PostRouter post.PostRouter
 }
 
 func NewContainer(repositoryFactory RepositoryFactory, domainFactory DomainFactory, deliveryFactory DeliveryFactory) *Container {

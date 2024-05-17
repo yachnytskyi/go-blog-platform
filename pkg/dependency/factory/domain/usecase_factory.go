@@ -1,4 +1,4 @@
-package usecase
+package domain
 
 import (
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"

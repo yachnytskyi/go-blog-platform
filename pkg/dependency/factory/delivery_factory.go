@@ -6,7 +6,7 @@ import (
 
 	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	ginFactory "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/delivery/gin"
+	deliveryFactory "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/delivery"
 	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
@@ -22,8 +22,8 @@ func InjectDelivery(ctx context.Context, container *applicationModel.Container) 
 
 	switch coreConfig.Delivery {
 	case constants.Gin:
-		container.DeliveryFactory = &ginFactory.GinFactory{Gin: ginConfig}
-	// Add other domain options here as needed.
+		container.DeliveryFactory = &deliveryFactory.GinFactory{Gin: ginConfig}
+	// Add other delivery options here as needed.
 	default:
 		notification := fmt.Sprintf(unsupportedDelivery, coreConfig.Delivery)
 		logging.Logger(domainError.NewInternalError(location+".loadConfig.Delivery:", notification))

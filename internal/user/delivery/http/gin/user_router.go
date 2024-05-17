@@ -34,7 +34,7 @@ func NewUserRouter(userController user.UserController) UserRouter {
 }
 
 // UserRouter defines the user-related routes and connects them to the corresponding controller methods.
-func (userRouter UserRouter) UserRouter(routerGroup any, userUseCase user.UserUseCase) {
+func (userRouter UserRouter) UserRouter(routerGroup any) {
 	ginRouterGroup := routerGroup.(*gin.RouterGroup)
 	router := ginRouterGroup.Group(groupPath)
 
@@ -64,24 +64,24 @@ func (userRouter UserRouter) UserRouter(routerGroup any, userUseCase user.UserUs
 	})
 
 	// Authenticated routes.
-	router.GET(getCurrentUserPath, httpGinMiddleware.AuthenticationMiddleware(userUseCase), func(ginContext *gin.Context) {
+	router.GET(getCurrentUserPath, httpGinMiddleware.AuthenticationMiddleware(), func(ginContext *gin.Context) {
 		userRouter.userController.GetCurrentUser(ginContext)
 	})
 
-	router.PUT(updateCurrentUserPath, httpGinMiddleware.AuthenticationMiddleware(userUseCase), func(ginContext *gin.Context) {
+	router.PUT(updateCurrentUserPath, httpGinMiddleware.AuthenticationMiddleware(), func(ginContext *gin.Context) {
 		userRouter.userController.UpdateCurrentUser(ginContext)
 	})
 
-	router.DELETE(deleteCurrentUserPath, httpGinMiddleware.AuthenticationMiddleware(userUseCase), func(ginContext *gin.Context) {
+	router.DELETE(deleteCurrentUserPath, httpGinMiddleware.AuthenticationMiddleware(), func(ginContext *gin.Context) {
 		userRouter.userController.DeleteCurrentUser(ginContext)
 	})
 
 	// Token-related routes.
-	router.GET(refreshTokenPath, httpGinMiddleware.RefreshTokenAuthenticationMiddleware(userUseCase), func(ginContext *gin.Context) {
+	router.GET(refreshTokenPath, httpGinMiddleware.RefreshTokenAuthenticationMiddleware(), func(ginContext *gin.Context) {
 		userRouter.userController.RefreshAccessToken(ginContext)
 	})
 
-	router.GET(logoutPath, httpGinMiddleware.RefreshTokenAuthenticationMiddleware(userUseCase), func(ginContext *gin.Context) {
+	router.GET(logoutPath, httpGinMiddleware.RefreshTokenAuthenticationMiddleware(), func(ginContext *gin.Context) {
 		userRouter.userController.Logout(ginContext)
 	})
 }

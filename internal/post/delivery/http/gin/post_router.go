@@ -3,7 +3,6 @@ package gin
 import (
 	"github.com/gin-gonic/gin"
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
-	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	httpGinMiddleware "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/middleware"
 )
 
@@ -15,7 +14,7 @@ func NewPostRouter(postController post.PostController) PostRouter {
 	return PostRouter{postController: postController}
 }
 
-func (postRouter PostRouter) PostRouter(routerGroup any, userUseCase user.UserUseCase) {
+func (postRouter PostRouter) PostRouter(routerGroup any) {
 	ginRouterGroup := routerGroup.(*gin.RouterGroup)
 	router := ginRouterGroup.Group("/posts")
 	router.GET("/", func(ginContext *gin.Context) {
@@ -25,7 +24,7 @@ func (postRouter PostRouter) PostRouter(routerGroup any, userUseCase user.UserUs
 		postRouter.postController.GetPostById(ginContext)
 	})
 
-	router.Use(httpGinMiddleware.AuthenticationMiddleware(userUseCase))
+	router.Use(httpGinMiddleware.AuthenticationMiddleware())
 	router.POST("/", func(ginContext *gin.Context) {
 		postRouter.postController.CreatePost(ginContext)
 	})

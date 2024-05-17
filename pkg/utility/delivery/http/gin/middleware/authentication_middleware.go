@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
 	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
@@ -24,7 +23,7 @@ const (
 )
 
 // AuthMiddleware is a Gin middleware for handling user authentication using JWT tokens.
-func AuthenticationMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
+func AuthenticationMiddleware() gin.HandlerFunc {
 	return func(ginContext *gin.Context) {
 		// Extract the access token from the request.
 		accessToken, tokenError := extractAccessToken(ginContext)

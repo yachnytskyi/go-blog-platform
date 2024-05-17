@@ -1,4 +1,4 @@
-package gin
+package delivery
 
 import (
 	"context"
@@ -50,8 +50,8 @@ func (ginFactory *GinFactory) InitializeServer(serverConfig applicationModel.Ser
 	ginFactory.Router.Use(cors.New(corsConfig))
 
 	// Routers
-	serverConfig.UserRouter.UserRouter(router, serverConfig.UserUseCase)
-	serverConfig.PostRouter.PostRouter(router, serverConfig.UserUseCase)
+	serverConfig.UserRouter.UserRouter(router)
+	serverConfig.PostRouter.PostRouter(router)
 
 	ginFactory.Server = &http.Server{
 		Addr:    ":" + ginFactory.Gin.Port,

@@ -6,13 +6,12 @@ import (
 	"github.com/gin-gonic/gin"
 	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
-func RefreshTokenAuthenticationMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
+func RefreshTokenAuthenticationMiddleware() gin.HandlerFunc {
 	return func(ginContext *gin.Context) {
 		// Extract the refresh token from the request.
 		refreshToken, tokenError := extractRefreshToken(ginContext)

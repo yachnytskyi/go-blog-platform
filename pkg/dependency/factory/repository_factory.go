@@ -17,15 +17,20 @@ const (
 	unsupportedDatabase = "Unsupported database type: %s"
 )
 
+// InjectRepository injects the appropriate repository factory into the container based on the configuration.
 func InjectRepository(ctx context.Context, container *applicationModel.Container) {
+	// Load the core configuration and the MongoDB configuration.
 	coreConfig := config.AppConfig.Core
 	mongoDBConfig := config.AppConfig.MongoDB
 
+	// Switch based on the configured database type.
 	switch coreConfig.Database {
 	case constants.MongoDB:
+		// Inject the MongoDB factory into the container if the database type is MongoDB.
 		container.RepositoryFactory = &repositoryFactory.MongoDBFactory{MongoDB: mongoDBConfig}
 	// Add other database cases here as needed.
 	default:
+		// Handle unsupported database types by logging an error and shutting down the application gracefully.
 		notification := fmt.Sprintf(unsupportedDatabase, coreConfig.Database)
 		logging.Logger(domainError.NewInternalError(location+".applicationConfig.Core.Database:", notification))
 		applicationModel.GracefulShutdown(ctx, container)

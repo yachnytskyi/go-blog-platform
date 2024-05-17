@@ -5,7 +5,7 @@ import (
 
 	pb "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1/model/pb"
 	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
-	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
+	domainModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -27,7 +27,7 @@ func (userGrpcServer *UserGrpcServer) Login(ctx context.Context, request *pb.Log
 	// }
 
 	// Generate the UserTokenPayload.
-	userTokenPayload := commonModel.NewUserTokenPayload(user.Data.UserID, user.Data.Role)
+	userTokenPayload := domainModel.NewUserTokenPayload(user.Data.UserID, user.Data.Role)
 
 	// Generate tokens.
 	accessToken, createTokenError := domainUtility.GenerateJWTToken(ctx, userGrpcServer.applicationConfig.AccessToken.ExpiredIn, userTokenPayload, userGrpcServer.applicationConfig.AccessToken.PrivateKey)

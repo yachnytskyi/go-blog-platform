@@ -9,7 +9,7 @@ import (
 
 	"github.com/golang-jwt/jwt"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
+	domainModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -29,7 +29,7 @@ const (
 
 // GenerateJWTToken generates a JWT token with the provided UserTokenPayload, using the given private key,
 // and sets the token's expiration based on the specified token lifetime.
-func GenerateJWTToken(ctx context.Context, tokenLifeTime time.Duration, userTokenPayload commonModel.UserTokenPayload, privateKey string) (string, error) {
+func GenerateJWTToken(ctx context.Context, tokenLifeTime time.Duration, userTokenPayload domainModel.UserTokenPayload, privateKey string) (string, error) {
 	// Decode the private key from base64-encoded string.
 	decodedPrivateKey, decodeStringError := decodeBase64String(privateKey)
 	if validator.IsError(decodeStringError) {
@@ -56,29 +56,29 @@ func GenerateJWTToken(ctx context.Context, tokenLifeTime time.Duration, userToke
 
 // ValidateJWTToken validates a JWT token using the provided public key and returns the claims
 // extracted from the token if it's valid.
-func ValidateJWTToken(token string, publicKey string) (commonModel.UserTokenPayload, error) {
+func ValidateJWTToken(token string, publicKey string) (domainModel.UserTokenPayload, error) {
 	// Decode the public key from a base64-encoded string.
 	decodedPublicKey, decodeStringError := decodeBase64String(publicKey)
 	if validator.IsError(decodeStringError) {
-		return commonModel.UserTokenPayload{}, decodeStringError
+		return domainModel.UserTokenPayload{}, decodeStringError
 	}
 
 	// Parse the public key for verification.
 	key, parsePublicKeyError := parsePublicKey(decodedPublicKey)
 	if validator.IsError(parsePublicKeyError) {
-		return commonModel.UserTokenPayload{}, parsePublicKeyError
+		return domainModel.UserTokenPayload{}, parsePublicKeyError
 	}
 
 	// Parse and verify the token using the public key.
 	parsedToken, parseTokenError := parseToken(token, key)
 	if validator.IsError(parseTokenError) {
-		return commonModel.UserTokenPayload{}, parseTokenError
+		return domainModel.UserTokenPayload{}, parseTokenError
 	}
 
 	// Extract and validate the claims from the parsed token.
 	claims, ok := parsedToken.Claims.(jwt.MapClaims)
 	if ok && parsedToken.Valid {
-		return commonModel.UserTokenPayload{
+		return domainModel.UserTokenPayload{
 			UserID: fmt.Sprint(claims[userIDClaim]),
 			Role:   fmt.Sprint(claims[userRoleClaim]),
 		}, nil
@@ -86,7 +86,7 @@ func ValidateJWTToken(token string, publicKey string) (commonModel.UserTokenPayl
 
 	internalError := domainError.NewInternalError(location+"parsedToken.Claims.NotOk", invalidTokenMessage)
 	logging.Logger(internalError)
-	return commonModel.UserTokenPayload{}, domainError.HandleError(internalError)
+	return domainModel.UserTokenPayload{}, domainError.HandleError(internalError)
 }
 
 // decodeBase64String decodes a base64-encoded string into a byte slice.
@@ -114,7 +114,7 @@ func parsePrivateKey(decodedPrivateKey []byte) (*rsa.PrivateKey, error) {
 }
 
 // generateClaims generates JWT claims with the specified token lifetime and UserTokenPayload.
-func generateClaims(tokenLifeTime time.Duration, now time.Time, userTokenPayload commonModel.UserTokenPayload) jwt.MapClaims {
+func generateClaims(tokenLifeTime time.Duration, now time.Time, userTokenPayload domainModel.UserTokenPayload) jwt.MapClaims {
 	return jwt.MapClaims{
 		userIDClaim:     userTokenPayload.UserID,
 		userRoleClaim:   userTokenPayload.Role,

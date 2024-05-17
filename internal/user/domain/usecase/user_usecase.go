@@ -11,6 +11,7 @@ import (
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
 	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
+	domainModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	commonUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -171,7 +172,7 @@ func (userUseCase UserUseCase) Login(ctx context.Context, userLoginData userMode
 	}
 
 	// Generate the UserTokenPayload.
-	userTokenPayload := commonModel.NewUserTokenPayload(fetchedUser.Data.UserID, fetchedUser.Data.Role)
+	userTokenPayload := domainModel.NewUserTokenPayload(fetchedUser.Data.UserID, fetchedUser.Data.Role)
 
 	// Generate access and refresh tokens.
 	userToken := generateToken(ctx, userTokenPayload)
@@ -182,7 +183,7 @@ func (userUseCase UserUseCase) Login(ctx context.Context, userLoginData userMode
 
 func (userUseCase UserUseCase) RefreshAccessToken(ctx context.Context, user userModel.User) commonModel.Result[userModel.UserToken] {
 	// Generate the UserTokenPayload.
-	userTokenPayload := commonModel.NewUserTokenPayload(user.UserID, user.Role)
+	userTokenPayload := domainModel.NewUserTokenPayload(user.UserID, user.Role)
 
 	// Generate access and refresh tokens.
 	userToken := generateToken(ctx, userTokenPayload)
@@ -269,7 +270,7 @@ func prepareEmailDataForUpdatePasswordResetToken(userName, tokenValue string) us
 // If there are errors during token generation, it returns a failure result
 // with the corresponding error. Otherwise, it returns a success result
 // containing the generated access and refresh tokens.
-func generateToken(ctx context.Context, userTokenPayload commonModel.UserTokenPayload) commonModel.Result[userModel.UserToken] {
+func generateToken(ctx context.Context, userTokenPayload domainModel.UserTokenPayload) commonModel.Result[userModel.UserToken] {
 	// Create a userToken struct to store the generated tokens.
 	var userToken userModel.UserToken
 

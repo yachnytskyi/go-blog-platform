@@ -94,7 +94,7 @@ func validateUserCreate(userCreate userModel.UserCreate) common.Result[userModel
 // validateUserUpdate validates the fields of the UserUpdate struct.
 func validateUserUpdate(userUpdate userModel.UserUpdate) common.Result[userModel.UserUpdate] {
 	// Initialize a slice to hold validation errors.
-	validationErrors := make([]error, expectedErrors)
+	validationErrors := make([]error, 0, expectedErrors)
 
 	// Sanitize input fields.
 	userUpdate.Name = domainUtility.SanitizeString(userUpdate.Name)
@@ -113,7 +113,7 @@ func validateUserUpdate(userUpdate userModel.UserUpdate) common.Result[userModel
 // validateUserLogin validates the fields of the UserLogin struct.
 func validateUserLogin(userLogin userModel.UserLogin) common.Result[userModel.UserLogin] {
 	// Initialize a slice to hold validation errors.
-	validationErrors := make([]error, expectedErrors)
+	validationErrors := make([]error, 0, expectedErrors)
 
 	// Sanitize input fields.
 	userLogin.Email = domainUtility.SanitizeAndToLowerString(userLogin.Email)
@@ -134,7 +134,7 @@ func validateUserLogin(userLogin userModel.UserLogin) common.Result[userModel.Us
 // validateUserForgottenPassword validates the fields of the UserForgottenPassword struct.
 func validateUserForgottenPassword(userForgottenPassword userModel.UserForgottenPassword) common.Result[userModel.UserForgottenPassword] {
 	// Initialize a slice to hold validation errors.
-	validationErrors := make([]error, expectedErrors)
+	validationErrors := make([]error, 0, expectedErrors)
 
 	// Sanitize input fields.
 	userForgottenPassword.Email = domainUtility.SanitizeAndToLowerString(userForgottenPassword.Email)
@@ -153,7 +153,7 @@ func validateUserForgottenPassword(userForgottenPassword userModel.UserForgotten
 // validateResetPassword validates the fields of the UserResetPassword struct.
 func validateResetPassword(userResetPassword userModel.UserResetPassword) common.Result[userModel.UserResetPassword] {
 	// Initialize a slice to hold validation errors.
-	validationErrors := make([]error, expectedErrors)
+	validationErrors := make([]error, 0, expectedErrors)
 
 	// Sanitize input fields.
 	userResetPassword.Password = domainUtility.SanitizeString(userResetPassword.Password)
@@ -172,10 +172,9 @@ func validateResetPassword(userResetPassword userModel.UserResetPassword) common
 
 // validateEmail validates the email field using regex and other checks.
 func validateEmail(email string, validationErrors []error) []error {
-	// Preallocate enough capacity for all elements but set length to zero.
-	// Append initial elements.
-	errors := make([]error, len(validationErrors))
-	errors = append(errors, validationErrors...)
+	// Initialize the errors slice with the given validationErrors to accumulate any validation errors.
+	// This allows appending new errors while preserving the existing ones.
+	errors := validationErrors
 
 	// Check email length.
 	if domainUtility.IsStringLengthInvalid(email, constants.MinStringLength, constants.MaxStringLength) {
@@ -207,10 +206,9 @@ func validateEmail(email string, validationErrors []error) []error {
 
 // validatePassword validates the password and password confirmation fields.
 func validatePassword(password, passwordConfirm string, validationErrors []error) []error {
-	// Preallocate enough capacity for all elements but set length to zero.
-	// Append initial elements.
-	errors := make([]error, len(validationErrors))
-	errors = append(errors, validationErrors...)
+	// Initialize the errors slice with the given validationErrors to accumulate any validation errors.
+	// This allows appending new errors while preserving the existing ones.
+	errors := validationErrors
 
 	// Check password length.
 	if domainUtility.IsStringLengthInvalid(password, constants.MinStringLength, constants.MaxStringLength) {

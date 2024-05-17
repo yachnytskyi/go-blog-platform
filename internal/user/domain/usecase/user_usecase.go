@@ -170,16 +170,22 @@ func (userUseCase UserUseCase) Login(ctx context.Context, userLoginData userMode
 		return commonModel.NewResultOnFailure[userModel.UserToken](domainError.HandleError(arePasswordsNotEqualError))
 	}
 
+	// Generate the UserTokenPayload.
+	userTokenPayload := commonModel.NewUserTokenPayload(fetchedUser.Data.UserID, fetchedUser.Data.Role)
+
 	// Generate access and refresh tokens.
-	userToken := generateToken(ctx, fetchedUser.Data.UserID)
+	userToken := generateToken(ctx, userTokenPayload)
 
 	// Return the result containing userToken information.
 	return userToken
 }
 
 func (userUseCase UserUseCase) RefreshAccessToken(ctx context.Context, user userModel.User) commonModel.Result[userModel.UserToken] {
+	// Generate the UserTokenPayload.
+	userTokenPayload := commonModel.NewUserTokenPayload(user.UserID, user.Role)
+
 	// Generate access and refresh tokens.
-	userToken := generateToken(ctx, user.UserID)
+	userToken := generateToken(ctx, userTokenPayload)
 
 	// Return the result containing userToken information.
 	return userToken
@@ -263,7 +269,7 @@ func prepareEmailDataForUpdatePasswordResetToken(userName, tokenValue string) us
 // If there are errors during token generation, it returns a failure result
 // with the corresponding error. Otherwise, it returns a success result
 // containing the generated access and refresh tokens.
-func generateToken(ctx context.Context, userID string) commonModel.Result[userModel.UserToken] {
+func generateToken(ctx context.Context, userTokenPayload commonModel.UserTokenPayload) commonModel.Result[userModel.UserToken] {
 	// Create a userToken struct to store the generated tokens.
 	var userToken userModel.UserToken
 
@@ -272,13 +278,13 @@ func generateToken(ctx context.Context, userID string) commonModel.Result[userMo
 	refreshTokenConfig := config.AppConfig.RefreshToken
 
 	// Generate the access token.
-	accessToken, accessTokenGenerationError := domainUtility.GenerateJWTToken(ctx, accessTokenConfig.ExpiredIn, userID, accessTokenConfig.PrivateKey)
+	accessToken, accessTokenGenerationError := domainUtility.GenerateJWTToken(ctx, accessTokenConfig.ExpiredIn, userTokenPayload, accessTokenConfig.PrivateKey)
 	if validator.IsError(accessTokenGenerationError) {
 		return commonModel.NewResultOnFailure[userModel.UserToken](domainError.HandleError(accessTokenGenerationError))
 	}
 
 	// Generate the refresh token.
-	refreshToken, refreshTokenGenerationError := domainUtility.GenerateJWTToken(ctx, refreshTokenConfig.ExpiredIn, userID, refreshTokenConfig.PrivateKey)
+	refreshToken, refreshTokenGenerationError := domainUtility.GenerateJWTToken(ctx, refreshTokenConfig.ExpiredIn, userTokenPayload, refreshTokenConfig.PrivateKey)
 	if validator.IsError(refreshTokenGenerationError) {
 		return commonModel.NewResultOnFailure[userModel.UserToken](domainError.HandleError(refreshTokenGenerationError))
 	}

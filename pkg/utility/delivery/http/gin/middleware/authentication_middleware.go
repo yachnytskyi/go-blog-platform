@@ -1,8 +1,6 @@
 package middleware
 
 import (
-	"context"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -10,7 +8,6 @@ import (
 	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
-	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
 	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
 	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
@@ -29,9 +26,6 @@ const (
 // AuthMiddleware is a Gin middleware for handling user authentication using JWT tokens.
 func AuthenticationMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
 	return func(ginContext *gin.Context) {
-		ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
-		defer cancel()
-
 		// Extract the access token from the request.
 		accessToken, tokenError := extractAccessToken(ginContext)
 		if validator.IsError(tokenError) {
@@ -42,9 +36,8 @@ func AuthenticationMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
 
 		// Get the application configuration.
 		accessTokenConfig := config.AppConfig.AccessToken
-
 		// Validate the JWT token.
-		userID, validateAccessTokenError := domainUtility.ValidateJWTToken(accessToken, accessTokenConfig.PublicKey)
+		userTokenPayload, validateAccessTokenError := domainUtility.ValidateJWTToken(accessToken, accessTokenConfig.PublicKey)
 		if validator.IsError(validateAccessTokenError) {
 			// Handle token validation error and respond with an unauthorized status and JSON error.
 			httpAuthorizationError := httpError.NewHttpAuthorizationErrorView(constants.EmptyString, constants.LoggingErrorNotification)
@@ -52,18 +45,9 @@ func AuthenticationMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
 			return
 		}
 
-		// Get the user information from the user use case.
-		user := userUseCase.GetUserById(ctx, fmt.Sprint(userID))
-		if validator.IsError(user.Error) {
-			// Handle user retrieval error and respond with an unauthorized status and JSON error.
-			handledError := httpError.HandleError(user.Error)
-			abortWithStatusJSON(ginContext, handledError, http.StatusUnauthorized)
-			return
-		}
-
 		// Set user-related information in the Gin context for downstream handlers.
-		ginContext.Set(constants.UserIDContext, userID)
-		ginContext.Set(constants.UserContext, userViewModel.UserToUserViewMapper(user.Data))
+		ginContext.Set(constants.UserIDContext, userTokenPayload.UserID)
+		ginContext.Set(constants.UserRoleContext, userTokenPayload.Role)
 
 		// Continue to the next middleware or handler in the chain.
 		ginContext.Next()

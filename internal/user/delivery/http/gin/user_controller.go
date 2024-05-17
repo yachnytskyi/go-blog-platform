@@ -57,10 +57,23 @@ func (userController UserController) GetAllUsers(controllerContext any) {
 // GetCurrentUser is a controller method that handles an HTTP request to retrieve the current user.
 // It retrieves the current user information from a middleware and returns the JSON response.
 func (userController UserController) GetCurrentUser(controllerContext any) {
-	// Extract the current user from Gin context.
+	// Extract the Gin context and create a context with timeout.
 	ginContext := controllerContext.(*gin.Context)
-	currentUser := ginContext.MustGet(constants.UserContext).(userViewModel.UserView)
-	jsonResponse := httpModel.NewJSONSuccessResponse(currentUser)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
+	defer cancel()
+
+	// Get the current user's ID from the Gin context.
+	// Fetch the current user using the user use case.
+	currentUserID := ginContext.MustGet(constants.UserIDContext).(string)
+	currentUser := userController.userUseCase.GetUserById(ctx, currentUserID)
+	if validator.IsError(currentUser.Error) {
+		httpGinCommon.GinNewJSONFailureResponse(ginContext, currentUser.Error, constants.StatusBadRequest)
+		return
+	}
+
+	// Map the retrieved user data to a JSON response.
+	// Return the JSON response with a successful status code.
+	jsonResponse := httpModel.NewJSONSuccessResponse(userViewModel.UserToUserViewMapper(currentUser.Data))
 	ginContext.JSON(constants.StatusOk, jsonResponse)
 }
 
@@ -228,17 +241,17 @@ func (userController UserController) RefreshAccessToken(controllerContext any) {
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
 
-	// Extract the current user from Gin context.
-	currentUser := ginContext.MustGet(constants.UserContext).(userViewModel.UserView)
-	user, userError := userViewModel.UserViewToUserMapper(currentUser)
-	if validator.IsError(userError) {
-		jsonResponse := httpModel.NewJSONFailureResponse(httpError.HandleError(userError))
-		ginContext.JSON(constants.StatusBadRequest, jsonResponse)
+	// Get the current user's ID from the Gin context.
+	// Fetch the current user using the user use case.
+	currentUserID := ginContext.MustGet(constants.UserIDContext).(string)
+	currentUser := userController.userUseCase.GetUserById(ctx, currentUserID)
+	if validator.IsError(currentUser.Error) {
+		httpGinCommon.GinNewJSONFailureResponse(ginContext, currentUser.Error, constants.StatusBadRequest)
 		return
 	}
 
 	// Refresh the access token using the provided refresh token.
-	userToken := userController.userUseCase.RefreshAccessToken(ctx, user)
+	userToken := userController.userUseCase.RefreshAccessToken(ctx, currentUser.Data)
 	if validator.IsError(userToken.Error) {
 		jsonResponse := httpModel.NewJSONFailureResponse(httpError.HandleError(userToken.Error))
 		ginContext.JSON(constants.StatusBadRequest, jsonResponse)

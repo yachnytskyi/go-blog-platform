@@ -30,6 +30,7 @@ const (
 	TokenDomainValue  = "localhost"
 	LogoutMaxAgeValue = -1
 	UserIDContext     = "userID"
+	UserRoleContext   = "userRole"
 	UserContext       = "user"
 
 	// Email subjects and URLs.

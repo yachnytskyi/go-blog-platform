@@ -4,10 +4,12 @@ import (
 	"context"
 	"crypto/rsa"
 	"encoding/base64"
+	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
+	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -16,6 +18,7 @@ import (
 const (
 	signingMethod       = "RS256"
 	userIDClaim         = "user_id"
+	userRoleClaim       = "user_role"
 	expirationClaim     = "exp"
 	issuedAtClaim       = "iat"
 	notBeforeClaim      = "nbf"
@@ -24,9 +27,9 @@ const (
 	invalidTokenMessage = "validate: invalid token"
 )
 
-// GenerateJWTToken generates a JWT token with the provided payload, using the given private key,
+// GenerateJWTToken generates a JWT token with the provided UserTokenPayload, using the given private key,
 // and sets the token's expiration based on the specified token lifetime.
-func GenerateJWTToken(ctx context.Context, tokenLifeTime time.Duration, payload any, privateKey string) (string, error) {
+func GenerateJWTToken(ctx context.Context, tokenLifeTime time.Duration, userTokenPayload commonModel.UserTokenPayload, privateKey string) (string, error) {
 	// Decode the private key from base64-encoded string.
 	decodedPrivateKey, decodeStringError := decodeBase64String(privateKey)
 	if validator.IsError(decodeStringError) {
@@ -42,7 +45,7 @@ func GenerateJWTToken(ctx context.Context, tokenLifeTime time.Duration, payload 
 	// Generate claims for the JWT token.
 	// Create the signed token using the private key and claims.
 	now := time.Now().UTC()
-	claims := generateClaims(tokenLifeTime, now, payload)
+	claims := generateClaims(tokenLifeTime, now, userTokenPayload)
 	token, newWithClaimsError := createSignedToken(key, claims)
 	if validator.IsError(newWithClaimsError) {
 		return constants.EmptyString, newWithClaimsError
@@ -53,34 +56,37 @@ func GenerateJWTToken(ctx context.Context, tokenLifeTime time.Duration, payload 
 
 // ValidateJWTToken validates a JWT token using the provided public key and returns the claims
 // extracted from the token if it's valid.
-func ValidateJWTToken(token string, publicKey string) (any, error) {
+func ValidateJWTToken(token string, publicKey string) (commonModel.UserTokenPayload, error) {
 	// Decode the public key from a base64-encoded string.
 	decodedPublicKey, decodeStringError := decodeBase64String(publicKey)
 	if validator.IsError(decodeStringError) {
-		return constants.EmptyString, decodeStringError
+		return commonModel.UserTokenPayload{}, decodeStringError
 	}
 
 	// Parse the public key for verification.
 	key, parsePublicKeyError := parsePublicKey(decodedPublicKey)
 	if validator.IsError(parsePublicKeyError) {
-		return nil, parsePublicKeyError
+		return commonModel.UserTokenPayload{}, parsePublicKeyError
 	}
 
 	// Parse and verify the token using the public key.
 	parsedToken, parseTokenError := parseToken(token, key)
 	if validator.IsError(parseTokenError) {
-		return nil, parseTokenError
+		return commonModel.UserTokenPayload{}, parseTokenError
 	}
 
 	// Extract and validate the claims from the parsed token.
 	claims, ok := parsedToken.Claims.(jwt.MapClaims)
 	if ok && parsedToken.Valid {
-		// claims := value.
-		return claims[userIDClaim], nil
+		return commonModel.UserTokenPayload{
+			UserID: fmt.Sprint(claims[userIDClaim]),
+			Role:   fmt.Sprint(claims[userRoleClaim]),
+		}, nil
 	}
+
 	internalError := domainError.NewInternalError(location+"parsedToken.Claims.NotOk", invalidTokenMessage)
 	logging.Logger(internalError)
-	return nil, domainError.HandleError(internalError)
+	return commonModel.UserTokenPayload{}, domainError.HandleError(internalError)
 }
 
 // decodeBase64String decodes a base64-encoded string into a byte slice.
@@ -107,10 +113,11 @@ func parsePrivateKey(decodedPrivateKey []byte) (*rsa.PrivateKey, error) {
 	return key, nil
 }
 
-// generateClaims generates JWT claims with the specified token lifetime and payload.
-func generateClaims(tokenLifeTime time.Duration, now time.Time, payload any) jwt.MapClaims {
+// generateClaims generates JWT claims with the specified token lifetime and UserTokenPayload.
+func generateClaims(tokenLifeTime time.Duration, now time.Time, userTokenPayload commonModel.UserTokenPayload) jwt.MapClaims {
 	return jwt.MapClaims{
-		userIDClaim:     payload,
+		userIDClaim:     userTokenPayload.UserID,
+		userRoleClaim:   userTokenPayload.Role,
 		expirationClaim: now.Add(tokenLifeTime).Unix(),
 		issuedAtClaim:   now.Unix(),
 		notBeforeClaim:  now.Unix(),

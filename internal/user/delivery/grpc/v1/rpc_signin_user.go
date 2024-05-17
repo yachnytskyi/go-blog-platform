@@ -5,6 +5,7 @@ import (
 
 	pb "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1/model/pb"
 	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
+	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -25,12 +26,15 @@ func (userGrpcServer *UserGrpcServer) Login(ctx context.Context, request *pb.Log
 	// 	return nil, status.Errorf(codes.InvalidArgument, "Invalid email or Password")
 	// }
 
+	// Generate the UserTokenPayload.
+	userTokenPayload := commonModel.NewUserTokenPayload(user.Data.UserID, user.Data.Role)
+
 	// Generate tokens.
-	accessToken, createTokenError := domainUtility.GenerateJWTToken(ctx, userGrpcServer.applicationConfig.AccessToken.ExpiredIn, user.Data.UserID, userGrpcServer.applicationConfig.AccessToken.PrivateKey)
+	accessToken, createTokenError := domainUtility.GenerateJWTToken(ctx, userGrpcServer.applicationConfig.AccessToken.ExpiredIn, userTokenPayload, userGrpcServer.applicationConfig.AccessToken.PrivateKey)
 	if createTokenError != nil {
 		return nil, status.Errorf(codes.PermissionDenied, createTokenError.Error())
 	}
-	refreshToken, createTokenError := domainUtility.GenerateJWTToken(ctx, userGrpcServer.applicationConfig.RefreshToken.ExpiredIn, user.Data.UserID, userGrpcServer.applicationConfig.RefreshToken.PrivateKey)
+	refreshToken, createTokenError := domainUtility.GenerateJWTToken(ctx, userGrpcServer.applicationConfig.RefreshToken.ExpiredIn, userTokenPayload, userGrpcServer.applicationConfig.RefreshToken.PrivateKey)
 	if createTokenError != nil {
 		return nil, status.Errorf(codes.PermissionDenied, createTokenError.Error())
 	}

@@ -10,37 +10,48 @@ import (
 
 // DataToMongoDocumentMapper converts the incoming data to a BSON document.
 // It uses BSON marshaling and unmarshaling to perform the conversion.
-func DataToMongoDocumentMapper(location string, incomingData any) (document *bson.D, err error) {
+// Parameters:
+// - location: A string representing the location or context for error logging.
+// - incomingData: The data to be converted to a BSON document.
+// Returns:
+// - A pointer to a BSON document.
+// - An error if the conversion fails.
+func DataToMongoDocumentMapper(location string, incomingData any) (*bson.D, error) {
 	// Marshal incoming data to BSON format.
 	data, err := bson.Marshal(incomingData)
 	if validator.IsError(err) {
 		// Log and handle the marshaling error.
-		internalError := domainError.NewInternalError(location+"HexToObjectIDMapper.bson.Marshal", err.Error())
+		internalError := domainError.NewInternalError(location+" DataToMongoDocumentMapper.bson.Marshal", err.Error())
 		logging.Logger(internalError)
-		return document, err
+		return nil, internalError
 	}
 
 	// Unmarshal the BSON data into a BSON document.
+	var document bson.D
 	err = bson.Unmarshal(data, &document)
-	if validator.IsError(err) {
+	if err != nil {
 		// Log and handle the unmarshaling error.
-		internalError := domainError.NewInternalError(location+"HexToObjectIDMapper.bson.UnMarshal", err.Error())
+		internalError := domainError.NewInternalError(location+" DataToMongoDocumentMapper.bson.Unmarshal", err.Error())
 		logging.Logger(internalError)
-		return document, err
+		return nil, internalError
 	}
 
-	return
+	return &document, nil
 }
 
 // HexToObjectIDMapper converts a hexadecimal string representation of MongoDB ObjectID
 // to its corresponding primitive.ObjectID type.
-// It takes a location string for context in error messages and the id as a string.
-// Returns the converted ObjectID or an error if the conversion fails.
+// Parameters:
+// - location: A string representing the location or context for error logging.
+// - id: The hexadecimal string to be converted.
+// Returns:
+// - The converted ObjectID.
+// - An error if the conversion fails.
 func HexToObjectIDMapper(location, id string) (primitive.ObjectID, error) {
 	// Convert the hexadecimal string to primitive.ObjectID.
 	objectID, objectIDFromHexError := primitive.ObjectIDFromHex(id)
 	if validator.IsError(objectIDFromHexError) {
-		// If an error occurs, create an internal error with context and log it.
+		// Log and handle the conversion error.
 		internalError := domainError.NewInternalError(location+".HexToObjectIDMapper.primitive.ObjectIDFromHex", objectIDFromHexError.Error())
 		logging.Logger(internalError)
 		// Return a default ObjectID and the error.

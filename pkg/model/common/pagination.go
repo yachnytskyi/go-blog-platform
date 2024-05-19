@@ -116,7 +116,7 @@ func NewPaginationResponse(paginationQuery PaginationQuery) PaginationResponse {
 		BaseURL:    paginationQuery.BaseURL,
 	}
 
-	paginationResponse.PageLinks = paginationResponse.getPageLinks(constants.DefaultAmountOfPages) // You can specify the number of pages to show here.
+	paginationResponse.PageLinks = getPageLinks(paginationResponse, constants.DefaultAmountOfPages) // You can specify the number of pages to show here.
 	return paginationResponse
 }
 
@@ -135,7 +135,7 @@ func getItemsLeft(page, totalItems, limit int) int {
 	return totalItems - (page * limit)
 }
 
-func (paginationResponse PaginationResponse) getPageLinks(amountOfPages int) []string {
+func getPageLinks(paginationResponse PaginationResponse, amountOfPages int) []string {
 	// Preallocate memory for the pageLinks slice based on amountOfPages, adding space for potential first and last page links.
 	pageLinks := make([]string, 0, amountOfPages+2)
 

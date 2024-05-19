@@ -12,10 +12,10 @@ import (
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
-var (
-	AppConfig ApplicationConfig
-)
+// AppConfig holds the global application configuration.
+var AppConfig ApplicationConfig
 
+// Constants for configuration paths and default values.
 const (
 	version                    = "v1"
 	environmentsPath           = "config/environment/.env."
@@ -23,12 +23,13 @@ const (
 	defaultMongoDBName         = "golang-mongodb"
 	defaultMongoDBURI          = "mongodb://root:root@localhost:27017/golang_mongodb"
 	defaultGinPort             = "8080"
-	defaultGinAllowOrirings    = "http://localhost:8080"
-	defaultGinAllowCredentuals = true
+	defaultGinAllowOrigins     = "http://localhost:8080"
+	defaultGinAllowCredentials = true
 	defaultGinServerGroup      = "/api"
 	location                   = "config.LoadConfig."
 )
 
+// ApplicationConfig defines the structure of the application configuration.
 type ApplicationConfig struct {
 	Core         Core         `mapstructure:"Core"`
 	MongoDB      MongoDB      `mapstructure:"MongoDB"`
@@ -40,12 +41,14 @@ type ApplicationConfig struct {
 	Email        Email        `mapstructure:"Email"`
 }
 
+// Core defines the core settings for the application.
 type Core struct {
 	Database string `mapstructure:"Database"`
 	Domain   string `mapstructure:"Domain"`
 	Delivery string `mapstructure:"Delivery"`
 }
 
+// Security defines the security settings for the application.
 type Security struct {
 	CookieSecure                    bool     `mapstructure:"Cookie_Secure"`
 	HttpOnly                        bool     `mapstructure:"Http_Only"`
@@ -58,17 +61,19 @@ type Security struct {
 	AllowedContentTypes             []string `mapstructure:"Allowed_Content_Types"`
 }
 
+// Header defines the structure for HTTP headers.
 type Header struct {
 	Key   string `mapstructure:"Key"`
 	Value string `mapstructure:"Value"`
-	// You can add more fields if needed
 }
 
+// MongoDB defines the MongoDB settings.
 type MongoDB struct {
 	Name string `mapstructure:"Name"`
 	URI  string `mapstructure:"URI"`
 }
 
+// Gin defines the settings for the Gin web framework.
 type Gin struct {
 	Port             string `mapstructure:"Port"`
 	AllowOrigins     string `mapstructure:"Allow_Origins"`
@@ -76,10 +81,12 @@ type Gin struct {
 	ServerGroup      string `mapstructure:"Server_Group"`
 }
 
+// GRPC defines the settings for gRPC.
 type GRPC struct {
 	ServerUrl string `mapstructure:"Server_Url"`
 }
 
+// AccessToken defines the settings for access tokens.
 type AccessToken struct {
 	PrivateKey string        `mapstructure:"Private_Key"`
 	PublicKey  string        `mapstructure:"Public_Key"`
@@ -87,6 +94,7 @@ type AccessToken struct {
 	MaxAge     int           `mapstructure:"Max_Age"`
 }
 
+// RefreshToken defines the settings for refresh tokens.
 type RefreshToken struct {
 	PrivateKey string        `mapstructure:"Private_Key"`
 	PublicKey  string        `mapstructure:"Public_Key"`
@@ -94,6 +102,7 @@ type RefreshToken struct {
 	MaxAge     int           `mapstructure:"Max_Age"`
 }
 
+// Email defines the settings for email.
 type Email struct {
 	ClientOriginUrl               string `mapstructure:"Client_Origin_Url"`
 	EmailFrom                     string `mapstructure:"Email_From"`
@@ -107,31 +116,46 @@ type Email struct {
 	ForgottenPasswordTemplatePath string `mapstructure:"Forgotten_Password_Template_Path"`
 }
 
+// LoadConfig loads the application configuration from environment variables and defaults.
+// It sets up the global AppConfig variable.
+// Returns:
+// - An error if there is an issue loading the configuration.
 func LoadConfig() (unmarshalError error) {
+	// Load environment variables from the .env file.
 	loadEnvironmentsError := godotenv.Load(environmentsPath + devInvironmentName)
 	if validator.IsError(loadEnvironmentsError) {
+		// Log and return an internal error if loading the environment variables fails.
 		loadEnvironmentsInternalError := domainError.NewInternalError(location+"Load", loadEnvironmentsError.Error())
 		logging.Logger(loadEnvironmentsInternalError)
 		return loadEnvironmentsInternalError
 	}
+
+	// Set the configuration file path from the environment variable.
 	configPath := os.Getenv(version)
 	viper.SetConfigFile(configPath)
 	viper.AutomaticEnv()
+
+	// Read the configuration file.
 	readInConfigError := viper.ReadInConfig()
 	if validator.IsError(readInConfigError) {
+		// Log and return an internal error if reading the configuration file fails.
 		readInInternalError := domainError.NewInternalError(location+"ReadInConfig", readInConfigError.Error())
 		logging.Logger(readInInternalError)
 		return readInInternalError
 	}
+
+	// Set default values for configuration fields.
 	viper.SetDefault("Database", constants.MongoDB)
 	viper.SetDefault("Domain", constants.UseCase)
 	viper.SetDefault("Delivery", constants.Gin)
 	viper.SetDefault("MongoDB.Name", defaultMongoDBName)
 	viper.SetDefault("MongoDB.URI", defaultMongoDBURI)
 	viper.SetDefault("Gin.Port", defaultGinPort)
-	viper.SetDefault("Gin.AllowOrigins", defaultGinAllowOrirings)
-	viper.SetDefault("Gin.AllowCredentials", defaultGinAllowCredentuals)
+	viper.SetDefault("Gin.AllowOrigins", defaultGinAllowOrigins)
+	viper.SetDefault("Gin.AllowCredentials", defaultGinAllowCredentials)
 	viper.SetDefault("Gin.ServerGroup", defaultGinServerGroup)
+
+	// Unmarshal the configuration into the global AppConfig variable.
 	unmarshalError = viper.Unmarshal(&AppConfig)
 	return
 }

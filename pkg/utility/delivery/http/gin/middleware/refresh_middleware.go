@@ -28,7 +28,7 @@ func RefreshTokenAuthenticationMiddleware() gin.HandlerFunc {
 		userTokenPayload, validateRefreshTokenError := domainUtility.ValidateJWTToken(refreshToken, applicationConfig.PublicKey)
 		if validator.IsError(validateRefreshTokenError) {
 			// Handle token validation error and respond with an unauthorized status and JSON error.
-			httpAuthorizationError := httpError.NewHttpAuthorizationErrorView(constants.EmptyString, constants.LoggingErrorNotification)
+			httpAuthorizationError := httpError.NewHttpAuthorizationErrorView("", constants.LoggingErrorNotification)
 			abortWithStatusJSON(ginContext, httpAuthorizationError, http.StatusUnauthorized)
 			return
 		}

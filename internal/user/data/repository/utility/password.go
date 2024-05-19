@@ -1,7 +1,6 @@
 package utility
 
 import (
-	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -13,7 +12,7 @@ func HashPassword(location, password string) (string, error) {
 	if validator.IsError(generateFromPasswordError) {
 		internalError := domainError.NewInternalError(location+".HashPassword.bcrypt.GenerateFromPassword", generateFromPasswordError.Error())
 		logging.Logger(internalError)
-		return constants.EmptyString, internalError
+		return "", internalError
 	}
 
 	return string(hashedPassword), nil

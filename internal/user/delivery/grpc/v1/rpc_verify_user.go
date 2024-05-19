@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	pb "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1/model/pb"
 	commonUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
 	"go.mongodb.org/mongo-driver/bson"
@@ -18,7 +17,7 @@ func (userGrpcServer *UserGrpcServer) VerifyEmail(ctx context.Context, request *
 	verificationCode := commonUtility.Encode(code)
 
 	query := bson.D{{Key: "verificationCode", Value: verificationCode}}
-	update := bson.D{{Key: "$set", Value: bson.D{{Key: "verified", Value: true}, {Key: "updated_at", Value: time.Now()}}}, {Key: "$unset", Value: bson.D{{Key: "verificationCode", Value: constants.EmptyString}}}}
+	update := bson.D{{Key: "$set", Value: bson.D{{Key: "verified", Value: true}, {Key: "updated_at", Value: time.Now()}}}, {Key: "$unset", Value: bson.D{{Key: "verificationCode", Value: ""}}}}
 	result, err := userGrpcServer.userCollection.UpdateOne(ctx, query, update)
 
 	if err != nil {

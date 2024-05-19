@@ -124,7 +124,7 @@ func ValidateInput() gin.HandlerFunc {
 		}
 
 		// Check if the content type is in the list of allowed content types.
-		if contentType != constants.EmptyString && validator.IsSliceNotContains(securityConfig.AllowedContentTypes, contentType) {
+		if validator.IsStringNotEmpty(contentType) && validator.IsSliceNotContains(securityConfig.AllowedContentTypes, contentType) {
 			// Reject requests with disallowed content types.
 			httpRequestError := httpError.NewHttpRequestErrorView(contentType, constants.InvalidContentTypeNotification)
 			abortWithStatusJSON(c, httpRequestError, constants.StatusBadRequest)

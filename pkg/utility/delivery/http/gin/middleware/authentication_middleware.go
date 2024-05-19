@@ -18,8 +18,6 @@ const (
 	location      = "pkg.utility.delivery.http.gin.middleware."
 	authorization = "Authorization"
 	bearer        = "Bearer"
-	firstElement  = 0
-	nextElement   = 1
 )
 
 // AuthMiddleware is a Gin middleware for handling user authentication using JWT tokens.
@@ -39,7 +37,7 @@ func AuthenticationMiddleware() gin.HandlerFunc {
 		userTokenPayload, validateAccessTokenError := domainUtility.ValidateJWTToken(accessToken, accessTokenConfig.PublicKey)
 		if validator.IsError(validateAccessTokenError) {
 			// Handle token validation error and respond with an unauthorized status and JSON error.
-			httpAuthorizationError := httpError.NewHttpAuthorizationErrorView(constants.EmptyString, constants.LoggingErrorNotification)
+			httpAuthorizationError := httpError.NewHttpAuthorizationErrorView("", constants.LoggingErrorNotification)
 			abortWithStatusJSON(ginContext, httpAuthorizationError, http.StatusUnauthorized)
 			return
 		}
@@ -64,20 +62,20 @@ func extractAccessToken(ginContext *gin.Context) (string, error) {
 	fields := strings.Fields(authorizationHeader)
 
 	// Check if the Authorization header contains a Bearer token.
-	if validator.IsSliceNotEmpty(fields) && fields[firstElement] == bearer {
+	if validator.IsSliceNotEmpty(fields) && fields[0] == bearer {
 		// If a Bearer token is present, set the access token.
-		accessToken = fields[nextElement]
+		accessToken = fields[1]
 	} else if cookieError == nil {
 		// If no Bearer token in the Authorization header, try to get the token from the cookie.
 		accessToken = cookie
 	}
 
 	// Check if the access token is still empty.
-	if accessToken == constants.EmptyString {
+	if accessToken == "" {
 		// If access token is empty, create and log an HTTP authorization error.
 		httpAuthorizationError := httpError.NewHttpAuthorizationErrorView(location+"extractAcessToken.accessToken", constants.LoggingErrorNotification)
 		logging.Logger(httpAuthorizationError)
-		return constants.EmptyString, httpAuthorizationError
+		return "", httpAuthorizationError
 	}
 
 	// Return the extracted access token.
@@ -92,7 +90,7 @@ func extractRefreshToken(ginContext *gin.Context) (string, error) {
 		// If refresh token is missing, create and log an HTTP authorization error.
 		httpAuthorizationError := httpError.NewHttpAuthorizationErrorView(location+"extractRefreshToken.refreshToken", constants.LoggingErrorNotification)
 		logging.Logger(httpAuthorizationError)
-		return constants.EmptyString, httpAuthorizationError
+		return "", httpAuthorizationError
 	}
 
 	// Return the extracted refresh token.

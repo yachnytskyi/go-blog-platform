@@ -30,7 +30,6 @@ func SanitizeAndToLowerString(data string) string {
 func ValidateField(field string, commonValidator CommonValidator, validationErrors []error) []error {
 	// Initialize a slice to hold validation errors.
 	errors := validationErrors
-	fmt.Println(errors)
 	if IsStringLengthInvalid(field, commonValidator.MinLength, commonValidator.MaxLength) {
 		commonValidator.Notification = fmt.Sprintf(constants.StringAllowedLength, commonValidator.MinLength, commonValidator.MaxLength)
 		validationError := domainError.NewValidationError(location+"ValidateField.IsStringLengthInvalid",

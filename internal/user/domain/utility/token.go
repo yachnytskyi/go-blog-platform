@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
-	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	domainModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
@@ -33,13 +32,13 @@ func GenerateJWTToken(ctx context.Context, tokenLifeTime time.Duration, userToke
 	// Decode the private key from base64-encoded string.
 	decodedPrivateKey, decodeStringError := decodeBase64String(privateKey)
 	if validator.IsError(decodeStringError) {
-		return constants.EmptyString, decodeStringError
+		return "", decodeStringError
 	}
 
 	// Parse the private key for signing.
 	key, parsePrivateKeyError := parsePrivateKey(decodedPrivateKey)
 	if validator.IsError(parsePrivateKeyError) {
-		return constants.EmptyString, parsePrivateKeyError
+		return "", parsePrivateKeyError
 	}
 
 	// Generate claims for the JWT token.
@@ -48,7 +47,7 @@ func GenerateJWTToken(ctx context.Context, tokenLifeTime time.Duration, userToke
 	claims := generateClaims(tokenLifeTime, now, userTokenPayload)
 	token, newWithClaimsError := createSignedToken(key, claims)
 	if validator.IsError(newWithClaimsError) {
-		return constants.EmptyString, newWithClaimsError
+		return "", newWithClaimsError
 	}
 
 	return token, nil
@@ -130,7 +129,7 @@ func createSignedToken(key *rsa.PrivateKey, claims jwt.MapClaims) (string, error
 	if validator.IsError(newWithClaimsError) {
 		internalError := domainError.NewInternalError(location+"createSignedToken.NewWithClaims", newWithClaimsError.Error())
 		logging.Logger(internalError)
-		return constants.EmptyString, domainError.HandleError(internalError)
+		return "", domainError.HandleError(internalError)
 	}
 
 	return token, nil

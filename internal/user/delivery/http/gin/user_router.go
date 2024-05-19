@@ -39,7 +39,7 @@ func (userRouter UserRouter) UserRouter(routerGroup any) {
 	router := ginRouterGroup.Group(groupPath)
 
 	// Public routes.
-	router.GET(constants.EmptyString, func(ginContext *gin.Context) {
+	router.GET("", func(ginContext *gin.Context) {
 		userRouter.userController.GetAllUsers(ginContext)
 	})
 

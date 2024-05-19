@@ -273,7 +273,7 @@ func (userRepository UserRepository) ResetUserPassword(ctx context.Context, firs
 
 	query := bson.D{{Key: firstKey, Value: firstValue}}
 	update := bson.D{{Key: "$set", Value: bson.D{{Key: passwordKey, Value: hashedPassword}}},
-		{Key: "$unset", Value: bson.D{{Key: firstKey, Value: constants.EmptyString}, {Key: secondKey, Value: constants.EmptyString}}}}
+		{Key: "$unset", Value: bson.D{{Key: firstKey, Value: ""}, {Key: secondKey, Value: ""}}}}
 	result, updateUserPasswordUpdateOneError := userRepository.collection.UpdateOne(ctx, query, update)
 	if validator.IsError(updateUserPasswordUpdateOneError) {
 		updatedUserPasswordError := domainError.NewInternalError(location+"ResetUserPassword.UpdateOne", updateUserPasswordUpdateOneError.Error())

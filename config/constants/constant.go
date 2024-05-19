@@ -57,7 +57,6 @@ const (
 	MinOptionalStringLength = 0
 	FieldRequired           = "required"
 	FieldOptional           = "optional"
-	EmptyString             = ""
 	True                    = "true"
 	False                   = "false"
 

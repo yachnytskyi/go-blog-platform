@@ -1,7 +1,7 @@
 package http
 
 import (
-	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	domainModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
@@ -39,7 +39,7 @@ func NewJSONFailureResponse(err error) JSONResponse {
 	jsonResponse := JSONResponse{Status: fail}
 
 	switch errorType := err.(type) {
-	case domain.Errors:
+	case domainModel.Errors:
 		if errorType.Len() == 1 {
 			jsonResponse.Error = errorType
 		} else {

@@ -70,7 +70,7 @@ func getSkip(page, limit int) int {
 
 // isLimitInvalid checks if a limit value is valid.
 func isLimitInvalid(data int) bool {
-	if data == 0 || data < 0 || data > constants.MaxItemsPerPage {
+	if data <= 0 || data > constants.MaxItemsPerPage {
 		return true
 	}
 
@@ -103,10 +103,11 @@ type PaginationResponse struct {
 
 // NewPaginationResponse creates a new PaginationResponse with the given parameters.
 func NewPaginationResponse(paginationQuery PaginationQuery) PaginationResponse {
+	totalPages := getTotalPages(paginationQuery.TotalItems, paginationQuery.Limit)
 	paginationResponse := PaginationResponse{
 		Page:       paginationQuery.Page,
-		TotalPages: getTotalPages(paginationQuery.TotalItems, paginationQuery.Limit),
-		PagesLeft:  getPagesLeft(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit),
+		TotalPages: totalPages,
+		PagesLeft:  totalPages - paginationQuery.Page,
 		TotalItems: paginationQuery.TotalItems,
 		ItemsLeft:  getItemsLeft(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit),
 		Limit:      paginationQuery.Limit,
@@ -123,11 +124,6 @@ func NewPaginationResponse(paginationQuery PaginationQuery) PaginationResponse {
 func getTotalPages(totalItems, limit int) int {
 	totalPages := float64(totalItems) / float64(limit)
 	return int(math.Ceil(totalPages))
-}
-
-// getPagesLeft calculates the number of pages remaining.
-func getPagesLeft(page, totalItems, limit int) int {
-	return getTotalPages(totalItems, limit) - page
 }
 
 // getItemsLeft calculates the number of items remaining on the current page.
@@ -151,7 +147,7 @@ func (paginationResponse PaginationResponse) getPageLinks(amountOfPages int) []s
 
 	// If the start page is not the first page, add the first page link to the pageLinks slice.
 	if startPage != 1 {
-		pageLinks = append(pageLinks, paginationResponse.buildPageLink(1))
+		pageLinks = append(pageLinks, buildPageLink(paginationResponse, 1))
 	}
 
 	// Calculate the end page based on the adjusted start page and amountOfPages.
@@ -168,20 +164,20 @@ func (paginationResponse PaginationResponse) getPageLinks(amountOfPages int) []s
 	// Append the page links to the list, excluding the current page link.
 	for i := startPage; i <= endPage; i++ {
 		if i != paginationResponse.Page {
-			pageLinks = append(pageLinks, paginationResponse.buildPageLink(i))
+			pageLinks = append(pageLinks, buildPageLink(paginationResponse, i))
 		}
 	}
 
 	// If the last page is not included in the page links, add the last page link to the pageLinks slice.
 	if endPage != paginationResponse.TotalPages {
-		pageLinks = append(pageLinks, paginationResponse.buildPageLink(paginationResponse.TotalPages))
+		pageLinks = append(pageLinks, buildPageLink(paginationResponse, paginationResponse.TotalPages))
 	}
 
 	return pageLinks
 }
 
 // buildPageLink builds the page link with given page number.
-func (paginationResponse PaginationResponse) buildPageLink(pageNumber int) string {
+func buildPageLink(paginationResponse PaginationResponse, pageNumber int) string {
 	baseURL := paginationResponse.BaseURL
 
 	// Construct the query parameters string.

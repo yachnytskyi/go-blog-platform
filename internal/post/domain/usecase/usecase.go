@@ -3,9 +3,15 @@ package usecase
 import (
 	"context"
 
-	"github.com/yachnytskyi/golang-mongo-grpc/internal/post"
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
+	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
 	postModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
-	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator/domain"
+	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
+)
+
+const (
+	location = "internal.post.domain.usecase."
 )
 
 type PostUseCase struct {
@@ -39,10 +45,8 @@ func (postUseCase *PostUseCase) UpdatePostById(ctx context.Context, postID strin
 	}
 
 	userID := fetchedPost.UserID
-
-	err = domainUtility.IsUserOwner(currentUserID, userID)
-	if err != nil {
-		return nil, err
+	if validator.AreStringsNotEqual(currentUserID, userID) {
+		return nil, domainError.NewAuthorizationError(location+"UpdatePostById.AreStringsNotEqual", constants.AuthorizationErrorNotification)
 	}
 
 	updatedPost, err := postUseCase.postRepository.UpdatePostById(ctx, postID, post)
@@ -57,10 +61,8 @@ func (postUseCase *PostUseCase) DeletePostByID(ctx context.Context, postID strin
 	}
 
 	userID := fetchedPost.UserID
-
-	err = domainUtility.IsUserOwner(currentUserID, userID)
-	if err != nil {
-		return err
+	if validator.AreStringsNotEqual(currentUserID, userID) {
+		return domainError.NewAuthorizationError(location+"DeletePostByID.AreStringsNotEqual", constants.AuthorizationErrorNotification)
 	}
 
 	deletedPost := postUseCase.postRepository.DeletePostByID(ctx, postID)

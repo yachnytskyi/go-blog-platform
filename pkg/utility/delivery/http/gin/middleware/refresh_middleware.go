@@ -11,6 +11,8 @@ import (
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
+// RefreshTokenAuthenticationMiddleware is a Gin middleware for handling user authentication using refresh tokens.
+// Returns a Gin middleware handler function.
 func RefreshTokenAuthenticationMiddleware() gin.HandlerFunc {
 	return func(ginContext *gin.Context) {
 		// Extract the refresh token from the request.

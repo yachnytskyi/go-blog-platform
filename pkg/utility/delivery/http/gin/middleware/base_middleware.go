@@ -3,7 +3,8 @@
 // SecureHeadersMiddleware: Adds secure headers to HTTP responses.
 // CSPMiddleware: Adds Content Security Policy (CSP) headers to HTTP responses.
 // RateLimitMiddleware: Implements rate limiting to control the number of requests from clients.
-// LoggingMiddleware: Logs incoming requests and outcoming responses with additional context.
+// LoggingMiddleware: Logs incoming requests and outgoing responses with additional context.
+// ValidateInput: Validates input based on HTTP methods and content types.
 package middleware
 
 import (
@@ -21,41 +22,45 @@ import (
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
-// SecureHeadersMiddleware is a middleware function for adding secure headers.
+// SecureHeadersMiddleware adds secure headers to HTTP responses.
+// Returns a Gin middleware handler function.
 func SecureHeadersMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Retrieve application configuration for security headers.
 		securityConfig := config.AppConfig.Security
 
+		// Set secure headers.
 		c.Header(securityConfig.ContentSecurityPolicyHeader.Key, securityConfig.ContentSecurityPolicyHeader.Value)
 		c.Header(securityConfig.StrictTransportSecurityHeader.Key, securityConfig.StrictTransportSecurityHeader.Value)
 		c.Header(securityConfig.XContentTypeOptionsHeader.Key, securityConfig.XContentTypeOptionsHeader.Value)
 
-		//  Add more headers as needed
+		// Continue to the next middleware or handler in the chain.
 		c.Next()
 	}
 }
 
-// CSPMiddleware is a middleware function for adding Content Security Policy headers.
+// CSPMiddleware adds Content Security Policy (CSP) headers to HTTP responses.
+// Returns a Gin middleware handler function.
 func CSPMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Retrieve application configuration for security headers.
+		// Retrieve application configuration for CSP headers.
 		securityConfig := config.AppConfig.Security
 
-		// Retrieve application configuration for CSP headers.
+		// Set the Content Security Policy header.
 		c.Writer.Header().Set(
 			securityConfig.ContentSecurityPolicyHeaderFull.Key,
 			securityConfig.ContentSecurityPolicyHeaderFull.Value,
 		)
 
-		// Call the next middleware or handler in the chain
+		// Continue to the next middleware or handler in the chain.
 		c.Next()
 	}
 }
 
-// RateLimitMiddleware is a middleware function for rate limiting.
+// RateLimitMiddleware implements rate limiting to control the number of requests from clients.
+// Returns a Gin middleware handler function.
 func RateLimitMiddleware() gin.HandlerFunc {
-	// Retrieve application configuration for rate limit.
+	// Retrieve application configuration for rate limiting.
 	securityConfig := config.AppConfig.Security
 
 	// Create an instance of limiter.ExpirableOptions.
@@ -63,7 +68,7 @@ func RateLimitMiddleware() gin.HandlerFunc {
 		DefaultExpirationTTL: time.Second,
 	}
 
-	// Create a limiter with the specified options.
+	// Create a rate limiter with the specified options.
 	limiter := tollbooth.NewLimiter(securityConfig.RateLimit, limiterOptions)
 	return func(c *gin.Context) {
 		tollbooth_gin.LimitHandler(limiter)(c)
@@ -71,7 +76,8 @@ func RateLimitMiddleware() gin.HandlerFunc {
 	}
 }
 
-// LoggingMiddleware is a middleware function for logging.
+// LoggingMiddleware logs incoming requests and outgoing responses with additional context.
+// Returns a Gin middleware handler function.
 func LoggingMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
@@ -89,8 +95,8 @@ func LoggingMiddleware() gin.HandlerFunc {
 		// Continue processing the request.
 		c.Next()
 
-		// Log information about the outcoming response.
-		outcomingResponse := commonModel.HTTPLog{
+		// Log information about the outgoing response.
+		outgoingResponse := commonModel.HTTPLog{
 			Location:       location + "LoggingMiddleware",
 			Time:           start,
 			RequestMethod:  c.Request.Method,
@@ -102,11 +108,12 @@ func LoggingMiddleware() gin.HandlerFunc {
 		}
 
 		logging.Logger(incomingRequest)
-		logging.Logger(outcomingResponse)
+		logging.Logger(outgoingResponse)
 	}
 }
 
 // ValidateInput allows specific HTTP methods and checks for the "application/json" or "application/grpc" content type.
+// Returns a Gin middleware handler function.
 func ValidateInput() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Get the content type from the request header.

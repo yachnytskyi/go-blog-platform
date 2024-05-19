@@ -10,6 +10,7 @@ import (
 )
 
 // TimeoutMiddleware sets a timeout for each request.
+// Returns a Gin middleware handler function.
 func TimeoutMiddleware() gin.HandlerFunc {
 	return func(ginContext *gin.Context) {
 		// Use context.WithTimeout to create a new context with a timeout.

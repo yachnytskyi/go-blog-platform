@@ -14,7 +14,7 @@ Security:
     Key: "Content-Security-Policy"
     Value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';"
   Strict_Transport_Security_Header:
-    Key: "X-Content-Type-Options"
+    Key: "Strict-Transport-Security"
     Value: "max-age=31536000; includeSubDomains; preload"
   X_Content_Type_Options_Header:
     Key: "X-Content-Type-Options"
@@ -25,14 +25,14 @@ Security:
     - PUT
     - PATCH
     - DELETE
-    # Add other allowed http methods as needed
+    # Add other allowed HTTP methods as needed
   Allowed_Content_Types:
     - application/json
     - application/grpc
     # Add other allowed content types as needed
 
 MongoDB:
-  Name:  golang_mongodb
+  Name: golang_mongodb
   URI: mongodb://root:root@localhost:27017/golang_mongodb
 
 Gin:
@@ -45,28 +45,25 @@ GRPC:
   Server_Url: 0.0.0.0:8081
 
 Access_Token:
-  PRIVATE_KEY: your private key for access token
-  PUBLIC_KEY: your public key for access token
-  EXPIRED_IN: 15m
-  MAXAGE: 900
+  Private_Key: "your private key for access token"
+  Public_Key: "your public key for access token"
+  Expired_In: 15m
+  Max_Age: 900
 
 Refresh_Token: 
-  PRIVATE_KEY: your private key for refresh token
-  PUBLIC_KEY: your public key for refresh token
-  EXPIRED_IN: 60m
-  MAXAGE: 3600
+  Private_Key: "your private key for refresh token"
+  Public_Key: "your public key for refresh token"
+  Expired_In: 60m
+  Max_Age: 3600
 
 Email: 
-  Email_From: your email
-  SMTP_Host: your host
-  SMTP_User: your user
-  SMTP_Password: your password
+  Email_From: "your email"
+  SMTP_Host: "your host"
+  SMTP_User: "your user"
+  SMTP_Password: "your password"
   SMTP_Port: your port
-  Client_Origin_Url: http://localhost:8080/api/ - put your own client url
+  Client_Origin_Url: "http://localhost:8080/api/" # put your own client URL
   User_Confirmation_Template_Name: verificationCode.html
   User_Confirmation_Template_Path: internal/user/data/repository/external/mail/template  
   Forgotten_Password_Template_Name: resetPassword.html
   Forgotten_Password_Template_Path: internal/user/data/repository/external/mail/template
-
-
-

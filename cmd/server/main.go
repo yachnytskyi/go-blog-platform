@@ -39,6 +39,7 @@ func main() {
 
 	// Launch the server in a separate goroutine.
 	go func() {
+		// Launch the server using the delivery factory from the container.
 		container.DeliveryFactory.LaunchServer(ctx, container)
 	}()
 

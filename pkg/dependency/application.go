@@ -20,10 +20,6 @@ func CreateApplication(ctx context.Context) *applicationModel.Container {
 
 	// Create a new repository instance.
 	db := container.RepositoryFactory.NewRepository(ctx)
-	// If the database connection fails, return nil to indicate the failure.
-	if db == nil {
-		return nil
-	}
 
 	// Create specific repositories.
 	userRepository := container.RepositoryFactory.NewUserRepository(db)

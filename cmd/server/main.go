@@ -10,7 +10,6 @@ import (
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	dependency "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency"
 	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 )
 
 const (
@@ -31,11 +30,6 @@ func main() {
 
 	// Initialize the application and get the container with all dependencies.
 	container := dependency.CreateApplication(ctx)
-	if container == nil {
-		// If the application failed to initialize, log the error and exit with a non-zero status.
-		logging.Logger(failedInitialization)
-		os.Exit(1)
-	}
 
 	// Launch the server in a separate goroutine.
 	go func() {

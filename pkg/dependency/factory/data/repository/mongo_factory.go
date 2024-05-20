@@ -17,10 +17,11 @@ import (
 )
 
 const (
-	successfully_connected = "Database connection is established..."
-	successfully_closed    = "Database connection has been successfully closed..."
-	location               = "pkg.dependency.data.repository.mongo.NewRepository."
-	unsupportedDatabase    = "Unsupported database type: %s"
+	dbConnectionSuccess = "Database connection is established..."
+	dbConnectionClosed  = "Database connection has been successfully closed..."
+	location            = "pkg.dependency.data.repository.mongo.NewRepository."
+	unsupportedDatabase = "Unsupported database type: %s"
+	dbConnectionFailure = "Failed to establish database connection"
 )
 
 // MongoDBFactory is a factory for creating MongoDB instances.
@@ -32,35 +33,34 @@ type MongoDBFactory struct {
 // NewRepository creates and returns a new MongoDB repository instance.
 func (mongoDBFactory *MongoDBFactory) NewRepository(ctx context.Context) any {
 	var connectError error
-	// Create a new MongoDB client with the provided URI.
+
+	// Attempt to connect to the MongoDB server using the provided URI.
 	mongoConnection := options.Client().ApplyURI(mongoDBFactory.MongoDB.URI)
 	mongoDBFactory.MongoClient, connectError = mongo.Connect(ctx, mongoConnection)
 	if validator.IsError(connectError) {
-		logging.Logger(domainError.NewInternalError(location+"MongoClient.Database", connectError.Error()))
-		// Return nil to indicate the failure to establish a connection
-		return nil
+		// Log the connection error with a detailed message indicating the failure location.
+		logging.Logger(domainError.NewInternalError(location+"MongoClient.Connect", connectError.Error()))
+		panic(dbConnectionFailure)
 	}
-
-	// Get the database instance from the MongoDB client.
-	db := mongoDBFactory.MongoClient.Database(mongoDBFactory.MongoDB.Name)
 
 	// Ping the MongoDB server to ensure a successful connection.
 	connectError = mongoDBFactory.MongoClient.Ping(ctx, readpref.Primary())
 	if validator.IsError(connectError) {
+		// Log the ping error with a detailed message indicating the failure location.
 		logging.Logger(domainError.NewInternalError(location+"MongoClient.Ping", connectError.Error()))
-		// Return nil to indicate the failure to establish a connection
-		return nil
+		// Panic to stop execution if the MongoDB server cannot be reached after the initial connection.
+		panic(dbConnectionFailure)
 	}
 
-	logging.Logger(successfully_connected)
-	return db
+	logging.Logger(dbConnectionSuccess)
+	return mongoDBFactory.MongoClient.Database(mongoDBFactory.MongoDB.Name)
 }
 
 // CloseRepository closes the MongoDB client and releases resources.
 func (mongoDBFactory *MongoDBFactory) CloseRepository(ctx context.Context) {
 	if validator.IsValueNotEmpty(mongoDBFactory.MongoClient) {
 		mongoDBFactory.MongoClient.Disconnect(ctx)
-		logging.Logger(successfully_closed)
+		logging.Logger(dbConnectionClosed)
 	}
 }
 

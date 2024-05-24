@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
@@ -22,6 +23,8 @@ const (
 	location            = "pkg.dependency.data.repository.mongo.NewRepository."
 	unsupportedDatabase = "Unsupported database type: %s"
 	dbConnectionFailure = "Failed to establish database connection"
+	retryDelayInterval  = 30 * time.Second
+	maxRetryAttempts    = 5
 )
 
 // MongoDBFactory is a factory for creating MongoDB instances.
@@ -34,24 +37,24 @@ type MongoDBFactory struct {
 func (mongoDBFactory *MongoDBFactory) NewRepository(ctx context.Context) any {
 	var connectError error
 
-	// Attempt to connect to the MongoDB server using the provided URI.
+	// Configure MongoDB connection options using the provided URI.
 	mongoConnection := options.Client().ApplyURI(mongoDBFactory.MongoDB.URI)
-	mongoDBFactory.MongoClient, connectError = mongo.Connect(ctx, mongoConnection)
+
+	// Try to connect to MongoDB with retries.
+	mongoDBFactory.MongoClient, connectError = connectToMongo(ctx, mongoConnection)
 	if validator.IsError(connectError) {
-		// Log the connection error with a detailed message indicating the failure location.
-		logging.Logger(domainError.NewInternalError(location+"MongoClient.Connect", connectError.Error()))
+		// Panic if all connection attempts fail.
 		panic(dbConnectionFailure)
 	}
 
-	// Ping the MongoDB server to ensure a successful connection.
-	connectError = mongoDBFactory.MongoClient.Ping(ctx, readpref.Primary())
+	// Try to ping the MongoDB server with retries.
+	connectError = pingMongo(ctx, mongoDBFactory.MongoClient)
 	if validator.IsError(connectError) {
-		// Log the ping error with a detailed message indicating the failure location.
-		logging.Logger(domainError.NewInternalError(location+"MongoClient.Ping", connectError.Error()))
-		// Panic to stop execution if the MongoDB server cannot be reached after the initial connection.
+		// Panic if all connection attempts fail.
 		panic(dbConnectionFailure)
 	}
 
+	// Log successful database connection.
 	logging.Logger(dbConnectionSuccess)
 	return mongoDBFactory.MongoClient.Database(mongoDBFactory.MongoDB.Name)
 }
@@ -74,4 +77,53 @@ func (mongoDBFactory *MongoDBFactory) NewUserRepository(db any) user.UserReposit
 func (mongoDBFactory *MongoDBFactory) NewPostRepository(db any) post.PostRepository {
 	mongoDB := db.(*mongo.Database)
 	return postRepository.NewPostRepository(mongoDB)
+}
+
+// connectToMongo attempts to connect to MongoDB server with retries.
+func connectToMongo(ctx context.Context, mongoConnection *options.ClientOptions) (*mongo.Client, error) {
+	var client *mongo.Client
+	var connectError error
+	var delay = time.Second
+
+	// Attempt to connect to MongoDB with exponential backoff.
+	for i := 0; i < maxRetryAttempts; i++ {
+		// Log the connection error with detailed message and retry after delay.
+		logging.Logger(domainError.NewInternalError(location+"connectToMongo.MongoClient.Connect", connectError.Error()))
+		time.Sleep(delay)
+		delay += retryDelayInterval
+
+		client, connectError = mongo.Connect(ctx, mongoConnection)
+		if connectError == nil {
+			// Return client if connection is successful.
+			return client, nil
+		}
+
+	}
+
+	// Return error if all retry attempts fail.
+	return nil, connectError
+}
+
+// pingMongo attempts to ping the MongoDB server with retries.
+func pingMongo(ctx context.Context, client *mongo.Client) error {
+	var connectError error
+	var delay = time.Second
+
+	// Attempt to ping MongoDB server with exponential backoff.
+	for i := 0; i < maxRetryAttempts; i++ {
+		// Log the ping error with detailed message and retry after delay.
+		logging.Logger(domainError.NewInternalError(location+"pingMongo.MongoClient.Ping", connectError.Error()))
+		time.Sleep(delay)
+		delay += retryDelayInterval
+
+		connectError = client.Ping(ctx, readpref.Primary())
+		if connectError == nil {
+			// Return nil if ping is successful.
+			return nil
+		}
+
+	}
+
+	// Return error if all retry attempts fail.
+	return connectError
 }

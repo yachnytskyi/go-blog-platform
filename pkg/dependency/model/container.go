@@ -8,28 +8,31 @@ import (
 )
 
 // Container holds the factory interfaces required to initialize and manage dependencies.
+// It encapsulates the logic for creating repositories, use cases, and delivery components.
 type Container struct {
 	RepositoryFactory RepositoryFactory // Interface for creating repository instances.
-	DomainFactory     DomainFactory     // Interface for creating domain use cases.
+	UseCaseFactory    UseCaseFactory    // Interface for creating domain use cases.
 	DeliveryFactory   DeliveryFactory   // Interface for creating delivery components and initializing the server.
 }
 
-// ServerRouters holds the routers for different entities.
+// ServerRouters holds the routers for different entities, managing the routing for user and post-related endpoints.
 type ServerRouters struct {
 	UserRouter user.UserRouter // Router for user-related endpoints.
 	PostRouter post.PostRouter // Router for post-related endpoints.
 }
 
 // NewContainer initializes and returns a new Container with the provided factories.
-func NewContainer(repositoryFactory RepositoryFactory, domainFactory DomainFactory, deliveryFactory DeliveryFactory) *Container {
+// This function ensures that the Container is populated with the necessary factories for creating repositories, use cases, and delivery components.
+func NewContainer(repositoryFactory RepositoryFactory, useCaseFactory UseCaseFactory, deliveryFactory DeliveryFactory) *Container {
 	return &Container{
 		RepositoryFactory: repositoryFactory,
-		DomainFactory:     domainFactory,
+		UseCaseFactory:    useCaseFactory,
 		DeliveryFactory:   deliveryFactory,
 	}
 }
 
 // RepositoryFactory defines methods for creating different repository instances and managing their lifecycle.
+// Implementations of this interface will handle the creation and disposal of various repositories.
 type RepositoryFactory interface {
 	// NewRepository creates and returns a new repository instance.
 	NewRepository(ctx context.Context) any
@@ -41,8 +44,9 @@ type RepositoryFactory interface {
 	NewPostRepository(db any) post.PostRepository
 }
 
-// DomainFactory defines methods for creating domain use cases.
-type DomainFactory interface {
+// UseCaseFactory defines methods for creating domain use cases.
+// This interface provides factory methods to create instances of use cases for different domains, like users and posts.
+type UseCaseFactory interface {
 	// NewUserUseCase creates and returns a new UserUseCase instance using the provided repository.
 	NewUserUseCase(repository any) user.UserUseCase
 	// NewPostUseCase creates and returns a new PostUseCase instance using the provided repository.
@@ -50,6 +54,7 @@ type DomainFactory interface {
 }
 
 // DeliveryFactory defines methods for creating delivery components, initializing the server, and managing its lifecycle.
+// This interface ensures that the server and its components are correctly initialized, started, and shut down.
 type DeliveryFactory interface {
 	// InitializeServer initializes the server with the provided routers configuration.
 	InitializeServer(serverConfig ServerRouters)
@@ -58,9 +63,9 @@ type DeliveryFactory interface {
 	// CloseServer gracefully shuts down the server using the provided context.
 	CloseServer(ctx context.Context)
 	// NewUserController creates and returns a new UserController instance using the provided domain use case.
-	NewUserController(domain any) user.UserController
+	NewUserController(useCase any) user.UserController
 	// NewPostController creates and returns a new PostController instance using the provided domain use case.
-	NewPostController(domain any) post.PostController
+	NewPostController(useCase any) post.PostController
 	// NewUserRouter creates and returns a new UserRouter instance using the provided controller.
 	NewUserRouter(controller any) user.UserRouter
 	// NewPostRouter creates and returns a new PostRouter instance using the provided controller.

@@ -44,7 +44,7 @@ type ApplicationConfig struct {
 // Core defines the core settings for the application.
 type Core struct {
 	Database string `mapstructure:"Database"`
-	Domain   string `mapstructure:"Domain"`
+	UseCase  string `mapstructure:"UseCase"`
 	Delivery string `mapstructure:"Delivery"`
 }
 
@@ -146,7 +146,7 @@ func LoadConfig() (unmarshalError error) {
 
 	// Set default values for configuration fields.
 	viper.SetDefault("Database", constants.MongoDB)
-	viper.SetDefault("Domain", constants.UseCase)
+	viper.SetDefault("UseCase", constants.UseCase)
 	viper.SetDefault("Delivery", constants.Gin)
 	viper.SetDefault("MongoDB.Name", defaultMongoDBName)
 	viper.SetDefault("MongoDB.URI", defaultMongoDBURI)

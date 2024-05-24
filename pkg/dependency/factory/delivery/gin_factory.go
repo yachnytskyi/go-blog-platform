@@ -29,11 +29,13 @@ type GinFactory struct {
 }
 
 const (
-	successfully_connected = "Server is successfully launched..."
-	successfully_closed    = "Server has been successfully shutdown..."
+	successFullyConnected = "Server is successfully launched..."
+	successfullyClosed    = "Server has been successfully shutdown..."
 )
 
 // InitializeServer sets up the Gin server with the provided routers configuration.
+// It loads the Gin configuration, creates a new Gin router engine, applies middleware,
+// configures CORS, and initializes entity-specific routers.
 func (ginFactory *GinFactory) InitializeServer(serverConfig applicationModel.ServerRouters) {
 	// Load the Gin configuration.
 	ginConfig := config.AppConfig.Gin
@@ -68,6 +70,8 @@ func (ginFactory *GinFactory) InitializeServer(serverConfig applicationModel.Ser
 }
 
 // LaunchServer starts the Gin server using the provided context and container.
+// It runs the Gin router in a separate goroutine and handles any startup errors,
+// ensuring proper resource cleanup on failure.
 func (ginFactory *GinFactory) LaunchServer(ctx context.Context, container *applicationModel.Container) {
 	ginConfig := config.AppConfig.Gin
 
@@ -84,10 +88,11 @@ func (ginFactory *GinFactory) LaunchServer(ctx context.Context, container *appli
 	}()
 
 	// Log successful server launch.
-	logging.Logger(successfully_connected)
+	logging.Logger(successFullyConnected)
 }
 
 // CloseServer gracefully shuts down the server using the provided context.
+// It attempts to shutdown the server and logs any errors that occur during the shutdown process.
 func (ginFactory *GinFactory) CloseServer(ctx context.Context) {
 	// Attempt to shut down the server.
 	shutDownError := ginFactory.Server.Shutdown(ctx)
@@ -97,28 +102,32 @@ func (ginFactory *GinFactory) CloseServer(ctx context.Context) {
 		logging.Logger(shutDownInternalError)
 	}
 	// Log successful server shutdown.
-	logging.Logger(successfully_closed)
+	logging.Logger(successfullyClosed)
 }
 
 // NewUserController creates and returns a new UserController instance using the provided domain use case.
-func (ginFactory *GinFactory) NewUserController(domain any) user.UserController {
-	userUseCase := domain.(user.UserUseCase)
+// It casts the generic use case parameter to the specific user.UserUseCase type and creates the UserController.
+func (ginFactory *GinFactory) NewUserController(useCase any) user.UserController {
+	userUseCase := useCase.(user.UserUseCase)
 	return userDelivery.NewUserController(userUseCase)
 }
 
 // NewUserRouter creates and returns a new UserRouter instance using the provided controller.
+// It casts the generic controller parameter to the specific user.UserController type and creates the UserRouter.
 func (ginFactory *GinFactory) NewUserRouter(controller any) user.UserRouter {
 	userController := controller.(user.UserController)
 	return userDelivery.NewUserRouter(userController)
 }
 
 // NewPostController creates and returns a new PostController instance using the provided domain use case.
-func (ginFactory *GinFactory) NewPostController(domain any) post.PostController {
-	postUseCase := domain.(post.PostUseCase)
+// It casts the generic use case parameter to the specific post.PostUseCase type and creates the PostController.
+func (ginFactory *GinFactory) NewPostController(useCase any) post.PostController {
+	postUseCase := useCase.(post.PostUseCase)
 	return postDelivery.NewPostController(postUseCase)
 }
 
 // NewPostRouter creates and returns a new PostRouter instance using the provided controller.
+// It casts the generic controller parameter to the specific post.PostController type and creates the PostRouter.
 func (ginFactory *GinFactory) NewPostRouter(controller any) post.PostRouter {
 	postController := controller.(post.PostController)
 	return postDelivery.NewPostRouter(postController)

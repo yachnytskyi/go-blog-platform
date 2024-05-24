@@ -18,19 +18,19 @@ func CreateApplication(ctx context.Context) *applicationModel.Container {
 	// Inject repository dependencies into the container.
 	factory.InjectRepository(ctx, container)
 
-	// Create a new repository instance.
+	// Create a new repository instance using the repository factory in the container.
 	db := container.RepositoryFactory.NewRepository(ctx)
 
-	// Create specific repositories.
+	// Create specific repositories using the repository instance.
 	userRepository := container.RepositoryFactory.NewUserRepository(db)
 	postRepository := container.RepositoryFactory.NewPostRepository(db)
 
-	// Inject domain dependencies into the container.
-	factory.InjectDomain(ctx, container)
+	// Inject use case dependencies into the container.
+	factory.InjectUseCase(ctx, container)
 
-	// Create the use cases for using the repositories.
-	userUseCase := container.DomainFactory.NewUserUseCase(userRepository)
-	postUseCase := container.DomainFactory.NewPostUseCase(postRepository)
+	// Create the use cases using the repositories.
+	userUseCase := container.UseCaseFactory.NewUserUseCase(userRepository)
+	postUseCase := container.UseCaseFactory.NewPostUseCase(postRepository)
 
 	// Inject delivery dependencies into the container.
 	factory.InjectDelivery(ctx, container)

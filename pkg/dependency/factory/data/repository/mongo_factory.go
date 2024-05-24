@@ -87,17 +87,16 @@ func connectToMongo(ctx context.Context, mongoConnection *options.ClientOptions)
 
 	// Attempt to connect to MongoDB with exponential backoff.
 	for i := 0; i < maxRetryAttempts; i++ {
-		// Log the connection error with detailed message and retry after delay.
-		logging.Logger(domainError.NewInternalError(location+"connectToMongo.MongoClient.Connect", connectError.Error()))
-		time.Sleep(delay)
-		delay += retryDelayInterval
-
 		client, connectError = mongo.Connect(ctx, mongoConnection)
 		if connectError == nil {
 			// Return client if connection is successful.
 			return client, nil
 		}
 
+		// Log the connection error with detailed message and retry after delay.
+		logging.Logger(domainError.NewInternalError(location+"connectToMongo.MongoClient.Connect", connectError.Error()))
+		time.Sleep(delay)
+		delay += retryDelayInterval
 	}
 
 	// Return error if all retry attempts fail.
@@ -111,17 +110,16 @@ func pingMongo(ctx context.Context, client *mongo.Client) error {
 
 	// Attempt to ping MongoDB server with exponential backoff.
 	for i := 0; i < maxRetryAttempts; i++ {
-		// Log the ping error with detailed message and retry after delay.
-		logging.Logger(domainError.NewInternalError(location+"pingMongo.MongoClient.Ping", connectError.Error()))
-		time.Sleep(delay)
-		delay += retryDelayInterval
-
 		connectError = client.Ping(ctx, readpref.Primary())
 		if connectError == nil {
 			// Return nil if ping is successful.
 			return nil
 		}
 
+		// Log the ping error with detailed message and retry after delay.
+		logging.Logger(domainError.NewInternalError(location+"pingMongo.MongoClient.Ping", connectError.Error()))
+		time.Sleep(delay)
+		delay += retryDelayInterval
 	}
 
 	// Return error if all retry attempts fail.

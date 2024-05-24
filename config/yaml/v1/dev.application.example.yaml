@@ -1,6 +1,6 @@
 Core:
   Database: MongoDB
-  Domain: UseCase
+  UseCase: UseCase
   Delivery: Gin
 
 Security:

@@ -1,26 +1,25 @@
+# Stage 1: Build the Go application
 FROM golang:alpine as builder
-RUN apk add git
+RUN apk add --no-cache git
 
 WORKDIR /go/src/app
 
-ENV GO111MODULE=auto
+# Install reflex
+RUN go install github.com/cespare/reflex@latest
 
-RUN go get github.com/cespare/reflex
-
-COPY go.mod .
-COPY go.sum .
-
+COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
 
-RUN go build -o ./run .
+RUN go build -o run .
 
+# Stage 2: Create a small image with only the necessary runtime dependencies
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
-WORKDIR /root/
 
-# Copy the executable from the builder
+WORKDIR /root/
 COPY --from=builder /go/src/app/run .
+COPY --from=builder /go/bin/reflex /usr/local/bin/reflex
 
 CMD ["./run"]

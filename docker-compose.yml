@@ -27,7 +27,6 @@ services:
   #   # Have to use $$ (double-dollar) so docker does not try to substitute a variable.
   #   depends_on:
   #     - mongodb
-  #     - redis
   #   command: reflex -r "\.go$$" -s -- sh -c "go run ./"
 
 volumes:

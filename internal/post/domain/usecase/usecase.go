@@ -14,31 +14,31 @@ const (
 	location = "internal.post.domain.usecase."
 )
 
-type PostUseCase struct {
+type PostUseCaseV1 struct {
 	postRepository post.PostRepository
 }
 
-func NewPostUseCase(postRepository post.PostRepository) post.PostUseCase {
-	return &PostUseCase{postRepository: postRepository}
+func NewPostUseCaseV1(postRepository post.PostRepository) post.PostUseCase {
+	return &PostUseCaseV1{postRepository: postRepository}
 }
 
-func (postUseCase *PostUseCase) GetAllPosts(ctx context.Context, page int, limit int) (*postModel.Posts, error) {
-	fetchedPosts, err := postUseCase.postRepository.GetAllPosts(ctx, page, limit)
+func (postUseCaseV1 *PostUseCaseV1) GetAllPosts(ctx context.Context, page int, limit int) (*postModel.Posts, error) {
+	fetchedPosts, err := postUseCaseV1.postRepository.GetAllPosts(ctx, page, limit)
 	return fetchedPosts, err
 }
 
-func (postUseCase *PostUseCase) GetPostById(ctx context.Context, postID string) (*postModel.Post, error) {
-	fetchedPost, err := postUseCase.postRepository.GetPostById(ctx, postID)
+func (postUseCaseV1 *PostUseCaseV1) GetPostById(ctx context.Context, postID string) (*postModel.Post, error) {
+	fetchedPost, err := postUseCaseV1.postRepository.GetPostById(ctx, postID)
 	return fetchedPost, err
 }
 
-func (postUseCase *PostUseCase) CreatePost(ctx context.Context, post *postModel.PostCreate) (*postModel.Post, error) {
-	createdPost, err := postUseCase.postRepository.CreatePost(ctx, post)
+func (postUseCaseV1 *PostUseCaseV1) CreatePost(ctx context.Context, post *postModel.PostCreate) (*postModel.Post, error) {
+	createdPost, err := postUseCaseV1.postRepository.CreatePost(ctx, post)
 	return createdPost, err
 }
 
-func (postUseCase *PostUseCase) UpdatePostById(ctx context.Context, postID string, post *postModel.PostUpdate, currentUserID string) (*postModel.Post, error) {
-	fetchedPost, err := postUseCase.GetPostById(ctx, postID)
+func (postUseCaseV1 *PostUseCaseV1) UpdatePostById(ctx context.Context, postID string, post *postModel.PostUpdate, currentUserID string) (*postModel.Post, error) {
+	fetchedPost, err := postUseCaseV1.GetPostById(ctx, postID)
 
 	if err != nil {
 		return nil, err
@@ -49,12 +49,12 @@ func (postUseCase *PostUseCase) UpdatePostById(ctx context.Context, postID strin
 		return nil, domainError.NewAuthorizationError(location+"UpdatePostById.AreStringsNotEqual", constants.AuthorizationErrorNotification)
 	}
 
-	updatedPost, err := postUseCase.postRepository.UpdatePostById(ctx, postID, post)
+	updatedPost, err := postUseCaseV1.postRepository.UpdatePostById(ctx, postID, post)
 	return updatedPost, err
 }
 
-func (postUseCase *PostUseCase) DeletePostByID(ctx context.Context, postID string, currentUserID string) error {
-	fetchedPost, err := postUseCase.GetPostById(ctx, postID)
+func (postUseCaseV1 *PostUseCaseV1) DeletePostByID(ctx context.Context, postID string, currentUserID string) error {
+	fetchedPost, err := postUseCaseV1.GetPostById(ctx, postID)
 
 	if err != nil {
 		return err
@@ -65,6 +65,6 @@ func (postUseCase *PostUseCase) DeletePostByID(ctx context.Context, postID strin
 		return domainError.NewAuthorizationError(location+"DeletePostByID.AreStringsNotEqual", constants.AuthorizationErrorNotification)
 	}
 
-	deletedPost := postUseCase.postRepository.DeletePostByID(ctx, postID)
+	deletedPost := postUseCaseV1.postRepository.DeletePostByID(ctx, postID)
 	return deletedPost
 }

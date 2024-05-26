@@ -7,24 +7,24 @@ import (
 	userUseCase "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
 )
 
-// UseCaseFactory is a factory for creating use case instances.
-type UseCaseFactory struct {
+// UseCaseFactoryV1 is a factory for creating use case instances.
+type UseCaseFactoryV1 struct {
 }
 
-// NewUserUseCase creates and returns a new UserUseCase instance using the provided repository.
-func (useCaseFactory UseCaseFactory) NewUserUseCase(repository any) user.UserUseCase {
+// NewUserUseCaseV1 creates and returns a new UserUseCaseV1 instance using the provided repository.
+func (useCaseFactoryV1 UseCaseFactoryV1) NewUserUseCase(repository any) user.UserUseCase {
 	// Type assert the repository to user.UserRepository.
 	userRepository := repository.(user.UserRepository)
 
-	// Create and return a new UserUseCase instance.
-	return userUseCase.NewUserUseCase(userRepository)
+	// Create and return a new UserUseCaseV1 instance.
+	return userUseCase.NewUserUseCaseV1(userRepository)
 }
 
-// NewPostUseCase creates and returns a new PostUseCase instance using the provided repository.
-func (useCaseFactory UseCaseFactory) NewPostUseCase(repository any) post.PostUseCase {
+// NewPostUseCaseV1 creates and returns a new PostUseCaseV1 instance using the provided repository.
+func (useCaseFactoryV1 UseCaseFactoryV1) NewPostUseCase(repository any) post.PostUseCase {
 	// Type assert the repository to post.PostRepository.
 	postRepository := repository.(post.PostRepository)
 
-	// Create and return a new PostUseCase instance.
-	return postUseCase.NewPostUseCase(postRepository)
+	// Create and return a new PostUseCaseV1 instance.
+	return postUseCase.NewPostUseCaseV1(postRepository)
 }

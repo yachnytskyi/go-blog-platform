@@ -1,6 +1,6 @@
 Core:
   Database: MongoDB
-  UseCase: UseCase
+  UseCase: UseCaseV1
   Delivery: Gin
 
 Security:

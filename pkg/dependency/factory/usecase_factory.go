@@ -29,8 +29,8 @@ func InjectUseCase(ctx context.Context, container *applicationModel.Container) {
 	// Switch based on the configured use case type.
 	switch coreConfig.UseCase {
 	case constants.UseCase:
-		// Inject the UseCaseFactory into the container if the usecase type is UseCase.
-		container.UseCaseFactory = useCaseFactory.UseCaseFactory{}
+		// Inject the UseCaseFactory into the container if the usecase type is UseCaseV1.
+		container.UseCaseFactory = useCaseFactory.UseCaseFactoryV1{}
 	// Add other use case options here as needed.
 	default:
 		// Handle unsupported usecase types by logging an error and shutting down the application gracefully.

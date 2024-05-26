@@ -34,5 +34,6 @@ func InjectRepository(ctx context.Context, container *applicationModel.Container
 		notification := fmt.Sprintf(unsupportedDatabase, coreConfig.Database)
 		logging.Logger(domainError.NewInternalError(location+".applicationConfig.Core.Database:", notification))
 		applicationModel.GracefulShutdown(ctx, container)
+		panic(notification)
 	}
 }

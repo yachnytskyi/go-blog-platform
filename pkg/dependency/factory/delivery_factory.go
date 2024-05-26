@@ -33,5 +33,6 @@ func InjectDelivery(ctx context.Context, container *applicationModel.Container) 
 		notification := fmt.Sprintf(unsupportedDelivery, coreConfig.Delivery)
 		logging.Logger(domainError.NewInternalError(location+".loadConfig.Delivery:", notification))
 		applicationModel.GracefulShutdown(ctx, container)
+		panic(notification)
 	}
 }

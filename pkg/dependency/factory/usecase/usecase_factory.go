@@ -7,7 +7,7 @@ import (
 	userUseCase "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
 )
 
-// UseCaseFactoryV1 is a factory for creating use case instances.
+// UseCaseFactoryV1 is a factory struct responsible for creating version 1 instances of user and post use cases.
 type UseCaseFactoryV1 struct {
 }
 

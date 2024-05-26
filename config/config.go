@@ -19,7 +19,8 @@ var AppConfig ApplicationConfig
 const (
 	version                    = "v1"
 	environmentsPath           = "config/environment/.env."
-	devInvironmentName         = "dev"
+	localDevEnvironment        = "local.dev"
+	dockerDevEnvironment       = "docker.dev"
 	defaultMongoDBName         = "golang-mongodb"
 	defaultMongoDBURI          = "mongodb://root:root@localhost:27017/golang_mongodb"
 	defaultGinPort             = "8080"
@@ -122,7 +123,7 @@ type Email struct {
 // - An error if there is an issue loading the configuration.
 func LoadConfig() (unmarshalError error) {
 	// Load environment variables from the .env file.
-	loadEnvironmentsError := godotenv.Load(environmentsPath + devInvironmentName)
+	loadEnvironmentsError := godotenv.Load(environmentsPath + localDevEnvironment)
 	if validator.IsError(loadEnvironmentsError) {
 		// Log and return an internal error if loading the environment variables fails.
 		loadEnvironmentsInternalError := domainError.NewInternalError(location+"Load", loadEnvironmentsError.Error())

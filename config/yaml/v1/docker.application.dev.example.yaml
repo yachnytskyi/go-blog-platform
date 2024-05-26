@@ -1,0 +1,69 @@
+Core:
+  Database: MongoDB
+  UseCase: UseCase
+  Delivery: Gin
+
+Security:
+  Cookie_Secure: true
+  Http_Only: false
+  Rate_Limit: 5.0
+  Content_Security_Policy_Header:
+    Key: "Content-Security-Policy"
+    Value: "default-src 'self'"
+  Content_Security_Policy_Header_Full:
+    Key: "Content-Security-Policy"
+    Value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';"
+  Strict_Transport_Security_Header:
+    Key: "Strict-Transport-Security"
+    Value: "max-age=31536000; includeSubDomains; preload"
+  X_Content_Type_Options_Header:
+    Key: "X-Content-Type-Options"
+    Value: "nosniff"
+  Allowed_HTTP_Methods: 
+    - GET
+    - POST
+    - PUT
+    - PATCH
+    - DELETE
+    # Add other allowed HTTP methods as needed
+  Allowed_Content_Types:
+    - application/json
+    - application/grpc
+    # Add other allowed content types as needed
+
+MongoDB:
+  Name: golang_mongodb
+  URI: mongodb://root:root@mongodb:27017/golang_mongodb
+
+Gin:
+  Port: 8080
+  Allow_Origins: http://localhost:8080
+  Allow_Credentials: true
+  Server_Group: /api
+
+GRPC:
+  Server_Url: 0.0.0.0:8081
+
+Access_Token:
+  Private_Key: "your private key for access token"
+  Public_Key: "your public key for access token"
+  Expired_In: 15m
+  Max_Age: 900
+
+Refresh_Token: 
+  Private_Key: "your private key for refresh token"
+  Public_Key: "your public key for refresh token"
+  Expired_In: 60m
+  Max_Age: 3600
+
+Email: 
+  Email_From: "your email"
+  SMTP_Host: "your host"
+  SMTP_User: "your user"
+  SMTP_Password: "your password"
+  SMTP_Port: your port
+  Client_Origin_Url: "http://localhost:8080/api/" # put your own client URL
+  User_Confirmation_Template_Name: verificationCode.html
+  User_Confirmation_Template_Path: internal/user/data/repository/external/mail/template  
+  Forgotten_Password_Template_Name: resetPassword.html
+  Forgotten_Password_Template_Path: internal/user/data/repository/external/mail/template

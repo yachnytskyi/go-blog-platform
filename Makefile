@@ -1,8 +1,12 @@
 up:
-	docker-compose up -d
+	docker-compose up 
 
 down:
 	docker-compose down
+
+local:
+	docker-compose up mongodb -d 
+	reflex -s go run cmd/server/main.go 
 
 run:
 	go run cmd/server/main.go
@@ -10,5 +14,3 @@ run:
 reflex:
 	reflex -s go run cmd/server/main.go 
 
-build:
-	docker-compose build

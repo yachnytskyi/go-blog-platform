@@ -1,33 +1,37 @@
 version: '3.9'
 services:
-
   mongodb:
     image: mongo
     container_name: mongodb
     restart: always
-    env_file: ./config/yaml/v1/dev.application.yaml
     ports:
       - '27017:27017'
     volumes:
       - mongodbDATA:/data/db
+    networks:
+      - application-network
 
-  # app:
-  #   build:
-  #     context: ./
-  #     dockerfile: Dockerfile.dev
-  #     target: builder
-  #   image: app
-  #   env_file: ./app.env
-  #   ports:
-  #     - "8080:8080"
-  #   environment:
-  #     - ENV=dev
-  #   volumes:
-  #     - ./:/go/src/app
-  #   # Have to use $$ (double-dollar) so docker does not try to substitute a variable.
-  #   depends_on:
-  #     - mongodb
-  #   command: reflex -r "\.go$$" -s -- sh -c "go run ./"
+  app:
+    build:
+      context: ./
+      dockerfile: infrastructure/Docker/Dockerfile.prod
+    image: app
+    ports:
+      - "8080:8080"
+    environment:
+      - ENV=dev
+    volumes:
+      - ./:/app
+    working_dir: /app
+    depends_on:
+      - mongodb
+    networks:
+      - application-network
+    command: reflex -r '\.go$' -s -- go run ./cmd/server/main.go
+
+networks:
+  application-network:
+    driver: bridge
 
 volumes:
   mongodbDATA:

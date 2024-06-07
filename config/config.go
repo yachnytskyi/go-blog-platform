@@ -21,6 +21,9 @@ const (
 	environmentsPath           = "config/environment/.env."
 	localDevEnvironment        = "local.dev"
 	dockerDevEnvironment       = "docker.dev"
+	defaultVersion             = "v1"
+	defaultEnvironmentsPath    = "config/environment/.env."
+	defaultDockerEnvironment   = "docker.prod"
 	defaultMongoDBName         = "golang-mongodb"
 	defaultMongoDBURI          = "mongodb://root:root@localhost:27017/golang_mongodb"
 	defaultGinPort             = "8080"
@@ -119,16 +122,22 @@ type Email struct {
 
 // LoadConfig loads the application configuration from environment variables and defaults.
 // It sets up the global AppConfig variable.
-// Returns:
-// - An error if there is an issue loading the configuration.
-func LoadConfig() (unmarshalError error) {
+func LoadConfig() {
 	// Load environment variables from the .env file.
 	loadEnvironmentsError := godotenv.Load(environmentsPath + dockerDevEnvironment)
 	if validator.IsError(loadEnvironmentsError) {
-		// Log and return an internal error if loading the environment variables fails.
+		// Log and attempt to load default environment.
 		loadEnvironmentsInternalError := domainError.NewInternalError(location+"Load", loadEnvironmentsError.Error())
 		logging.Logger(loadEnvironmentsInternalError)
-		return loadEnvironmentsInternalError
+
+		// Attempt to load default environment.
+		defaultEnvironmentError := godotenv.Load(defaultEnvironmentsPath + defaultDockerEnvironment)
+		if validator.IsError(defaultEnvironmentError) {
+			// Log and panic if loading both environments fails.
+			defaultEnvInternalError := domainError.NewInternalError(location+"LoadDefaults", defaultEnvironmentError.Error())
+			logging.Logger(defaultEnvInternalError)
+			panic(defaultEnvInternalError)
+		}
 	}
 
 	// Set the configuration file path from the environment variable.
@@ -139,13 +148,33 @@ func LoadConfig() (unmarshalError error) {
 	// Read the configuration file.
 	readInConfigError := viper.ReadInConfig()
 	if validator.IsError(readInConfigError) {
-		// Log and return an internal error if reading the configuration file fails.
+		// Log and attempt to load default configuration.
 		readInInternalError := domainError.NewInternalError(location+"ReadInConfig", readInConfigError.Error())
 		logging.Logger(readInInternalError)
-		return readInInternalError
+
+		// Attempt to set default configurations.
+		setDefaultConfig()
+
+		// Attempt to read default configuration.
+		defaultConfigError := viper.ReadInConfig()
+		if validator.IsError(defaultConfigError) {
+			// Log and panic if reading both configurations fails.
+			defaultConfigInternalError := domainError.NewInternalError(location+"ReadDefaultConfig", defaultConfigError.Error())
+			logging.Logger(defaultConfigInternalError)
+			panic(defaultConfigInternalError)
+		}
 	}
 
-	// Set default values for configuration fields.
+	// Unmarshal the configuration into the global AppConfig variable.
+	unmarshalError := viper.Unmarshal(&AppConfig)
+	if validator.IsError(unmarshalError) {
+		internalError := domainError.NewInternalError(location+"Unmarshal", unmarshalError.Error())
+		logging.Logger(internalError)
+		panic(internalError)
+	}
+}
+
+func setDefaultConfig() {
 	viper.SetDefault("Database", constants.MongoDB)
 	viper.SetDefault("UseCase", constants.UseCase)
 	viper.SetDefault("Delivery", constants.Gin)
@@ -155,8 +184,4 @@ func LoadConfig() (unmarshalError error) {
 	viper.SetDefault("Gin.AllowOrigins", defaultGinAllowOrigins)
 	viper.SetDefault("Gin.AllowCredentials", defaultGinAllowCredentials)
 	viper.SetDefault("Gin.ServerGroup", defaultGinServerGroup)
-
-	// Unmarshal the configuration into the global AppConfig variable.
-	unmarshalError = viper.Unmarshal(&AppConfig)
-	return
 }

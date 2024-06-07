@@ -43,7 +43,7 @@ func (ginFactory *GinFactory) InitializeServer(serverConfig applicationModel.Ser
 	ginFactory.Router = gin.Default()
 	// Apply middleware to the Gin router.
 	ginFactory.Router.Use(httpGinMiddleware.TimeoutMiddleware())
-	ginFactory.Router.Use(httpGinMiddleware.ValidateInput())
+	ginFactory.Router.Use(httpGinMiddleware.ValidateInputMiddleware())
 	ginFactory.Router.Use(httpGinMiddleware.SecureHeadersMiddleware())
 	ginFactory.Router.Use(httpGinMiddleware.CSPMiddleware())
 	ginFactory.Router.Use(httpGinMiddleware.RateLimitMiddleware())

@@ -95,8 +95,8 @@ func connectToMongo(ctx context.Context, mongoConnection *options.ClientOptions)
 
 		// Log the connection error with detailed message and retry after delay.
 		logging.Logger(domainError.NewInternalError(location+"connectToMongo.MongoClient.Connect", connectError.Error()))
-		time.Sleep(delay)
 		delay += retryDelayInterval
+		time.Sleep(delay)
 	}
 
 	// Return error if all retry attempts fail.
@@ -118,8 +118,8 @@ func pingMongo(ctx context.Context, client *mongo.Client) error {
 
 		// Log the ping error with detailed message and retry after delay.
 		logging.Logger(domainError.NewInternalError(location+"pingMongo.MongoClient.Ping", connectError.Error()))
-		time.Sleep(delay)
 		delay += retryDelayInterval
+		time.Sleep(delay)
 	}
 
 	// Return error if all retry attempts fail.

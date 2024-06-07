@@ -22,9 +22,6 @@ FROM alpine:latest
 # Set the Current Working Directory inside the container
 WORKDIR /app
 
-# Copy the configuration files
-COPY config ./config
-
 # Copy the built executable from the builder stage
 COPY --from=builder /app/main .
 

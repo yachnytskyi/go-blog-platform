@@ -123,7 +123,7 @@ type Email struct {
 // - An error if there is an issue loading the configuration.
 func LoadConfig() (unmarshalError error) {
 	// Load environment variables from the .env file.
-	loadEnvironmentsError := godotenv.Load(environmentsPath + localDevEnvironment)
+	loadEnvironmentsError := godotenv.Load(environmentsPath + dockerDevEnvironment)
 	if validator.IsError(loadEnvironmentsError) {
 		// Log and return an internal error if loading the environment variables fails.
 		loadEnvironmentsInternalError := domainError.NewInternalError(location+"Load", loadEnvironmentsError.Error())

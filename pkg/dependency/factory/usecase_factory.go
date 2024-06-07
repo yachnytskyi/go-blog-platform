@@ -37,5 +37,6 @@ func InjectUseCase(ctx context.Context, container *applicationModel.Container) {
 		notification := fmt.Sprintf(unsupportedUseCase, coreConfig.UseCase)
 		logging.Logger(domainError.NewInternalError(location+".loadConfig.UseCase:", notification))
 		applicationModel.GracefulShutdown(ctx, container)
+		panic(notification)
 	}
 }

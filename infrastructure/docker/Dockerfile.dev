@@ -25,9 +25,6 @@ WORKDIR /app
 # Install reflex for live reloading
 RUN go install github.com/cespare/reflex@latest
 
-# Copy the configuration files
-COPY config ./config
-
 # Copy the source code from the builder stage
 COPY --from=builder /app/main .
 

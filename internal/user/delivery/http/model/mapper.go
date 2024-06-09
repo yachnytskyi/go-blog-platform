@@ -98,10 +98,8 @@ func UserLoginViewToUserLoginMapper(user UserLoginView) userModel.UserLogin {
 
 func UserLoginToUserLoginViewMapper(user userModel.UserLogin) UserLoginView {
 	return UserLoginView{
-		Email:        user.Email,
-		Password:     user.Password,
-		AccessToken:  user.AccessToken,
-		RefreshToken: user.RefreshToken,
+		Email:    user.Email,
+		Password: user.Password,
 	}
 }
 

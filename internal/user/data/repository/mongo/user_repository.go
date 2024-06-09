@@ -66,11 +66,11 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 	// Query the database to fetch users.
 	cursor, cursorFindError := userRepository.collection.Find(ctx, query, &option)
 	if validator.IsError(cursorFindError) {
-		// If an error occurs while finding documents, log and return an entity not found error.
+		// If an error occurs while finding documents, log and return an item not found error.
 		queryString := commonUtility.ConvertQueryToString(query)
-		entityNotFoundError := domainError.NewEntityNotFoundError(location+"GetAllUsers.Find", queryString, cursorFindError.Error())
-		logging.Logger(entityNotFoundError)
-		return commonModel.NewResultOnFailure[userModel.Users](entityNotFoundError)
+		itemNotFoundError := domainError.NewItemNotFoundError(location+"GetAllUsers.Find", queryString, cursorFindError.Error())
+		logging.Logger(itemNotFoundError)
+		return commonModel.NewResultOnFailure[userModel.Users](itemNotFoundError)
 	}
 	defer cursor.Close(ctx)
 
@@ -353,9 +353,9 @@ func (userRepository UserRepository) getUserByQuery(location string, ctx context
 	userFindOneError := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
 	if validator.IsError(userFindOneError) {
 		queryString := commonUtility.ConvertQueryToString(query)
-		entityNotFoundError := domainError.NewEntityNotFoundError(location+".getUserByQuery.Decode", queryString, userFindOneError.Error())
-		logging.Logger(entityNotFoundError)
-		return commonModel.NewResultOnFailure[userModel.User](entityNotFoundError)
+		itemNotFoundError := domainError.NewItemNotFoundError(location+".getUserByQuery.Decode", queryString, userFindOneError.Error())
+		logging.Logger(itemNotFoundError)
+		return commonModel.NewResultOnFailure[userModel.User](itemNotFoundError)
 	}
 
 	// Map the repository model to domain ones.

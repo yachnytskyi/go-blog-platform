@@ -21,6 +21,7 @@ func IsSliceContains(slice []string, value string) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -36,5 +37,6 @@ func IsSliceNotContains(slice []string, value string) bool {
 			return false
 		}
 	}
+
 	return true
 }

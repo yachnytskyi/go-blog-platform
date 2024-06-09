@@ -87,25 +87,25 @@ func (err HttpAuthorizationErrorView) Error() string {
 	return fmt.Sprintf("location: %s notification: %s", err.Location, err.Notification)
 }
 
-// HttpEntityNotFoundErrorView represents an entity not found error in an HTTP request.
-type HttpEntityNotFoundErrorView struct {
-	Notification string `json:"notification"` // The notification message for the entity not found error.
+// HttpItemNotFoundErrorView represents an item not found error in an HTTP request.
+type HttpItemNotFoundErrorView struct {
+	Notification string `json:"notification"` // The notification message for the item not found error.
 }
 
-// NewHttpEntityNotFoundErrorView creates a new HttpEntityNotFoundErrorView with the provided notification.
+// NewHttpItemNotFoundErrorView creates a new HttpItemNotFoundErrorView with the provided notification.
 // Parameters:
-// - notification: The notification message for the entity not found error.
+// - notification: The notification message for the item not found error.
 // Returns:
-// - A HttpEntityNotFoundErrorView struct populated with the given notification.
-func NewHttpEntityNotFoundErrorView(notification string) HttpEntityNotFoundErrorView {
-	return HttpEntityNotFoundErrorView{
+// - A HttpItemNotFoundErrorView struct populated with the given notification.
+func NewHttpItemNotFoundErrorView(notification string) HttpItemNotFoundErrorView {
+	return HttpItemNotFoundErrorView{
 		Notification: notification,
 	}
 }
 
-// Error implements the error interface for HttpEntityNotFoundErrorView.
-// Returns a formatted string representation of the entity not found error.
-func (err HttpEntityNotFoundErrorView) Error() string {
+// Error implements the error interface for HttpItemNotFoundErrorView.
+// Returns a formatted string representation of the item not found error.
+func (err HttpItemNotFoundErrorView) Error() string {
 	return fmt.Sprintf("notification: %s", err.Notification)
 }
 
@@ -139,18 +139,21 @@ func (httpPaginationErrorView HttpPaginationErrorView) Error() string {
 
 // HttpRequestErrorView represents a request error in an HTTP request.
 type HttpRequestErrorView struct {
+	Location     string `json:"-"`            // The location where the error occurred.
 	RequestType  string `json:"request_type"` // The type of the request that caused the error.
 	Notification string `json:"notification"` // The notification message for the request error.
 }
 
-// NewHttpRequestErrorView creates a new HttpRequestErrorView with the provided requestType and notification.
+// NewHttpRequestErrorView creates a new HttpRequestErrorView with the provided location, requestType, and notification.
 // Parameters:
+// - location: The location where the error occurred.
 // - requestType: The type of the request that caused the error.
 // - notification: The notification message for the request error.
 // Returns:
-// - A HttpRequestErrorView struct populated with the given requestType and notification.
-func NewHttpRequestErrorView(requestType, notification string) HttpRequestErrorView {
+// - A HttpRequestErrorView struct populated with the given location, requestType, and notification.
+func NewHttpRequestErrorView(location, requestType, notification string) HttpRequestErrorView {
 	return HttpRequestErrorView{
+		Location:     location,
 		RequestType:  requestType,
 		Notification: notification,
 	}
@@ -159,7 +162,7 @@ func NewHttpRequestErrorView(requestType, notification string) HttpRequestErrorV
 // Error implements the error interface for HttpRequestErrorView.
 // Returns a formatted string representation of the request error.
 func (httpRequestErrorView HttpRequestErrorView) Error() string {
-	return fmt.Sprintf("request type: %s notification: %s", httpRequestErrorView.RequestType, httpRequestErrorView.Notification)
+	return fmt.Sprintf("location: %s request type: %s notification: %s", httpRequestErrorView.Location, httpRequestErrorView.RequestType, httpRequestErrorView.Notification)
 }
 
 // HttpInternalErrorView represents an internal error in an HTTP request.

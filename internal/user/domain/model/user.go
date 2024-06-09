@@ -41,10 +41,8 @@ type UserUpdate struct {
 }
 
 type UserLogin struct {
-	Email        string
-	Password     string
-	AccessToken  string
-	RefreshToken string
+	Email    string
+	Password string
 }
 
 type UserToken struct {

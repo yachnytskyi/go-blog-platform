@@ -41,10 +41,8 @@ type UserUpdateView struct {
 
 // [POST].
 type UserLoginView struct {
-	Email        string `json:"email"`
-	Password     string `json:"password"`
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 // [GET].

@@ -26,9 +26,9 @@ func HandleError(err error) error {
 	case domainError.AuthorizationError:
 		// Map domain authorization error to HTTP authorization error view.
 		return AuthorizationErrorToHttpAuthorizationErrorViewMapper(errorType)
-	case domainError.EntityNotFoundError:
-		// Map domain entity not found error to HTTP entity not found error view.
-		return EntityNotFoundErrorToHttpEntityNotFoundErrorViewMapper(errorType)
+	case domainError.ItemNotFoundError:
+		// Map domain item not found error to HTTP item not found error view.
+		return ItemNotFoundErrorToHttpItemNotFoundErrorViewMapper(errorType)
 	case domainError.PaginationError:
 		// Map domain pagination error to HTTP pagination error view.
 		return PaginationErrorToHttpPaginationErrorViewMapper(errorType)

@@ -47,14 +47,14 @@ func AuthorizationErrorToHttpAuthorizationErrorViewMapper(authorizationError dom
 	}
 }
 
-// EntityNotFoundErrorToHttpEntityNotFoundErrorViewMapper maps a domain EntityNotFoundError to an HTTP EntityNotFoundError view.
+// ItemNotFoundErrorToHttpItemNotFoundErrorViewMapper maps a domain ItemNotFoundError to an HTTP ItemNotFoundError view.
 // Parameters:
-// - entityNotFoundError: The domain EntityNotFoundError to be mapped.
+// - ItemNotFoundError: The domain ItemNotFoundError to be mapped.
 // Returns:
-// - An HttpEntityNotFoundErrorView populated with the notification from the domain error.
-func EntityNotFoundErrorToHttpEntityNotFoundErrorViewMapper(entityNotFoundError domainError.EntityNotFoundError) HttpEntityNotFoundErrorView {
-	return HttpEntityNotFoundErrorView{
-		Notification: entityNotFoundError.Notification,
+// - An HttpItemNotFoundErrorView populated with the notification from the domain error.
+func ItemNotFoundErrorToHttpItemNotFoundErrorViewMapper(itemNotFoundError domainError.ItemNotFoundError) HttpItemNotFoundErrorView {
+	return HttpItemNotFoundErrorView{
+		Notification: itemNotFoundError.Notification,
 	}
 }
 

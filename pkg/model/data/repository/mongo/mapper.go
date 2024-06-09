@@ -52,10 +52,10 @@ func HexToObjectIDMapper(location, id string) (primitive.ObjectID, error) {
 	objectID, objectIDFromHexError := primitive.ObjectIDFromHex(id)
 	if validator.IsError(objectIDFromHexError) {
 		// Log and handle the conversion error.
-		internalError := domainError.NewInternalError(location+".HexToObjectIDMapper.primitive.ObjectIDFromHex", objectIDFromHexError.Error())
-		logging.Logger(internalError)
+		itemNotFoundError := domainError.NewItemNotFoundError(location+".HexToObjectIDMapper.primitive.ObjectIDFromHex", "", objectIDFromHexError.Error())
+		logging.Logger(itemNotFoundError)
 		// Return a default ObjectID and the error.
-		return primitive.NilObjectID, internalError
+		return primitive.NilObjectID, itemNotFoundError
 	}
 
 	// Return the successfully converted ObjectID and nil error.

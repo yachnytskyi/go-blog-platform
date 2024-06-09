@@ -24,9 +24,9 @@ func HandleError(err error) error {
 		// Set a standardized notification message for authorization errors.
 		errorType.Notification = constants.AuthorizationErrorNotification
 		return errorType
-	case EntityNotFoundError:
-		// Set a standardized notification message for entity not found errors.
-		errorType.Notification = constants.EntityNotFoundErrorNotification
+	case ItemNotFoundError:
+		// Set a standardized notification message for item not found errors.
+		errorType.Notification = constants.ItemNotFoundErrorNotification
 		return errorType
 	case PaginationError:
 		// Set a standardized notification message for pagination errors.

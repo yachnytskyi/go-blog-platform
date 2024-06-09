@@ -11,6 +11,31 @@ type Errors interface {
 	Len() int
 }
 
+// InfoMessage represents an informational message with details about the location and a notification message.
+type InfoMessage struct {
+	Location     string // The location where the message originated.
+	Notification string // The notification message.
+}
+
+// NewInfoMessage creates a new InfoMessage with the provided details.
+// Parameters:
+// - location: The location where the message originated.
+// - notification: The notification message.
+// Returns:
+// - An InfoMessage populated with the given details.
+func NewInfoMessage(location, notification string) InfoMessage {
+	return InfoMessage{
+		Location:     location,
+		Notification: notification,
+	}
+}
+
+// Error implements the error interface for InfoMessage.
+// Returns a formatted string representation of the informational message.
+func (msg InfoMessage) Error() string {
+	return fmt.Sprintf("location: %s notification: %s", msg.Location, msg.Notification)
+}
+
 // ValidationError represents a validation error with details about the location, field, field type, and a notification message.
 type ValidationError struct {
 	Location     string // The location where the error occurred.
@@ -99,31 +124,31 @@ func (err AuthorizationError) Error() string {
 	return fmt.Sprintf("location: %s notification: %s", err.Location, err.Notification)
 }
 
-// EntityNotFoundError represents an entity not found error with details about the location, query, and a notification message.
-type EntityNotFoundError struct {
+// ItemNotFoundError represents an item not found error with details about the location, query, and a notification message.
+type ItemNotFoundError struct {
 	Location     string // The location where the error occurred.
 	Query        string // The query that caused the error.
-	Notification string // The notification message for the entity not found error.
+	Notification string // The notification message for the item not found error.
 }
 
-// NewEntityNotFoundError creates a new EntityNotFoundError with the provided details.
+// NewItemNotFoundError creates a new ItemNotFoundError with the provided details.
 // Parameters:
 // - location: The location where the error occurred.
 // - query: The query that caused the error.
-// - notification: The notification message for the entity not found error.
+// - notification: The notification message for the item not found error.
 // Returns:
-// - An EntityNotFoundError populated with the given details.
-func NewEntityNotFoundError(location, query, notification string) EntityNotFoundError {
-	return EntityNotFoundError{
+// - An ItemNotFoundError populated with the given details.
+func NewItemNotFoundError(location, query, notification string) ItemNotFoundError {
+	return ItemNotFoundError{
 		Location:     location,
 		Query:        query,
 		Notification: notification,
 	}
 }
 
-// Error implements the error interface for EntityNotFoundError.
-// Returns a formatted string representation of the entity not found error.
-func (err EntityNotFoundError) Error() string {
+// Error implements the error interface for ItemNotFoundError.
+// Returns a formatted string representation of the item not found error.
+func (err ItemNotFoundError) Error() string {
 	return fmt.Sprintf("location: %s query: %s notification: %s", err.Location, err.Query, err.Notification)
 }
 

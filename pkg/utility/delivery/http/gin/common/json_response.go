@@ -26,7 +26,7 @@ func GinNewJSONFailureResponse(ginContext *gin.Context, err error, httpCode int)
 // - location: A string representing the location or context for error logging.
 // - err: The error that occurred during JSON binding.
 func HandleJSONBindingError(ginContext *gin.Context, location string, err error) {
-	internalError := httpError.NewHttpInternalErrorView(location+".ShouldBindJSON", err.Error())
-	logging.Logger(internalError)
-	GinNewJSONFailureResponse(ginContext, internalError, constants.StatusBadRequest)
+	httpInternalErrorView := httpError.NewHttpInternalErrorView(location+".ShouldBindJSON", err.Error())
+	logging.Logger(httpInternalErrorView)
+	GinNewJSONFailureResponse(ginContext, httpInternalErrorView, constants.StatusBadRequest)
 }

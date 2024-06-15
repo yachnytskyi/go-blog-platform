@@ -11,14 +11,16 @@ import (
 // It encapsulates the logic for creating repositories, use cases, and delivery components.
 type Container struct {
 	RepositoryFactory RepositoryFactory // Interface for creating repository instances.
-	UseCaseFactory    UseCaseFactory    // Interface for creating domain use cases.
+	UseCaseFactory    UseCaseFactory    // Interface for creating use cases.
 	DeliveryFactory   DeliveryFactory   // Interface for creating delivery components and initializing the server.
 }
 
 // ServerRouters holds the routers for different entities, managing the routing for user and post-related endpoints.
+// UserUseCase is the use case responsible for user-related logic and operations in the application.
 type ServerRouters struct {
-	UserRouter user.UserRouter // Router for user-related endpoints.
-	PostRouter post.PostRouter // Router for post-related endpoints.
+	UserUseCase user.UserUseCase // UserUseCase handles user-related logic and operations.
+	UserRouter  user.UserRouter  // Router for user-related endpoints.
+	PostRouter  post.PostRouter  // Router for post-related endpoints.
 }
 
 // NewContainer initializes and returns a new Container with the provided factories.
@@ -44,7 +46,7 @@ type RepositoryFactory interface {
 	NewPostRepository(db any) post.PostRepository
 }
 
-// UseCaseFactory defines methods for creating domain use cases.
+// UseCaseFactory defines methods for creating use cases.
 // This interface provides factory methods to create instances of use cases for different domains, like users and posts.
 type UseCaseFactory interface {
 	// NewUserUseCase creates and returns a new UserUseCase instance using the provided repository.
@@ -62,10 +64,10 @@ type DeliveryFactory interface {
 	LaunchServer(ctx context.Context, container *Container)
 	// CloseServer gracefully shuts down the server using the provided context.
 	CloseServer(ctx context.Context)
-	// NewUserController creates and returns a new UserController instance using the provided domain use case.
+	// NewUserController creates and returns a new UserController instance using the provided use case.
 	NewUserController(useCase any) user.UserController
-	// NewPostController creates and returns a new PostController instance using the provided domain use case.
-	NewPostController(useCase any) post.PostController
+	// NewPostController creates and returns a new PostController instance using the provided use cases.
+	NewPostController(userUseCase, postUseCase any) post.PostController
 	// NewUserRouter creates and returns a new UserRouter instance using the provided controller.
 	NewUserRouter(controller any) user.UserRouter
 	// NewPostRouter creates and returns a new PostRouter instance using the provided controller.

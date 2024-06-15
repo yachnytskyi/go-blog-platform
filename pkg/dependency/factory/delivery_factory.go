@@ -31,8 +31,9 @@ func InjectDelivery(ctx context.Context, container *applicationModel.Container) 
 	default:
 		// Handle unsupported delivery types by logging an error and shutting down the application gracefully.
 		notification := fmt.Sprintf(unsupportedDelivery, coreConfig.Delivery)
-		logging.Logger(domainError.NewInternalError(location+".loadConfig.Delivery:", notification))
+		internalError := domainError.NewInternalError(location+".loadConfig.Delivery:", notification)
+		logging.Logger(internalError)
 		applicationModel.GracefulShutdown(ctx, container)
-		panic(notification)
+		panic(internalError)
 	}
 }

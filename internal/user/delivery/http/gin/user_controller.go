@@ -62,9 +62,9 @@ func (userController UserController) GetCurrentUser(controllerContext any) {
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
 
-	// Get the current user's ID from the Gin context.
+	// Get the current user's ID from the context.
 	// Fetch the current user using the user use case.
-	currentUserID := ginContext.MustGet(constants.UserIDContext).(string)
+	currentUserID := ctx.Value(constants.UserIDContext).(string)
 	currentUser := userController.userUseCase.GetUserById(ctx, currentUserID)
 	if validator.IsError(currentUser.Error) {
 		httpGinCommon.GinNewJSONFailureResponse(ginContext, currentUser.Error, constants.StatusBadRequest)
@@ -87,8 +87,7 @@ func (userController UserController) GetUserById(controllerContext any) {
 
 	// Get the user ID from the request parameters.
 	// Fetch the user using the user use case.
-	userID := ginContext.Param(constants.UserIDContext)
-
+	userID := ginContext.Param(constants.ItemIdParam)
 	fetchedUser := userController.userUseCase.GetUserById(ctx, userID)
 	if validator.IsError(fetchedUser.Error) {
 		httpGinCommon.GinNewJSONFailureResponse(ginContext, fetchedUser.Error, constants.StatusBadRequest)
@@ -144,9 +143,9 @@ func (userController UserController) UpdateCurrentUser(controllerContext any) {
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
 
-	// Get the current user's ID from the Gin context.
+	// Get the current user's ID from the context.
 	// Bind the incoming JSON data to a struct.
-	currentUserID := ginContext.MustGet(constants.UserIDContext).(string)
+	currentUserID := ctx.Value(constants.UserIDContext).(string)
 	var userUpdateViewData userViewModel.UserUpdateView
 
 	// Bind the incoming JSON data to a struct.
@@ -177,9 +176,9 @@ func (userController UserController) DeleteCurrentUser(controllerContext any) {
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
 
-	// Extract the current user ID from the gin context.
+	// Extract the current user ID from the context.
 	// Delete the user using the user use case.
-	currentUserID := ginContext.MustGet(constants.UserIDContext).(string)
+	currentUserID := ctx.Value(constants.UserIDContext).(string)
 	deletedUser := userController.userUseCase.DeleteUserById(ctx, currentUserID)
 	if validator.IsError(deletedUser) {
 		httpGinCommon.GinNewJSONFailureResponse(ginContext, deletedUser, constants.StatusBadRequest)
@@ -241,9 +240,9 @@ func (userController UserController) RefreshAccessToken(controllerContext any) {
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
 
-	// Get the current user's ID from the Gin context.
+	// Get the current user's ID from the context.
 	// Fetch the current user using the user use case.
-	currentUserID := ginContext.MustGet(constants.UserIDContext).(string)
+	currentUserID := ctx.Value(constants.UserIDContext).(string)
 	currentUser := userController.userUseCase.GetUserById(ctx, currentUserID)
 	if validator.IsError(currentUser.Error) {
 		httpGinCommon.GinNewJSONFailureResponse(ginContext, currentUser.Error, constants.StatusBadRequest)
@@ -342,7 +341,7 @@ func setLoginCookies(ginContext *gin.Context, accessToken, refreshToken string) 
 	// Retrieve application configuration for cookie settings.
 	accessTokenConfig := config.AppConfig.AccessToken
 	refreshTokenConfig := config.AppConfig.RefreshToken
-	securityConfig := config.AppConfig.Security
+	securityConfig := config.GetSecurityConfig()
 
 	// Set the access token cookie with the provided value and configuration.
 	ginContext.SetCookie(constants.AccessTokenValue, accessToken, accessTokenConfig.MaxAge, "/", constants.TokenDomainValue,
@@ -363,7 +362,7 @@ func setRefreshTokenCookies(ginContext *gin.Context, accessToken, refreshToken s
 	// Retrieve application configuration for cookie settings.
 	accessTokenConfig := config.AppConfig.AccessToken
 	refreshTokenConfig := config.AppConfig.RefreshToken
-	securityConfig := config.AppConfig.Security
+	securityConfig := config.GetSecurityConfig()
 
 	// Set the access token cookie with the provided value and configuration.
 	ginContext.SetCookie(constants.AccessTokenValue, accessToken, accessTokenConfig.MaxAge, "/", constants.TokenDomainValue,

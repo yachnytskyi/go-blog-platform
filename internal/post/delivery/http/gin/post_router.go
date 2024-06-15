@@ -3,18 +3,25 @@ package gin
 import (
 	"github.com/gin-gonic/gin"
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
+	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
+
+	// user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	httpGinMiddleware "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/middleware"
 )
 
 type PostRouter struct {
 	postController post.PostController
+	// userUseCase    user.UserUseCase
 }
 
 func NewPostRouter(postController post.PostController) PostRouter {
-	return PostRouter{postController: postController}
+	return PostRouter{
+		postController: postController,
+		// userUseCase:    userUseCase,
+	}
 }
 
-func (postRouter PostRouter) PostRouter(routerGroup any) {
+func (postRouter PostRouter) PostRouter(routerGroup any, userUseCase user.UserUseCase) {
 	ginRouterGroup := routerGroup.(*gin.RouterGroup)
 	router := ginRouterGroup.Group("/posts")
 	router.GET("/", func(ginContext *gin.Context) {
@@ -25,7 +32,7 @@ func (postRouter PostRouter) PostRouter(routerGroup any) {
 	})
 
 	router.Use(httpGinMiddleware.AuthenticationMiddleware())
-	router.POST("/", func(ginContext *gin.Context) {
+	router.POST("/", httpGinMiddleware.UserContextMiddleware(userUseCase), func(ginContext *gin.Context) {
 		postRouter.postController.CreatePost(ginContext)
 	})
 	router.PUT("/:postID", func(ginContext *gin.Context) {

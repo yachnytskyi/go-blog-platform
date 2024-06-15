@@ -2,17 +2,21 @@ package delivery
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	config "github.com/yachnytskyi/golang-mongo-grpc/config"
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
 	postDelivery "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/http/gin"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	userDelivery "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin"
 	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
+	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	httpGinCommon "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/common"
 	httpGinMiddleware "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/middleware"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -41,6 +45,7 @@ func (ginFactory *GinFactory) InitializeServer(serverConfig applicationModel.Ser
 	ginConfig := config.AppConfig.Gin
 	// Create a new Gin router engine instance.
 	ginFactory.Router = gin.Default()
+
 	// Apply middleware to the Gin router.
 	ginFactory.Router.Use(httpGinMiddleware.TimeoutMiddleware())
 	ginFactory.Router.Use(httpGinMiddleware.ValidateInputMiddleware())
@@ -60,7 +65,51 @@ func (ginFactory *GinFactory) InitializeServer(serverConfig applicationModel.Ser
 
 	// Initialize entity-specific routers.
 	serverConfig.UserRouter.UserRouter(router)
-	serverConfig.PostRouter.PostRouter(router)
+	serverConfig.PostRouter.PostRouter(router, serverConfig.UserUseCase)
+
+	// Set NoRoute handler.
+	ginFactory.Router.NoRoute(func(c *gin.Context) {
+		c.JSON(constants.StatusNotFound, gin.H{"message": "Page not found"})
+	})
+
+	// Set NoMethod handler.
+	ginFactory.Router.NoMethod(func(ginContext *gin.Context) {
+		// Get the HTTP method that is not allowed.
+		forbiddenMethod := ginContext.Request.Method
+
+		// Create the error message using your constant and the HTTP method.
+		errorMessage := fmt.Sprintf(constants.MethodNotAllowedNotification, forbiddenMethod)
+
+		// Create the error view with the custom error message.
+		newHttpRequestErrorView := httpError.NewHttpRequestErrorView(location+"InitializeServer.ginFactory.Router.NoMethod", forbiddenMethod, errorMessage)
+
+		// Log the error.
+		logging.Logger(newHttpRequestErrorView)
+
+		// Respond with an unauthorized status and JSON error.
+		httpGinCommon.GinNewJSONFailureResponse(ginContext, newHttpRequestErrorView, constants.StatusMethodNotAllowed)
+	})
+
+	// Set NoRoute handler.
+	ginFactory.Router.NoRoute(func(ginContext *gin.Context) {
+		// Get the requested path that is not found.
+		requestedPath := ginContext.Request.URL.Path
+
+		// Create the error message using your constant and the requested path.
+		errorMessage := fmt.Sprintf(constants.RouteNotFoundNotification, requestedPath)
+
+		// Create the error view with the custom error message.
+		newHttpRequestErrorView := httpError.NewHttpRequestErrorView(location+"InitializeServer.ginFactory.Router.NoRoute", requestedPath, errorMessage)
+
+		// Log the error.
+		logging.Logger(newHttpRequestErrorView)
+
+		// Respond with a not found status and JSON error.
+		httpGinCommon.GinNewJSONFailureResponse(ginContext, newHttpRequestErrorView, constants.StatusNotFound)
+	})
+
+	// Set HandleMethodNotAllowed.
+	ginFactory.Router.HandleMethodNotAllowed = true
 
 	// Create the HTTP server with the configured Gin router.
 	ginFactory.Server = &http.Server{
@@ -121,9 +170,10 @@ func (ginFactory *GinFactory) NewUserRouter(controller any) user.UserRouter {
 
 // NewPostController creates and returns a new PostController instance using the provided domain use case.
 // It casts the generic use case parameter to the specific post.PostUseCase type and creates the PostController.
-func (ginFactory *GinFactory) NewPostController(useCase any) post.PostController {
-	postUseCase := useCase.(post.PostUseCase)
-	return postDelivery.NewPostController(postUseCase)
+func (ginFactory *GinFactory) NewPostController(userUseCaseInterface, postUseCaseInterface any) post.PostController {
+	userUseCase := userUseCaseInterface.(user.UserUseCase)
+	postUseCase := postUseCaseInterface.(post.PostUseCase)
+	return postDelivery.NewPostController(userUseCase, postUseCase)
 }
 
 // NewPostRouter creates and returns a new PostRouter instance using the provided controller.

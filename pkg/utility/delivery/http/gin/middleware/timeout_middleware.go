@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"context"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
@@ -13,7 +12,7 @@ import (
 // Returns a Gin middleware handler function.
 func TimeoutMiddleware() gin.HandlerFunc {
 	return func(ginContext *gin.Context) {
-		// Use context.WithTimeout to create a new context with a timeout.
+		// Create a context with timeout.
 		ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 		defer cancel()
 
@@ -35,7 +34,7 @@ func TimeoutMiddleware() gin.HandlerFunc {
 			// Context timed out.
 			httpInternalErrorView := httpError.NewHttpInternalErrorView(location+"TimeOutMiddleware", ctx.Err().Error())
 			// Abort the request with an HTTP status and respond with a JSON error.
-			abortWithStatusJSON(ginContext, httpInternalErrorView, http.StatusBadGateway)
+			abortWithStatusJSON(ginContext, httpInternalErrorView, constants.StatusBadGateway)
 		}
 	}
 }

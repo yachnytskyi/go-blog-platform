@@ -29,15 +29,15 @@ func CreateApplication(ctx context.Context) *applicationModel.Container {
 	factory.InjectUseCase(ctx, container)
 
 	// Create the use cases using the repositories.
-	userUseCase := container.UseCaseFactory.NewUserUseCase(userRepository)
+	serverRouters.UserUseCase = container.UseCaseFactory.NewUserUseCase(userRepository)
 	postUseCase := container.UseCaseFactory.NewPostUseCase(postRepository)
 
 	// Inject delivery dependencies into the container.
 	factory.InjectDelivery(ctx, container)
 
 	// Create the controllers using the use cases.
-	userController := container.DeliveryFactory.NewUserController(userUseCase)
-	postController := container.DeliveryFactory.NewPostController(postUseCase)
+	userController := container.DeliveryFactory.NewUserController(serverRouters.UserUseCase)
+	postController := container.DeliveryFactory.NewPostController(serverRouters.UserUseCase, postUseCase)
 
 	// Initialize the routers using the controllers.
 	serverRouters.UserRouter = container.DeliveryFactory.NewUserRouter(userController)

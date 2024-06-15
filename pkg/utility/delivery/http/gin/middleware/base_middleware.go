@@ -8,6 +8,8 @@
 package middleware
 
 import (
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/didip/tollbooth"
@@ -27,7 +29,7 @@ import (
 func SecureHeadersMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Retrieve application configuration for security headers.
-		securityConfig := config.AppConfig.Security
+		securityConfig := config.GetSecurityConfig()
 
 		// Set secure headers.
 		c.Header(securityConfig.ContentSecurityPolicyHeader.Key, securityConfig.ContentSecurityPolicyHeader.Value)
@@ -44,13 +46,16 @@ func SecureHeadersMiddleware() gin.HandlerFunc {
 func CSPMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Retrieve application configuration for CSP headers.
-		securityConfig := config.AppConfig.Security
+		securityConfig := config.GetSecurityConfig()
 
 		// Set the Content Security Policy header.
 		c.Writer.Header().Set(
 			securityConfig.ContentSecurityPolicyHeaderFull.Key,
 			securityConfig.ContentSecurityPolicyHeaderFull.Value,
 		)
+		fmt.Println("hey")
+		fmt.Println(securityConfig.ContentSecurityPolicyHeaderFull.Key, " and: ",
+			securityConfig.ContentSecurityPolicyHeaderFull.Value)
 
 		// Continue to the next middleware or handler in the chain.
 		c.Next()
@@ -61,7 +66,7 @@ func CSPMiddleware() gin.HandlerFunc {
 // Returns a Gin middleware handler function.
 func RateLimitMiddleware() gin.HandlerFunc {
 	// Retrieve application configuration for rate limiting.
-	securityConfig := config.AppConfig.Security
+	securityConfig := config.GetSecurityConfig()
 
 	// Create an instance of limiter.ExpirableOptions.
 	limiterOptions := &limiter.ExpirableOptions{
@@ -112,33 +117,62 @@ func LoggingMiddleware() gin.HandlerFunc {
 	}
 }
 
-// ValidateInput allows specific HTTP methods and checks for the "application/json" or "application/grpc" content type.
+// ValidateInputMiddleware allows specific HTTP methods and checks for the content type.
 // Returns a Gin middleware handler function.
-func ValidateInput() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func ValidateInputMiddleware() gin.HandlerFunc {
+	return func(ginContext *gin.Context) {
 		// Get the content type from the request header.
-		contentType := c.GetHeader("Content-Type")
+		contentType := ginContext.GetHeader(constants.ContentType)
 
 		// Retrieve application configuration for allowed requests.
-		securityConfig := config.AppConfig.Security
+		securityConfig := config.GetSecurityConfig()
 
 		// Check if the request method is in the list of allowed methods.
-		if validator.IsSliceNotContains(securityConfig.AllowedHTTPMethods, c.Request.Method) {
+		if validator.IsSliceNotContains(securityConfig.AllowedHTTPMethods, ginContext.Request.Method) {
+			allowedMethods := strings.Join(config.GetSecurityConfig().AllowedHTTPMethods, ", ")
+			notification := constants.InvalidHTTPMethodNotification + allowedMethods
+
 			// Reject requests with disallowed HTTP methods.
-			httpRequestError := httpError.NewHttpRequestErrorView(contentType, constants.InvalidHTTPMethodNotification)
-			abortWithStatusJSON(c, httpRequestError, constants.StatusBadRequest)
+			httpRequestError := httpError.NewHttpRequestErrorView(location+"ValidateInputMiddleware.AllowedHTTPMethods", ginContext.Request.Method, notification)
+			abortWithStatusJSON(ginContext, httpRequestError, constants.StatusBadRequest)
 			return
 		}
 
 		// Check if the content type is in the list of allowed content types.
 		if validator.IsStringNotEmpty(contentType) && validator.IsSliceNotContains(securityConfig.AllowedContentTypes, contentType) {
+			allowedContentTypes := strings.Join(config.GetSecurityConfig().AllowedContentTypes, ", ")
+			notification := constants.InvalidHTTPMethodNotification + allowedContentTypes
+
 			// Reject requests with disallowed content types.
-			httpRequestError := httpError.NewHttpRequestErrorView(contentType, constants.InvalidContentTypeNotification)
-			abortWithStatusJSON(c, httpRequestError, constants.StatusBadRequest)
+			httpRequestError := httpError.NewHttpRequestErrorView(location+"ValidateInputMiddleware.AllowedContentTypes", contentType, notification)
+			abortWithStatusJSON(ginContext, httpRequestError, constants.StatusBadRequest)
 			return
 		}
 
 		// Continue processing the request.
-		c.Next()
+		ginContext.Next()
+	}
+}
+
+// EnforceHTTPMethod ensures that the incoming request uses the specified HTTP method.
+// If the request method does not match the specified method, it responds with a 405 Method Not Allowed status.
+// Returns a Gin middleware handler function.
+func EnforceHTTPMethod(method string) gin.HandlerFunc {
+	return func(ginContext *gin.Context) {
+		// Check if the request method matches the specified method.
+		if ginContext.Request.Method != method {
+			// Create a notification message indicating the allowed method.
+			notification := fmt.Sprintf("Method %s not allowed. You can only use %s method", ginContext.Request.Method, method)
+
+			// Create an HTTP request error view with the location, method, and notification.
+			httpRequestError := httpError.NewHttpRequestErrorView(location+"ValidateInputMiddleware.EnforceHTTPMethod", ginContext.Request.Method, notification)
+
+			// Abort the request and respond with the error and status code 405 (Method Not Allowed).
+			abortWithStatusJSON(ginContext, httpRequestError, constants.StatusBadRequest)
+			return
+		}
+
+		// Continue to the next middleware or handler in the chain if the method matches.
+		ginContext.Next()
 	}
 }

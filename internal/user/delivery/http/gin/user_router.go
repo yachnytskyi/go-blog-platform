@@ -43,7 +43,7 @@ func (userRouter UserRouter) UserRouter(routerGroup any) {
 		userRouter.userController.GetAllUsers(ginContext)
 	})
 
-	router.GET(getUserByIdPath+constants.UserIDContext, func(ginContext *gin.Context) {
+	router.GET(constants.GetItemByIdURL, func(ginContext *gin.Context) {
 		userRouter.userController.GetUserById(ginContext)
 	})
 

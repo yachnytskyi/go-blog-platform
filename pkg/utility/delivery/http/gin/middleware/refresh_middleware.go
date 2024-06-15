@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"net/http"
+	"context"
 
 	"github.com/gin-gonic/gin"
 	config "github.com/yachnytskyi/golang-mongo-grpc/config"
@@ -15,11 +15,15 @@ import (
 // Returns a Gin middleware handler function.
 func RefreshTokenAuthenticationMiddleware() gin.HandlerFunc {
 	return func(ginContext *gin.Context) {
-		// Extract the refresh token from the request.
+		// Create a context with timeout.
+		ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
+		defer cancel()
+
+		// Extract the refresh token from the request headers or cookies.
 		refreshToken, tokenError := extractRefreshToken(ginContext)
 		if validator.IsError(tokenError) {
 			// Abort the request with an unauthorized status and respond with a JSON error.
-			abortWithStatusJSON(ginContext, tokenError, http.StatusUnauthorized)
+			abortWithStatusJSON(ginContext, tokenError, constants.StatusUnauthorized)
 			return
 		}
 
@@ -31,12 +35,16 @@ func RefreshTokenAuthenticationMiddleware() gin.HandlerFunc {
 		if validator.IsError(validateRefreshTokenError) {
 			// Handle token validation error and respond with an unauthorized status and JSON error.
 			httpAuthorizationError := httpError.NewHttpAuthorizationErrorView("", constants.LoggingErrorNotification)
-			abortWithStatusJSON(ginContext, httpAuthorizationError, http.StatusUnauthorized)
+			abortWithStatusJSON(ginContext, httpAuthorizationError, constants.StatusUnauthorized)
 			return
 		}
 
-		// Set user-related information in the Gin context for downstream handlers.
-		ginContext.Set(constants.UserIDContext, userTokenPayload.UserID)
+		// Store user information in the context.
+		ctx = context.WithValue(ctx, constants.UserIDContext, userTokenPayload.UserID)
+		ctx = context.WithValue(ctx, constants.UserRoleContext, userTokenPayload.Role)
+
+		// Update the request's context with the new context containing user information.
+		ginContext.Request = ginContext.Request.WithContext(ctx)
 
 		// Continue to the next middleware or handler in the chain.
 		ginContext.Next()

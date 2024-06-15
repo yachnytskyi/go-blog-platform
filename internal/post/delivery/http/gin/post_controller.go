@@ -11,6 +11,7 @@ import (
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
 	postViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/model"
 	postModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
+	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
 )
 
@@ -18,8 +19,9 @@ type PostController struct {
 	postUseCase post.PostUseCase
 }
 
-func NewPostController(postUseCase post.PostUseCase) PostController {
-	return PostController{postUseCase: postUseCase}
+func NewPostController(userUseCase user.UserUseCase, postUseCase post.PostUseCase) PostController {
+	return PostController{
+		postUseCase: postUseCase}
 }
 
 func (postController PostController) GetAllPosts(controllerContext any) {
@@ -76,10 +78,9 @@ func (postController PostController) CreatePost(controllerContext any) {
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
 	var createdPostData *postModel.PostCreate = new(postModel.PostCreate)
-	currentUser := ginContext.MustGet("user").(userViewModel.UserView)
-	createdPostData.User = currentUser.Name
-	createdPostData.UserID = currentUser.UserID
-
+	user := ctx.Value(constants.UserContext).(userViewModel.UserView)
+	createdPostData.UserID = user.UserID
+	createdPostData.User = user.Name
 	err := ginContext.ShouldBindJSON(&createdPostData)
 	if err != nil {
 		ginContext.JSON(http.StatusBadRequest, err.Error())
@@ -104,7 +105,7 @@ func (postController PostController) UpdatePostById(controllerContext any) {
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
 	postID := ginContext.Param("postID")
-	currentUserID := ginContext.MustGet("userID").(string)
+	currentUserID := ctx.Value(constants.UserIDContext).(string)
 
 	var updatedPostData *postModel.PostUpdate = new(postModel.PostUpdate)
 	updatedPostData.PostID = ginContext.Param("postID")
@@ -136,7 +137,7 @@ func (postController PostController) DeletePostByID(controllerContext any) {
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
 	postID := ginContext.Param("postID")
-	currentUserID := ginContext.MustGet("userID").(string)
+	currentUserID := ctx.Value(constants.UserIDContext).(string)
 	err := postController.postUseCase.DeletePostByID(ctx, postID, currentUserID)
 
 	if err != nil {

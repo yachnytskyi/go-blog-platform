@@ -32,8 +32,9 @@ func InjectRepository(ctx context.Context, container *applicationModel.Container
 	default:
 		// Handle unsupported database types by logging an error and shutting down the application gracefully.
 		notification := fmt.Sprintf(unsupportedDatabase, coreConfig.Database)
-		logging.Logger(domainError.NewInternalError(location+".applicationConfig.Core.Database:", notification))
+		internalError := domainError.NewInternalError(location+".applicationConfig.Core.Database:", notification)
+		logging.Logger(internalError)
 		applicationModel.GracefulShutdown(ctx, container)
-		panic(notification)
+		panic(internalError)
 	}
 }

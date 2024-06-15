@@ -6,7 +6,6 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
-	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -17,20 +16,15 @@ var AppConfig ApplicationConfig
 
 // Constants for configuration paths and default values.
 const (
-	version                    = "v1"
-	environmentsPath           = "config/environment/.env."
-	localDevEnvironment        = "local.dev"
-	dockerDevEnvironment       = "docker.dev"
-	defaultVersion             = "v1"
-	defaultEnvironmentsPath    = "config/environment/.env."
-	defaultDockerEnvironment   = "docker.prod"
-	defaultMongoDBName         = "golang-mongodb"
-	defaultMongoDBURI          = "mongodb://root:root@localhost:27017/golang_mongodb"
-	defaultGinPort             = "8080"
-	defaultGinAllowOrigins     = "http://localhost:8080"
-	defaultGinAllowCredentials = true
-	defaultGinServerGroup      = "/api"
-	location                   = "config.LoadConfig."
+	version                  = "v1"
+	environmentsPath         = "config/environment/.env."
+	localDevEnvironment      = "local.dev"
+	dockerDevEnvironment     = "docker.dev"
+	defaultVersion           = "v1"
+	defaultEnvironmentsPath  = "config/environment/.env."
+	defaultConfigPath        = "config/yaml/v1/local.dev.application.yaml"
+	defaultDockerEnvironment = "local.dev"
+	location                 = "config.LoadConfig."
 )
 
 // ApplicationConfig defines the structure of the application configuration.
@@ -124,20 +118,14 @@ type Email struct {
 // It sets up the global AppConfig variable.
 func LoadConfig() {
 	// Load environment variables from the .env file.
-	loadEnvironmentsError := godotenv.Load(environmentsPath + dockerDevEnvironment)
+	loadEnvironmentsError := godotenv.Load(environmentsPath + localDevEnvironment)
 	if validator.IsError(loadEnvironmentsError) {
 		// Log and attempt to load default environment.
 		loadEnvironmentsInternalError := domainError.NewInternalError(location+"Load", loadEnvironmentsError.Error())
 		logging.Logger(loadEnvironmentsInternalError)
 
 		// Attempt to load default environment.
-		defaultEnvironmentError := godotenv.Load(defaultEnvironmentsPath + defaultDockerEnvironment)
-		if validator.IsError(defaultEnvironmentError) {
-			// Log and panic if loading both environments fails.
-			defaultEnvInternalError := domainError.NewInternalError(location+"LoadDefaults", defaultEnvironmentError.Error())
-			logging.Logger(defaultEnvInternalError)
-			panic(defaultEnvInternalError)
-		}
+		loadDefaultEnvironment()
 	}
 
 	// Set the configuration file path from the environment variable.
@@ -153,16 +141,7 @@ func LoadConfig() {
 		logging.Logger(readInInternalError)
 
 		// Attempt to set default configurations.
-		setDefaultConfig()
-
-		// Attempt to read default configuration.
-		defaultConfigError := viper.ReadInConfig()
-		if validator.IsError(defaultConfigError) {
-			// Log and panic if reading both configurations fails.
-			defaultConfigInternalError := domainError.NewInternalError(location+"ReadDefaultConfig", defaultConfigError.Error())
-			logging.Logger(defaultConfigInternalError)
-			panic(defaultConfigInternalError)
-		}
+		loadDefaultConfig()
 	}
 
 	// Unmarshal the configuration into the global AppConfig variable.
@@ -174,14 +153,33 @@ func LoadConfig() {
 	}
 }
 
-func setDefaultConfig() {
-	viper.SetDefault("Database", constants.MongoDB)
-	viper.SetDefault("UseCase", constants.UseCase)
-	viper.SetDefault("Delivery", constants.Gin)
-	viper.SetDefault("MongoDB.Name", defaultMongoDBName)
-	viper.SetDefault("MongoDB.URI", defaultMongoDBURI)
-	viper.SetDefault("Gin.Port", defaultGinPort)
-	viper.SetDefault("Gin.AllowOrigins", defaultGinAllowOrigins)
-	viper.SetDefault("Gin.AllowCredentials", defaultGinAllowCredentials)
-	viper.SetDefault("Gin.ServerGroup", defaultGinServerGroup)
+func loadDefaultEnvironment() {
+	// Attempt to load the default environment file.
+	defaultEnvironmentError := godotenv.Load(defaultEnvironmentsPath + defaultDockerEnvironment)
+	if validator.IsError(defaultEnvironmentError) {
+		// Log and panic if loading the default environment file fails.
+		internalError := domainError.NewInternalError(location+"loadDefaultEnvironment", defaultEnvironmentError.Error())
+		logging.Logger(internalError)
+		panic(internalError)
+	}
+
+	// Log an informational message indicating the use of a default environment path.
+	defaultEnvironmentInfoMessage := domainError.NewInfoMessage(location+"loadDefaultEnvironment", "Using default environment path")
+	logging.Logger(defaultEnvironmentInfoMessage)
+}
+
+func loadDefaultConfig() {
+	// Attempt to load the default configuration file.
+	viper.SetConfigFile(defaultConfigPath)
+	defaultConfigError := viper.ReadInConfig()
+	if validator.IsError(defaultConfigError) {
+		// Log and panic if loading the default configuration file fails.
+		defaultConfigInternalError := domainError.NewInternalError(location+"loadDefaultConfig", defaultConfigError.Error())
+		logging.Logger(defaultConfigInternalError)
+		panic(defaultConfigInternalError)
+	}
+
+	// Log an informational message indicating the use of a default configuration path.
+	defaultConfigPathInfoMessage := domainError.NewInfoMessage(location+"loadDefaultConfig", "Using default configuration path")
+	logging.Logger(defaultConfigPathInfoMessage)
 }

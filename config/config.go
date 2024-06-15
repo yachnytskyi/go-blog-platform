@@ -183,3 +183,8 @@ func loadDefaultConfig() {
 	defaultConfigPathInfoMessage := domainError.NewInfoMessage(location+"loadDefaultConfig", "Using default configuration path")
 	logging.Logger(defaultConfigPathInfoMessage)
 }
+
+// GetSecurityConfig is a helper function to retrieve the security configuration.
+func GetSecurityConfig() Security {
+	return AppConfig.Security
+}

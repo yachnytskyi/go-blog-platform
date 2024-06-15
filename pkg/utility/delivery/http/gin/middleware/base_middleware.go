@@ -53,10 +53,6 @@ func CSPMiddleware() gin.HandlerFunc {
 			securityConfig.ContentSecurityPolicyHeaderFull.Key,
 			securityConfig.ContentSecurityPolicyHeaderFull.Value,
 		)
-		fmt.Println("hey")
-		fmt.Println(securityConfig.ContentSecurityPolicyHeaderFull.Key, " and: ",
-			securityConfig.ContentSecurityPolicyHeaderFull.Value)
-
 		// Continue to the next middleware or handler in the chain.
 		c.Next()
 	}

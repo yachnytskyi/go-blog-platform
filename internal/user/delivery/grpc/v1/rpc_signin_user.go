@@ -6,6 +6,7 @@ import (
 	pb "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1/model/pb"
 	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
 	domainModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
+	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -34,19 +35,20 @@ func (userGrpcServer *UserGrpcServer) Login(ctx context.Context, request *pb.Log
 	userTokenPayload := domainModel.NewUserTokenPayload(user.Data.UserID, user.Data.Role)
 
 	// Generate tokens.
-	accessToken, createTokenError := domainUtility.GenerateJWTToken(ctx, location+"Login", userGrpcServer.applicationConfig.AccessToken.ExpiredIn, userTokenPayload, userGrpcServer.applicationConfig.AccessToken.PrivateKey)
-	if createTokenError != nil {
-		return nil, status.Errorf(codes.PermissionDenied, createTokenError.Error())
+	accessToken := domainUtility.GenerateJWTToken(location+"Login", userGrpcServer.applicationConfig.AccessToken.PrivateKey, userGrpcServer.applicationConfig.AccessToken.ExpiredIn, userTokenPayload)
+	if validator.IsError(accessToken.Error) {
+		return nil, status.Errorf(codes.PermissionDenied, accessToken.Error.Error())
 	}
-	refreshToken, createTokenError := domainUtility.GenerateJWTToken(ctx, location+"Login", userGrpcServer.applicationConfig.RefreshToken.ExpiredIn, userTokenPayload, userGrpcServer.applicationConfig.RefreshToken.PrivateKey)
-	if createTokenError != nil {
-		return nil, status.Errorf(codes.PermissionDenied, createTokenError.Error())
+
+	refreshToken := domainUtility.GenerateJWTToken(location+"Login", userGrpcServer.applicationConfig.RefreshToken.PrivateKey, userGrpcServer.applicationConfig.RefreshToken.ExpiredIn, userTokenPayload)
+	if validator.IsError(refreshToken.Error) {
+		return nil, status.Errorf(codes.PermissionDenied, refreshToken.Error.Error())
 	}
 
 	response := &pb.LoginUserView{
 		Status:       "success",
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
+		AccessToken:  accessToken.Data,
+		RefreshToken: refreshToken.Data,
 	}
 
 	return response, nil

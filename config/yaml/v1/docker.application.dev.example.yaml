@@ -47,13 +47,13 @@ GRPC:
 Access_Token:
   Private_Key: "your private key for access token"
   Public_Key: "your public key for access token"
-  Expired_In: 15m
+  Expired_In: 900s
   Max_Age: 900
 
 Refresh_Token: 
   Private_Key: "your private key for refresh token"
   Public_Key: "your public key for refresh token"
-  Expired_In: 60m
+  Expired_In: 3600s
   Max_Age: 3600
 
 Email: 

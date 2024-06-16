@@ -9,9 +9,6 @@ import (
 
 // Constants for route paths.
 const (
-	groupPath             = "/users"
-	getAllUsersPath       = ""
-	getUserByIdPath       = "/:"
 	registerPath          = "/register"
 	forgottenPasswordPath = "/forgotten-password"
 	resetPasswordPath     = "/reset-password/:resetToken"
@@ -36,52 +33,69 @@ func NewUserRouter(userController user.UserController) UserRouter {
 // UserRouter defines the user-related routes and connects them to the corresponding controller methods.
 func (userRouter UserRouter) UserRouter(routerGroup any) {
 	ginRouterGroup := routerGroup.(*gin.RouterGroup)
-	router := ginRouterGroup.Group(groupPath)
+	router := ginRouterGroup.Group(constants.UsersGroupPath)
 
 	// Public routes.
-	router.GET("", func(ginContext *gin.Context) {
-		userRouter.userController.GetAllUsers(ginContext)
-	})
+	publicRoutes := router.Group("")
+	{
+		publicRoutes.GET(constants.GetAllItemsURL, func(ginContext *gin.Context) {
+			userRouter.userController.GetAllUsers(ginContext)
+		})
 
-	router.GET(constants.GetItemByIdURL, func(ginContext *gin.Context) {
-		userRouter.userController.GetUserById(ginContext)
-	})
+		publicRoutes.GET(constants.GetItemByIdURL, func(ginContext *gin.Context) {
+			userRouter.userController.GetUserById(ginContext)
+		})
 
-	router.POST(registerPath, httpGinMiddleware.AnonymousMiddleware(), func(ginContext *gin.Context) {
-		userRouter.userController.Register(ginContext)
-	})
+		publicRoutes.POST(forgottenPasswordPath, func(ginContext *gin.Context) {
+			userRouter.userController.ForgottenPassword(ginContext)
+		})
 
-	router.POST(loginPath, httpGinMiddleware.AnonymousMiddleware(), func(ginContext *gin.Context) {
-		userRouter.userController.Login(ginContext)
-	})
+		publicRoutes.PATCH((resetPasswordPath), func(ginContext *gin.Context) {
+			userRouter.userController.ResetUserPassword(ginContext)
+		})
+	}
 
-	router.POST(forgottenPasswordPath, func(ginContext *gin.Context) {
-		userRouter.userController.ForgottenPassword(ginContext)
-	})
+	// Public routes with anonymous middleware.
+	publicAnonymousRoutes := router.Group("")
+	publicAnonymousRoutes.Use(httpGinMiddleware.AnonymousMiddleware())
+	{
+		publicAnonymousRoutes.POST(loginPath, func(ginContext *gin.Context) {
+			userRouter.userController.Login(ginContext)
+		})
 
-	router.PATCH((resetPasswordPath), func(ginContext *gin.Context) {
-		userRouter.userController.ResetUserPassword(ginContext)
-	})
+		publicAnonymousRoutes.POST(registerPath, func(ginContext *gin.Context) {
+			userRouter.userController.Register(ginContext)
+		})
 
-	// Authenticated routes.
-	router.GET(getCurrentUserPath, httpGinMiddleware.AuthenticationMiddleware(), func(ginContext *gin.Context) {
-		userRouter.userController.GetCurrentUser(ginContext)
-	})
+	}
 
-	router.PUT(updateCurrentUserPath, httpGinMiddleware.AuthenticationMiddleware(), func(ginContext *gin.Context) {
-		userRouter.userController.UpdateCurrentUser(ginContext)
-	})
+	// Authenticated routes with authentication middleware.
+	authenticatedRoutes := router.Group("")
+	authenticatedRoutes.Use(httpGinMiddleware.AuthenticationMiddleware())
+	{
+		authenticatedRoutes.GET(getCurrentUserPath, httpGinMiddleware.AuthenticationMiddleware(), func(ginContext *gin.Context) {
+			userRouter.userController.GetCurrentUser(ginContext)
+		})
 
-	router.DELETE(deleteCurrentUserPath, httpGinMiddleware.AuthenticationMiddleware(), func(ginContext *gin.Context) {
-		userRouter.userController.DeleteCurrentUser(ginContext)
-	})
+		authenticatedRoutes.PUT(updateCurrentUserPath, httpGinMiddleware.AuthenticationMiddleware(), func(ginContext *gin.Context) {
+			userRouter.userController.UpdateCurrentUser(ginContext)
+		})
 
-	// Token-related routes.
-	router.GET(refreshTokenPath, httpGinMiddleware.RefreshTokenAuthenticationMiddleware(), func(ginContext *gin.Context) {
-		userRouter.userController.RefreshAccessToken(ginContext)
-	})
+		authenticatedRoutes.DELETE(deleteCurrentUserPath, httpGinMiddleware.AuthenticationMiddleware(), func(ginContext *gin.Context) {
+			userRouter.userController.DeleteCurrentUser(ginContext)
+		})
+	}
 
-	router.GET(logoutPath, httpGinMiddleware.RefreshTokenAuthenticationMiddleware(), func(ginContext *gin.Context) {
-		userRouter.userController.Logout(ginContext)
-	})
+	// Token-related routes with refresh token authentication middleware.
+	tokenRoutes := router.Group("")
+	tokenRoutes.Use(httpGinMiddleware.RefreshTokenAuthenticationMiddleware())
+	{
+		tokenRoutes.GET(refreshTokenPath, httpGinMiddleware.RefreshTokenAuthenticationMiddleware(), func(ginContext *gin.Context) {
+			userRouter.userController.RefreshAccessToken(ginContext)
+		})
+
+		tokenRoutes.GET(logoutPath, httpGinMiddleware.RefreshTokenAuthenticationMiddleware(), func(ginContext *gin.Context) {
+			userRouter.userController.Logout(ginContext)
+		})
+	}
 }

@@ -39,8 +39,8 @@ func AuthenticationMiddleware() gin.HandlerFunc {
 		// Get the application configuration.
 		accessTokenConfig := config.AppConfig.AccessToken
 		// Validate the JWT token.
-		userTokenPayload, validateAccessTokenError := domainUtility.ValidateJWTToken(accessToken, accessTokenConfig.PublicKey)
-		if validator.IsError(validateAccessTokenError) {
+		userTokenPayload := domainUtility.ValidateJWTToken(location, accessToken, accessTokenConfig.PublicKey)
+		if validator.IsError(userTokenPayload.Error) {
 			// Handle token validation error and respond with an unauthorized status and JSON error.
 			httpAuthorizationError := httpError.NewHttpAuthorizationErrorView("", constants.LoggingErrorNotification)
 			abortWithStatusJSON(ginContext, httpAuthorizationError, constants.StatusUnauthorized)
@@ -48,8 +48,8 @@ func AuthenticationMiddleware() gin.HandlerFunc {
 		}
 
 		// Store user information in the context.
-		ctx = context.WithValue(ctx, constants.UserIDContext, userTokenPayload.UserID)
-		ctx = context.WithValue(ctx, constants.UserRoleContext, userTokenPayload.Role)
+		ctx = context.WithValue(ctx, constants.UserIDContext, userTokenPayload.Data.UserID)
+		ctx = context.WithValue(ctx, constants.UserRoleContext, userTokenPayload.Data.Role)
 
 		// Update the request's context with the new context containing user information.
 		ginContext.Request = ginContext.Request.WithContext(ctx)

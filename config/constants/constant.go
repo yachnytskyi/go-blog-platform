@@ -147,7 +147,8 @@ const (
 
 // Domain routes.
 const (
-	Users = "users" // Users domain route.
+	UsersGroupPath = "/users" // Users domain route.
+	// Initialize other routes here
 )
 
 // contextKey is a custom type for context keys to prevent collisions.

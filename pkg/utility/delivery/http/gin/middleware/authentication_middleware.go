@@ -14,9 +14,10 @@ import (
 )
 
 const (
-	location      = "pkg.utility.delivery.http.gin.middleware."
-	authorization = "Authorization"
-	bearer        = "Bearer"
+	location             = "pkg.utility.delivery.http.gin.middleware."
+	authorization        = "Authorization"
+	bearer               = "Bearer"
+	userIDContextMissing = "User ID context value is missing or empty."
 )
 
 // AuthenticationMiddleware is a Gin middleware for handling user authentication using JWT tokens.
@@ -68,7 +69,12 @@ func UserContextMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
 		defer cancel()
 
 		// Retrieve the user ID from the context.
-		userID := ctx.Value(constants.UserIDContext).(string)
+		userID, _ := ctx.Value(constants.UserIDContext).(string)
+		if userID == "" {
+			httpInternalErrorView := httpError.NewHttpInternalErrorView(location+"UserContextMiddleware.ctx.Value", userIDContextMissing)
+			abortWithStatusJSON(ginContext, httpInternalErrorView, constants.StatusUnauthorized)
+			return
+		}
 
 		// Fetch user details using the user use case.
 		user := userUseCase.GetUserById(ctx, userID)

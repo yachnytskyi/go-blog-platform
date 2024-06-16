@@ -10,6 +10,10 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+const (
+	location = "internal.user.delivery.grpc.v1."
+)
+
 func (userGrpcServer *UserGrpcServer) Login(ctx context.Context, request *pb.LoginUser) (*pb.LoginUserView, error) {
 	user := userGrpcServer.userUseCase.GetUserByEmail(ctx, request.GetEmail())
 
@@ -30,11 +34,11 @@ func (userGrpcServer *UserGrpcServer) Login(ctx context.Context, request *pb.Log
 	userTokenPayload := domainModel.NewUserTokenPayload(user.Data.UserID, user.Data.Role)
 
 	// Generate tokens.
-	accessToken, createTokenError := domainUtility.GenerateJWTToken(ctx, userGrpcServer.applicationConfig.AccessToken.ExpiredIn, userTokenPayload, userGrpcServer.applicationConfig.AccessToken.PrivateKey)
+	accessToken, createTokenError := domainUtility.GenerateJWTToken(ctx, location+"Login", userGrpcServer.applicationConfig.AccessToken.ExpiredIn, userTokenPayload, userGrpcServer.applicationConfig.AccessToken.PrivateKey)
 	if createTokenError != nil {
 		return nil, status.Errorf(codes.PermissionDenied, createTokenError.Error())
 	}
-	refreshToken, createTokenError := domainUtility.GenerateJWTToken(ctx, userGrpcServer.applicationConfig.RefreshToken.ExpiredIn, userTokenPayload, userGrpcServer.applicationConfig.RefreshToken.PrivateKey)
+	refreshToken, createTokenError := domainUtility.GenerateJWTToken(ctx, location+"Login", userGrpcServer.applicationConfig.RefreshToken.ExpiredIn, userTokenPayload, userGrpcServer.applicationConfig.RefreshToken.PrivateKey)
 	if createTokenError != nil {
 		return nil, status.Errorf(codes.PermissionDenied, createTokenError.Error())
 	}

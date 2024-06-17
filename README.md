@@ -16,10 +16,7 @@ Hexagonal architecture, manual dependency injection and abstract factory are imp
 you need to put them in your `config/yaml/v1/local.dev.application.example.yaml` and/or `config/yaml/v1/docker.dev.application.example.yaml` (you should create them  on your own). 
 
 ## From the project root directory, run:  
-```make up```  
-For docker environment  
-```make local ```   
-For local environment     
+```make up``` For docker environment.  ```make local ``` For local environment     
     
 The API will then be available at  **http://localhost:8080/api/posts  http://localhost:8080/api/users**
 You can also find all possible API requests/urls when you launch the project in your server terminal. 
@@ -28,10 +25,8 @@ If you need to make rebuild, you can use these commands:
 ```make build``` if you prefer a shortcut command from Makefile.   
 ```docker-compose build``` if you you prefer to enter a full command on your own.
   
-After that repeat this command:  
-```make up```  
-For docker environment
-```make lo```make up```  
+After that repeat this command:
+```make up``` For docker environment.  ```make local ``` For local environment    
 
 ## Run server
 To run this code, you will need docker and docker-compose installed on your machine. From the root project directory, run:  

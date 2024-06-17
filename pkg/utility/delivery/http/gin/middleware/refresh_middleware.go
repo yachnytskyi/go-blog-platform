@@ -31,7 +31,7 @@ func RefreshTokenAuthenticationMiddleware() gin.HandlerFunc {
 		applicationConfig := config.AppConfig.RefreshToken
 
 		// Validate the JWT token.
-		userTokenPayload := domainUtility.ValidateJWTToken(location, refreshToken, applicationConfig.PublicKey)
+		userTokenPayload := domainUtility.ValidateJWTToken(location+".RefreshTokenAuthenticationMiddleware", refreshToken, applicationConfig.PublicKey)
 		if validator.IsError(userTokenPayload.Error) {
 			// Handle token validation error and respond with an unauthorized status and JSON error.
 			httpAuthorizationError := httpError.NewHttpAuthorizationErrorView("", constants.LoggingErrorNotification)

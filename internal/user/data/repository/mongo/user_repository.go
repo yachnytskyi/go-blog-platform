@@ -151,15 +151,15 @@ func (userRepository UserRepository) CheckEmailDuplicate(ctx context.Context, em
 
 	// Find and decode the user.
 	// If no user is found, return nil (indicating that the email is unique).
-	findOneError := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
-	if validator.IsError(findOneError) {
-		if findOneError == mongo.ErrNoDocuments {
+	userFindOneError := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
+	if validator.IsError(userFindOneError) {
+		if userFindOneError == mongo.ErrNoDocuments {
 			// No user found, email is unique
 			return nil
 		}
 
 		// If an error occurs during the database query, log it as an internal error.
-		internalError := domainError.NewInternalError(location+"CheckEmailDuplicate.FindOne.Decode", findOneError.Error())
+		internalError := domainError.NewInternalError(location+"CheckEmailDuplicate.FindOne.Decode", userFindOneError.Error())
 		logging.Logger(internalError)
 		return internalError
 	}
@@ -181,13 +181,13 @@ func (userRepository UserRepository) Register(ctx context.Context, userCreate us
 	userCreateRepository := userRepositoryModel.UserCreateToUserCreateRepositoryMapper(userCreate)
 
 	// Hash the user's password.
-	hashedPassword, hashPasswordError := repositoryUtility.HashPassword(location+"Register", userCreate.Password)
-	if validator.IsError(hashPasswordError) {
-		return commonModel.NewResultOnFailure[userModel.User](hashPasswordError)
+	hashedPassword := repositoryUtility.HashPassword(location+"Register", userCreate.Password)
+	if validator.IsError(hashedPassword.Error) {
+		return commonModel.NewResultOnFailure[userModel.User](hashedPassword.Error)
 	}
 
 	// Set the hashed password in the repository model.
-	userCreateRepository.Password = hashedPassword
+	userCreateRepository.Password = hashedPassword.Data
 
 	// Insert the user data into the database.
 	insertOneResult, insertOneResultError := userRepository.collection.InsertOne(ctx, &userCreateRepository)
@@ -271,9 +271,9 @@ func (userRepository UserRepository) DeleteUserById(ctx context.Context, userID 
 
 func (userRepository UserRepository) ResetUserPassword(ctx context.Context, firstKey string, firstValue string, secondKey string, passwordKey, password string) error {
 	// Hash the user's password.
-	hashedPassword, hashPasswordError := repositoryUtility.HashPassword(location+"ResetUserPassword", password)
-	if validator.IsError(hashPasswordError) {
-		return hashPasswordError
+	hashedPassword := repositoryUtility.HashPassword(location+"ResetUserPassword", password)
+	if validator.IsError(hashedPassword.Error) {
+		return hashedPassword.Error
 	}
 
 	query := bson.D{{Key: firstKey, Value: firstValue}}
@@ -314,7 +314,7 @@ func (userRepository UserRepository) UpdatePasswordResetTokenUserByEmail(ctx con
 }
 
 func (userRepository UserRepository) SendEmail(user userModel.User, data userModel.EmailData) error {
-	sendEmailError := userRepositoryMail.SendEmail(location, user, data)
+	sendEmailError := userRepositoryMail.SendEmail(location+"SendEmail", user, data)
 	if validator.IsError(sendEmailError) {
 		return sendEmailError
 	}
@@ -346,10 +346,10 @@ func (userRepository UserRepository) ensureUniqueEmailIndex(ctx context.Context)
 func (userRepository UserRepository) getUserByQuery(location string, ctx context.Context, query bson.M) commonModel.Result[userModel.User] {
 	// Initialize a User object and find the user based on the provided query.
 	fetchedUser := userRepositoryModel.UserRepository{}
-	findOneError := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
-	if validator.IsError(findOneError) {
+	userFindOneError := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
+	if validator.IsError(userFindOneError) {
 		queryString := commonUtility.ConvertQueryToString(query)
-		itemNotFoundError := domainError.NewItemNotFoundError(location+".getUserByQuery.Decode", queryString, findOneError.Error())
+		itemNotFoundError := domainError.NewItemNotFoundError(location+".getUserByQuery.Decode", queryString, userFindOneError.Error())
 		logging.Logger(itemNotFoundError)
 		return commonModel.NewResultOnFailure[userModel.User](itemNotFoundError)
 	}

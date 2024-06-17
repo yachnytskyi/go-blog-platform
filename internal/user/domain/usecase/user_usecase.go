@@ -281,13 +281,13 @@ func generateToken(userTokenPayload domainModel.UserTokenPayload) commonModel.Re
 	refreshTokenConfig := config.AppConfig.RefreshToken
 
 	// Generate the access token.
-	accessToken := domainUtility.GenerateJWTToken(location, accessTokenConfig.PrivateKey, accessTokenConfig.ExpiredIn, userTokenPayload)
+	accessToken := domainUtility.GenerateJWTToken(location+".generateToken.accessToken", accessTokenConfig.PrivateKey, accessTokenConfig.ExpiredIn, userTokenPayload)
 	if validator.IsError(accessToken.Error) {
 		return commonModel.NewResultOnFailure[userModel.UserToken](accessToken.Error)
 	}
 
 	// Generate the refresh token.
-	refreshToken := domainUtility.GenerateJWTToken(location, refreshTokenConfig.PrivateKey, refreshTokenConfig.ExpiredIn, userTokenPayload)
+	refreshToken := domainUtility.GenerateJWTToken(location+".generateToken.refreshToken", refreshTokenConfig.PrivateKey, refreshTokenConfig.ExpiredIn, userTokenPayload)
 	if validator.IsError(accessToken.Error) {
 		return commonModel.NewResultOnFailure[userModel.UserToken](refreshToken.Error)
 	}

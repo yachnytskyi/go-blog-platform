@@ -30,13 +30,13 @@ const (
 // and sets the token's expiration based on the specified token lifetime.
 func GenerateJWTToken(location, privateKey string, tokenLifeTime time.Duration, userTokenPayload domainModel.UserTokenPayload) commonModel.Result[string] {
 	// Decode the private key from base64-encoded string.
-	decodedPrivateKey := decodeBase64String(location, privateKey)
+	decodedPrivateKey := decodeBase64String(location+".GenerateJWTToken", privateKey)
 	if validator.IsError(decodedPrivateKey.Error) {
 		return commonModel.NewResultOnFailure[string](decodedPrivateKey.Error)
 	}
 
 	// Parse the private key for signing.
-	key := parsePrivateKey(location, decodedPrivateKey.Data)
+	key := parsePrivateKey(location+".GenerateJWTToken", decodedPrivateKey.Data)
 	if validator.IsError(key.Error) {
 		return commonModel.NewResultOnFailure[string](key.Error)
 	}
@@ -45,7 +45,7 @@ func GenerateJWTToken(location, privateKey string, tokenLifeTime time.Duration, 
 	// Create the signed token using the private key and claims.
 	now := time.Now().UTC()
 	claims := generateClaims(tokenLifeTime, now, userTokenPayload)
-	token := createSignedToken(location, key.Data, claims)
+	token := createSignedToken(location+".GenerateJWTToken", key.Data, claims)
 	if validator.IsError(token.Error) {
 		return commonModel.NewResultOnFailure[string](token.Error)
 	}
@@ -57,19 +57,19 @@ func GenerateJWTToken(location, privateKey string, tokenLifeTime time.Duration, 
 // extracted from the token if it's valid.
 func ValidateJWTToken(location, token, publicKey string) commonModel.Result[domainModel.UserTokenPayload] {
 	// Decode the public key from a base64-encoded string.
-	decodedPublicKey := decodeBase64String(location, publicKey)
+	decodedPublicKey := decodeBase64String(location+".ValidateJWTToken", publicKey)
 	if validator.IsError(decodedPublicKey.Error) {
 		return commonModel.NewResultOnFailure[domainModel.UserTokenPayload](decodedPublicKey.Error)
 	}
 
 	// Parse the public key for verification.
-	key := parsePublicKey(location, decodedPublicKey.Data)
+	key := parsePublicKey(location+".ValidateJWTToken", decodedPublicKey.Data)
 	if validator.IsError(key.Error) {
 		return commonModel.NewResultOnFailure[domainModel.UserTokenPayload](key.Error)
 	}
 
 	// Parse and verify the token using the public key.
-	parsedToken := parseToken(location, token, key.Data)
+	parsedToken := parseToken(location+".ValidateJWTToken", token, key.Data)
 	if validator.IsError(parsedToken.Error) {
 		return commonModel.NewResultOnFailure[domainModel.UserTokenPayload](parsedToken.Error)
 	}

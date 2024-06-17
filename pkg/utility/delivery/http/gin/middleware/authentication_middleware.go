@@ -39,7 +39,7 @@ func AuthenticationMiddleware() gin.HandlerFunc {
 		// Get the application configuration.
 		accessTokenConfig := config.AppConfig.AccessToken
 		// Validate the JWT token.
-		userTokenPayload := domainUtility.ValidateJWTToken(location, accessToken, accessTokenConfig.PublicKey)
+		userTokenPayload := domainUtility.ValidateJWTToken(location+".AuthenticationMiddleware", accessToken, accessTokenConfig.PublicKey)
 		if validator.IsError(userTokenPayload.Error) {
 			// Handle token validation error and respond with an unauthorized status and JSON error.
 			httpAuthorizationError := httpError.NewHttpAuthorizationErrorView("", constants.LoggingErrorNotification)

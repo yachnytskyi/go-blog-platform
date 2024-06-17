@@ -9,6 +9,7 @@ import (
 	postRepository "github.com/yachnytskyi/golang-mongo-grpc/internal/post/data/repository/mongo"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	userRepository "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/mongo"
+	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -33,7 +34,9 @@ type MongoDBFactory struct {
 	MongoClient *mongo.Client  // MongoDB client instance.
 }
 
-// NewRepository creates and returns a new MongoDB repository instance.
+// NewRepository creates a new MongoDB repository instance based on the provided MongoDB configuration.
+// It establishes a connection to the MongoDB server using retry logic and returns a handle to the MongoDB database.
+// If connection or ping attempts fail after retries, it panics with a detailed error message.
 func (mongoDBFactory *MongoDBFactory) NewRepository(ctx context.Context) any {
 	var connectError error
 
@@ -41,8 +44,12 @@ func (mongoDBFactory *MongoDBFactory) NewRepository(ctx context.Context) any {
 	mongoConnection := options.Client().ApplyURI(mongoDBFactory.MongoDB.URI)
 
 	// Try to connect to MongoDB with retries.
-	mongoDBFactory.MongoClient, connectError = connectToMongo(ctx, mongoConnection)
-	if validator.IsError(connectError) {
+	mongoClient := connectToMongo(ctx, mongoConnection)
+
+	// Assign the MongoDB client instance obtained from the successful connection result.
+	mongoDBFactory.MongoClient = mongoClient.Data
+
+	if validator.IsError(mongoClient.Error) {
 		// Panic if all connection attempts fail.
 		panic(dbConnectionFailure)
 	}
@@ -56,10 +63,14 @@ func (mongoDBFactory *MongoDBFactory) NewRepository(ctx context.Context) any {
 
 	// Log successful database connection.
 	logging.Logger(dbConnectionSuccess)
+
+	// Return the MongoDB database handle.
 	return mongoDBFactory.MongoClient.Database(mongoDBFactory.MongoDB.Name)
 }
 
-// CloseRepository closes the MongoDB client and releases resources.
+// CloseRepository closes the MongoDB client and releases associated resources.
+// It attempts to disconnect the MongoDB client with the provided context.
+// Logs any errors encountered during disconnection and logs a success message upon successful closure.
 // Parameters:
 // - ctx: The context to control the timeout and cancellation for the disconnect operation.
 func (mongoDBFactory *MongoDBFactory) CloseRepository(ctx context.Context) {
@@ -76,19 +87,19 @@ func (mongoDBFactory *MongoDBFactory) CloseRepository(ctx context.Context) {
 }
 
 // NewUserRepository creates and returns a new UserRepository instance using the provided database.
-func (mongoDBFactory *MongoDBFactory) NewUserRepository(db any) user.UserRepository {
-	mongoDB := db.(*mongo.Database)
+func (mongoDBFactory *MongoDBFactory) NewUserRepository(database any) user.UserRepository {
+	mongoDB := database.(*mongo.Database)
 	return userRepository.NewUserRepository(mongoDB)
 }
 
 // NewPostRepository creates and returns a new PostRepository instance using the provided database.
-func (mongoDBFactory *MongoDBFactory) NewPostRepository(db any) post.PostRepository {
-	mongoDB := db.(*mongo.Database)
+func (mongoDBFactory *MongoDBFactory) NewPostRepository(database any) post.PostRepository {
+	mongoDB := database.(*mongo.Database)
 	return postRepository.NewPostRepository(mongoDB)
 }
 
 // connectToMongo attempts to connect to MongoDB server with retries.
-func connectToMongo(ctx context.Context, mongoConnection *options.ClientOptions) (*mongo.Client, error) {
+func connectToMongo(ctx context.Context, mongoConnection *options.ClientOptions) commonModel.Result[*mongo.Client] {
 	var client *mongo.Client
 	var connectError error
 	var delay = time.Second
@@ -98,7 +109,7 @@ func connectToMongo(ctx context.Context, mongoConnection *options.ClientOptions)
 		client, connectError = mongo.Connect(ctx, mongoConnection)
 		if connectError == nil {
 			// Return client if connection is successful.
-			return client, nil
+			return commonModel.NewResultOnSuccess[*mongo.Client](client)
 		}
 
 		// Log the connection error with detailed message and retry after delay.
@@ -107,8 +118,11 @@ func connectToMongo(ctx context.Context, mongoConnection *options.ClientOptions)
 		time.Sleep(delay)
 	}
 
+	// Log the connection error with detailed message.
+	logging.Logger(domainError.NewInternalError(location+"connectToMongo.MongoClient.Connect", connectError.Error()))
+
 	// Return error if all retry attempts fail.
-	return nil, connectError
+	return commonModel.NewResultOnFailure[*mongo.Client](connectError)
 }
 
 // pingMongo attempts to ping the MongoDB server with retries.

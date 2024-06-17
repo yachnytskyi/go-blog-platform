@@ -2,15 +2,12 @@ package model
 
 import (
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
-	http "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
+	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
+	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
-)
-
-const (
-	location = "user.delivery.http.model."
+	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
 func UsersToUsersViewMapper(users userModel.Users) UsersView {
@@ -20,7 +17,7 @@ func UsersToUsersViewMapper(users userModel.Users) UsersView {
 	}
 
 	return UsersView{
-		PaginationResponse: http.PaginationResponse{
+		PaginationResponse: httpModel.PaginationResponse{
 			CurrentPage: users.PaginationResponse.Page,
 			TotalPages:  users.PaginationResponse.TotalPages,
 			PagesLeft:   users.PaginationResponse.PagesLeft,
@@ -44,33 +41,6 @@ func UserToUserViewMapper(user userModel.User) UserView {
 		CreatedAt: common.FormatDate(user.CreatedAt),
 		UpdatedAt: common.FormatDate(user.UpdatedAt),
 	}
-}
-
-func UserViewToUserMapper(user UserView) (userModel.User, error) {
-	var httpInternalErrorsView httpError.HttpInternalErrorsView
-	created_at, parseDateError := common.ParseDate(location+"UserViewToUserMapper.created_at", user.CreatedAt)
-	if validator.IsError(parseDateError) {
-		httpInternalErrorsView = append(httpInternalErrorsView, parseDateError)
-	}
-
-	updated_at, parseDateError := common.ParseDate(location+"UserViewToUserMapper.updated_at", user.UpdatedAt)
-	if validator.IsError(parseDateError) {
-		httpInternalErrorsView = append(httpInternalErrorsView, parseDateError)
-	}
-
-	if validator.IsSliceNotEmpty(httpInternalErrorsView) {
-		logging.Logger(httpInternalErrorsView)
-		return userModel.User{}, httpInternalErrorsView
-	}
-
-	return userModel.User{
-		UserID:    user.UserID,
-		Name:      user.Name,
-		Email:     user.Email,
-		Role:      user.Role,
-		CreatedAt: created_at,
-		UpdatedAt: updated_at,
-	}, nil
 }
 
 func UserCreateViewToUserCreateMapper(user UserCreateView) userModel.UserCreate {
@@ -121,4 +91,33 @@ func UserResetPasswordViewToUserResetPassword(user UserResetPasswordView) userMo
 		Password:        user.Password,
 		PasswordConfirm: user.PasswordConfirm,
 	}
+}
+
+func UserViewToUserMapper(location string, userView UserView) commonModel.Result[userModel.User] {
+	var httpInternalErrorsView httpError.HttpInternalErrorsView
+	created_at, parseDateError := common.ParseDate(location+".UserViewToUserMapper.created_at", userView.CreatedAt)
+	if validator.IsError(parseDateError) {
+		httpInternalErrorsView = append(httpInternalErrorsView, parseDateError)
+	}
+
+	updated_at, parseDateError := common.ParseDate(location+"UserViewToUserMapper.updated_at", userView.UpdatedAt)
+	if validator.IsError(parseDateError) {
+		httpInternalErrorsView = append(httpInternalErrorsView, parseDateError)
+	}
+
+	if validator.IsSliceNotEmpty(httpInternalErrorsView) {
+		logging.Logger(httpInternalErrorsView)
+		return commonModel.NewResultOnFailure[userModel.User](httpInternalErrorsView)
+	}
+
+	user := userModel.User{
+		UserID:    userView.UserID,
+		Name:      userView.Name,
+		Email:     userView.Email,
+		Role:      userView.Role,
+		CreatedAt: created_at,
+		UpdatedAt: updated_at,
+	}
+
+	return commonModel.NewResultOnSuccess[userModel.User](user)
 }

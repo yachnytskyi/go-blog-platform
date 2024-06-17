@@ -2,6 +2,7 @@ package model
 
 import (
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
+	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	mongoModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
@@ -41,17 +42,19 @@ func UserCreateToUserCreateRepositoryMapper(userCreate userModel.UserCreate) Use
 	}
 }
 
-func UserUpdateToUserUpdateRepositoryMapper(userUpdate userModel.UserUpdate) (UserUpdateRepository, error) {
+func UserUpdateToUserUpdateRepositoryMapper(userUpdate userModel.UserUpdate) commonModel.Result[UserUpdateRepository] {
 	userObjectID, hexToObjectIDMapperError := mongoModel.HexToObjectIDMapper(location+"UserUpdateToUserUpdateRepositoryMapper", userUpdate.UserID)
 	if validator.IsError(hexToObjectIDMapperError) {
-		return UserUpdateRepository{}, hexToObjectIDMapperError
+		return commonModel.NewResultOnFailure[UserUpdateRepository](hexToObjectIDMapperError)
 	}
 
-	return UserUpdateRepository{
+	userUpdateRepository := UserUpdateRepository{
 		UserID:    userObjectID,
 		Name:      userUpdate.Name,
 		UpdatedAt: userUpdate.UpdatedAt,
-	}, nil
+	}
+
+	return commonModel.NewResultOnSuccess[UserUpdateRepository](userUpdateRepository)
 }
 
 func UserRepositoryToUserMapper(userRepository UserRepository) userModel.User {

@@ -28,14 +28,14 @@ If you need to make rebuild, you can use these commands:
   
 After that repeat this command:  
 ```make up```   
+   
 Or:  
 ```make local ```
 
 ## Run server
 To run this code, you will need docker and docker-compose installed on your machine. From the root project directory, run:  
-```make up``` or   
-```make local``` use local launch mode  
-```make run``` use default launch mode
+```make up``` use default dockerized launch mode     
+```make local``` use local launch mode 
 
 ## Stop Docker Compose services 
 ```make down``` if you prefer a shortcut command from Makefile.  

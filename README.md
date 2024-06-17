@@ -18,7 +18,7 @@ you need to put them in your `config/yaml/v1/local.dev.application.example.yaml`
 ## From the project root directory, run:  
 ```make up```   
 ## Or:  
-```make local```
+```make local```   
 The API will then be available at  **http://localhost:8080/api/posts  http://localhost:8080/api/users**
 You can also find all possible API requests/urls when you launch the project in your server terminal. 
 

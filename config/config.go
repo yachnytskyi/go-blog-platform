@@ -164,8 +164,8 @@ func loadDefaultEnvironment() {
 	}
 
 	// Log an informational message indicating the use of a default environment path.
-	defaultEnvironmentInfoMessage := domainError.NewInfoMessage(location+"loadDefaultEnvironment", "Using default environment path")
-	logging.Logger(defaultEnvironmentInfoMessage)
+	infoMessage := domainError.NewInfoMessage(location+"loadDefaultEnvironment", "Using default environment path")
+	logging.Logger(infoMessage)
 }
 
 func loadDefaultConfig() {
@@ -180,8 +180,8 @@ func loadDefaultConfig() {
 	}
 
 	// Log an informational message indicating the use of a default configuration path.
-	defaultConfigPathInfoMessage := domainError.NewInfoMessage(location+"loadDefaultConfig", "Using default configuration path")
-	logging.Logger(defaultConfigPathInfoMessage)
+	infoMessage := domainError.NewInfoMessage(location+"loadDefaultConfig", "Using default configuration path")
+	logging.Logger(infoMessage)
 }
 
 // GetSecurityConfig is a helper function to retrieve the security configuration.

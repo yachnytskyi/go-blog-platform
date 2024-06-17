@@ -81,13 +81,13 @@ func (ginFactory *GinFactory) InitializeServer(serverConfig applicationModel.Ser
 		errorMessage := fmt.Sprintf(constants.MethodNotAllowedNotification, forbiddenMethod)
 
 		// Create the error view with the custom error message.
-		newHttpRequestErrorView := httpError.NewHttpRequestErrorView(location+"InitializeServer.ginFactory.Router.NoMethod", forbiddenMethod, errorMessage)
+		httpRequestErrorView := httpError.NewHttpRequestErrorView(location+"InitializeServer.ginFactory.Router.NoMethod", forbiddenMethod, errorMessage)
 
 		// Log the error.
-		logging.Logger(newHttpRequestErrorView)
+		logging.Logger(httpRequestErrorView)
 
 		// Respond with an unauthorized status and JSON error.
-		httpGinCommon.GinNewJSONFailureResponse(ginContext, newHttpRequestErrorView, constants.StatusMethodNotAllowed)
+		httpGinCommon.GinNewJSONFailureResponse(ginContext, httpRequestErrorView, constants.StatusMethodNotAllowed)
 	})
 
 	// Set NoRoute handler.
@@ -99,13 +99,13 @@ func (ginFactory *GinFactory) InitializeServer(serverConfig applicationModel.Ser
 		errorMessage := fmt.Sprintf(constants.RouteNotFoundNotification, requestedPath)
 
 		// Create the error view with the custom error message.
-		newHttpRequestErrorView := httpError.NewHttpRequestErrorView(location+"InitializeServer.ginFactory.Router.NoRoute", requestedPath, errorMessage)
+		httpRequestErrorView := httpError.NewHttpRequestErrorView(location+"InitializeServer.ginFactory.Router.NoRoute", requestedPath, errorMessage)
 
 		// Log the error.
-		logging.Logger(newHttpRequestErrorView)
+		logging.Logger(httpRequestErrorView)
 
 		// Respond with a not found status and JSON error.
-		httpGinCommon.GinNewJSONFailureResponse(ginContext, newHttpRequestErrorView, constants.StatusNotFound)
+		httpGinCommon.GinNewJSONFailureResponse(ginContext, httpRequestErrorView, constants.StatusNotFound)
 	})
 
 	// Set HandleMethodNotAllowed.
@@ -131,8 +131,8 @@ func (ginFactory *GinFactory) LaunchServer(ctx context.Context, container *appli
 			// Close repository on error.
 			container.RepositoryFactory.CloseRepository(ctx)
 			// Log the error.
-			runInternalError := domainError.NewInternalError(location+"LaunchServer.Router.Run", runError.Error())
-			logging.Logger(runInternalError)
+			internalError := domainError.NewInternalError(location+"LaunchServer.Router.Run", runError.Error())
+			logging.Logger(internalError)
 		}
 	}()
 
@@ -147,8 +147,8 @@ func (ginFactory *GinFactory) CloseServer(ctx context.Context) {
 	shutDownError := ginFactory.Server.Shutdown(ctx)
 	if validator.IsError(shutDownError) {
 		// Log any errors that occur during shutdown.
-		shutDownInternalError := domainError.NewInternalError(location+"CloseServer.Server.Shutdown", shutDownError.Error())
-		logging.Logger(shutDownInternalError)
+		internalError := domainError.NewInternalError(location+"CloseServer.Server.Shutdown", shutDownError.Error())
+		logging.Logger(internalError)
 	}
 	// Log successful server shutdown.
 	logging.Logger(successfullyClosed)

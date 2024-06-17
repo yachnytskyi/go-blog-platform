@@ -92,10 +92,10 @@ func (userUseCaseV1 UserUseCaseV1) Register(ctx context.Context, userCreateData 
 
 	// Generate a verification token and set user properties.
 	tokenValue := randstr.String(verificationCodeLength)
-	encodedTokenValue := commonUtility.Encode(tokenValue)
+	tokenValue = commonUtility.Encode(tokenValue)
 	userCreate.Data.Role = userRole
 	userCreate.Data.Verified = true
-	userCreate.Data.VerificationCode = encodedTokenValue
+	userCreate.Data.VerificationCode = tokenValue
 	currentTime := time.Now()
 	userCreate.Data.CreatedAt = currentTime
 	userCreate.Data.UpdatedAt = currentTime

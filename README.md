@@ -16,7 +16,7 @@ Hexagonal architecture, manual dependency injection and abstract factory are imp
 you need to put them in your `config/yaml/v1/local.dev.application.example.yaml` and/or `config/yaml/v1/docker.dev.application.example.yaml` (you should create them  on your own). 
 
 ## From the project root directory, run:  
-```make up``` 
+```make up```   
 ## or:  
 ```make local```
 The API will then be available at  **http://localhost:8080/api/posts  http://localhost:8080/api/users**
@@ -27,14 +27,14 @@ If you need to make rebuild, you can use these commands:
 ```docker-compose build``` if you you prefer to enter a full command on your own.
   
 After that repeat this command:  
-```make up```
+```make up```   
 or:  
 ```make local ```
 
 ## Run server
 To run this code, you will need docker and docker-compose installed on your machine. From the root project directory, run:  
 ```make up``` or   
-```make reflex``` use reflex hot reload launch mode  
+```make local``` use local launch mode  
 ```make run``` use default launch mode
 
 ## Stop Docker Compose services 

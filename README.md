@@ -18,7 +18,8 @@ you need to put them in your `config/yaml/v1/local.dev.application.example.yaml`
 ## From the project root directory, run:  
 ```make up```   
 ## Or:  
-```make local```   
+```make local```     
+    
 The API will then be available at  **http://localhost:8080/api/posts  http://localhost:8080/api/users**
 You can also find all possible API requests/urls when you launch the project in your server terminal. 
 
@@ -27,10 +28,10 @@ If you need to make rebuild, you can use these commands:
 ```docker-compose build``` if you you prefer to enter a full command on your own.
   
 After that repeat this command:  
-```make up```   
-   
-Or:  
-```make local ```
+```make up```  
+For docker environment
+```make local ```   
+For local environment
 
 ## Run server
 To run this code, you will need docker and docker-compose installed on your machine. From the root project directory, run:  

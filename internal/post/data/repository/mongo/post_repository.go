@@ -137,16 +137,18 @@ func (postRepository *PostRepository) CreatePost(ctx context.Context, post *post
 	return postRepositoryModel.PostRepositoryToPostMapper(createdPost), nil
 }
 
-func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID string, post *postModel.PostUpdate) (*postModel.Post, error) {
-	postUpdateRepository, postUpdateToPostUpdateRepositoryMapper := postRepositoryModel.PostUpdateToPostUpdateRepositoryMapper(post)
+func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID string, postUpdate *postModel.PostUpdate) (*postModel.Post, error) {
+	postUpdateRepository, postUpdateToPostUpdateRepositoryMapper := postRepositoryModel.PostUpdateToPostUpdateRepositoryMapper(postUpdate)
 	if validator.IsError(postUpdateToPostUpdateRepositoryMapper) {
 		return nil, postUpdateToPostUpdateRepositoryMapper
 	}
 
 	postUpdateRepository.UpdatedAt = time.Now()
-	postMappedToMongoDB, dataToMongoDocumentMapper := mongoModel.DataToMongoDocumentMapper(location+"UpdatePostById", postUpdateRepository)
-	if validator.IsError(dataToMongoDocumentMapper) {
-		return nil, dataToMongoDocumentMapper
+
+	// Map the user update repository to a BSON document for MongoDB update.
+	postUpdateBson := mongoModel.DataToMongoDocumentMapper(location+"UpdatePostById", postUpdateRepository)
+	if validator.IsError(postUpdateBson.Error) {
+		return nil, postUpdateBson.Error
 	}
 
 	postObjectID, hexToObjectIDMapperError := mongoModel.HexToObjectIDMapper(location+"UpdatePostById", postID)
@@ -155,7 +157,7 @@ func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID
 	}
 
 	query := bson.D{{Key: "_id", Value: postObjectID}}
-	update := bson.D{{Key: "$set", Value: postMappedToMongoDB}}
+	update := bson.D{{Key: "$set", Value: postUpdateBson.Data}}
 	result := postRepository.collection.FindOneAndUpdate(ctx, query, update, options.FindOneAndUpdate().SetReturnDocument(1))
 
 	var updatedPost *postModel.Post

@@ -209,24 +209,24 @@ func (userRepository UserRepository) Register(ctx context.Context, userCreate us
 // 2. Maps the repository model to a MongoDB model.
 // 3. Updates the user in the database by executing the MongoDB update query.
 // 4. Retrieves the updated user from the database, maps it back to the domain model, and returns the result.
-func (userRepository UserRepository) UpdateCurrentUser(ctx context.Context, user userModel.UserUpdate) commonModel.Result[userModel.User] {
+func (userRepository UserRepository) UpdateCurrentUser(ctx context.Context, userUpdate userModel.UserUpdate) commonModel.Result[userModel.User] {
 	// Map user update data to a repository model.
-	userUpdateRepository := userRepositoryModel.UserUpdateToUserUpdateRepositoryMapper(user)
+	userUpdateRepository := userRepositoryModel.UserUpdateToUserUpdateRepositoryMapper(userUpdate)
 	if validator.IsError(userUpdateRepository.Error) {
 		return commonModel.NewResultOnFailure[userModel.User](userUpdateRepository.Error)
 	}
 
-	// Map repository model to a MongoDB model.
-	userUpdateMongo, dataToMongoDocumentMapper := mongoModel.DataToMongoDocumentMapper(location+"UpdateCurrentUser", userUpdateRepository)
-	if validator.IsError(dataToMongoDocumentMapper) {
-		return commonModel.NewResultOnFailure[userModel.User](dataToMongoDocumentMapper)
+	// Map the user update repository to a BSON document for MongoDB update.
+	userUpdateBSON := mongoModel.DataToMongoDocumentMapper(location+"UpdateCurrentUser", userUpdateRepository)
+	if validator.IsError(userUpdateBSON.Error) {
+		return commonModel.NewResultOnFailure[userModel.User](userUpdateBSON.Error)
 	}
 
 	// Define the MongoDB query.
 	// Define the update operation.
 	// Execute the update query and retrieve the updated user.
 	query := bson.D{{Key: "_id", Value: userUpdateRepository.Data.UserID}}
-	update := bson.D{{Key: "$set", Value: userUpdateMongo}}
+	update := bson.D{{Key: "$set", Value: userUpdateBSON.Data}}
 	result := userRepository.collection.FindOneAndUpdate(ctx, query, update, options.FindOneAndUpdate().SetReturnDocument(1))
 
 	// Decode the updated user from the result.

@@ -1,6 +1,7 @@
 package mongo
 
 import (
+	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -16,14 +17,14 @@ import (
 // Returns:
 // - A pointer to a BSON document.
 // - An error if the conversion fails.
-func DataToMongoDocumentMapper(location string, incomingData any) (*bson.D, error) {
+func DataToMongoDocumentMapper(location string, incomingData any) commonModel.Result[*bson.D] {
 	// Marshal incoming data to BSON format.
 	data, err := bson.Marshal(incomingData)
 	if validator.IsError(err) {
 		// Log and handle the marshaling error.
-		internalError := domainError.NewInternalError(location+" DataToMongoDocumentMapper.bson.Marshal", err.Error())
+		internalError := domainError.NewInternalError(location+".DataToMongoDocumentMapper.bson.Marshal", err.Error())
 		logging.Logger(internalError)
-		return nil, internalError
+		return commonModel.NewResultOnFailure[*bson.D](internalError)
 	}
 
 	// Unmarshal the BSON data into a BSON document.
@@ -31,12 +32,12 @@ func DataToMongoDocumentMapper(location string, incomingData any) (*bson.D, erro
 	err = bson.Unmarshal(data, &document)
 	if err != nil {
 		// Log and handle the unmarshaling error.
-		internalError := domainError.NewInternalError(location+" DataToMongoDocumentMapper.bson.Unmarshal", err.Error())
+		internalError := domainError.NewInternalError(location+".DataToMongoDocumentMapper.bson.Unmarshal", err.Error())
 		logging.Logger(internalError)
-		return nil, internalError
+		return commonModel.NewResultOnFailure[*bson.D](internalError)
 	}
 
-	return &document, nil
+	return commonModel.NewResultOnSuccess[*bson.D](&document)
 }
 
 // HexToObjectIDMapper converts a hexadecimal string representation of MongoDB ObjectID

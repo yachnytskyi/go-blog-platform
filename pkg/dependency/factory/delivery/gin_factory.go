@@ -150,6 +150,7 @@ func (ginFactory *GinFactory) CloseServer(ctx context.Context) {
 		internalError := domainError.NewInternalError(location+"CloseServer.Server.Shutdown", shutDownError.Error())
 		logging.Logger(internalError)
 	}
+
 	// Log successful server shutdown.
 	logging.Logger(successfullyClosed)
 }

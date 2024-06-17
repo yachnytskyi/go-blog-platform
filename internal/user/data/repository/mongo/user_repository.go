@@ -76,11 +76,11 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 	option.SetSort(sortOptions)
 
 	// Query the database to fetch users.
-	cursor, cursorFindError := userRepository.collection.Find(ctx, query, &option)
-	if validator.IsError(cursorFindError) {
+	cursor, findError := userRepository.collection.Find(ctx, query, &option)
+	if validator.IsError(findError) {
 		// If an error occurs while finding documents, log and return an item not found error.
 		queryString := commonUtility.ConvertQueryToString(query)
-		itemNotFoundError := domainError.NewItemNotFoundError(location+"GetAllUsers.Find", queryString, cursorFindError.Error())
+		itemNotFoundError := domainError.NewItemNotFoundError(location+"GetAllUsers.Find", queryString, findError.Error())
 		logging.Logger(itemNotFoundError)
 		return commonModel.NewResultOnFailure[userModel.Users](itemNotFoundError)
 	}
@@ -90,10 +90,10 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 	fetchedUsers := make([]userRepositoryModel.UserRepository, 0, paginationQuery.Limit)
 	for cursor.Next(ctx) {
 		user := userRepositoryModel.UserRepository{}
-		cursorDecodeError := cursor.Decode(&user)
-		if validator.IsError(cursorDecodeError) {
+		decodeError := cursor.Decode(&user)
+		if validator.IsError(decodeError) {
 			// If an error occurs while decoding documents, log and return an internal error.
-			internalError := domainError.NewInternalError(location+"GetAllUsers.cursor.decode", cursorDecodeError.Error())
+			internalError := domainError.NewInternalError(location+"GetAllUsers.cursor.decode", decodeError.Error())
 			logging.Logger(internalError)
 			return commonModel.NewResultOnFailure[userModel.Users](internalError)
 		}
@@ -151,15 +151,15 @@ func (userRepository UserRepository) CheckEmailDuplicate(ctx context.Context, em
 
 	// Find and decode the user.
 	// If no user is found, return nil (indicating that the email is unique).
-	userFindOneError := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
-	if validator.IsError(userFindOneError) {
-		if userFindOneError == mongo.ErrNoDocuments {
+	findOneError := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
+	if validator.IsError(findOneError) {
+		if findOneError == mongo.ErrNoDocuments {
 			// No user found, email is unique
 			return nil
 		}
 
 		// If an error occurs during the database query, log it as an internal error.
-		internalError := domainError.NewInternalError(location+"CheckEmailDuplicate.FindOne.Decode", userFindOneError.Error())
+		internalError := domainError.NewInternalError(location+"CheckEmailDuplicate.FindOne.Decode", findOneError.Error())
 		logging.Logger(internalError)
 		return internalError
 	}
@@ -211,9 +211,9 @@ func (userRepository UserRepository) Register(ctx context.Context, userCreate us
 // 4. Retrieves the updated user from the database, maps it back to the domain model, and returns the result.
 func (userRepository UserRepository) UpdateCurrentUser(ctx context.Context, user userModel.UserUpdate) commonModel.Result[userModel.User] {
 	// Map user update data to a repository model.
-	userUpdateRepository, userUpdateError := userRepositoryModel.UserUpdateToUserUpdateRepositoryMapper(user)
-	if validator.IsError(userUpdateError) {
-		return commonModel.NewResultOnFailure[userModel.User](userUpdateError)
+	userUpdateRepository := userRepositoryModel.UserUpdateToUserUpdateRepositoryMapper(user)
+	if validator.IsError(userUpdateRepository.Error) {
+		return commonModel.NewResultOnFailure[userModel.User](userUpdateRepository.Error)
 	}
 
 	// Map repository model to a MongoDB model.
@@ -225,7 +225,7 @@ func (userRepository UserRepository) UpdateCurrentUser(ctx context.Context, user
 	// Define the MongoDB query.
 	// Define the update operation.
 	// Execute the update query and retrieve the updated user.
-	query := bson.D{{Key: "_id", Value: userUpdateRepository.UserID}}
+	query := bson.D{{Key: "_id", Value: userUpdateRepository.Data.UserID}}
 	update := bson.D{{Key: "$set", Value: userUpdateMongo}}
 	result := userRepository.collection.FindOneAndUpdate(ctx, query, update, options.FindOneAndUpdate().SetReturnDocument(1))
 
@@ -313,20 +313,9 @@ func (userRepository UserRepository) UpdatePasswordResetTokenUserByEmail(ctx con
 	return nil
 }
 
-func (userRepository UserRepository) SendEmailVerificationMessage(ctx context.Context, user userModel.User, data userModel.EmailData) error {
-	sendEmailError := userRepositoryMail.SendEmail(ctx, user, data)
+func (userRepository UserRepository) SendEmail(user userModel.User, data userModel.EmailData) error {
+	sendEmailError := userRepositoryMail.SendEmail(location, user, data)
 	if validator.IsError(sendEmailError) {
-		logging.Logger(sendEmailError)
-		return sendEmailError
-	}
-
-	return nil
-}
-
-func (userRepository UserRepository) SendEmailForgottenPasswordMessage(ctx context.Context, user userModel.User, data userModel.EmailData) error {
-	sendEmailError := userRepositoryMail.SendEmail(ctx, user, data)
-	if validator.IsError(sendEmailError) {
-		logging.Logger(sendEmailError)
 		return sendEmailError
 	}
 
@@ -357,10 +346,10 @@ func (userRepository UserRepository) ensureUniqueEmailIndex(ctx context.Context)
 func (userRepository UserRepository) getUserByQuery(location string, ctx context.Context, query bson.M) commonModel.Result[userModel.User] {
 	// Initialize a User object and find the user based on the provided query.
 	fetchedUser := userRepositoryModel.UserRepository{}
-	userFindOneError := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
-	if validator.IsError(userFindOneError) {
+	findOneError := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
+	if validator.IsError(findOneError) {
 		queryString := commonUtility.ConvertQueryToString(query)
-		itemNotFoundError := domainError.NewItemNotFoundError(location+".getUserByQuery.Decode", queryString, userFindOneError.Error())
+		itemNotFoundError := domainError.NewItemNotFoundError(location+".getUserByQuery.Decode", queryString, findOneError.Error())
 		logging.Logger(itemNotFoundError)
 		return commonModel.NewResultOnFailure[userModel.User](itemNotFoundError)
 	}

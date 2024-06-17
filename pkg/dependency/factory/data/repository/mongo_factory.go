@@ -60,11 +60,19 @@ func (mongoDBFactory *MongoDBFactory) NewRepository(ctx context.Context) any {
 }
 
 // CloseRepository closes the MongoDB client and releases resources.
+// Parameters:
+// - ctx: The context to control the timeout and cancellation for the disconnect operation.
 func (mongoDBFactory *MongoDBFactory) CloseRepository(ctx context.Context) {
-	if validator.IsValueNotEmpty(mongoDBFactory.MongoClient) {
-		mongoDBFactory.MongoClient.Disconnect(ctx)
-		logging.Logger(dbConnectionClosed)
+	// Attempt to disconnect the MongoDB client.
+	disconnectError := mongoDBFactory.MongoClient.Disconnect(ctx)
+	if validator.IsError(disconnectError) {
+		// Log any errors that occur during disconnection.
+		internalError := domainError.NewInternalError(location+"CloseRepository.Disconnect", disconnectError.Error())
+		logging.Logger(internalError)
 	}
+
+	// Log a success message if the disconnection is successful.
+	logging.Logger(dbConnectionClosed)
 }
 
 // NewUserRepository creates and returns a new UserRepository instance using the provided database.

@@ -105,11 +105,12 @@ const (
 	Delete = "DELETE" // DELETE method for deleting resources.
 )
 
-// Error Messages
+// Error Messages.
 const (
 	StringAllowedLength            = "Can be between %d and %d characters long."          // Allowed string length message.
 	StringOptionalAllowedLength    = "Cannot be more than %d characters."                 // Optional string length message.
 	EmailAlreadyExists             = "An account with this email address already exists." // Email already exists message.
+	EmailTemplateNotFound          = "Email template not found"                           // Email template not found message.
 	AuthorizationErrorNotification = "Access denied. You do not have the required permissions to perform this action. Please try again or contact our support team for assistance."
 	LoggingErrorNotification       = "You are not logged in."                                                                                    // Not logged in message.
 	MethodNotAllowedNotification   = "Method %s is not allowed."                                                                                 // Method not allowed in message.
@@ -149,6 +150,11 @@ const (
 const (
 	UsersGroupPath = "/users" // Users domain route.
 	// Initialize other routes here
+)
+
+// Database table names.
+const (
+	UsersTable = "users" // UsersTable represents the name of the users table in the database.
 )
 
 // contextKey is a custom type for context keys to prevent collisions.

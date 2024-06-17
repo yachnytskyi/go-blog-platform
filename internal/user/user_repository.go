@@ -13,8 +13,7 @@ type UserRepository interface {
 	GetUserById(ctx context.Context, userID string) commonModel.Result[userModel.User]
 	GetUserByEmail(ctx context.Context, email string) commonModel.Result[userModel.User]
 	CheckEmailDuplicate(ctx context.Context, email string) error
-	SendEmailVerificationMessage(ctx context.Context, user userModel.User, data userModel.EmailData) error
-	SendEmailForgottenPasswordMessage(ctx context.Context, user userModel.User, data userModel.EmailData) error
+	SendEmail(user userModel.User, data userModel.EmailData) error
 	Register(ctx context.Context, user userModel.UserCreate) commonModel.Result[userModel.User]
 	UpdateCurrentUser(ctx context.Context, user userModel.UserUpdate) commonModel.Result[userModel.User]
 	DeleteUserById(ctx context.Context, userID string) error

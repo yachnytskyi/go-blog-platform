@@ -110,9 +110,9 @@ func (userUseCaseV1 UserUseCaseV1) Register(ctx context.Context, userCreateData 
 	// Prepare email data for user registration.
 	// Send the email verification message and return the created user.
 	emailData := prepareEmailDataForRegistration(createdUser.Data.Name, tokenValue)
-	sendEmailVerificationMessageError := userUseCaseV1.userRepository.SendEmailVerificationMessage(ctx, createdUser.Data, emailData)
-	if validator.IsError(sendEmailVerificationMessageError) {
-		return commonModel.NewResultOnFailure[userModel.User](domainError.HandleError(sendEmailVerificationMessageError))
+	sendEmailError := userUseCaseV1.userRepository.SendEmail(createdUser.Data, emailData)
+	if validator.IsError(sendEmailError) {
+		return commonModel.NewResultOnFailure[userModel.User](domainError.HandleError(sendEmailError))
 	}
 
 	return createdUser
@@ -225,10 +225,9 @@ func (userUseCaseV1 UserUseCaseV1) UpdatePasswordResetTokenUserByEmail(ctx conte
 	}
 
 	emailData := prepareEmailDataForUpdatePasswordResetToken(fetchedUser.Data.Name, tokenValue)
-	sendEmailForgottenPasswordMessageError := userUseCaseV1.userRepository.SendEmailForgottenPasswordMessage(ctx, fetchedUser.Data, emailData)
-	if validator.IsError(sendEmailForgottenPasswordMessageError) {
-		sendEmailForgottenPasswordMessageError = domainError.HandleError(sendEmailForgottenPasswordMessageError)
-		return sendEmailForgottenPasswordMessageError
+	sendEmailError := userUseCaseV1.userRepository.SendEmail(fetchedUser.Data, emailData)
+	if validator.IsError(sendEmailError) {
+		return domainError.HandleError(sendEmailError)
 	}
 
 	return nil

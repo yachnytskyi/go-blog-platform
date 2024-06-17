@@ -3,7 +3,6 @@ package mail
 
 import (
 	"bytes"
-	"context"
 	"crypto/tls"
 	"html/template"
 	"os"
@@ -22,21 +21,20 @@ import (
 
 const (
 	loggerMessage = "parsing template..."
-	location      = "User.Data.Repository.External.Mail."
 )
 
 // ParseTemplateDirectory walks through the specified directory and parses all template files.
 // It returns a commonModel.Result containing a pointer to the parsed template.
 // Parameters:
 // - templatePath: the path to the directory containing the template files.
-func ParseTemplateDirectory(templatePath string) commonModel.Result[*template.Template] {
+func ParseTemplateDirectory(location, templatePath string) commonModel.Result[*template.Template] {
 	var paths []string
 
 	// Walk through the directory and gather all file paths.
 	filePathWalkError := filepath.Walk(templatePath, func(path string, info os.FileInfo, walkError error) error {
 		if validator.IsError(walkError) {
 			// Handle any error encountered during walking the directory.
-			internalError := domainError.NewInternalError(location+"ParseTemplateDirectory.Walk", walkError.Error())
+			internalError := domainError.NewInternalError(location+".ParseTemplateDirectory.Walk", walkError.Error())
 			logging.Logger(internalError)
 			return internalError
 		}
@@ -51,7 +49,7 @@ func ParseTemplateDirectory(templatePath string) commonModel.Result[*template.Te
 	logging.Logger(loggerMessage)
 	if validator.IsError(filePathWalkError) {
 		// Handle error if walking the directory fails.
-		internalError := domainError.NewInternalError(location+"ParseTemplateDirectory."+loggerMessage, filePathWalkError.Error())
+		internalError := domainError.NewInternalError(location+".ParseTemplateDirectory."+loggerMessage, filePathWalkError.Error())
 		logging.Logger(internalError)
 		return commonModel.NewResultOnFailure[*template.Template](internalError)
 	}
@@ -60,7 +58,7 @@ func ParseTemplateDirectory(templatePath string) commonModel.Result[*template.Te
 	parseFiles, parseFilesError := template.ParseFiles(paths...)
 	if validator.IsError(parseFilesError) {
 		// Handle error if parsing the templates fails.
-		internalError := domainError.NewInternalError(location+"ParseFiles."+loggerMessage, parseFilesError.Error())
+		internalError := domainError.NewInternalError(location+".ParseFiles."+loggerMessage, parseFilesError.Error())
 		logging.Logger(internalError)
 		return commonModel.NewResultOnFailure[*template.Template](internalError)
 	}
@@ -72,10 +70,9 @@ func ParseTemplateDirectory(templatePath string) commonModel.Result[*template.Te
 // SendEmail sends an email to the specified user using the provided email data.
 // It returns an error if sending the email fails.
 // Parameters:
-// - ctx: context for controlling timeouts and cancellations.
 // - user: the recipient of the email.
 // - data: the data to be used in the email body.
-func SendEmail(ctx context.Context, user userModel.User, data userModel.EmailData) error {
+func SendEmail(location string, user userModel.User, data userModel.EmailData) error {
 	// Email configuration.
 	emailConfig := config.AppConfig.Email
 	smtpPass := emailConfig.SMTPPassword
@@ -88,7 +85,7 @@ func SendEmail(ctx context.Context, user userModel.User, data userModel.EmailDat
 	dialer.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 
 	// Prepare the email message.
-	prepareSendMessage := PrepareSendMessage(ctx, user.Email, data)
+	prepareSendMessage := PrepareSendMessage(location, user.Email, data)
 	if validator.IsError(prepareSendMessage.Error) {
 		// Handle error if preparing the email message fails.
 		return prepareSendMessage.Error
@@ -98,7 +95,7 @@ func SendEmail(ctx context.Context, user userModel.User, data userModel.EmailDat
 	dialAndSendError := dialer.DialAndSend(prepareSendMessage.Data)
 	if validator.IsError(dialAndSendError) {
 		// Handle error if sending the email fails.
-		internalError := domainError.NewInternalError(location+"SendEmail.DialAndSend", dialAndSendError.Error())
+		internalError := domainError.NewInternalError(location+".SendEmail.DialAndSend", dialAndSendError.Error())
 		logging.Logger(internalError)
 		return internalError
 	}
@@ -109,10 +106,9 @@ func SendEmail(ctx context.Context, user userModel.User, data userModel.EmailDat
 // PrepareSendMessage prepares the email message to be sent.
 // It returns a commonModel.Result containing a pointer to the prepared message.
 // Parameters:
-// - ctx: context for controlling timeouts and cancellations.
 // - userEmail: the recipient's email address.
 // - data: the data to be used in the email body, including the template path and name.
-func PrepareSendMessage(ctx context.Context, userEmail string, data userModel.EmailData) commonModel.Result[*gomail.Message] {
+func PrepareSendMessage(location, userEmail string, data userModel.EmailData) commonModel.Result[*gomail.Message] {
 	// Load email configuration.
 	emailConfig := config.AppConfig.Email
 
@@ -124,10 +120,10 @@ func PrepareSendMessage(ctx context.Context, userEmail string, data userModel.Em
 	var body bytes.Buffer
 
 	// Parse the template directory to get the templates.
-	template := ParseTemplateDirectory(data.TemplatePath)
+	template := ParseTemplateDirectory(location, data.TemplatePath)
 	if validator.IsError(template.Error) {
 		// Handle template parsing error.
-		internalError := domainError.NewInternalError(location+"SendEmail.PrepareSendMessage.ParseTemplateDirectory", template.Error.Error())
+		internalError := domainError.NewInternalError(location+".SendEmail.PrepareSendMessage.ParseTemplateDirectory", template.Error.Error())
 		logging.Logger(internalError)
 		return commonModel.NewResultOnFailure[*gomail.Message](internalError)
 	}
@@ -136,7 +132,7 @@ func PrepareSendMessage(ctx context.Context, userEmail string, data userModel.Em
 	emailTemplate := template.Data.Lookup(data.TemplateName)
 	if emailTemplate == nil {
 		// Handle missing email template.
-		internalError := domainError.NewInternalError(location+"SendEmail.PrepareSendMessage.TemplateNotFound", constants.EmailTemplateNotFound)
+		internalError := domainError.NewInternalError(location+".SendEmail.PrepareSendMessage.TemplateNotFound", constants.EmailTemplateNotFound)
 		logging.Logger(internalError)
 		return commonModel.NewResultOnFailure[*gomail.Message](internalError)
 	}
@@ -145,7 +141,7 @@ func PrepareSendMessage(ctx context.Context, userEmail string, data userModel.Em
 	executeError := emailTemplate.Execute(&body, &data)
 	if validator.IsError(executeError) {
 		// Handle template execution error.
-		internalError := domainError.NewInternalError(location+"SendEmail.PrepareSendMessage.Execute", executeError.Error())
+		internalError := domainError.NewInternalError(location+".SendEmail.PrepareSendMessage.Execute", executeError.Error())
 		logging.Logger(internalError)
 		return commonModel.NewResultOnFailure[*gomail.Message](internalError)
 	}

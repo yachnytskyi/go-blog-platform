@@ -2,14 +2,16 @@ package utility
 
 import "strings"
 
-const (
-	firstElement = 0
-)
-
-func UserFirstName(firstName string) string {
-	if strings.Contains(firstName, " ") {
-		firstName = strings.Split(firstName, " ")[firstElement]
+// UserFirstName extracts the first name from a given string.
+// If the string contains spaces, it splits and returns the first word.
+// Otherwise, it returns the original string.
+func UserFirstName(fullName string) string {
+	// Check if there is a space in the name
+	spaceIndex := strings.Index(fullName, " ")
+	if spaceIndex != -1 {
+		// Return the substring up to the first space.
+		return fullName[:spaceIndex]
 	}
-
-	return firstName
+	// If no space is found, return the original string.
+	return fullName
 }

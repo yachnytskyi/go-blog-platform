@@ -1,8 +1,8 @@
 package mongo
 
 import (
-	"github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator/domain"
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
+	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/domain"
 )
 
 const (
@@ -19,7 +19,7 @@ const (
 // Returns:
 // - An integer representing the sort order, where 1 means ascending and -1 means descending.
 func SetSortOrder(sortOrder string) int {
-	sortOrder = domain.ToLowerString(sortOrder)
+	sortOrder = domainUtility.ToLowerString(sortOrder)
 	switch sortOrder {
 	case constants.SortAscend:
 		return sortAscend

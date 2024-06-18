@@ -3,9 +3,9 @@ package domain
 import (
 	"fmt"
 	"regexp"
-	"strings"
 
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
+	domainModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 )
@@ -13,34 +13,6 @@ import (
 const (
 	location = "pkg.utility.validator.domain."
 )
-
-// SanitizeString trims leading and trailing white spaces from the input string.
-// Parameters:
-// - data: The string to be sanitized.
-// Returns:
-// - The sanitized string.
-func SanitizeString(data string) string {
-	return strings.TrimSpace(data)
-}
-
-// ToLowerString converts the input string to lowercase.
-// Parameters:
-// - data: The string to be converted to lowercase.
-// Returns:
-// - The lowercase string.
-func ToLowerString(data string) string {
-	return strings.ToLower(data)
-}
-
-// SanitizeAndToLowerString trims leading and trailing white spaces from the input string
-// and converts it to lowercase.
-// Parameters:
-// - data: The string to be sanitized and converted to lowercase.
-// Returns:
-// - The sanitized and lowercase string.
-func SanitizeAndToLowerString(data string) string {
-	return strings.ToLower(strings.TrimSpace(data))
-}
 
 // ValidateField validates a required field based on the provided commonValidator.
 // It checks the string length and character validity using regular expressions.
@@ -50,7 +22,7 @@ func SanitizeAndToLowerString(data string) string {
 // - validationErrors: A slice of existing validation errors to be appended to.
 // Returns:
 // - A slice of validation errors including any new errors found.
-func ValidateField(field string, commonValidator CommonValidator, validationErrors []error) []error {
+func ValidateField(field string, commonValidator domainModel.CommonValidator, validationErrors []error) []error {
 	// Initialize a slice to hold validation errors.
 	errors := validationErrors
 
@@ -90,14 +62,15 @@ func ValidateField(field string, commonValidator CommonValidator, validationErro
 // - validationErrors: A slice of existing validation errors to be appended to.
 // Returns:
 // - A slice of validation errors including any new errors found.
-func ValidateOptionalField(field string, commonValidator CommonValidator, validationErrors []error) []error {
+func ValidateOptionalField(field string, commonValidator domainModel.CommonValidator, validationErrors []error) []error {
 	// Initialize a slice to hold validation errors, preserving existing ones.
 	errors := append([]error(nil), validationErrors...)
 
 	// Check if the string length is invalid.
 	if IsStringLengthInvalid(field, commonValidator.MinLength, commonValidator.MaxLength) {
 		// Set the notification message for optional string length violation.
-		commonValidator.Notification = fmt.Sprintf(constants.StringOptionalAllowedLength, commonValidator.MinLength, commonValidator.MaxLength)
+		commonValidator.Notification = fmt.Sprintf(constants.StringOptionalAllowedLength, commonValidator.MaxLength)
+
 		// Create a new validation error with context and log it.
 		validationError := domainError.NewValidationError(location+"ValidateOptionalField.IsStringLengthInvalid",
 			commonValidator.FieldName, constants.FieldOptional, commonValidator.Notification)

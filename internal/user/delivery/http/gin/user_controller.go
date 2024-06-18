@@ -339,8 +339,8 @@ func (userController UserController) ResetUserPassword(controllerContext any) {
 // It is typically used during user login to store authentication-related information.
 func setLoginCookies(ginContext *gin.Context, accessToken, refreshToken string) {
 	// Retrieve application configuration for cookie settings.
-	accessTokenConfig := config.AppConfig.AccessToken
-	refreshTokenConfig := config.AppConfig.RefreshToken
+	accessTokenConfig := config.GetAccessConfig()
+	refreshTokenConfig := config.GetRefreshConfig()
 	securityConfig := config.GetSecurityConfig()
 
 	// Set the access token cookie with the provided value and configuration.
@@ -360,8 +360,8 @@ func setLoginCookies(ginContext *gin.Context, accessToken, refreshToken string) 
 // It is typically used when refreshing the access token.
 func setRefreshTokenCookies(ginContext *gin.Context, accessToken, refreshToken string) {
 	// Retrieve application configuration for cookie settings.
-	accessTokenConfig := config.AppConfig.AccessToken
-	refreshTokenConfig := config.AppConfig.RefreshToken
+	accessTokenConfig := config.GetAccessConfig()
+	refreshTokenConfig := config.GetRefreshConfig()
 	securityConfig := config.GetSecurityConfig()
 
 	// Set the access token cookie with the provided value and configuration.

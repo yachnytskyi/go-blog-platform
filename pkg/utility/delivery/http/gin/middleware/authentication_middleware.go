@@ -29,17 +29,17 @@ func AuthenticationMiddleware() gin.HandlerFunc {
 		defer cancel()
 
 		// Extract the refresh token from the request headers or cookies.
-		accessToken, tokenError := extractAccessToken(ginContext)
-		if validator.IsError(tokenError) {
+		accessToken := extractAccessToken(ginContext)
+		if validator.IsError(accessToken.Error) {
 			// Abort the request with an unauthorized status and respond with a JSON error.
-			abortWithStatusJSON(ginContext, tokenError, constants.StatusUnauthorized)
+			abortWithStatusJSON(ginContext, accessToken.Error, constants.StatusUnauthorized)
 			return
 		}
 
 		// Get the application configuration.
-		accessTokenConfig := config.AppConfig.AccessToken
+		accessTokenConfig := config.GetAccessConfig()
 		// Validate the JWT token.
-		userTokenPayload := domainUtility.ValidateJWTToken(location+".AuthenticationMiddleware", accessToken, accessTokenConfig.PublicKey)
+		userTokenPayload := domainUtility.ValidateJWTToken(location+".AuthenticationMiddleware", accessToken.Data, accessTokenConfig.PublicKey)
 		if validator.IsError(userTokenPayload.Error) {
 			// Handle token validation error and respond with an unauthorized status and JSON error.
 			httpAuthorizationError := httpError.NewHttpAuthorizationErrorView("", constants.LoggingErrorNotification)

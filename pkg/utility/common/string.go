@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 
+	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -25,17 +26,17 @@ func Encode(data string) string {
 // Returns:
 // - The decoded string data.
 // - An error if the decoding fails, wrapped in a domain-specific error with logging.
-func Decode(location, encodedString string) (string, error) {
-	data, decodeStringError := base64.StdEncoding.DecodeString(encodedString)
+func Decode(location, encodedString string) commonModel.Result[string] {
+	decodeString, decodeStringError := base64.StdEncoding.DecodeString(encodedString)
 	if validator.IsError(decodeStringError) {
 		// Create and log an internal error with context if decoding fails.
 		internalError := domainError.NewInternalError(location+".Decode.DecodeString", decodeStringError.Error())
 		logging.Logger(internalError)
-		// Return an empty string and the internal error.
-		return "", internalError
+		// Return the internal error.
+		return commonModel.NewResultOnFailure[string](internalError)
 	}
 
-	return string(data), nil
+	return commonModel.NewResultOnSuccess[string](string(decodeString))
 }
 
 // ConvertQueryToString converts a query to a string representation.

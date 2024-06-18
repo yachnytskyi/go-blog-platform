@@ -9,9 +9,14 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+const (
+	emptyID = "id is empty"
+)
+
 // DataToMongoDocumentMapper converts the incoming data to a BSON document.
 // It uses BSON marshaling and unmarshaling to perform the conversion.
 // Parameters:
+// - ctx: A context to support cancellation and timeout.
 // - location: A string representing the location or context for error logging.
 // - incomingData: The data to be converted to a BSON document.
 // Returns:
@@ -48,17 +53,26 @@ func DataToMongoDocumentMapper(location string, incomingData any) commonModel.Re
 // Returns:
 // - The converted ObjectID.
 // - An error if the conversion fails.
-func HexToObjectIDMapper(location, id string) (primitive.ObjectID, error) {
+func HexToObjectIDMapper(location, id string) commonModel.Result[primitive.ObjectID] {
+	// Check if the provided id is empty.
+	if id == "" {
+		// Log and handle the empty id error.
+		internalError := domainError.NewInternalError(location+".HexToObjectIDMapper", emptyID)
+		logging.Logger(internalError)
+		// Return a failure result with the internal error.
+		return commonModel.NewResultOnFailure[primitive.ObjectID](internalError)
+	}
+
 	// Convert the hexadecimal string to primitive.ObjectID.
 	objectID, objectIDFromHexError := primitive.ObjectIDFromHex(id)
 	if validator.IsError(objectIDFromHexError) {
 		// Log and handle the conversion error.
-		itemNotFoundError := domainError.NewItemNotFoundError(location+".HexToObjectIDMapper.primitive.ObjectIDFromHex", "", objectIDFromHexError.Error())
-		logging.Logger(itemNotFoundError)
+		internalError := domainError.NewInternalError(location+".HexToObjectIDMapper.primitive.ObjectIDFromHex", objectIDFromHexError.Error())
+		logging.Logger(internalError)
 		// Return a default ObjectID and the error.
-		return primitive.NilObjectID, itemNotFoundError
+		return commonModel.NewResultOnFailure[primitive.ObjectID](internalError)
 	}
 
-	// Return the successfully converted ObjectID and nil error.
-	return objectID, nil
+	// Return the successfully converted ObjectID.
+	return commonModel.NewResultOnSuccess[primitive.ObjectID](objectID)
 }

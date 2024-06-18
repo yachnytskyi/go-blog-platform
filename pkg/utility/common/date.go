@@ -4,6 +4,7 @@ import (
 	"time"
 
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
+	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -25,15 +26,15 @@ func FormatDate(data time.Time) string {
 // Returns:
 // - The parsed time.Time instance.
 // - An error if the parsing fails, wrapped in a Error-specific error with logging.
-func ParseDate(location, data string) (time.Time, error) {
+func ParseDate(location, data string) commonModel.Result[time.Time] {
 	parsedTime, parseError := time.Parse(constants.DateTimeFormat, data)
 	if validator.IsError(parseError) {
 		// Create and log an internal error with context if parsing fails.
 		internalError := domainError.NewInternalError(location+".ParseDate.time.Parse", parseError.Error())
 		logging.Logger(internalError)
-		// Return a default time.Time instance and the internal error.
-		return time.Time{}, internalError
+		// Return the internal error.
+		return commonModel.NewResultOnFailure[time.Time](internalError)
 	}
 
-	return parsedTime, nil
+	return commonModel.NewResultOnSuccess[time.Time](parsedTime)
 }

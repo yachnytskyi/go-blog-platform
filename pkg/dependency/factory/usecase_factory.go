@@ -24,7 +24,7 @@ const (
 // - container: The dependency injection container where the use case factory will be registered.
 func InjectUseCase(ctx context.Context, container *applicationModel.Container) {
 	// Load the core configuration from the application's configuration.
-	coreConfig := config.AppConfig.Core
+	coreConfig := config.GetCoreConfig()
 
 	// Switch based on the configured use case type.
 	switch coreConfig.UseCase {

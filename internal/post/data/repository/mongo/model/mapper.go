@@ -33,13 +33,13 @@ func PostRepositoryToPostMapper(postRepository *PostRepository) *postModel.Post 
 }
 
 func PostCreateToPostCreateRepositoryMapper(postCreate *postModel.PostCreate) (*PostCreateRepository, error) {
-	userObjectID, hexToObjectIDMapperError := mongoModel.HexToObjectIDMapper(location+"PostCreateToPostCreateRepositoryMapper", postCreate.UserID)
-	if validator.IsError(hexToObjectIDMapperError) {
-		return &PostCreateRepository{}, hexToObjectIDMapperError
+	userObjectID := mongoModel.HexToObjectIDMapper(location+"PostCreateToPostCreateRepositoryMapper", postCreate.UserID)
+	if validator.IsError(userObjectID.Error) {
+		return &PostCreateRepository{}, userObjectID.Error
 	}
 
 	return &PostCreateRepository{
-		UserID:    userObjectID,
+		UserID:    userObjectID.Data,
 		Title:     postCreate.Title,
 		Content:   postCreate.Content,
 		Image:     postCreate.Image,
@@ -50,19 +50,19 @@ func PostCreateToPostCreateRepositoryMapper(postCreate *postModel.PostCreate) (*
 }
 
 func PostUpdateToPostUpdateRepositoryMapper(postUpdate *postModel.PostUpdate) (*PostUpdateRepository, error) {
-	postObjectID, hexToObjectIDMapperError := mongoModel.HexToObjectIDMapper(location+"PostUpdateToPostUpdateRepositoryMapper.postObjectID", postUpdate.PostID)
-	if validator.IsError(hexToObjectIDMapperError) {
-		return &PostUpdateRepository{}, hexToObjectIDMapperError
+	postObjectID := mongoModel.HexToObjectIDMapper(location+"PostUpdateToPostUpdateRepositoryMapper.postObjectID", postUpdate.PostID)
+	if validator.IsError(postObjectID.Error) {
+		return &PostUpdateRepository{}, postObjectID.Error
 	}
 
-	userObjectID, hexToObjectIDMapperError := mongoModel.HexToObjectIDMapper(location+"PostUpdateToPostUpdateRepositoryMapper.userObjectID", postUpdate.UserID)
-	if validator.IsError(hexToObjectIDMapperError) {
-		return &PostUpdateRepository{}, hexToObjectIDMapperError
+	userObjectID := mongoModel.HexToObjectIDMapper(location+"PostUpdateToPostUpdateRepositoryMapper.userObjectID", postUpdate.UserID)
+	if validator.IsError(userObjectID.Error) {
+		return &PostUpdateRepository{}, userObjectID.Error
 	}
 
 	return &PostUpdateRepository{
-		PostID:    postObjectID,
-		UserID:    userObjectID,
+		PostID:    postObjectID.Data,
+		UserID:    userObjectID.Data,
 		Title:     postUpdate.Title,
 		Content:   postUpdate.Content,
 		Image:     postUpdate.Image,

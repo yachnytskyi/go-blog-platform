@@ -43,13 +43,13 @@ func UserCreateToUserCreateRepositoryMapper(userCreate userModel.UserCreate) Use
 }
 
 func UserUpdateToUserUpdateRepositoryMapper(userUpdate userModel.UserUpdate) commonModel.Result[UserUpdateRepository] {
-	userObjectID, hexToObjectIDMapperError := mongoModel.HexToObjectIDMapper(location+"UserUpdateToUserUpdateRepositoryMapper", userUpdate.UserID)
-	if validator.IsError(hexToObjectIDMapperError) {
-		return commonModel.NewResultOnFailure[UserUpdateRepository](hexToObjectIDMapperError)
+	userObjectID := mongoModel.HexToObjectIDMapper(location+"UserUpdateToUserUpdateRepositoryMapper", userUpdate.UserID)
+	if validator.IsError(userObjectID.Error) {
+		return commonModel.NewResultOnFailure[UserUpdateRepository](userObjectID.Error)
 	}
 
 	userUpdateRepository := UserUpdateRepository{
-		UserID:    userObjectID,
+		UserID:    userObjectID.Data,
 		Name:      userUpdate.Name,
 		UpdatedAt: userUpdate.UpdatedAt,
 	}

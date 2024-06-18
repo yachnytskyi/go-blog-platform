@@ -23,7 +23,7 @@ func ValidationErrorToHttpValidationErrorViewMapper(validationError domainError.
 // Returns:
 // - An HttpValidationErrorsView populated with the mapped validation errors.
 func ValidationErrorsToHttpValidationErrorsViewMapper(validationErrors domainError.ValidationErrors) HttpValidationErrorsView {
-	httpValidationErrorsView := make([]HttpValidationErrorView, 0, len(validationErrors))
+	httpValidationErrorsView := make([]error, 0, len(validationErrors))
 	for _, validationError := range validationErrors {
 		validationError, ok := validationError.(domainError.ValidationError)
 		if ok {

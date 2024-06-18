@@ -124,14 +124,14 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 
 // GetUserById retrieves a user by their ID from the database.
 func (userRepository UserRepository) GetUserById(ctx context.Context, userID string) commonModel.Result[userModel.User] {
-	userObjectID, hexToObjectIDMapperError := mongoModel.HexToObjectIDMapper(location+"GetUserById", userID)
-	if validator.IsError(hexToObjectIDMapperError) {
-		return commonModel.NewResultOnFailure[userModel.User](hexToObjectIDMapperError)
+	userObjectID := mongoModel.HexToObjectIDMapper(location+"GetUserById", userID)
+	if validator.IsError(userObjectID.Error) {
+		return commonModel.NewResultOnFailure[userModel.User](userObjectID.Error)
 	}
 
 	// Define the MongoDB query to find the user by ObjectID.
 	// Retrieve the user from the database.
-	query := bson.M{"_id": userObjectID}
+	query := bson.M{"_id": userObjectID.Data}
 	return userRepository.getUserByQuery(location+"GetUserById", ctx, query)
 }
 
@@ -245,14 +245,14 @@ func (userRepository UserRepository) UpdateCurrentUser(ctx context.Context, user
 
 // DeleteUserById deletes a user in the repository based on the provided userID.
 func (userRepository UserRepository) DeleteUserById(ctx context.Context, userID string) error {
-	userObjectID, hexToObjectIDMapperError := mongoModel.HexToObjectIDMapper(location+"GetUserById", userID)
-	if validator.IsError(hexToObjectIDMapperError) {
-		return hexToObjectIDMapperError
+	userObjectID := mongoModel.HexToObjectIDMapper(location+"GetUserById", userID)
+	if validator.IsError(userObjectID.Error) {
+		return userObjectID.Error
 	}
 
 	// Define the MongoDB query to delete the user by ObjectID.
 	// Execute the delete query.
-	query := bson.M{"_id": userObjectID}
+	query := bson.M{"_id": userObjectID.Data}
 	result, userDeleteOneError := userRepository.collection.DeleteOne(ctx, query)
 	if validator.IsError(userDeleteOneError) {
 		internalError := domainError.NewInternalError(location+"Delete.DeleteOne", userDeleteOneError.Error())

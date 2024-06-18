@@ -34,14 +34,14 @@ func (httpValidationErrorView HttpValidationErrorView) Error() string {
 }
 
 // HttpValidationErrorsView represents a collection of validation errors in an HTTP request.
-type HttpValidationErrorsView []HttpValidationErrorView
+type HttpValidationErrorsView []error
 
 // NewHttpValidationErrorsView creates a new HttpValidationErrorsView from a slice of HttpValidationErrorView.
 // Parameters:
 // - httpValidationErrorsView: A slice of HttpValidationErrorView structs.
 // Returns:
 // - A HttpValidationErrorsView struct populated with the given validation errors.
-func NewHttpValidationErrorsView(httpValidationErrorsView []HttpValidationErrorView) HttpValidationErrorsView {
+func NewHttpValidationErrorsView(httpValidationErrorsView []error) HttpValidationErrorsView {
 	return HttpValidationErrorsView(httpValidationErrorsView)
 }
 
@@ -49,9 +49,13 @@ func NewHttpValidationErrorsView(httpValidationErrorsView []HttpValidationErrorV
 // Returns a concatenated string representation of all validation errors.
 func (httpValidationErrorsView HttpValidationErrorsView) Error() string {
 	var result strings.Builder
-	for _, validationError := range httpValidationErrorsView {
-		result.WriteString("field: " + validationError.Field + " type: " + validationError.FieldType + " notification: " + validationError.Notification)
+	for i, httpValidationError := range httpValidationErrorsView {
+		if i > 0 {
+			result.WriteString(": ")
+		}
+		result.WriteString(httpValidationError.Error())
 	}
+
 	return result.String()
 }
 

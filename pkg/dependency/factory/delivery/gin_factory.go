@@ -42,7 +42,7 @@ const (
 // configures CORS, and initializes entity-specific routers.
 func (ginFactory *GinFactory) InitializeServer(serverConfig applicationModel.ServerRouters) {
 	// Load the Gin configuration.
-	ginConfig := config.AppConfig.Gin
+	ginConfig := config.GetGinConfig()
 	// Create a new Gin router engine instance.
 	ginFactory.Router = gin.Default()
 
@@ -122,7 +122,7 @@ func (ginFactory *GinFactory) InitializeServer(serverConfig applicationModel.Ser
 // It runs the Gin router in a separate goroutine and handles any startup errors,
 // ensuring proper resource cleanup on failure.
 func (ginFactory *GinFactory) LaunchServer(ctx context.Context, container *applicationModel.Container) {
-	ginConfig := config.AppConfig.Gin
+	ginConfig := config.GetGinConfig()
 
 	go func() {
 		// Run the Gin router and handle any errors that occur.

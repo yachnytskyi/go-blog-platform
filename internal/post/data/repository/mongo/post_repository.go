@@ -82,12 +82,12 @@ func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int,
 }
 
 func (postRepository *PostRepository) GetPostById(ctx context.Context, postID string) (*postModel.Post, error) {
-	postObjectID, hexToObjectIDMapperError := mongoModel.HexToObjectIDMapper(location+"GetPostById", postID)
-	if validator.IsError(hexToObjectIDMapperError) {
-		return nil, hexToObjectIDMapperError
+	postObjectID := mongoModel.HexToObjectIDMapper(location+"GetPostById", postID)
+	if validator.IsError(postObjectID.Error) {
+		return nil, postObjectID.Error
 	}
 
-	query := bson.M{"_id": postObjectID}
+	query := bson.M{"_id": postObjectID.Data}
 	var fetchedPost *postRepositoryModel.PostRepository
 	err := postRepository.collection.FindOne(ctx, query).Decode(&fetchedPost)
 	if validator.IsError(err) {
@@ -151,12 +151,12 @@ func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID
 		return nil, postUpdateBson.Error
 	}
 
-	postObjectID, hexToObjectIDMapperError := mongoModel.HexToObjectIDMapper(location+"UpdatePostById", postID)
-	if validator.IsError(hexToObjectIDMapperError) {
-		return nil, hexToObjectIDMapperError
+	postObjectID := mongoModel.HexToObjectIDMapper(location+"UpdatePostById", postID)
+	if validator.IsError(postObjectID.Error) {
+		return nil, postObjectID.Error
 	}
 
-	query := bson.D{{Key: "_id", Value: postObjectID}}
+	query := bson.D{{Key: "_id", Value: postObjectID.Data}}
 	update := bson.D{{Key: "$set", Value: postUpdateBson.Data}}
 	result := postRepository.collection.FindOneAndUpdate(ctx, query, update, options.FindOneAndUpdate().SetReturnDocument(1))
 
@@ -170,12 +170,12 @@ func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID
 }
 
 func (postRepository *PostRepository) DeletePostByID(ctx context.Context, postID string) error {
-	postObjectID, hexToObjectIDMapperError := mongoModel.HexToObjectIDMapper(location+"GetPostById", postID)
-	if validator.IsError(hexToObjectIDMapperError) {
-		return hexToObjectIDMapperError
+	postObjectID := mongoModel.HexToObjectIDMapper(location+"GetPostById", postID)
+	if validator.IsError(postObjectID.Error) {
+		return postObjectID.Error
 	}
 
-	query := bson.M{"_id": postObjectID}
+	query := bson.M{"_id": postObjectID.Data}
 	result, err := postRepository.collection.DeleteOne(ctx, query)
 	if validator.IsError(err) {
 		return err

@@ -26,6 +26,7 @@ const (
 // ParseTemplateDirectory walks through the specified directory and parses all template files.
 // It returns a commonModel.Result containing a pointer to the parsed template.
 // Parameters:
+// - location: a string used to identify the source location in error messages and logging.
 // - templatePath: the path to the directory containing the template files.
 func ParseTemplateDirectory(location, templatePath string) commonModel.Result[*template.Template] {
 	var paths []string
@@ -70,11 +71,12 @@ func ParseTemplateDirectory(location, templatePath string) commonModel.Result[*t
 // SendEmail sends an email to the specified user using the provided email data.
 // It returns an error if sending the email fails.
 // Parameters:
+// - location: a string used to identify the source location in error messages and logging.
 // - user: the recipient of the email.
 // - data: the data to be used in the email body.
 func SendEmail(location string, user userModel.User, data userModel.EmailData) error {
 	// Email configuration.
-	emailConfig := config.AppConfig.Email
+	emailConfig := config.GetEmailConfig()
 	smtpPass := emailConfig.SMTPPassword
 	smtpUser := emailConfig.SMTPUser
 	smtpHost := emailConfig.SMTPHost
@@ -85,7 +87,7 @@ func SendEmail(location string, user userModel.User, data userModel.EmailData) e
 	dialer.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 
 	// Prepare the email message.
-	prepareSendMessage := PrepareSendMessage(location, user.Email, data)
+	prepareSendMessage := prepareSendMessage(location+".SendEmail", user.Email, data)
 	if validator.IsError(prepareSendMessage.Error) {
 		// Handle error if preparing the email message fails.
 		return prepareSendMessage.Error
@@ -103,14 +105,15 @@ func SendEmail(location string, user userModel.User, data userModel.EmailData) e
 	return nil // Return nil if email is sent successfully.
 }
 
-// PrepareSendMessage prepares the email message to be sent.
+// prepareSendMessage prepares the email message to be sent.
 // It returns a commonModel.Result containing a pointer to the prepared message.
 // Parameters:
+// - location: a string used to identify the source location in error messages and logging.
 // - userEmail: the recipient's email address.
 // - data: the data to be used in the email body, including the template path and name.
-func PrepareSendMessage(location, userEmail string, data userModel.EmailData) commonModel.Result[*gomail.Message] {
+func prepareSendMessage(location, userEmail string, data userModel.EmailData) commonModel.Result[*gomail.Message] {
 	// Load email configuration.
-	emailConfig := config.AppConfig.Email
+	emailConfig := config.GetEmailConfig()
 
 	// Set sender and recipient.
 	from := emailConfig.EmailFrom
@@ -120,7 +123,7 @@ func PrepareSendMessage(location, userEmail string, data userModel.EmailData) co
 	var body bytes.Buffer
 
 	// Parse the template directory to get the templates.
-	template := ParseTemplateDirectory(location, data.TemplatePath)
+	template := ParseTemplateDirectory(location+".prepareSendMessage", data.TemplatePath)
 	if validator.IsError(template.Error) {
 		// Handle template parsing error.
 		internalError := domainError.NewInternalError(location+".SendEmail.PrepareSendMessage.ParseTemplateDirectory", template.Error.Error())

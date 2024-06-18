@@ -2,12 +2,7 @@ package model
 
 import (
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
-	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
-	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
-	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
-	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
-	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
 func UsersToUsersViewMapper(users userModel.Users) UsersView {
@@ -38,8 +33,8 @@ func UserToUserViewMapper(user userModel.User) UserView {
 		Name:      user.Name,
 		Email:     user.Email,
 		Role:      user.Role,
-		CreatedAt: common.FormatDate(user.CreatedAt),
-		UpdatedAt: common.FormatDate(user.UpdatedAt),
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
 	}
 }
 
@@ -93,31 +88,13 @@ func UserResetPasswordViewToUserResetPassword(user UserResetPasswordView) userMo
 	}
 }
 
-func UserViewToUserMapper(location string, userView UserView) commonModel.Result[userModel.User] {
-	var httpInternalErrorsView httpError.HttpInternalErrorsView
-	created_at, parseDateError := common.ParseDate(location+".UserViewToUserMapper.created_at", userView.CreatedAt)
-	if validator.IsError(parseDateError) {
-		httpInternalErrorsView = append(httpInternalErrorsView, parseDateError)
-	}
-
-	updated_at, parseDateError := common.ParseDate(location+"UserViewToUserMapper.updated_at", userView.UpdatedAt)
-	if validator.IsError(parseDateError) {
-		httpInternalErrorsView = append(httpInternalErrorsView, parseDateError)
-	}
-
-	if validator.IsSliceNotEmpty(httpInternalErrorsView) {
-		logging.Logger(httpInternalErrorsView)
-		return commonModel.NewResultOnFailure[userModel.User](httpInternalErrorsView)
-	}
-
-	user := userModel.User{
+func UserViewToUserMapper(location string, userView UserView) userModel.User {
+	return userModel.User{
 		UserID:    userView.UserID,
 		Name:      userView.Name,
 		Email:     userView.Email,
 		Role:      userView.Role,
-		CreatedAt: created_at,
-		UpdatedAt: updated_at,
+		CreatedAt: userView.CreatedAt,
+		UpdatedAt: userView.UpdatedAt,
 	}
-
-	return commonModel.NewResultOnSuccess[userModel.User](user)
 }

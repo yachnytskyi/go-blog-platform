@@ -89,6 +89,7 @@ func (validationErrors ValidationErrors) Error() string {
 		}
 		result.WriteString(validationError.Error())
 	}
+
 	return result.String()
 }
 

@@ -19,8 +19,8 @@ const (
 // InjectDelivery injects the appropriate delivery factory into the container based on the configuration.
 func InjectDelivery(ctx context.Context, container *applicationModel.Container) {
 	// Load the core configuration and the Gin configuration.
-	coreConfig := config.AppConfig.Core
-	ginConfig := config.AppConfig.Gin
+	coreConfig := config.GetCoreConfig()
+	ginConfig := config.GetGinConfig()
 
 	// Switch based on the configured delivery type.
 	switch coreConfig.Delivery {

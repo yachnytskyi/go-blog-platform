@@ -20,8 +20,8 @@ const (
 // InjectRepository injects the appropriate repository factory into the container based on the configuration.
 func InjectRepository(ctx context.Context, container *applicationModel.Container) {
 	// Load the core configuration and the MongoDB configuration.
-	coreConfig := config.AppConfig.Core
-	mongoDBConfig := config.AppConfig.MongoDB
+	coreConfig := config.GetCoreConfig()
+	mongoDBConfig := config.GetMongoDBConfig()
 
 	// Switch based on the configured database type.
 	switch coreConfig.Database {

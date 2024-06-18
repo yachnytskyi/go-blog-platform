@@ -242,7 +242,7 @@ func (userUseCaseV1 UserUseCaseV1) ResetUserPassword(ctx context.Context, firstK
 // It takes the context, user name, token value, email subject, URL, template name, and template path as input.
 // It constructs an EmailData model and returns it in a Result.
 func prepareEmailData(userName, tokenValue, subject, url, templateName, templatePath string) userModel.EmailData {
-	emailConfig := config.AppConfig.Email
+	emailConfig := config.GetEmailConfig()
 	userFirstName := domainUtility.UserFirstName(userName)
 	emailData := userModel.NewEmailData(emailConfig.ClientOriginUrl+url+tokenValue, templateName, templatePath, userFirstName, subject)
 	return emailData
@@ -252,7 +252,7 @@ func prepareEmailData(userName, tokenValue, subject, url, templateName, template
 // It takes the context, user name, and token value as input and uses the constants for email subject, URL, template name, and template path.
 // It internally calls prepareEmailData with the appropriate parameters and returns the result.
 func prepareEmailDataForRegistration(userName, tokenValue string) userModel.EmailData {
-	emailConfig := config.AppConfig.Email
+	emailConfig := config.GetEmailConfig()
 	return prepareEmailData(userName, tokenValue, constants.EmailConfirmationSubject, constants.EmailConfirmationUrl,
 		emailConfig.UserConfirmationTemplateName, emailConfig.UserConfirmationTemplatePath)
 }
@@ -261,7 +261,7 @@ func prepareEmailDataForRegistration(userName, tokenValue string) userModel.Emai
 // It takes the context, user name, and token value as input and uses the constants for email subject, URL, template name, and template path.
 // It internally calls prepareEmailData with the appropriate parameters and returns the result.
 func prepareEmailDataForUpdatePasswordResetToken(userName, tokenValue string) userModel.EmailData {
-	emailConfig := config.AppConfig.Email
+	emailConfig := config.GetEmailConfig()
 	return prepareEmailData(userName, tokenValue, constants.ForgottenPasswordSubject, constants.ForgottenPasswordUrl,
 		emailConfig.ForgottenPasswordTemplateName, emailConfig.ForgottenPasswordTemplatePath)
 }
@@ -277,8 +277,8 @@ func generateToken(userTokenPayload domainModel.UserTokenPayload) commonModel.Re
 	var userToken userModel.UserToken
 
 	// Retrieve application configuration.
-	accessTokenConfig := config.AppConfig.AccessToken
-	refreshTokenConfig := config.AppConfig.RefreshToken
+	accessTokenConfig := config.GetAccessConfig()
+	refreshTokenConfig := config.GetRefreshConfig()
 
 	// Generate the access token.
 	accessToken := domainUtility.GenerateJWTToken(location+".generateToken.accessToken", accessTokenConfig.PrivateKey, accessTokenConfig.ExpiredIn, userTokenPayload)

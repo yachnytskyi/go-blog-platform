@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	emptyID = "id is empty"
+	emptyID = "Id is empty"
 )
 
 // DataToMongoDocumentMapper converts the incoming data to a BSON document.
@@ -51,8 +51,8 @@ func DataToMongoDocumentMapper(location string, incomingData any) commonModel.Re
 // - location: A string representing the location or context for error logging.
 // - id: The hexadecimal string to be converted.
 // Returns:
-// - The converted ObjectID.
-// - An error if the conversion fails.
+// - A Result containing the converted ObjectID if successful.
+// - A Result containing an error if the conversion fails.
 func HexToObjectIDMapper(location, id string) commonModel.Result[primitive.ObjectID] {
 	// Check if the provided id is empty.
 	if id == "" {

@@ -18,7 +18,6 @@ type PaginationQuery struct {
 	Skip       int    // Number of items to skip for pagination.
 	BaseURL    string // Base URL for pagination.
 	TotalItems int    // Total number of items.
-
 }
 
 // NewPaginationQuery creates a new PaginationQuery with the given parameters.
@@ -28,7 +27,7 @@ func NewPaginationQuery(page, limit int, orderBy, sortOrder, baseURL string) Pag
 		Limit:     limit,
 		OrderBy:   orderBy,
 		SortOrder: sortOrder,
-		Skip:      getSkip(page, limit),
+		Skip:      calculateSkip(page, limit),
 		BaseURL:   baseURL,
 	}
 }
@@ -59,8 +58,8 @@ func GetLimit(limit string) int {
 	return intLimit
 }
 
-// getSkip calculates the number of items to skip based on the current page and limit.
-func getSkip(page, limit int) int {
+// calculateSkip calculates the number of items to skip based on the current page and limit.
+func calculateSkip(page, limit int) int {
 	if page == 0 {
 		return page
 	}
@@ -80,8 +79,8 @@ func isLimitInvalid(data int) bool {
 // SetCorrectPage adjusts the PaginationQuery to ensure it's valid, especially when there are not enough items to reach the current page.
 func SetCorrectPage(paginationQuery PaginationQuery) PaginationQuery {
 	if paginationQuery.TotalItems <= paginationQuery.Skip {
-		paginationQuery.Page = getTotalPages(paginationQuery.TotalItems, paginationQuery.Limit)
-		paginationQuery.Skip = getSkip(paginationQuery.Page, paginationQuery.Limit)
+		paginationQuery.Page = calculateTotalPages(paginationQuery.TotalItems, paginationQuery.Limit)
+		paginationQuery.Skip = calculateSkip(paginationQuery.Page, paginationQuery.Limit)
 	}
 
 	return paginationQuery
@@ -103,31 +102,31 @@ type PaginationResponse struct {
 
 // NewPaginationResponse creates a new PaginationResponse with the given parameters.
 func NewPaginationResponse(paginationQuery PaginationQuery) PaginationResponse {
-	totalPages := getTotalPages(paginationQuery.TotalItems, paginationQuery.Limit)
+	totalPages := calculateTotalPages(paginationQuery.TotalItems, paginationQuery.Limit)
 	paginationResponse := PaginationResponse{
 		Page:       paginationQuery.Page,
 		TotalPages: totalPages,
 		PagesLeft:  totalPages - paginationQuery.Page,
 		TotalItems: paginationQuery.TotalItems,
-		ItemsLeft:  getItemsLeft(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit),
+		ItemsLeft:  calculateItemsLeft(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit),
 		Limit:      paginationQuery.Limit,
 		OrderBy:    paginationQuery.OrderBy,
 		SortOrder:  paginationQuery.SortOrder,
 		BaseURL:    paginationQuery.BaseURL,
 	}
 
-	paginationResponse.PageLinks = getPageLinks(paginationResponse, constants.DefaultAmountOfPages) // You can specify the number of pages to show here.
+	paginationResponse.PageLinks = generatePageLinks(paginationResponse, constants.DefaultAmountOfPages) // You can specify the number of pages to show here.
 	return paginationResponse
 }
 
-// getTotalPages calculates the total number of pages based on total items and limit.
-func getTotalPages(totalItems, limit int) int {
+// calculateTotalPages calculates the total number of pages based on total items and limit.
+func calculateTotalPages(totalItems, limit int) int {
 	totalPages := float64(totalItems) / float64(limit)
 	return int(math.Ceil(totalPages))
 }
 
-// getItemsLeft calculates the number of items remaining on the current page.
-func getItemsLeft(page, totalItems, limit int) int {
+// calculateItemsLeft calculates the number of items remaining on the current page.
+func calculateItemsLeft(page, totalItems, limit int) int {
 	if (totalItems - (page * limit)) < 0 {
 		return 0
 	}
@@ -135,7 +134,8 @@ func getItemsLeft(page, totalItems, limit int) int {
 	return totalItems - (page * limit)
 }
 
-func getPageLinks(paginationResponse PaginationResponse, amountOfPages int) []string {
+// generatePageLinks creates page links for pagination based on the current page, total pages, and other parameters.
+func generatePageLinks(paginationResponse PaginationResponse, amountOfPages int) []string {
 	// Preallocate memory for the pageLinks slice based on amountOfPages, adding space for potential first and last page links.
 	pageLinks := make([]string, 0, amountOfPages+2)
 
@@ -162,9 +162,9 @@ func getPageLinks(paginationResponse PaginationResponse, amountOfPages int) []st
 	}
 
 	// Append the page links to the list, excluding the current page link.
-	for i := startPage; i <= endPage; i++ {
-		if i != paginationResponse.Page {
-			pageLinks = append(pageLinks, buildPageLink(paginationResponse, i))
+	for index := startPage; index <= endPage; index++ {
+		if index != paginationResponse.Page {
+			pageLinks = append(pageLinks, buildPageLink(paginationResponse, index))
 		}
 	}
 

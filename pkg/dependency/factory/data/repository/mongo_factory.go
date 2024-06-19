@@ -105,7 +105,7 @@ func connectToMongo(ctx context.Context, mongoConnection *options.ClientOptions)
 	var delay = time.Second
 
 	// Attempt to connect to MongoDB with exponential backoff.
-	for i := 0; i < maxRetryAttempts; i++ {
+	for index := 0; index < maxRetryAttempts; index++ {
 		client, connectError = mongo.Connect(ctx, mongoConnection)
 		if connectError == nil {
 			// Return client if connection is successful.
@@ -131,7 +131,7 @@ func pingMongo(ctx context.Context, client *mongo.Client) error {
 	var delay = time.Second
 
 	// Attempt to ping MongoDB server with exponential backoff.
-	for i := 0; i < maxRetryAttempts; i++ {
+	for index := 0; index < maxRetryAttempts; index++ {
 		connectError = client.Ping(ctx, readpref.Primary())
 		if connectError == nil {
 			// Return nil if ping is successful.

@@ -18,6 +18,7 @@ import (
 )
 
 const (
+	location                   = "internal.user.domain.usecase."
 	verificationCodeLength int = 20
 	resetTokenLength       int = 20
 	userRole                   = "user"

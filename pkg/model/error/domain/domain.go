@@ -11,197 +11,135 @@ type Errors interface {
 	Len() int
 }
 
-// InfoMessage represents an informational message with details about the location and a notification message.
-type InfoMessage struct {
-	Location     string // The location where the message originated.
-	Notification string // The notification message.
-}
-
-// NewInfoMessage creates a new InfoMessage with the provided details.
-// Parameters:
-// - location: The location where the message originated.
-// - notification: The notification message.
-// Returns:
-// - An InfoMessage populated with the given details.
-func NewInfoMessage(location, notification string) InfoMessage {
-	return InfoMessage{
-		Location:     location,
-		Notification: notification,
-	}
-}
-
-// Error implements the error interface for InfoMessage.
-// Returns a formatted string representation of the informational message.
-func (msg InfoMessage) Error() string {
-	return fmt.Sprintf("location: %s notification: %s", msg.Location, msg.Notification)
-}
-
-// ValidationError represents a validation error with details about the location, field, field type, and a notification message.
-type ValidationError struct {
+// BaseError represents a base structure for individual errors, containing a location and a notification message.
+type BaseError struct {
 	Location     string // The location where the error occurred.
-	Field        string // The field that caused the validation error.
-	FieldType    string // The type of the field.
-	Notification string // The notification message for the validation error.
+	Notification string // The error message or notification.
 }
 
-// NewValidationError creates a new ValidationError with the provided details.
-// Parameters:
-// - location: The location where the error occurred.
-// - field: The field that caused the validation error.
-// - fieldType: The type of the field.
-// - notification: The notification message for the validation error.
-// Returns:
-// - A ValidationError populated with the given details.
-func NewValidationError(location, field, fieldType, notification string) ValidationError {
-	return ValidationError{
+// Error implements the error interface for BaseError, returning a formatted error string.
+func (baseError BaseError) Error() string {
+	return fmt.Sprintf("location: %s notification: %s", baseError.Location, baseError.Notification)
+}
+
+// NewBaseError creates a new BaseError with the given location and notification message.
+func NewBaseError(location, notification string) BaseError {
+	return BaseError{
 		Location:     location,
-		Field:        field,
-		FieldType:    fieldType,
 		Notification: notification,
 	}
 }
 
-// Error implements the error interface for ValidationError.
-// Returns a formatted string representation of the validation error.
-func (err ValidationError) Error() string {
-	return fmt.Sprintf("location: %s field: %s type: %s notification: %s", err.Location, err.Field, err.FieldType, err.Notification)
+// BaseErrors represents a collection of errors.
+type BaseErrors struct {
+	Errors []error // A slice of errors.
 }
 
-// ValidationErrors represents a collection of validation errors.
-type ValidationErrors []error
-
-// NewValidationErrors creates a new ValidationErrors collection from a slice of errors.
-// Parameters:
-// - validationErrors: A slice of errors representing validation errors.
-// Returns:
-// - A ValidationErrors collection populated with the given errors.
-func NewValidationErrors(validationErrors []error) ValidationErrors {
-	return ValidationErrors(validationErrors)
+// NewBaseErrors creates a new BaseErrors with the given slice of errors.
+func NewBaseErrors(errors []error) BaseErrors {
+	return BaseErrors{Errors: errors}
 }
 
-// Error implements the error interface for ValidationErrors.
-// Returns a concatenated string representation of all validation errors.
-func (validationErrors ValidationErrors) Error() string {
+// Error implements the error interface for BaseErrors, returning a concatenated error string.
+func (baseErrors BaseErrors) Error() string {
 	var result strings.Builder
-	for i, validationError := range validationErrors {
-		if i > 0 {
+	for index, baseError := range baseErrors.Errors {
+		if index > 0 {
 			result.WriteString(": ")
 		}
-		result.WriteString(validationError.Error())
+		result.WriteString(baseError.Error())
 	}
 
 	return result.String()
 }
 
-// Len returns the number of validation errors in the ValidationErrors collection.
-// Returns:
-// - An integer representing the number of validation errors.
-func (validationErrors ValidationErrors) Len() int {
-	return len(validationErrors)
+// Len returns the number of errors in the BaseErrors collection.
+func (baseErrors BaseErrors) Len() int {
+	return len(baseErrors.Errors)
 }
 
-// AuthorizationError represents an authorization error with details about the location and a notification message.
-type AuthorizationError struct {
-	Location     string // The location where the error occurred.
-	Notification string // The notification message for the authorization error.
+// InfoMessage represents an informational message, embedding BaseError and implementing the error interface.
+type InfoMessage struct {
+	BaseError
 }
 
-// NewAuthorizationError creates a new AuthorizationError with the provided details.
-// Parameters:
-// - location: The location where the error occurred.
-// - notification: The notification message for the authorization error.
-// Returns:
-// - An AuthorizationError populated with the given details.
-func NewAuthorizationError(location, notification string) AuthorizationError {
-	return AuthorizationError{
-		Location:     location,
-		Notification: notification,
+// NewInfoMessage creates a new InfoMessage with the given location and notification message.
+func NewInfoMessage(location, notification string) InfoMessage {
+	return InfoMessage{NewBaseError(location, notification)}
+}
+
+// ValidationError represents a validation error, embedding BaseError and adding field-specific details.
+type ValidationError struct {
+	BaseError
+	Field     string // The name of the field that caused the validation error.
+	FieldType string // The type of the field that caused the validation error.
+}
+
+// NewValidationError creates a new ValidationError with the given details.
+func NewValidationError(location, field, fieldType, notification string) ValidationError {
+	return ValidationError{
+		BaseError: NewBaseError(location, notification),
+		Field:     field,
+		FieldType: fieldType,
 	}
 }
 
-// Error implements the error interface for AuthorizationError.
-// Returns a formatted string representation of the authorization error.
-func (err AuthorizationError) Error() string {
-	return fmt.Sprintf("location: %s notification: %s", err.Location, err.Notification)
+// ValidationErrors represents a collection of validation errors, embedding BaseErrors and implementing the Errors interface.
+type ValidationErrors struct {
+	BaseErrors
 }
 
-// ItemNotFoundError represents an item not found error with details about the location, query, and a notification message.
+// NewValidationErrors creates a new ValidationErrors collection with the given slice of errors.
+func NewValidationErrors(errors []error) ValidationErrors {
+	return ValidationErrors{NewBaseErrors(errors)}
+}
+
+// AuthorizationError represents an authorization error, embedding BaseError and implementing the error interface.
+type AuthorizationError struct {
+	BaseError
+}
+
+// NewAuthorizationError creates a new AuthorizationError with the given location and notification message.
+func NewAuthorizationError(location, notification string) AuthorizationError {
+	return AuthorizationError{NewBaseError(location, notification)}
+}
+
+// ItemNotFoundError represents an item not found error, embedding BaseError and adding query-specific details.
 type ItemNotFoundError struct {
-	Location     string // The location where the error occurred.
-	Query        string // The query that caused the error.
-	Notification string // The notification message for the item not found error.
+	BaseError
+	Query string // The query that caused the item not found error.
 }
 
-// NewItemNotFoundError creates a new ItemNotFoundError with the provided details.
-// Parameters:
-// - location: The location where the error occurred.
-// - query: The query that caused the error.
-// - notification: The notification message for the item not found error.
-// Returns:
-// - An ItemNotFoundError populated with the given details.
+// NewItemNotFoundError creates a new ItemNotFoundError with the given details.
 func NewItemNotFoundError(location, query, notification string) ItemNotFoundError {
 	return ItemNotFoundError{
-		Location:     location,
-		Query:        query,
-		Notification: notification,
+		BaseError: NewBaseError(location, notification),
+		Query:     query,
 	}
 }
 
-// Error implements the error interface for ItemNotFoundError.
-// Returns a formatted string representation of the item not found error.
-func (err ItemNotFoundError) Error() string {
-	return fmt.Sprintf("location: %s query: %s notification: %s", err.Location, err.Query, err.Notification)
-}
-
-// PaginationError represents a pagination error with details about the current page, total pages, and a notification message.
+// PaginationError represents a pagination error, embedding BaseError and adding pagination-specific details.
 type PaginationError struct {
-	CurrentPage  string // The current page in the pagination.
-	TotalPages   string // The total number of pages.
-	Notification string // The notification message for the pagination error.
+	BaseError
+	CurrentPage string // The current page number.
+	TotalPages  string // The total number of pages.
 }
 
-// NewPaginationError creates a new PaginationError with the provided details.
-// Parameters:
-// - currentPage: The current page in the pagination.
-// - totalPages: The total number of pages.
-// - notification: The notification message for the pagination error.
-// Returns:
-// - A PaginationError populated with the given details.
-func NewPaginationError(currentPage, totalPages, notification string) PaginationError {
+// NewPaginationError creates a new PaginationError with the given details.
+func NewPaginationError(location, currentPage, totalPages, notification string) PaginationError {
 	return PaginationError{
-		CurrentPage:  currentPage,
-		TotalPages:   totalPages,
-		Notification: notification,
+		BaseError:   NewBaseError(location, notification),
+		CurrentPage: currentPage,
+		TotalPages:  totalPages,
 	}
 }
 
-// Error implements the error interface for PaginationError.
-// Returns a formatted string representation of the pagination error.
-func (err PaginationError) Error() string {
-	return fmt.Sprintf("page: %s total: %s notification: %s", err.CurrentPage, err.TotalPages, err.Notification)
-}
-
-// InternalError represents an internal error with details about the location and a notification message.
+// InternalError represents an internal error, embedding BaseError and implementing the error interface.
 type InternalError struct {
-	Location     string // The location where the error occurred.
-	Notification string // The notification message for the internal error.
+	BaseError
 }
 
-// NewInternalError creates a new InternalError with the provided details.
-// Parameters:
-// - location: The location where the error occurred.
-// - notification: The notification message for the internal error.
-// Returns:
-// - An InternalError populated with the given details.
+// NewInternalError creates a new InternalError with the given location and notification message.
 func NewInternalError(location, notification string) InternalError {
-	return InternalError{
-		Location:     location,
-		Notification: notification,
-	}
-}
-
-// Error implements the error interface for InternalError.
-// Returns a formatted string representation of the internal error.
-func (err InternalError) Error() string {
-	return fmt.Sprintf("location: %s notification: %s", err.Location, err.Notification)
+	return InternalError{NewBaseError(location, notification)}
 }

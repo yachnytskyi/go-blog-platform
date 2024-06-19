@@ -11,9 +11,9 @@ import (
 // - An HttpValidationErrorView populated with the field, fieldType, and notification from the domain error.
 func ValidationErrorToHttpValidationErrorViewMapper(validationError domainError.ValidationError) HttpValidationErrorView {
 	return HttpValidationErrorView{
-		Field:        validationError.Field,
-		FieldType:    validationError.FieldType,
-		Notification: validationError.Notification,
+		Field:         validationError.Field,
+		FieldType:     validationError.FieldType,
+		HttpBaseError: NewHttpBaseError(validationError.Notification),
 	}
 }
 
@@ -23,8 +23,8 @@ func ValidationErrorToHttpValidationErrorViewMapper(validationError domainError.
 // Returns:
 // - An HttpValidationErrorsView populated with the mapped validation errors.
 func ValidationErrorsToHttpValidationErrorsViewMapper(validationErrors domainError.ValidationErrors) HttpValidationErrorsView {
-	httpValidationErrorsView := make([]error, 0, len(validationErrors))
-	for _, validationError := range validationErrors {
+	httpValidationErrorsView := make([]error, 0, validationErrors.Len())
+	for _, validationError := range validationErrors.Errors {
 		validationError, ok := validationError.(domainError.ValidationError)
 		if ok {
 			// Map the specific validation error to the HTTP view.
@@ -33,7 +33,7 @@ func ValidationErrorsToHttpValidationErrorsViewMapper(validationErrors domainErr
 		}
 	}
 
-	return HttpValidationErrorsView(httpValidationErrorsView)
+	return NewHttpValidationErrorsView(httpValidationErrorsView)
 }
 
 // AuthorizationErrorToHttpAuthorizationErrorViewMapper maps a domain AuthorizationError to an HTTP AuthorizationError view.
@@ -43,7 +43,7 @@ func ValidationErrorsToHttpValidationErrorsViewMapper(validationErrors domainErr
 // - An HttpAuthorizationErrorView populated with the notification from the domain error.
 func AuthorizationErrorToHttpAuthorizationErrorViewMapper(authorizationError domainError.AuthorizationError) HttpAuthorizationErrorView {
 	return HttpAuthorizationErrorView{
-		Notification: authorizationError.Notification,
+		HttpBaseError: NewHttpBaseError(authorizationError.Notification),
 	}
 }
 
@@ -54,7 +54,7 @@ func AuthorizationErrorToHttpAuthorizationErrorViewMapper(authorizationError dom
 // - An HttpItemNotFoundErrorView populated with the notification from the domain error.
 func ItemNotFoundErrorToHttpItemNotFoundErrorViewMapper(itemNotFoundError domainError.ItemNotFoundError) HttpItemNotFoundErrorView {
 	return HttpItemNotFoundErrorView{
-		Notification: itemNotFoundError.Notification,
+		HttpBaseError: NewHttpBaseError(itemNotFoundError.Notification),
 	}
 }
 
@@ -65,9 +65,9 @@ func ItemNotFoundErrorToHttpItemNotFoundErrorViewMapper(itemNotFoundError domain
 // - An HttpPaginationErrorView populated with the currentPage, totalPages, and notification from the domain error.
 func PaginationErrorToHttpPaginationErrorViewMapper(errorMessage domainError.PaginationError) HttpPaginationErrorView {
 	return HttpPaginationErrorView{
-		CurrentPage:  errorMessage.CurrentPage,
-		TotalPages:   errorMessage.TotalPages,
-		Notification: errorMessage.Notification,
+		CurrentPage:   errorMessage.CurrentPage,
+		TotalPages:    errorMessage.TotalPages,
+		HttpBaseError: NewHttpBaseError(errorMessage.Notification),
 	}
 }
 
@@ -78,6 +78,6 @@ func PaginationErrorToHttpPaginationErrorViewMapper(errorMessage domainError.Pag
 // - An HttpInternalErrorView populated with the notification from the domain error.
 func InternalErrorToHttpInternalErrorViewMapper(internalError domainError.InternalError) HttpInternalErrorView {
 	return HttpInternalErrorView{
-		Notification: internalError.Notification,
+		HttpBaseError: NewHttpBaseError(internalError.Notification),
 	}
 }

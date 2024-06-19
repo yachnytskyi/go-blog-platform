@@ -47,18 +47,10 @@ func (ginFactory *GinFactory) InitializeServer(serverConfig applicationModel.Ser
 	ginFactory.Router = gin.Default()
 
 	// Apply middleware to the Gin router.
-	ginFactory.Router.Use(httpGinMiddleware.TimeoutMiddleware())
-	ginFactory.Router.Use(httpGinMiddleware.ValidateInputMiddleware())
-	ginFactory.Router.Use(httpGinMiddleware.SecureHeadersMiddleware())
-	ginFactory.Router.Use(httpGinMiddleware.CSPMiddleware())
-	ginFactory.Router.Use(httpGinMiddleware.RateLimitMiddleware())
-	ginFactory.Router.Use(httpGinMiddleware.LoggingMiddleware())
+	applyMiddleware(ginFactory.Router)
 
 	// Configure CORS settings.
-	corsConfig := cors.DefaultConfig()
-	corsConfig.AllowOrigins = []string{ginConfig.AllowOrigins}
-	corsConfig.AllowCredentials = ginConfig.AllowCredentials
-	ginFactory.Router.Use(cors.New(corsConfig))
+	configureCORS(ginFactory.Router, ginConfig)
 
 	// Group routes under the server group prefix.
 	router := ginFactory.Router.Group(ginConfig.ServerGroup)
@@ -67,46 +59,9 @@ func (ginFactory *GinFactory) InitializeServer(serverConfig applicationModel.Ser
 	serverConfig.UserRouter.UserRouter(router)
 	serverConfig.PostRouter.PostRouter(router, serverConfig.UserUseCase)
 
-	// Set NoRoute handler.
-	ginFactory.Router.NoRoute(func(c *gin.Context) {
-		c.JSON(constants.StatusNotFound, gin.H{"message": "Page not found"})
-	})
-
-	// Set NoMethod handler.
-	ginFactory.Router.NoMethod(func(ginContext *gin.Context) {
-		// Get the HTTP method that is not allowed.
-		forbiddenMethod := ginContext.Request.Method
-
-		// Create the error message using your constant and the HTTP method.
-		errorMessage := fmt.Sprintf(constants.MethodNotAllowedNotification, forbiddenMethod)
-
-		// Create the error view with the custom error message.
-		httpRequestErrorView := httpError.NewHttpRequestErrorView(location+"InitializeServer.ginFactory.Router.NoMethod", forbiddenMethod, errorMessage)
-
-		// Log the error.
-		logging.Logger(httpRequestErrorView)
-
-		// Respond with an unauthorized status and JSON error.
-		httpGinCommon.GinNewJSONFailureResponse(ginContext, httpRequestErrorView, constants.StatusMethodNotAllowed)
-	})
-
-	// Set NoRoute handler.
-	ginFactory.Router.NoRoute(func(ginContext *gin.Context) {
-		// Get the requested path that is not found.
-		requestedPath := ginContext.Request.URL.Path
-
-		// Create the error message using your constant and the requested path.
-		errorMessage := fmt.Sprintf(constants.RouteNotFoundNotification, requestedPath)
-
-		// Create the error view with the custom error message.
-		httpRequestErrorView := httpError.NewHttpRequestErrorView(location+"InitializeServer.ginFactory.Router.NoRoute", requestedPath, errorMessage)
-
-		// Log the error.
-		logging.Logger(httpRequestErrorView)
-
-		// Respond with a not found status and JSON error.
-		httpGinCommon.GinNewJSONFailureResponse(ginContext, httpRequestErrorView, constants.StatusNotFound)
-	})
+	// Set NoRoute and NoMethod handlers.
+	setNoRouteHandler(ginFactory.Router)
+	setNoMethodHandler(ginFactory.Router)
 
 	// Set HandleMethodNotAllowed.
 	ginFactory.Router.HandleMethodNotAllowed = true
@@ -182,4 +137,63 @@ func (ginFactory *GinFactory) NewPostController(userUseCaseInterface, postUseCas
 func (ginFactory *GinFactory) NewPostRouter(controller any) post.PostRouter {
 	postController := controller.(post.PostController)
 	return postDelivery.NewPostRouter(postController)
+}
+
+// Apply middleware to the Gin router.
+func applyMiddleware(router *gin.Engine) {
+	router.Use(httpGinMiddleware.TimeoutMiddleware())
+	router.Use(httpGinMiddleware.ValidateInputMiddleware())
+	router.Use(httpGinMiddleware.SecureHeadersMiddleware())
+	router.Use(httpGinMiddleware.CSPMiddleware())
+	router.Use(httpGinMiddleware.RateLimitMiddleware())
+	router.Use(httpGinMiddleware.LoggingMiddleware())
+}
+
+// Configure CORS settings for the Gin router.
+func configureCORS(router *gin.Engine, ginConfig config.Gin) {
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowOrigins = []string{ginConfig.AllowOrigins}
+	corsConfig.AllowCredentials = ginConfig.AllowCredentials
+	router.Use(cors.New(corsConfig))
+}
+
+// Set the handler for unmatched routes.
+func setNoRouteHandler(router *gin.Engine) {
+	// Set NoMethod handler.
+	router.NoRoute(func(ginContext *gin.Context) {
+		// Get the requested path that is not found.
+		requestedPath := ginContext.Request.URL.Path
+
+		// Create the error message using your constant and the requested path.
+		errorMessage := fmt.Sprintf(constants.RouteNotFoundNotification, requestedPath)
+
+		// Create the error view with the custom error message.
+		httpRequestErrorView := httpError.NewHttpRequestErrorView(location+"InitializeServer.setNoRouteHandler.ginFactory.Router.NoRoute", requestedPath, errorMessage)
+
+		// Log the error.
+		logging.Logger(httpRequestErrorView)
+
+		// Respond with a not found status and JSON error.
+		httpGinCommon.GinNewJSONFailureResponse(ginContext, httpRequestErrorView, constants.StatusNotFound)
+	})
+}
+
+// Set the handler for methods not allowed.
+func setNoMethodHandler(router *gin.Engine) {
+	router.NoMethod(func(ginContext *gin.Context) {
+		// Get the HTTP method that is not allowed.
+		forbiddenMethod := ginContext.Request.Method
+
+		// Create the error message using your constant and the HTTP method.
+		errorMessage := fmt.Sprintf(constants.MethodNotAllowedNotification, forbiddenMethod)
+
+		// Create the error view with the custom error message.
+		httpRequestErrorView := httpError.NewHttpRequestErrorView(location+"InitializeServer.setNoMethodHandler.ginFactory.Router.NoMethod", forbiddenMethod, errorMessage)
+
+		// Log the error.
+		logging.Logger(httpRequestErrorView)
+
+		// Respond with an unauthorized status and JSON error.
+		httpGinCommon.GinNewJSONFailureResponse(ginContext, httpRequestErrorView, constants.StatusMethodNotAllowed)
+	})
 }

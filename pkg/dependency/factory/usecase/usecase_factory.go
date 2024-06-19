@@ -11,7 +11,7 @@ import (
 type UseCaseFactoryV1 struct {
 }
 
-// NewUserUseCaseV1 creates and returns a new UserUseCaseV1 instance using the provided repository.
+// NewUserUseCase creates and returns a new UserUseCase instance using the provided repository.
 func (useCaseFactoryV1 UseCaseFactoryV1) NewUserUseCase(repository any) user.UserUseCase {
 	// Type assert the repository to user.UserRepository.
 	userRepository := repository.(user.UserRepository)
@@ -20,7 +20,7 @@ func (useCaseFactoryV1 UseCaseFactoryV1) NewUserUseCase(repository any) user.Use
 	return userUseCase.NewUserUseCaseV1(userRepository)
 }
 
-// NewPostUseCaseV1 creates and returns a new PostUseCaseV1 instance using the provided repository.
+// NewPostUseCase creates and returns a new PostUseCase instance using the provided repository.
 func (useCaseFactoryV1 UseCaseFactoryV1) NewPostUseCase(repository any) post.PostUseCase {
 	// Type assert the repository to post.PostRepository.
 	postRepository := repository.(post.PostRepository)

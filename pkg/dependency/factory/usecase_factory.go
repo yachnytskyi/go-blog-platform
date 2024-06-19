@@ -13,6 +13,7 @@ import (
 )
 
 const (
+	location           = "pkg/dependency"
 	unsupportedUseCase = "unsupported usecase type: %s"
 )
 
@@ -26,18 +27,24 @@ func InjectUseCase(ctx context.Context, container *applicationModel.Container) {
 	// Load the core configuration from the application's configuration.
 	coreConfig := config.GetCoreConfig()
 
-	// Switch based on the configured use case type.
+	// Determine the use case type and inject the corresponding factory into the container.
 	switch coreConfig.UseCase {
 	case constants.UseCase:
 		// Inject the UseCaseFactory into the container if the usecase type is UseCaseV1.
 		container.UseCaseFactory = useCaseFactory.UseCaseFactoryV1{}
 	// Add other use case options here as needed.
 	default:
-		// Handle unsupported usecase types by logging an error and shutting down the application gracefully.
+		// Create an error message for the unsupported database type.
 		notification := fmt.Sprintf(unsupportedUseCase, coreConfig.UseCase)
-		internalError := domainError.NewInternalError(location+".loadConfig.UseCase:", notification)
+		internalError := domainError.NewInternalError(location+"InjectUseCase.loadConfig.UseCase:", notification)
+
+		// Log the error.
 		logging.Logger(internalError)
+
+		// Perform a graceful shutdown of the application.
 		applicationModel.GracefulShutdown(ctx, container)
+
+		// Panic with the error to ensure the application exits.
 		panic(internalError)
 	}
 }

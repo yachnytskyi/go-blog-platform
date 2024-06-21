@@ -12,17 +12,17 @@ func UsersToUsersViewMapper(users userModel.Users) UsersView {
 	}
 
 	return UsersView{
-		PaginationResponse: httpModel.PaginationResponse{
-			CurrentPage: users.PaginationResponse.Page,
-			TotalPages:  users.PaginationResponse.TotalPages,
-			PagesLeft:   users.PaginationResponse.PagesLeft,
-			TotalItems:  users.PaginationResponse.TotalItems,
-			ItemsLeft:   users.PaginationResponse.ItemsLeft,
-			Limit:       users.PaginationResponse.Limit,
-			OrderBy:     users.PaginationResponse.OrderBy,
-			SortOrder:   users.PaginationResponse.SortOrder,
-			PageLinks:   users.PaginationResponse.PageLinks,
-		},
+		PaginationResponse: httpModel.NewHttpPaginationResponse(
+			users.PaginationResponse.Page,
+			users.PaginationResponse.TotalPages,
+			users.PaginationResponse.PagesLeft,
+			users.PaginationResponse.ItemsLeft,
+			users.PaginationResponse.TotalItems,
+			users.PaginationResponse.Limit,
+			users.PaginationResponse.OrderBy,
+			users.PaginationResponse.SortOrder,
+			users.PaginationResponse.PageLinks,
+		),
 		UsersView: usersView,
 	}
 }

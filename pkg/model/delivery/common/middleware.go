@@ -1,22 +1,46 @@
 package common
 
-import "time"
+import (
+	"time"
+)
 
-// HTTPLog represents a log entry for an HTTP request.
-type HTTPLog struct {
-	Location       string        `json:"location"`        // Location in the code where the log was generated.
-	Time           time.Time     `json:"time"`            // The time when the log entry was created.
-	RequestMethod  string        `json:"request_method"`  // The HTTP method used for the request (e.g., GET, POST).
-	RequestURL     string        `json:"request_url"`     // The URL of the request.
-	ClientIP       string        `json:"client_ip"`       // The IP address of the client making the request.
-	UserAgent      string        `json:"user_agent"`      // The User-Agent header from the request.
-	ResponseStatus int           `json:"response_status"` // The HTTP status code of the response.
-	Duration       time.Duration `json:"duration"`        // The duration of the request handling.
+// HTTPIncomingLog represents a log entry for incoming HTTP requests.
+type HTTPIncomingLog struct {
+	Location      string    `json:"location"`
+	Time          time.Time `json:"time"`
+	RequestMethod string    `json:"request_method"`
+	RequestURL    string    `json:"request_url"`
+	ClientIP      string    `json:"client_ip"`
+	UserAgent     string    `json:"user_agent"`
 }
 
-// NewHTTPLog creates a new instance of HTTPLog with the current time.
-func NewHTTPLog(location string, method, url, ip, userAgent string, status int, duration time.Duration) *HTTPLog {
-	return &HTTPLog{
+// HTTPOutgoingLog represents a log entry for outgoing HTTP responses.
+type HTTPOutgoingLog struct {
+	Location       string        `json:"location"`
+	Time           time.Time     `json:"time"`
+	RequestMethod  string        `json:"request_method"`
+	RequestURL     string        `json:"request_url"`
+	ClientIP       string        `json:"client_ip"`
+	UserAgent      string        `json:"user_agent"`
+	ResponseStatus int           `json:"response_status"`
+	Duration       time.Duration `json:"duration"`
+}
+
+// NewHTTPIncomingLog creates a new instance of HTTPIncomingLog with the current time.
+func NewHTTPIncomingLog(location, method, url, ip, userAgent string) *HTTPIncomingLog {
+	return &HTTPIncomingLog{
+		Location:      location,
+		Time:          time.Now(),
+		RequestMethod: method,
+		RequestURL:    url,
+		ClientIP:      ip,
+		UserAgent:     userAgent,
+	}
+}
+
+// NewHTTPOutgoingLog creates a new instance of HTTPOutgoingLog with the current time and response details.
+func NewHTTPOutgoingLog(location, method, url, ip, userAgent string, status int, duration time.Duration) *HTTPOutgoingLog {
+	return &HTTPOutgoingLog{
 		Location:       location,
 		Time:           time.Now(),
 		RequestMethod:  method,

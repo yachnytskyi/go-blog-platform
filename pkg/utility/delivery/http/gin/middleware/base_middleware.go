@@ -84,32 +84,30 @@ func LoggingMiddleware() gin.HandlerFunc {
 		start := time.Now()
 
 		// Log information about the incoming request.
-		incomingRequest := commonModel.HTTPLog{
-			Location:      location + "LoggingMiddleware",
-			Time:          start,
-			RequestMethod: c.Request.Method,
-			RequestURL:    c.Request.URL.Path,
-			ClientIP:      c.ClientIP(),
-			UserAgent:     c.Request.UserAgent(),
-		}
+		httpIncomingLog := commonModel.NewHTTPIncomingLog(
+			location+"LoggingMiddleware",
+			c.Request.Method,
+			c.Request.URL.Path,
+			c.ClientIP(),
+			c.Request.UserAgent(),
+		)
 
 		// Continue processing the request.
 		c.Next()
 
 		// Log information about the outgoing response.
-		outgoingResponse := commonModel.HTTPLog{
-			Location:       location + "LoggingMiddleware",
-			Time:           start,
-			RequestMethod:  c.Request.Method,
-			RequestURL:     c.Request.URL.Path,
-			ClientIP:       c.ClientIP(),
-			UserAgent:      c.Request.UserAgent(),
-			ResponseStatus: c.Writer.Status(),
-			Duration:       time.Since(start),
-		}
+		httpOutgoingLog := commonModel.NewHTTPOutgoingLog(
+			location+"LoggingMiddleware",
+			c.Request.Method,
+			c.Request.URL.Path,
+			c.ClientIP(),
+			c.Request.UserAgent(),
+			c.Writer.Status(),
+			time.Since(start),
+		)
 
-		logging.Logger(incomingRequest)
-		logging.Logger(outgoingResponse)
+		logging.Logger(httpIncomingLog)
+		logging.Logger(httpOutgoingLog)
 	}
 }
 

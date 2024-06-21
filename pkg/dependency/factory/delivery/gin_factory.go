@@ -141,11 +141,12 @@ func (ginFactory *GinFactory) NewPostRouter(controller any) post.PostRouter {
 
 // Apply middleware to the Gin router.
 func applyMiddleware(router *gin.Engine) {
-	router.Use(httpGinMiddleware.TimeoutMiddleware())
-	router.Use(httpGinMiddleware.ValidateInputMiddleware())
+	router.Use(httpGinMiddleware.CorrelationIDMiddleware())
 	router.Use(httpGinMiddleware.SecureHeadersMiddleware())
 	router.Use(httpGinMiddleware.CSPMiddleware())
 	router.Use(httpGinMiddleware.RateLimitMiddleware())
+	router.Use(httpGinMiddleware.ValidateInputMiddleware())
+	router.Use(httpGinMiddleware.TimeoutMiddleware())
 	router.Use(httpGinMiddleware.LoggingMiddleware())
 }
 

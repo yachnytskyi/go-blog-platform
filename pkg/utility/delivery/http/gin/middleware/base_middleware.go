@@ -8,6 +8,7 @@
 package middleware
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
@@ -16,6 +17,7 @@ import (
 	"github.com/didip/tollbooth/limiter"
 	"github.com/didip/tollbooth_gin"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/common"
@@ -23,6 +25,30 @@ import (
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
+
+// CorrelationIDMiddleware adds a correlation ID to requests and responses.
+// Returns a Gin middleware handler function.
+func CorrelationIDMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		const correlationIDHeader = "X-Correlation-ID"
+
+		// Retrieve the correlation ID from the request header.
+		correlationID := c.GetHeader(correlationIDHeader)
+		if correlationID == "" {
+			// Generate a new correlation ID if it's not provided in the request.
+			correlationID = uuid.New().String()
+		}
+
+		// Add the correlation ID to the context.
+		c.Set(correlationIDHeader, correlationID)
+
+		// Add the correlation ID to the response header.
+		c.Writer.Header().Set(correlationIDHeader, correlationID)
+
+		// Continue to the next middleware or handler in the chain.
+		c.Next()
+	}
+}
 
 // SecureHeadersMiddleware adds secure headers to HTTP responses.
 // Returns a Gin middleware handler function.
@@ -77,40 +103,6 @@ func RateLimitMiddleware() gin.HandlerFunc {
 	}
 }
 
-// LoggingMiddleware logs incoming requests and outgoing responses with additional context.
-// Returns a Gin middleware handler function.
-func LoggingMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		start := time.Now()
-
-		// Log information about the incoming request.
-		httpIncomingLog := commonModel.NewHTTPIncomingLog(
-			location+"LoggingMiddleware",
-			c.Request.Method,
-			c.Request.URL.Path,
-			c.ClientIP(),
-			c.Request.UserAgent(),
-		)
-
-		// Continue processing the request.
-		c.Next()
-
-		// Log information about the outgoing response.
-		httpOutgoingLog := commonModel.NewHTTPOutgoingLog(
-			location+"LoggingMiddleware",
-			c.Request.Method,
-			c.Request.URL.Path,
-			c.ClientIP(),
-			c.Request.UserAgent(),
-			c.Writer.Status(),
-			time.Since(start),
-		)
-
-		logging.Logger(httpIncomingLog)
-		logging.Logger(httpOutgoingLog)
-	}
-}
-
 // ValidateInputMiddleware allows specific HTTP methods and checks for the content type.
 // Returns a Gin middleware handler function.
 func ValidateInputMiddleware() gin.HandlerFunc {
@@ -145,6 +137,76 @@ func ValidateInputMiddleware() gin.HandlerFunc {
 
 		// Continue processing the request.
 		ginContext.Next()
+	}
+}
+
+// TimeoutMiddleware sets a timeout for each request.
+// Returns a Gin middleware handler function.
+func TimeoutMiddleware() gin.HandlerFunc {
+	return func(ginContext *gin.Context) {
+		// Create a context with timeout.
+		ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
+		defer cancel()
+
+		// Create a new request with the modified context.
+		ginContext.Request = ginContext.Request.WithContext(ctx)
+
+		// Use a goroutine to call Next and handle the response.
+		ch := make(chan struct{})
+		go func() {
+			defer close(ch)
+			ginContext.Next()
+		}()
+
+		// Use a select statement to wait for either the request to complete or the context to timeout.
+		select {
+		case <-ch:
+			// Request completed successfully.
+		case <-ctx.Done():
+			// Context timed out.
+			httpInternalErrorView := httpError.NewHttpInternalErrorView(location+"TimeOutMiddleware", ctx.Err().Error())
+			// Abort the request with an HTTP status and respond with a JSON error.
+			abortWithStatusJSON(ginContext, httpInternalErrorView, constants.StatusBadGateway)
+		}
+	}
+}
+
+// LoggingMiddleware logs incoming requests and outgoing responses with additional context.
+// Returns a Gin middleware handler function.
+func LoggingMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		start := time.Now()
+
+		// Retrieve the correlation ID from the context.
+		correlationID := c.GetString("X-Correlation-ID")
+
+		// Log information about the incoming request.
+		httpIncomingLog := commonModel.NewHTTPIncomingLog(
+			location+"LoggingMiddleware",
+			correlationID,
+			c.Request.Method,
+			c.Request.URL.Path,
+			c.ClientIP(),
+			c.Request.UserAgent(),
+		)
+
+		// Continue processing the request.
+		c.Next()
+
+		// Log information about the outgoing response.
+		httpOutgoingLog := commonModel.NewHTTPOutgoingLog(
+			location+"LoggingMiddleware",
+			correlationID,
+			c.Request.Method,
+			c.Request.URL.Path,
+			c.ClientIP(),
+			c.Request.UserAgent(),
+			c.Writer.Status(),
+			time.Since(start),
+		)
+
+		logging.Logger(httpIncomingLog)
+		logging.Logger(httpOutgoingLog)
 	}
 }
 

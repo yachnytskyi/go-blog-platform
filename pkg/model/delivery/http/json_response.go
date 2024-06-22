@@ -62,6 +62,7 @@ func SetStatus(jsonResponse *JSONResponse) {
 	case validator.IsValueNotEmpty(jsonResponse.Data):
 		jsonResponse.Status = success
 	case validator.IsError(jsonResponse.Error) || validator.IsError(jsonResponse.Errors):
+		// Optionally handle cases where neither Data nor Error/Errors are set.
 		jsonResponse.Status = fail
 	}
 }

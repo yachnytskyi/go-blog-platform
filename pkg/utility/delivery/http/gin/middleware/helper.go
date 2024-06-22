@@ -16,8 +16,8 @@ import (
 // Parameters:
 // - ginContext: The Gin context containing the HTTP request.
 // Returns:
-// - The extracted access token as a string.
-// - An error if the access token is not found or invalid.
+// - A Result containing the extracted access token as a string.
+// - A Result containing an error if the access token is not found or invalid.
 func extractAccessToken(ginContext *gin.Context) commonModel.Result[string] {
 	// Attempt to retrieve the access token from the cookie.
 	cookie, cookieError := ginContext.Cookie(constants.AccessTokenValue)
@@ -35,7 +35,7 @@ func extractAccessToken(ginContext *gin.Context) commonModel.Result[string] {
 	}
 
 	// If access token is still empty, create and log an HTTP authorization error.
-	httpAuthorizationError := httpError.NewHttpAuthorizationErrorView(location+"extractAccessToken.accessToken", constants.LoggingErrorNotification)
+	httpAuthorizationError := httpError.NewHTTPAuthorizationErrorView(location+"extractAccessToken.accessToken", constants.LoggingErrorNotification)
 	logging.Logger(httpAuthorizationError)
 	return commonModel.NewResultOnFailure[string](httpAuthorizationError)
 }
@@ -44,14 +44,14 @@ func extractAccessToken(ginContext *gin.Context) commonModel.Result[string] {
 // Parameters:
 // - ginContext: The Gin context containing the HTTP request.
 // Returns:
-// - The extracted refresh token as a string.
-// - An error if the refresh token is not found or invalid.
+// - A Result containing the extracted refresh token as a string.
+// - A Result containing an error if the refresh token is not found or invalid.
 func extractRefreshToken(ginContext *gin.Context) commonModel.Result[string] {
 	// Attempt to retrieve the refresh token from the cookie.
 	refreshToken, refreshTokenError := ginContext.Cookie(constants.RefreshTokenValue)
 	if validator.IsError(refreshTokenError) {
 		// If refresh token is missing, create and log an HTTP authorization error.
-		httpAuthorizationError := httpError.NewHttpAuthorizationErrorView(location+"extractRefreshToken.refreshToken", constants.LoggingErrorNotification)
+		httpAuthorizationError := httpError.NewHTTPAuthorizationErrorView(location+"extractRefreshToken.refreshToken", constants.LoggingErrorNotification)
 		logging.Logger(httpAuthorizationError)
 		return commonModel.NewResultOnFailure[string](httpAuthorizationError)
 	}

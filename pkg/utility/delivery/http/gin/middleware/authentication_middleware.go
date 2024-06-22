@@ -42,7 +42,7 @@ func AuthenticationMiddleware() gin.HandlerFunc {
 		userTokenPayload := domainUtility.ValidateJWTToken(location+".AuthenticationMiddleware", accessToken.Data, accessTokenConfig.PublicKey)
 		if validator.IsError(userTokenPayload.Error) {
 			// Handle token validation error and respond with an unauthorized status and JSON error.
-			httpAuthorizationError := httpError.NewHttpAuthorizationErrorView("", constants.LoggingErrorNotification)
+			httpAuthorizationError := httpError.NewHTTPAuthorizationErrorView(location+"AuthenticationMiddleware.ValidateJWTToken", constants.LoggingErrorNotification)
 			abortWithStatusJSON(ginContext, httpAuthorizationError, constants.StatusUnauthorized)
 			return
 		}
@@ -71,7 +71,7 @@ func UserContextMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
 		// Retrieve the user ID from the context.
 		userID, _ := ctx.Value(constants.UserIDContext).(string)
 		if userID == "" {
-			httpInternalErrorView := httpError.NewHttpInternalErrorView(location+"UserContextMiddleware.ctx.Value", userIDContextMissing)
+			httpInternalErrorView := httpError.NewHTTPInternalErrorView(location+"UserContextMiddleware.ctx.Value", userIDContextMissing)
 			abortWithStatusJSON(ginContext, httpInternalErrorView, constants.StatusUnauthorized)
 			return
 		}

@@ -12,7 +12,7 @@ func UsersToUsersViewMapper(users userModel.Users) UsersView {
 	}
 
 	return UsersView{
-		PaginationResponse: httpModel.NewHttpPaginationResponse(
+		HTTPPaginationResponse: httpModel.NewHTTPPaginationResponse(
 			users.PaginationResponse.Page,
 			users.PaginationResponse.TotalPages,
 			users.PaginationResponse.PagesLeft,

@@ -169,7 +169,7 @@ func setNoRouteHandler(router *gin.Engine) {
 		errorMessage := fmt.Sprintf(constants.RouteNotFoundNotification, requestedPath)
 
 		// Create the error view with the custom error message.
-		httpRequestErrorView := httpError.NewHttpRequestErrorView(location+"InitializeServer.setNoRouteHandler.ginFactory.Router.NoRoute", requestedPath, errorMessage)
+		httpRequestErrorView := httpError.NewHTTPRequestErrorView(location+"InitializeServer.setNoRouteHandler.ginFactory.Router.NoRoute", requestedPath, errorMessage)
 
 		// Log the error.
 		logging.Logger(httpRequestErrorView)
@@ -189,7 +189,7 @@ func setNoMethodHandler(router *gin.Engine) {
 		errorMessage := fmt.Sprintf(constants.MethodNotAllowedNotification, forbiddenMethod)
 
 		// Create the error view with the custom error message.
-		httpRequestErrorView := httpError.NewHttpRequestErrorView(location+"InitializeServer.setNoMethodHandler.ginFactory.Router.NoMethod", forbiddenMethod, errorMessage)
+		httpRequestErrorView := httpError.NewHTTPRequestErrorView(location+"InitializeServer.setNoMethodHandler.ginFactory.Router.NoMethod", forbiddenMethod, errorMessage)
 
 		// Log the error.
 		logging.Logger(httpRequestErrorView)

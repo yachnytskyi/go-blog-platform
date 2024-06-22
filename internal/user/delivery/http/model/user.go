@@ -13,8 +13,8 @@ type TokenView struct {
 
 // [GET].
 type UsersView struct {
-	UsersView          []UserView                       `json:"users"`
-	PaginationResponse httpModel.HttpPaginationResponse `json:"pagination_response"`
+	UsersView              []UserView                       `json:"users"`
+	HTTPPaginationResponse httpModel.HTTPPaginationResponse `json:"pagination_response"`
 }
 
 // [GET].

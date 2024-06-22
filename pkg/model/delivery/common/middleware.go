@@ -29,10 +29,10 @@ type HTTPOutgoingLog struct {
 }
 
 // NewHTTPIncomingLog creates a new instance of HTTPIncomingLog with the current time.
-func NewHTTPIncomingLog(location, corelationID, method, url, ip, userAgent string) *HTTPIncomingLog {
+func NewHTTPIncomingLog(location, correlationID, method, url, ip, userAgent string) *HTTPIncomingLog {
 	return &HTTPIncomingLog{
 		Location:      location,
-		CorrelationID: corelationID,
+		CorrelationID: correlationID,
 		Time:          time.Now(),
 		RequestMethod: method,
 		RequestURL:    url,
@@ -42,10 +42,10 @@ func NewHTTPIncomingLog(location, corelationID, method, url, ip, userAgent strin
 }
 
 // NewHTTPOutgoingLog creates a new instance of HTTPOutgoingLog with the current time and response details.
-func NewHTTPOutgoingLog(location, corelationID, method, url, ip, userAgent string, status int, duration time.Duration) *HTTPOutgoingLog {
+func NewHTTPOutgoingLog(location, correlationID, method, url, ip, userAgent string, status int, duration time.Duration) *HTTPOutgoingLog {
 	return &HTTPOutgoingLog{
 		Location:       location,
-		CorrelationID:  corelationID,
+		CorrelationID:  correlationID,
 		Time:           time.Now(),
 		RequestMethod:  method,
 		RequestURL:     url,

@@ -19,34 +19,34 @@ func HandleError(err error) error {
 	switch errorType := err.(type) {
 	case domainError.ValidationError:
 		// Map domain validation error to HTTP validation error view.
-		return ValidationErrorToHttpValidationErrorViewMapper(errorType)
+		return ValidationErrorToHTTPValidationErrorViewMapper(errorType)
 	case domainError.ValidationErrors:
 		// Map domain validation errors to HTTP validation errors view.
-		return ValidationErrorsToHttpValidationErrorsViewMapper(errorType)
+		return ValidationErrorsToHTTPValidationErrorsViewMapper(errorType)
 	case domainError.AuthorizationError:
 		// Map domain authorization error to HTTP authorization error view.
-		return AuthorizationErrorToHttpAuthorizationErrorViewMapper(errorType)
+		return AuthorizationErrorToHTTPAuthorizationErrorViewMapper(errorType)
 	case domainError.ItemNotFoundError:
 		// Map domain item not found error to HTTP item not found error view.
-		return ItemNotFoundErrorToHttpItemNotFoundErrorViewMapper(errorType)
+		return ItemNotFoundErrorToHTTPItemNotFoundErrorViewMapper(errorType)
 	case domainError.PaginationError:
 		// Map domain pagination error to HTTP pagination error view.
-		return PaginationErrorToHttpPaginationErrorViewMapper(errorType)
-	case HttpAuthorizationErrorView:
+		return PaginationErrorToHTTPPaginationErrorViewMapper(errorType)
+	case HTTPAuthorizationErrorView:
 		// Return HTTP authorization error view directly.
 		return errorType
-	case HttpRequestErrorView:
+	case HTTPRequestErrorView:
 		// Return HTTP request error view directly.
 		return errorType
-	case HttpInternalErrorView:
+	case HTTPInternalErrorView:
 		// Add internal error notification and return HTTP internal error view.
 		errorType.Notification = constants.InternalErrorNotification
 		return errorType
-	case HttpInternalErrorsView:
+	case HTTPInternalErrorsView:
 		// Return a new HTTP internal error view with location and notification.
-		return NewHttpInternalErrorView(location+"case HttpInternalErrorsView", constants.InternalErrorNotification)
+		return NewHTTPInternalErrorView(location+"case HTTPInternalErrorsView", constants.InternalErrorNotification)
 	default:
 		// Return a new HTTP internal error view for unknown error types with location and notification.
-		return NewHttpInternalErrorView(location+"case default", constants.InternalErrorNotification)
+		return NewHTTPInternalErrorView(location+"case default", constants.InternalErrorNotification)
 	}
 }

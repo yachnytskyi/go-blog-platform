@@ -20,8 +20,8 @@ const (
 // - location: A string representing the location or context for error logging.
 // - incomingData: The data to be converted to a BSON document.
 // Returns:
-// - A pointer to a BSON document.
-// - An error if the conversion fails.
+// - A Result containing a pointer to a BSON document.
+// - A Result containing an error if the conversion fails.
 func DataToMongoDocumentMapper(location string, incomingData any) commonModel.Result[*bson.D] {
 	// Marshal incoming data to BSON format.
 	data, err := bson.Marshal(incomingData)

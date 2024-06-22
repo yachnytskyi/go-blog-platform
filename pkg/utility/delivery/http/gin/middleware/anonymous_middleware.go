@@ -19,7 +19,7 @@ func AnonymousMiddleware() gin.HandlerFunc {
 		// If the access token is present, indicating that the user is already authenticated.
 		if anonymousAccessToken {
 			// Create a custom error message indicating that the user is already authenticated.
-			httpAuthorizationError := httpError.NewHttpAuthorizationErrorView(location+"AnonymousMiddleware.anonymousAccessToken", constants.AlreadyLoggedInNotification)
+			httpAuthorizationError := httpError.NewHTTPAuthorizationErrorView(location+"AnonymousMiddleware.anonymousAccessToken", constants.AlreadyLoggedInNotification)
 			abortWithStatusJSON(ginContext, httpAuthorizationError, constants.StatusForbidden)
 			return
 		}

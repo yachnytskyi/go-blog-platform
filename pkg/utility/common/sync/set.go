@@ -1,6 +1,8 @@
 package sync
 
-import "sync"
+import (
+	"sync"
+)
 
 // Set represents a synchronized set implemented using a map.
 type Set[T comparable] struct {
@@ -65,6 +67,8 @@ func (set *Set[T]) IsUnique(value T) bool {
 // Returns:
 // - The number of values in the set.
 func (set *Set[T]) Len() int {
+	set.mutex.RLock()
+	defer set.mutex.RUnlock()
 	return len(set.data)
 }
 
@@ -72,10 +76,11 @@ func (set *Set[T]) Len() int {
 // Returns:
 // - A slice containing all the values in the set.
 func (set *Set[T]) Values() []T {
-	values := make([]T, 0, len(set.data))
+	values := make([]T, 0, set.Len())
 	for value := range set.data {
 		values = append(values, value)
 	}
+
 	return values
 }
 
@@ -92,7 +97,9 @@ func (set *Set[T]) Delete(value T) {
 func (set *Set[T]) Clear() {
 	set.mutex.Lock()
 	defer set.mutex.Unlock()
-	set.data = make(map[T]struct{}, len(set.data))
+
+	// Create a new empty set with the same length as the existing set.
+	set.data = make(map[T]struct{}, set.Len())
 }
 
 // OrderedSet represents an ordered set implemented using both a map and a slice.
@@ -107,7 +114,7 @@ type OrderedSet[T comparable] struct {
 // - capacity: The initial capacity of the ordered set.
 // Returns:
 // - A pointer to the newly created OrderedSet.
-func NewOrderedSet[T comparable](capacity uint) *OrderedSet[T] {
+func NewOrderedSet[T comparable](capacity int) *OrderedSet[T] {
 	return &OrderedSet[T]{
 		setMap:   make(map[T]struct{}, capacity),
 		setSlice: make([]T, 0, capacity),
@@ -120,8 +127,6 @@ func NewOrderedSet[T comparable](capacity uint) *OrderedSet[T] {
 func (orderedSet *OrderedSet[T]) Add(value T) {
 	orderedSet.mutex.Lock()
 	defer orderedSet.mutex.Unlock()
-
-	// Check for uniqueness using the map.
 	if orderedSet.IsUnique(value) {
 		orderedSet.setMap[value] = struct{}{}
 		orderedSet.setSlice = append(orderedSet.setSlice, value)
@@ -132,14 +137,8 @@ func (orderedSet *OrderedSet[T]) Add(value T) {
 // Parameters:
 // - values: The values to be added to the ordered set.
 func (orderedSet *OrderedSet[T]) AddAll(values ...T) {
-	orderedSet.mutex.Lock()
-	defer orderedSet.mutex.Unlock()
 	for _, value := range values {
-		// Check for uniqueness using the map.
-		if orderedSet.IsUnique(value) {
-			orderedSet.setMap[value] = struct{}{}
-			orderedSet.setSlice = append(orderedSet.setSlice, value)
-		}
+		orderedSet.Add(value)
 	}
 }
 
@@ -149,6 +148,8 @@ func (orderedSet *OrderedSet[T]) AddAll(values ...T) {
 // Returns:
 // - A boolean indicating whether the value is present in the ordered set.
 func (orderedSet *OrderedSet[T]) Contains(value T) bool {
+	orderedSet.mutex.RLock()
+	defer orderedSet.mutex.RUnlock()
 	_, exists := orderedSet.setMap[value]
 	return exists
 }
@@ -159,17 +160,10 @@ func (orderedSet *OrderedSet[T]) Contains(value T) bool {
 // Returns:
 // - A boolean indicating whether the value is unique in the ordered set.
 func (orderedSet *OrderedSet[T]) IsUnique(value T) bool {
-	_, exists := orderedSet.setMap[value]
-	return !exists
-}
-
-// Len returns the number of values in the ordered set.
-// Returns:
-// - The number of values in the ordered set.
-func (orderedSet *OrderedSet[T]) Len() int {
 	orderedSet.mutex.RLock()
 	defer orderedSet.mutex.RUnlock()
-	return len(orderedSet.setSlice)
+	_, exists := orderedSet.setMap[value]
+	return !exists
 }
 
 // Values returns the values from the ordered set.
@@ -178,7 +172,9 @@ func (orderedSet *OrderedSet[T]) Len() int {
 func (orderedSet *OrderedSet[T]) Values() []T {
 	orderedSet.mutex.RLock()
 	defer orderedSet.mutex.RUnlock()
-	return orderedSet.setSlice
+	values := make([]T, len(orderedSet.setSlice))
+	copy(values, orderedSet.setSlice)
+	return values
 }
 
 // Delete removes a value from the ordered set based on the index.
@@ -187,18 +183,16 @@ func (orderedSet *OrderedSet[T]) Values() []T {
 func (orderedSet *OrderedSet[T]) Delete(index uint) {
 	orderedSet.mutex.Lock()
 	defer orderedSet.mutex.Unlock()
-	// Check if the index is within the bounds of the slice and non-negative.
-	deleteIndex := int(index)
-	length := orderedSet.Len()
-	if deleteIndex < length && deleteIndex >= 0 {
+	// Check if the index is within the bounds of the slice.
+	if int(index) < len(orderedSet.setSlice) {
 		// Retrieve the value at the specified index.
-		value := orderedSet.setSlice[deleteIndex]
+		value := orderedSet.setSlice[index]
 
 		// Delete from the map.
 		delete(orderedSet.setMap, value)
 
 		// Delete from the slice.
-		orderedSet.setSlice = append(orderedSet.setSlice[:deleteIndex], orderedSet.setSlice[deleteIndex+1:]...)
+		orderedSet.setSlice = append(orderedSet.setSlice[:index], orderedSet.setSlice[index+1:]...)
 	}
 }
 

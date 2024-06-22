@@ -36,7 +36,11 @@ func (set Set[T]) Contains(value T) bool {
 // - A boolean indicating whether the value is unique in the set.
 func (set Set[T]) IsUnique(value T) bool {
 	_, exists := set[value]
-	return !exists
+	if exists {
+		return false
+	}
+
+	return true
 }
 
 // Len returns the number of values in the set.
@@ -66,7 +70,8 @@ func (set Set[T]) Delete(value T) {
 
 // Clear removes all values from the set.
 func (set *Set[T]) Clear() {
-	*set = make(Set[T])
+	// Create a new empty set with the same length as the existing map.
+	*set = make(Set[T], len(*set))
 }
 
 // OrderedSet represents an ordered set implemented using both a map and a slice.
@@ -103,11 +108,7 @@ func (orderedSet *OrderedSet[T]) Add(value T) {
 // - values: The values to be added to the ordered set.
 func (orderedSet *OrderedSet[T]) AddAll(values ...T) {
 	for _, value := range values {
-		// Check for uniqueness using the map.
-		if orderedSet.IsUnique(value) {
-			orderedSet.setMap[value] = struct{}{}
-			orderedSet.setSlice = append(orderedSet.setSlice, value)
-		}
+		orderedSet.Add(value)
 	}
 }
 
@@ -128,7 +129,11 @@ func (orderedSet OrderedSet[T]) Contains(value T) bool {
 // - A boolean indicating whether the value is unique in the ordered set.
 func (orderedSet OrderedSet[T]) IsUnique(value T) bool {
 	_, exists := orderedSet.setMap[value]
-	return !exists
+	if exists {
+		return false
+	}
+
+	return true
 }
 
 // Values returns the values from the ordered set.
@@ -138,39 +143,27 @@ func (orderedSet OrderedSet[T]) Values() []T {
 	return orderedSet.setSlice
 }
 
-// Len returns the number of values in the ordered set.
-// Returns:
-// - The number of values in the ordered set.
-func (orderedSet OrderedSet[T]) Len() int {
-	return len(orderedSet.setSlice)
-}
-
 // Delete removes a value from the ordered set based on the index.
 // Parameters:
 // - index: The index of the value to be removed.
 func (orderedSet *OrderedSet[T]) Delete(index uint) {
-	// Check if the index is within the bounds of the slice.
-	deleteIndex := int(index)
-	length := orderedSet.Len()
-	if deleteIndex < length && deleteIndex >= 0 {
+	if int(index) < len(orderedSet.setSlice) {
+
 		// Retrieve the value at the specified index.
-		value := orderedSet.setSlice[deleteIndex]
+		value := orderedSet.setSlice[index]
 
 		// Delete from the map.
 		delete(orderedSet.setMap, value)
 
 		// Delete from the slice.
-		orderedSet.setSlice = append(orderedSet.setSlice[:deleteIndex], orderedSet.setSlice[deleteIndex+1:]...)
+		orderedSet.setSlice = append(orderedSet.setSlice[:index], orderedSet.setSlice[index+1:]...)
 	}
 }
 
 // Clear removes all values from the ordered set.
 func (orderedSet *OrderedSet[T]) Clear() {
-	if orderedSet.Len() > 0 {
-		// Create a new empty map with the same length as the existing map.
-		orderedSet.setMap = make(map[T]struct{}, len(orderedSet.setMap))
-
-		// Reset the slice to an empty slice, reusing the existing underlying array.
-		orderedSet.setSlice = orderedSet.setSlice[:0]
-	}
+	// Create a new empty map with the same length as the existing map.
+	orderedSet.setMap = make(map[T]struct{}, len(orderedSet.setMap))
+	// Reset the slice to an empty slice, reusing the existing underlying array.
+	orderedSet.setSlice = orderedSet.setSlice[:0]
 }

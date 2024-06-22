@@ -7,7 +7,7 @@ import (
 	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
-	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
+	userView "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
 	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -42,7 +42,7 @@ func AuthenticationMiddleware() gin.HandlerFunc {
 		userTokenPayload := domainUtility.ValidateJWTToken(location+".AuthenticationMiddleware", accessToken.Data, accessTokenConfig.PublicKey)
 		if validator.IsError(userTokenPayload.Error) {
 			// Handle token validation error and respond with an unauthorized status and JSON error.
-			httpAuthorizationError := httpError.NewHTTPAuthorizationErrorView(location+"AuthenticationMiddleware.ValidateJWTToken", constants.LoggingErrorNotification)
+			httpAuthorizationError := httpError.NewHTTPAuthorizationError(location+"AuthenticationMiddleware.ValidateJWTToken", constants.LoggingErrorNotification)
 			abortWithStatusJSON(ginContext, httpAuthorizationError, constants.StatusUnauthorized)
 			return
 		}
@@ -71,8 +71,8 @@ func UserContextMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
 		// Retrieve the user ID from the context.
 		userID, _ := ctx.Value(constants.UserIDContext).(string)
 		if userID == "" {
-			httpInternalErrorView := httpError.NewHTTPInternalErrorView(location+"UserContextMiddleware.ctx.Value", userIDContextMissing)
-			abortWithStatusJSON(ginContext, httpInternalErrorView, constants.StatusUnauthorized)
+			httpInternalError := httpError.NewHTTPInternalError(location+"UserContextMiddleware.ctx.Value", userIDContextMissing)
+			abortWithStatusJSON(ginContext, httpInternalError, constants.StatusUnauthorized)
 			return
 		}
 
@@ -85,7 +85,7 @@ func UserContextMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
 		}
 
 		// Map user data to a user view model.
-		userView := userViewModel.UserToUserViewMapper(user.Data)
+		userView := userView.UserToUserViewMapper(user.Data)
 
 		// Store user information in the context.
 		ctx = context.WithValue(ctx, constants.UserContext, userView)

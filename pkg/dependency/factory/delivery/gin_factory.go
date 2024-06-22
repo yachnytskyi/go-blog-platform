@@ -168,14 +168,14 @@ func setNoRouteHandler(router *gin.Engine) {
 		// Create the error message using your constant and the requested path.
 		errorMessage := fmt.Sprintf(constants.RouteNotFoundNotification, requestedPath)
 
-		// Create the error view with the custom error message.
-		httpRequestErrorView := httpError.NewHTTPRequestErrorView(location+"InitializeServer.setNoRouteHandler.ginFactory.Router.NoRoute", requestedPath, errorMessage)
+		// Create the error with the custom error message.
+		httpRequestError := httpError.NewHTTPRequestError(location+"InitializeServer.setNoRouteHandler.ginFactory.Router.NoRoute", requestedPath, errorMessage)
 
 		// Log the error.
-		logging.Logger(httpRequestErrorView)
+		logging.Logger(httpRequestError)
 
 		// Respond with a not found status and JSON error.
-		httpGinCommon.GinNewJSONFailureResponse(ginContext, httpRequestErrorView, constants.StatusNotFound)
+		httpGinCommon.GinNewJSONFailureResponse(ginContext, httpRequestError, constants.StatusNotFound)
 	})
 }
 
@@ -188,13 +188,13 @@ func setNoMethodHandler(router *gin.Engine) {
 		// Create the error message using your constant and the HTTP method.
 		errorMessage := fmt.Sprintf(constants.MethodNotAllowedNotification, forbiddenMethod)
 
-		// Create the error view with the custom error message.
-		httpRequestErrorView := httpError.NewHTTPRequestErrorView(location+"InitializeServer.setNoMethodHandler.ginFactory.Router.NoMethod", forbiddenMethod, errorMessage)
+		// Create the error with the custom error message.
+		httpRequestError := httpError.NewHTTPRequestError(location+"InitializeServer.setNoMethodHandler.ginFactory.Router.NoMethod", forbiddenMethod, errorMessage)
 
 		// Log the error.
-		logging.Logger(httpRequestErrorView)
+		logging.Logger(httpRequestError)
 
 		// Respond with an unauthorized status and JSON error.
-		httpGinCommon.GinNewJSONFailureResponse(ginContext, httpRequestErrorView, constants.StatusMethodNotAllowed)
+		httpGinCommon.GinNewJSONFailureResponse(ginContext, httpRequestError, constants.StatusMethodNotAllowed)
 	})
 }

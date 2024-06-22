@@ -119,7 +119,7 @@ func ValidateInputMiddleware() gin.HandlerFunc {
 			notification := constants.InvalidHTTPMethodNotification + allowedMethods
 
 			// Reject requests with disallowed HTTP methods.
-			httpRequestError := httpError.NewHTTPRequestErrorView(location+"ValidateInputMiddleware.AllowedHTTPMethods", ginContext.Request.Method, notification)
+			httpRequestError := httpError.NewHTTPRequestError(location+"ValidateInputMiddleware.AllowedHTTPMethods", ginContext.Request.Method, notification)
 			abortWithStatusJSON(ginContext, httpRequestError, constants.StatusBadRequest)
 			return
 		}
@@ -130,7 +130,7 @@ func ValidateInputMiddleware() gin.HandlerFunc {
 			notification := constants.InvalidHTTPMethodNotification + allowedContentTypes
 
 			// Reject requests with disallowed content types.
-			httpRequestError := httpError.NewHTTPRequestErrorView(location+"ValidateInputMiddleware.AllowedContentTypes", contentType, notification)
+			httpRequestError := httpError.NewHTTPRequestError(location+"ValidateInputMiddleware.AllowedContentTypes", contentType, notification)
 			abortWithStatusJSON(ginContext, httpRequestError, constants.StatusBadRequest)
 			return
 		}
@@ -164,9 +164,9 @@ func TimeoutMiddleware() gin.HandlerFunc {
 			// Request completed successfully.
 		case <-ctx.Done():
 			// Context timed out.
-			httpInternalErrorView := httpError.NewHTTPInternalErrorView(location+"TimeOutMiddleware", ctx.Err().Error())
+			httpInternalError := httpError.NewHTTPInternalError(location+"TimeOutMiddleware", ctx.Err().Error())
 			// Abort the request with an HTTP status and respond with a JSON error.
-			abortWithStatusJSON(ginContext, httpInternalErrorView, constants.StatusBadGateway)
+			abortWithStatusJSON(ginContext, httpInternalError, constants.StatusBadGateway)
 		}
 	}
 }
@@ -220,8 +220,8 @@ func EnforceHTTPMethod(method string) gin.HandlerFunc {
 			// Create a notification message indicating the allowed method.
 			notification := fmt.Sprintf("Method %s not allowed. You can only use %s method", ginContext.Request.Method, method)
 
-			// Create an HTTP request error view with the location, method, and notification.
-			httpRequestError := httpError.NewHTTPRequestErrorView(location+"ValidateInputMiddleware.EnforceHTTPMethod", ginContext.Request.Method, notification)
+			// Create an HTTP request error with the location, method, and notification.
+			httpRequestError := httpError.NewHTTPRequestError(location+"ValidateInputMiddleware.EnforceHTTPMethod", ginContext.Request.Method, notification)
 
 			// Abort the request and respond with the error and status code 405 (Method Not Allowed).
 			abortWithStatusJSON(ginContext, httpRequestError, constants.StatusBadRequest)

@@ -50,120 +50,120 @@ func (httpBaseErrors HTTPBaseErrors) Len() int {
 	return len(httpBaseErrors.Errors)
 }
 
-// HTTPValidationErrorView represents a validation error with field-specific details.
-type HTTPValidationErrorView struct {
+// HTTPValidationError represents a validation error, embedding HTTPBaseError and adding field-specific details.
+type HTTPValidationError struct {
 	Field     string `json:"field"` // The field that caused the validation error.
 	FieldType string `json:"type"`  // The type of the field.
 	HTTPBaseError
 }
 
-// NewHTTPValidationError creates a new HTTPValidationErrorView with the given details.
-func NewHTTPValidationErrorView(field, fieldType, notification string) HTTPValidationErrorView {
-	return HTTPValidationErrorView{
+// NewHTTPValidationError creates a new HTTPValidationError with the given details.
+func NewHTTPValidationError(field, fieldType, notification string) HTTPValidationError {
+	return HTTPValidationError{
 		Field:         field,
 		FieldType:     fieldType,
 		HTTPBaseError: NewHTTPBaseError(notification),
 	}
 }
 
-// HTTPValidationErrorsView represents a collection of validation errors.
-type HTTPValidationErrorsView struct {
+// HTTPValidationErrors represents a collection of validation errors.
+type HTTPValidationErrors struct {
 	HTTPBaseErrors
 }
 
-// NewHTTPValidationErrorsView creates a new HTTPValidationErrorsView collection with the given slice of errors.
-func NewHTTPValidationErrorsView(errors []error) HTTPValidationErrorsView {
-	return HTTPValidationErrorsView{NewHTTPBaseErrors(errors)}
+// NewHTTPValidationErrors creates a new HTTPValidationErrors collection with the given slice of errors.
+func NewHTTPValidationErrors(errors []error) HTTPValidationErrors {
+	return HTTPValidationErrors{NewHTTPBaseErrors(errors)}
 }
 
-// HTTPAuthorizationErrorView represents an authorization error with additional details.
-type HTTPAuthorizationErrorView struct {
+// HTTPAuthorizationError represents an authorization error, embedding HTTPBaseError and adding field-specific details.
+type HTTPAuthorizationError struct {
 	Location string `json:"-"` // The location where the error occurred.
 	HTTPBaseError
 }
 
-// NewHTTPAuthorizationErrorView creates a new HTTPAuthorizationErrorView with the given location and notification message.
-func NewHTTPAuthorizationErrorView(location, notification string) HTTPAuthorizationErrorView {
-	return HTTPAuthorizationErrorView{
+// NewHTTPAuthorizationError creates a new HTTPAuthorizationError with the given location and notification message.
+func NewHTTPAuthorizationError(location, notification string) HTTPAuthorizationError {
+	return HTTPAuthorizationError{
 		Location:      location,
 		HTTPBaseError: NewHTTPBaseError(notification),
 	}
 }
 
-// HTTPItemNotFoundErrorView represents an item not found error.
-type HTTPItemNotFoundErrorView struct {
+// HTTPItemNotFoundError represents an item not found error, embedding HTTPBaseError and implementing the error interface.
+type HTTPItemNotFoundError struct {
 	HTTPBaseError
 }
 
-// NewHTTPItemNotFoundErrorView creates a new HTTPItemNotFoundErrorView with the given notification message.
-func NewHTTPItemNotFoundErrorView(notification string) HTTPItemNotFoundErrorView {
-	return HTTPItemNotFoundErrorView{
+// NewHTTPItemNotFoundError creates a new HTTPItemNotFoundError with the given notification message.
+func NewHTTPItemNotFoundError(notification string) HTTPItemNotFoundError {
+	return HTTPItemNotFoundError{
 		HTTPBaseError: NewHTTPBaseError(notification),
 	}
 }
 
-// HTTPPaginationErrorView represents a pagination error with additional details.
-type HTTPPaginationErrorView struct {
+// HTTPPaginationError represents a pagination error, embedding HTTPBaseError and adding field-specific details.
+type HTTPPaginationError struct {
 	CurrentPage string `json:"current_page"` // The current page number.
 	TotalPages  string `json:"total_pages"`  // The total number of pages.
 	HTTPBaseError
 }
 
-// NewHTTPPaginationErrorView creates a new HTTPPaginationErrorView with the given details.
-func NewHTTPPaginationErrorView(currentPage, totalPages, notification string) HTTPPaginationErrorView {
-	return HTTPPaginationErrorView{
+// NewHTTPPaginationError creates a new HTTPPaginationError with the given details.
+func NewHTTPPaginationError(currentPage, totalPages, notification string) HTTPPaginationError {
+	return HTTPPaginationError{
 		CurrentPage:   currentPage,
 		TotalPages:    totalPages,
 		HTTPBaseError: NewHTTPBaseError(notification),
 	}
 }
 
-// HTTPRequestErrorView represents a request error with additional details.
-type HTTPRequestErrorView struct {
+// HTTPRequestError represents a request error, embedding HTTPBaseError and adding field-specific details.
+type HTTPRequestError struct {
 	Location    string `json:"-"`            // The location where the error occurred.
 	RequestType string `json:"request_type"` // The type of the request that caused the error.
 	HTTPBaseError
 }
 
-// NewHTTPRequestErrorView creates a new HTTPRequestErrorView with the given location, request type, and notification message.
-func NewHTTPRequestErrorView(location, requestType, notification string) HTTPRequestErrorView {
-	return HTTPRequestErrorView{
+// NewHTTPRequestError creates a new HTTPRequestError with the given location, request type, and notification message.
+func NewHTTPRequestError(location, requestType, notification string) HTTPRequestError {
+	return HTTPRequestError{
 		Location:      location,
 		RequestType:   requestType,
 		HTTPBaseError: NewHTTPBaseError(notification),
 	}
 }
 
-// HTTPInternalErrorView represents an internal error with additional details.
-type HTTPInternalErrorView struct {
+// HTTPInternalError represents an internal error, embedding HTTPBaseError and adding field-specific details.
+type HTTPInternalError struct {
 	Location string `json:"-"` // The location where the error occurred.
 	HTTPBaseError
 }
 
-// NewHTTPInternalErrorView creates a new HTTPInternalErrorView with the given location and notification message.
-func NewHTTPInternalErrorView(location, notification string) HTTPInternalErrorView {
-	return HTTPInternalErrorView{
+// NewHTTPInternalError creates a new HTTPInternalError with the given location and notification message.
+func NewHTTPInternalError(location, notification string) HTTPInternalError {
+	return HTTPInternalError{
 		Location:      location,
 		HTTPBaseError: NewHTTPBaseError(notification),
 	}
 }
 
-// HTTPInternalErrorsView represents a collection of internal errors.
-type HTTPInternalErrorsView struct {
+// HTTPInternalErrors represents a collection of internal errors.
+type HTTPInternalErrors struct {
 	HTTPBaseErrors
 }
 
-// NewHTTPInternalErrorsView creates a new HTTPInternalErrorsView collection with the given slice of errors.
-func NewHTTPInternalErrorsView(errors []error) HTTPInternalErrorsView {
-	return HTTPInternalErrorsView{NewHTTPBaseErrors(errors)}
+// NewHTTPInternalErrors creates a new HTTPInternalErrors collection with the given slice of errors.
+func NewHTTPInternalErrors(errors []error) HTTPInternalErrors {
+	return HTTPInternalErrors{NewHTTPBaseErrors(errors)}
 }
 
-// MarshalJSON customizes the JSON output for HTTPValidationErrorsView.
-func (httpValidationErrorsView HTTPValidationErrorsView) MarshalJSON() ([]byte, error) {
-	return json.Marshal(httpValidationErrorsView.Errors)
+// MarshalJSON customizes the JSON output for HTTPValidationErrors.
+func (httpValidationErrors HTTPValidationErrors) MarshalJSON() ([]byte, error) {
+	return json.Marshal(httpValidationErrors.Errors)
 }
 
-// MarshalJSON customizes the JSON output for HTTPInternalErrorsView.
-func (httpInternalErrorsView HTTPInternalErrorsView) MarshalJSON() ([]byte, error) {
-	return json.Marshal(httpInternalErrorsView.Errors)
+// MarshalJSON customizes the JSON output for HTTPInternalErrors.
+func (httpInternalErrors HTTPInternalErrors) MarshalJSON() ([]byte, error) {
+	return json.Marshal(httpInternalErrors.Errors)
 }

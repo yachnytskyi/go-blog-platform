@@ -10,43 +10,43 @@ const (
 )
 
 // HandleError takes an error as input and returns an error.
-// It performs error type assertions and maps specific domain errors to their corresponding HTTP error views.
+// It performs error type assertions and maps specific domain errors to their corresponding HTTP errors.
 // Parameters:
 // - err: The error to be handled.
 // Returns:
-// - An error mapped to its corresponding HTTP error view.
+// - An error mapped to its corresponding HTTP error .
 func HandleError(err error) error {
 	switch errorType := err.(type) {
 	case domainError.ValidationError:
-		// Map domain validation error to HTTP validation error view.
-		return ValidationErrorToHTTPValidationErrorViewMapper(errorType)
+		// Map domain validation error to HTTP validation error .
+		return ValidationErrorToHTTPValidationErrorMapper(errorType)
 	case domainError.ValidationErrors:
-		// Map domain validation errors to HTTP validation errors view.
-		return ValidationErrorsToHTTPValidationErrorsViewMapper(errorType)
+		// Map domain validation errors to HTTP validation errors .
+		return ValidationErrorsToHTTPValidationErrorsMapper(errorType)
 	case domainError.AuthorizationError:
-		// Map domain authorization error to HTTP authorization error view.
-		return AuthorizationErrorToHTTPAuthorizationErrorViewMapper(errorType)
+		// Map domain authorization error to HTTP authorization error .
+		return AuthorizationErrorToHTTPAuthorizationErrorMapper(errorType)
 	case domainError.ItemNotFoundError:
-		// Map domain item not found error to HTTP item not found error view.
-		return ItemNotFoundErrorToHTTPItemNotFoundErrorViewMapper(errorType)
+		// Map domain item not found error to HTTP item not found error .
+		return ItemNotFoundErrorToHTTPItemNotFoundErrorMapper(errorType)
 	case domainError.PaginationError:
-		// Map domain pagination error to HTTP pagination error view.
-		return PaginationErrorToHTTPPaginationErrorViewMapper(errorType)
-	case HTTPAuthorizationErrorView:
-		// Return HTTP authorization error view directly.
+		// Map domain pagination error to HTTP pagination error .
+		return PaginationErrorToHTTPPaginationErrorMapper(errorType)
+	case HTTPAuthorizationError:
+		// Return HTTP authorization error directly.
 		return errorType
-	case HTTPRequestErrorView:
-		// Return HTTP request error view directly.
+	case HTTPRequestError:
+		// Return HTTP request error directly.
 		return errorType
-	case HTTPInternalErrorView:
-		// Add internal error notification and return HTTP internal error view.
+	case HTTPInternalError:
+		// Add internal error notification and return HTTP internal error .
 		errorType.Notification = constants.InternalErrorNotification
 		return errorType
-	case HTTPInternalErrorsView:
-		// Return a new HTTP internal error view with location and notification.
-		return NewHTTPInternalErrorView(location+"case HTTPInternalErrorsView", constants.InternalErrorNotification)
+	case HTTPInternalErrors:
+		// Return a new HTTP internal error  with location and notification.
+		return NewHTTPInternalError(location+"case HTTPInternalErrors", constants.InternalErrorNotification)
 	default:
-		// Return a new HTTP internal error view for unknown error types with location and notification.
-		return NewHTTPInternalErrorView(location+"case default", constants.InternalErrorNotification)
+		// Return a new HTTP internal error  for unknown error types with location and notification.
+		return NewHTTPInternalError(location+"case default", constants.InternalErrorNotification)
 	}
 }

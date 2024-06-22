@@ -15,7 +15,7 @@ func (set Set[T]) Add(value T) {
 // - values: The values to be added to the set.
 func (set Set[T]) AddAll(values ...T) {
 	for _, value := range values {
-		set[value] = struct{}{}
+		set.Add(value)
 	}
 }
 
@@ -66,10 +66,7 @@ func (set Set[T]) Delete(value T) {
 
 // Clear removes all values from the set.
 func (set *Set[T]) Clear() {
-	if set.Len() > 0 {
-		// Create a new empty map with the same length as the existing map.
-		*set = make(map[T]struct{}, set.Len())
-	}
+	*set = make(Set[T])
 }
 
 // OrderedSet represents an ordered set implemented using both a map and a slice.

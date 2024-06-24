@@ -1,6 +1,8 @@
 package domain
 
-import "strings"
+import (
+	"strings"
+)
 
 // SanitizeString trims leading and trailing white spaces from the input string.
 // Parameters:
@@ -21,11 +23,12 @@ func ToLowerString(data string) string {
 }
 
 // SanitizeAndToLowerString trims leading and trailing white spaces from the input string
-// and converts it to lowercase.
+// and converts it to lowercase by utilizing SanitizeString and ToLowerString functions.
 // Parameters:
 // - data: The string to be sanitized and converted to lowercase.
 // Returns:
 // - The sanitized and lowercase string.
 func SanitizeAndToLowerString(data string) string {
-	return strings.ToLower(strings.TrimSpace(data))
+	// Utilize existing functions for clarity and to avoid redundancy
+	return ToLowerString(SanitizeString(data))
 }

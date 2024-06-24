@@ -24,10 +24,10 @@ func Encode(data string) string {
 // - location: A string representing the location or context for error logging.
 // - encodedString: The base64 encoded string to be decoded.
 // Returns:
-// - The decoded string data.
-// - An error if the decoding fails, wrapped in a domain-specific error with logging.
+// - A Result containing the decoded string data.
+// - A Result containing an error if the decoding fails, wrapped in a domain-specific error with logging.
 func Decode(location, encodedString string) commonModel.Result[string] {
-	decodeString, decodeStringError := base64.StdEncoding.DecodeString(encodedString)
+	decodedBytes, decodeStringError := base64.StdEncoding.DecodeString(encodedString)
 	if validator.IsError(decodeStringError) {
 		// Create and log an internal error with context if decoding fails.
 		internalError := domainError.NewInternalError(location+".Decode.DecodeString", decodeStringError.Error())
@@ -36,7 +36,7 @@ func Decode(location, encodedString string) commonModel.Result[string] {
 		return commonModel.NewResultOnFailure[string](internalError)
 	}
 
-	return commonModel.NewResultOnSuccess[string](string(decodeString))
+	return commonModel.NewResultOnSuccess[string](string(decodedBytes))
 }
 
 // ConvertQueryToString converts a query to a string representation.

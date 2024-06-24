@@ -69,7 +69,7 @@ func ValidateOptionalField(field string, commonValidator domainModel.CommonValid
 	// Check if the string length is invalid.
 	if IsStringLengthInvalid(field, commonValidator.MinLength, commonValidator.MaxLength) {
 		// Set the notification message for optional string length violation.
-		commonValidator.Notification = fmt.Sprintf(constants.StringOptionalAllowedLength, commonValidator.MaxLength)
+		commonValidator.Notification = fmt.Sprintf(constants.StringOptionalAllowedLength, commonValidator.MinLength, commonValidator.MaxLength)
 
 		// Create a new validation error with context and log it.
 		validationError := domainError.NewValidationError(location+"ValidateOptionalField.IsStringLengthInvalid",
@@ -124,5 +124,9 @@ func AreStringCharactersInvalid(checkedString string, regexString string) bool {
 // Returns:
 // - A boolean indicating whether the optional string length is invalid.
 func IsOptionalStringLengthInvalid(checkedString string, minLength int, maxLength int) bool {
+	if len(checkedString) == 0 {
+		return true
+	}
+
 	return len(checkedString) < minLength || len(checkedString) > maxLength
 }

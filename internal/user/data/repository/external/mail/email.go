@@ -23,19 +23,20 @@ const (
 	loggerMessage = "parsing template..."
 )
 
-// ParseTemplateDirectory walks through the specified directory and parses all template files.
+// parseTemplateDirectory walks through the specified directory and parses all template files.
 // It returns a commonModel.Result containing a pointer to the parsed template.
+//
 // Parameters:
 // - location: a string used to identify the source location in error messages and logging.
 // - templatePath: the path to the directory containing the template files.
-func ParseTemplateDirectory(location, templatePath string) commonModel.Result[*template.Template] {
+func parseTemplateDirectory(location, templatePath string) commonModel.Result[*template.Template] {
 	var paths []string
 
 	// Walk through the directory and gather all file paths.
 	filePathWalkError := filepath.Walk(templatePath, func(path string, info os.FileInfo, walkError error) error {
 		if validator.IsError(walkError) {
 			// Handle any error encountered during walking the directory.
-			internalError := domainError.NewInternalError(location+".ParseTemplateDirectory.Walk", walkError.Error())
+			internalError := domainError.NewInternalError(location+".parseTemplateDirectory.Walk", walkError.Error())
 			logging.Logger(internalError)
 			return internalError
 		}
@@ -50,7 +51,7 @@ func ParseTemplateDirectory(location, templatePath string) commonModel.Result[*t
 	logging.Logger(loggerMessage)
 	if validator.IsError(filePathWalkError) {
 		// Handle error if walking the directory fails.
-		internalError := domainError.NewInternalError(location+".ParseTemplateDirectory."+loggerMessage, filePathWalkError.Error())
+		internalError := domainError.NewInternalError(location+".parseTemplateDirectory."+loggerMessage, filePathWalkError.Error())
 		logging.Logger(internalError)
 		return commonModel.NewResultOnFailure[*template.Template](internalError)
 	}
@@ -70,6 +71,7 @@ func ParseTemplateDirectory(location, templatePath string) commonModel.Result[*t
 
 // SendEmail sends an email to the specified user using the provided email data.
 // It returns an error if sending the email fails.
+//
 // Parameters:
 // - location: a string used to identify the source location in error messages and logging.
 // - user: the recipient of the email.
@@ -107,6 +109,7 @@ func SendEmail(location string, user userModel.User, data userModel.EmailData) e
 
 // prepareSendMessage prepares the email message to be sent.
 // It returns a commonModel.Result containing a pointer to the prepared message.
+//
 // Parameters:
 // - location: a string used to identify the source location in error messages and logging.
 // - userEmail: the recipient's email address.
@@ -123,10 +126,10 @@ func prepareSendMessage(location, userEmail string, data userModel.EmailData) co
 	var body bytes.Buffer
 
 	// Parse the template directory to get the templates.
-	template := ParseTemplateDirectory(location+".prepareSendMessage", data.TemplatePath)
+	template := parseTemplateDirectory(location+".prepareSendMessage", data.TemplatePath)
 	if validator.IsError(template.Error) {
 		// Handle template parsing error.
-		internalError := domainError.NewInternalError(location+".SendEmail.PrepareSendMessage.ParseTemplateDirectory", template.Error.Error())
+		internalError := domainError.NewInternalError(location+".SendEmail.PrepareSendMessage.parseTemplateDirectory", template.Error.Error())
 		logging.Logger(internalError)
 		return commonModel.NewResultOnFailure[*gomail.Message](internalError)
 	}

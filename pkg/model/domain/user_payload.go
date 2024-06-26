@@ -8,9 +8,11 @@ type UserTokenPayload struct {
 }
 
 // NewUserTokenPayload creates a new UserTokenPayload with the provided user ID and role.
+//
 // Parameters:
 // - userID: A string representing the unique identifier of the user.
 // - role: A string representing the role of the user.
+//
 // Returns:
 // - A UserTokenPayload struct populated with the given user ID and role.
 func NewUserTokenPayload(userID, role string) UserTokenPayload {

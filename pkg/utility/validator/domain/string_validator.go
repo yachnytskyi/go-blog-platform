@@ -16,10 +16,12 @@ const (
 
 // ValidateField validates a required field based on the provided commonValidator.
 // It checks the string length and character validity using regular expressions.
+//
 // Parameters:
 // - field: The field to be validated.
 // - commonValidator: The validator containing validation rules.
 // - validationErrors: A slice of existing validation errors to be appended to.
+//
 // Returns:
 // - A slice of validation errors including any new errors found.
 func ValidateField(field string, commonValidator domainModel.CommonValidator, validationErrors []error) []error {
@@ -56,10 +58,12 @@ func ValidateField(field string, commonValidator domainModel.CommonValidator, va
 
 // ValidateOptionalField validates an optional field based on the provided commonValidator.
 // It checks the string length and character validity using regular expressions.
+//
 // Parameters:
 // - field: The field to be validated.
 // - commonValidator: The validator containing validation rules.
 // - validationErrors: A slice of existing validation errors to be appended to.
+//
 // Returns:
 // - A slice of validation errors including any new errors found.
 func ValidateOptionalField(field string, commonValidator domainModel.CommonValidator, validationErrors []error) []error {
@@ -101,10 +105,12 @@ func ValidateOptionalField(field string, commonValidator domainModel.CommonValid
 }
 
 // IsStringLengthInvalid checks if the length of the input string is outside the specified range.
+//
 // Parameters:
 // - checkedString: The string to check.
 // - minLength: The minimum allowed length.
 // - maxLength: The maximum allowed length.
+//
 // Returns:
 // - A boolean indicating whether the string length is invalid.
 func IsStringLengthInvalid(checkedString string, minLength int, maxLength int) bool {
@@ -112,9 +118,11 @@ func IsStringLengthInvalid(checkedString string, minLength int, maxLength int) b
 }
 
 // AreStringCharactersInvalid checks if the characters in the input string match the specified regex pattern.
+//
 // Parameters:
 // - checkedString: The string to check.
 // - regexString: The regex pattern to match against.
+//
 // Returns:
 // - A boolean indicating whether the string characters are invalid.
 func AreStringCharactersInvalid(checkedString string, regexString string) bool {

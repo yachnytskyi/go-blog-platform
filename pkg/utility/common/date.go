@@ -11,8 +11,10 @@ import (
 )
 
 // FormatDate formats a time.Time instance to a custom string format defined in constants.
+//
 // Parameters:
 // - data: The time.Time instance to be formatted.
+//
 // Returns:
 // - A string representing the formatted date.
 func FormatDate(data time.Time) string {
@@ -20,9 +22,11 @@ func FormatDate(data time.Time) string {
 }
 
 // ParseDate parses a string formatted as defined in constants.DateTimeFormat into a time.Time instance.
+//
 // Parameters:
 // - location: A string representing the location or context for error logging.
 // - data: The string to be parsed into a time.Time instance.
+//
 // Returns:
 // - A result containing the parsed time.Time instance.
 // - A result containing an error if the parsing fails, wrapped in a Error-specific error with logging.

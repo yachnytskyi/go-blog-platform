@@ -14,6 +14,7 @@ type HTTPPaginationResponse struct {
 }
 
 // NewHTTPPaginationResponse creates a new instance of HTTPPaginationResponse.
+//
 // Parameters:
 // - currentPage: The current page number being viewed.
 // - totalPages: The total number of pages available.
@@ -24,6 +25,7 @@ type HTTPPaginationResponse struct {
 // - orderBy: (Optional) The field by which the items are ordered.
 // - sortOrder: (Optional) The order in which the items are sorted.
 // - pageLinks: (Optional) A list of links to other pages.
+//
 // Returns:
 // - A new instance of HTTPPaginationResponse populated with the provided data.
 func NewHTTPPaginationResponse(currentPage, totalPages, pagesLeft, itemsLeft, totalItems, limit int, orderBy, sortOrder string, pageLinks []string) HTTPPaginationResponse {

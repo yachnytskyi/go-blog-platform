@@ -11,8 +11,10 @@ import (
 )
 
 // Encode encodes the input data to a base64 string.
+//
 // Parameters:
 // - data: The string data to be encoded.
+//
 // Returns:
 // - A base64 encoded string.
 func Encode(data string) string {
@@ -20,9 +22,11 @@ func Encode(data string) string {
 }
 
 // Decode decodes a base64 encoded string and returns the original data.
+//
 // Parameters:
 // - location: A string representing the location or context for error logging.
 // - encodedString: The base64 encoded string to be decoded.
+//
 // Returns:
 // - A Result containing the decoded string data.
 // - A Result containing an error if the decoding fails, wrapped in a domain-specific error with logging.
@@ -40,8 +44,10 @@ func Decode(location, encodedString string) commonModel.Result[string] {
 }
 
 // ConvertQueryToString converts a query to a string representation.
+//
 // Parameters:
 // - query: The query to be converted to a string.
+//
 // Returns:
 // - A string representation of the query.
 func ConvertQueryToString(query any) string {

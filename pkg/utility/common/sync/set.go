@@ -11,8 +11,10 @@ type Set[T comparable] struct {
 }
 
 // NewSet creates a new set with an optional capacity.
+//
 // Parameters:
 // - capacity: The initial capacity of the set.
+//
 // Returns:
 // - A pointer to the newly created Set.
 func NewSet[T comparable](capacity uint) *Set[T] {
@@ -22,6 +24,7 @@ func NewSet[T comparable](capacity uint) *Set[T] {
 }
 
 // Add adds a value to the synchronized set.
+//
 // Parameters:
 // - value: The value to be added to the set.
 func (set *Set[T]) Add(value T) {
@@ -31,6 +34,7 @@ func (set *Set[T]) Add(value T) {
 }
 
 // AddAll adds multiple values to the synchronized set.
+//
 // Parameters:
 // - values: The values to be added to the set.
 func (set *Set[T]) AddAll(values ...T) {
@@ -42,8 +46,10 @@ func (set *Set[T]) AddAll(values ...T) {
 }
 
 // Contains checks if a value exists in the set.
+//
 // Parameters:
 // - value: The value to check for existence in the set.
+//
 // Returns:
 // - A boolean indicating whether the value is present in the set.
 func (set *Set[T]) Contains(value T) bool {
@@ -54,8 +60,10 @@ func (set *Set[T]) Contains(value T) bool {
 }
 
 // IsUnique checks if a value is unique in the set.
+//
 // Parameters:
 // - value: The value to check for uniqueness in the set.
+//
 // Returns:
 // - A boolean indicating whether the value is unique in the set.
 func (set *Set[T]) IsUnique(value T) bool {
@@ -64,6 +72,7 @@ func (set *Set[T]) IsUnique(value T) bool {
 }
 
 // Len returns the number of values in the set.
+//
 // Returns:
 // - The number of values in the set.
 func (set *Set[T]) Len() int {
@@ -73,6 +82,7 @@ func (set *Set[T]) Len() int {
 }
 
 // Values returns the values from the synchronized set.
+//
 // Returns:
 // - A slice containing all the values in the set.
 func (set *Set[T]) Values() []T {
@@ -85,6 +95,7 @@ func (set *Set[T]) Values() []T {
 }
 
 // Delete removes a value from the set.
+//
 // Parameters:
 // - value: The value to be removed from the set.
 func (set *Set[T]) Delete(value T) {
@@ -110,8 +121,10 @@ type OrderedSet[T comparable] struct {
 }
 
 // NewOrderedSet creates a new ordered set with map and slice.
+//
 // Parameters:
 // - capacity: The initial capacity of the ordered set.
+//
 // Returns:
 // - A pointer to the newly created OrderedSet.
 func NewOrderedSet[T comparable](capacity int) *OrderedSet[T] {
@@ -122,6 +135,7 @@ func NewOrderedSet[T comparable](capacity int) *OrderedSet[T] {
 }
 
 // Add adds a value to the ordered set.
+//
 // Parameters:
 // - value: The value to be added to the ordered set.
 func (orderedSet *OrderedSet[T]) Add(value T) {
@@ -134,6 +148,7 @@ func (orderedSet *OrderedSet[T]) Add(value T) {
 }
 
 // AddAll adds multiple values to the ordered set.
+//
 // Parameters:
 // - values: The values to be added to the ordered set.
 func (orderedSet *OrderedSet[T]) AddAll(values ...T) {
@@ -143,8 +158,10 @@ func (orderedSet *OrderedSet[T]) AddAll(values ...T) {
 }
 
 // Contains checks if a value exists in the ordered set.
+//
 // Parameters:
 // - value: The value to check for existence in the ordered set.
+//
 // Returns:
 // - A boolean indicating whether the value is present in the ordered set.
 func (orderedSet *OrderedSet[T]) Contains(value T) bool {
@@ -155,8 +172,10 @@ func (orderedSet *OrderedSet[T]) Contains(value T) bool {
 }
 
 // IsUnique checks if a value is unique in the ordered set.
+//
 // Parameters:
 // - value: The value to check for uniqueness in the ordered set.
+//
 // Returns:
 // - A boolean indicating whether the value is unique in the ordered set.
 func (orderedSet *OrderedSet[T]) IsUnique(value T) bool {
@@ -167,6 +186,7 @@ func (orderedSet *OrderedSet[T]) IsUnique(value T) bool {
 }
 
 // Values returns the values from the ordered set.
+//
 // Returns:
 // - A slice containing all the values in the ordered set.
 func (orderedSet *OrderedSet[T]) Values() []T {
@@ -178,6 +198,7 @@ func (orderedSet *OrderedSet[T]) Values() []T {
 }
 
 // Delete removes a value from the ordered set based on the index.
+//
 // Parameters:
 // - index: The index of the value to be removed.
 func (orderedSet *OrderedSet[T]) Delete(index uint) {

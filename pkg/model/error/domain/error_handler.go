@@ -8,8 +8,10 @@ import (
 // consistent error handling for various error types in the application.
 // It returns an error type with a standardized notification message based on
 // the specific error type.
+//
 // Parameters:
 // - err: The error to be handled.
+//
 // Returns:
 // - An error with a standardized notification message.
 func HandleError(err error) error {

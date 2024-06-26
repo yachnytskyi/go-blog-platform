@@ -30,8 +30,10 @@ func AnonymousMiddleware() gin.HandlerFunc {
 }
 
 // isUserAnonymous checks if the user is anonymous based on the presence of an access token.
+//
 // Parameters:
 // - ginContext: The Gin context containing the HTTP request.
+//
 // Returns:
 // - A boolean indicating whether the user is anonymous.
 func isUserAnonymous(ginContext *gin.Context) bool {

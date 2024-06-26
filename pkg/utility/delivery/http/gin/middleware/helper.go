@@ -13,8 +13,10 @@ import (
 )
 
 // extractAccessToken extracts the access token from the request headers or cookies.
+//
 // Parameters:
 // - ginContext: The Gin context containing the HTTP request.
+//
 // Returns:
 // - A Result containing the extracted access token as a string.
 // - A Result containing an error if the access token is not found or invalid.
@@ -41,8 +43,10 @@ func extractAccessToken(ginContext *gin.Context) commonModel.Result[string] {
 }
 
 // extractRefreshToken extracts the refresh token from the request cookies.
+//
 // Parameters:
 // - ginContext: The Gin context containing the HTTP request.
+//
 // Returns:
 // - A Result containing the extracted refresh token as a string.
 // - A Result containing an error if the refresh token is not found or invalid.
@@ -61,6 +65,7 @@ func extractRefreshToken(ginContext *gin.Context) commonModel.Result[string] {
 }
 
 // abortWithStatusJSON aborts the request, logs the error, and responds with a JSON error.
+//
 // Parameters:
 // - ginContext: The Gin context used to generate the JSON response.
 // - err: The error to be included in the response.

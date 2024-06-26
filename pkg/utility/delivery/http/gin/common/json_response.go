@@ -10,6 +10,7 @@ import (
 
 // GinNewJSONFailureResponse generates a JSON response for a failed operation.
 // It takes a Gin context, an error that occurred, and an HTTP status code.
+//
 // Parameters:
 // - ginContext: The Gin context used to generate the JSON response.
 // - err: The error that occurred.
@@ -21,6 +22,7 @@ func GinNewJSONFailureResponse(ginContext *gin.Context, err error, httpCode int)
 
 // HandleJSONBindingError handles errors that occur during JSON data binding.
 // It logs the error, generates a JSON response, and sets the HTTP status code.
+//
 // Parameters:
 // - ginContext: The Gin context used to generate the JSON response.
 // - location: A string representing the location or context for error logging.

@@ -11,8 +11,10 @@ const (
 
 // HandleError takes an error as input and returns an error.
 // It performs error type assertions and maps specific domain errors to their corresponding HTTP errors.
+//
 // Parameters:
 // - err: The error to be handled.
+//
 // Returns:
 // - An error mapped to its corresponding HTTP error .
 func HandleError(err error) error {

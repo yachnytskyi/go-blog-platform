@@ -15,10 +15,12 @@ const (
 
 // DataToMongoDocumentMapper converts the incoming data to a BSON document.
 // It uses BSON marshaling and unmarshaling to perform the conversion.
+//
 // Parameters:
 // - ctx: A context to support cancellation and timeout.
 // - location: A string representing the location or context for error logging.
 // - incomingData: The data to be converted to a BSON document.
+//
 // Returns:
 // - A Result containing a pointer to a BSON document.
 // - A Result containing an error if the conversion fails.
@@ -47,9 +49,11 @@ func DataToMongoDocumentMapper(location string, incomingData any) commonModel.Re
 
 // HexToObjectIDMapper converts a hexadecimal string representation of MongoDB ObjectID
 // to its corresponding primitive.ObjectID type.
+//
 // Parameters:
 // - location: A string representing the location or context for error logging.
 // - id: The hexadecimal string to be converted.
+//
 // Returns:
 // - A Result containing the converted ObjectID if successful.
 // - A Result containing an error if the conversion fails.

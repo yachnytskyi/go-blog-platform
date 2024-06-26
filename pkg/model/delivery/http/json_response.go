@@ -19,8 +19,10 @@ type JSONResponse struct {
 }
 
 // NewJSONSuccessResponse creates a JSON response for a successful operation.
+//
 // Parameters:
 // - data: The data to be included in the response.
+//
 // Returns:
 // - A JSONResponse with the "Data" field populated and the "Status" set to "success".
 func NewJSONSuccessResponse(data any) JSONResponse {
@@ -31,8 +33,10 @@ func NewJSONSuccessResponse(data any) JSONResponse {
 }
 
 // NewJSONFailureResponse creates a JSON response for a failed operation.
+//
 // Parameters:
 // - err: The error to be included in the response.
+//
 // Returns:
 // - A JSONResponse with the "Status" set to "fail" and the "Error" or "Errors" field populated based on the type of error.
 func NewJSONFailureResponse(err error) JSONResponse {
@@ -55,6 +59,7 @@ func NewJSONFailureResponse(err error) JSONResponse {
 }
 
 // SetStatus sets the "Status" field based on the presence of "Data," "Error," or "Errors."
+//
 // Parameters:
 // - jsonResponse: A pointer to the JSONResponse whose status needs to be set.
 func SetStatus(jsonResponse *JSONResponse) {

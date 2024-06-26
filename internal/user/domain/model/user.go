@@ -4,6 +4,7 @@ import (
 	"time"
 
 	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
+	domainModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
 )
 
 type Users struct {
@@ -12,7 +13,7 @@ type Users struct {
 }
 
 type User struct {
-	UserID    string
+	domainModel.BaseEntity
 	Name      string
 	Email     string
 	Password  string
@@ -35,7 +36,7 @@ type UserCreate struct {
 }
 
 type UserUpdate struct {
-	UserID    string
+	ID        string
 	Name      string
 	UpdatedAt time.Time
 }

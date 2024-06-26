@@ -19,7 +19,7 @@ func (userGrpcServer *UserGrpcServer) GetMe(ctx context.Context, request *pb.Get
 
 	response := &pb.UserView{
 		User: &pb.User{
-			Id:        user.Data.UserID,
+			Id:        user.Data.ID,
 			Name:      user.Data.Name,
 			Email:     user.Data.Email,
 			Role:      user.Data.Role,

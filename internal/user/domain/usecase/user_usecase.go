@@ -173,7 +173,7 @@ func (userUseCaseV1 UserUseCaseV1) Login(ctx context.Context, userLoginData user
 	}
 
 	// Generate the UserTokenPayload.
-	userTokenPayload := domainModel.NewUserTokenPayload(fetchedUser.Data.UserID, fetchedUser.Data.Role)
+	userTokenPayload := domainModel.NewUserTokenPayload(fetchedUser.Data.ID, fetchedUser.Data.Role)
 
 	// Generate access and refresh tokens.
 	userToken := generateToken(userTokenPayload)
@@ -187,7 +187,7 @@ func (userUseCaseV1 UserUseCaseV1) Login(ctx context.Context, userLoginData user
 
 func (userUseCaseV1 UserUseCaseV1) RefreshAccessToken(ctx context.Context, user userModel.User) commonModel.Result[userModel.UserToken] {
 	// Generate the UserTokenPayload.
-	userTokenPayload := domainModel.NewUserTokenPayload(user.UserID, user.Role)
+	userTokenPayload := domainModel.NewUserTokenPayload(user.ID, user.Role)
 
 	// Generate access and refresh tokens.
 	userToken := generateToken(userTokenPayload)

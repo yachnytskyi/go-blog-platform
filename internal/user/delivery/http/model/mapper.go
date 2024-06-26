@@ -3,6 +3,7 @@ package model
 import (
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
+	domainModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
 )
 
 func UsersToUsersViewMapper(users userModel.Users) UsersView {
@@ -29,12 +30,10 @@ func UsersToUsersViewMapper(users userModel.Users) UsersView {
 
 func UserToUserViewMapper(user userModel.User) UserView {
 	return UserView{
-		UserID:    user.UserID,
-		Name:      user.Name,
-		Email:     user.Email,
-		Role:      user.Role,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
+		BaseEntity: httpModel.NewBaseEntity(user.ID, user.CreatedAt, user.UpdatedAt),
+		Name:       user.Name,
+		Email:      user.Email,
+		Role:       user.Role,
 	}
 }
 
@@ -49,8 +48,8 @@ func UserCreateViewToUserCreateMapper(user UserCreateView) userModel.UserCreate 
 
 func UserUpdateViewToUserUpdateMapper(user UserUpdateView) userModel.UserUpdate {
 	return userModel.UserUpdate{
-		UserID: user.UserID,
-		Name:   user.Name,
+		ID:   user.ID,
+		Name: user.Name,
 	}
 }
 
@@ -90,11 +89,11 @@ func UserResetPasswordViewToUserResetPassword(user UserResetPasswordView) userMo
 
 func UserViewToUserMapper(location string, userView UserView) userModel.User {
 	return userModel.User{
-		UserID:    userView.UserID,
-		Name:      userView.Name,
-		Email:     userView.Email,
-		Role:      userView.Role,
-		CreatedAt: userView.CreatedAt,
-		UpdatedAt: userView.UpdatedAt,
+		BaseEntity: domainModel.NewBaseEntity(userView.ID, userView.CreatedAt, userView.UpdatedAt),
+		Name:       userView.Name,
+		Email:      userView.Email,
+		Role:       userView.Role,
+		CreatedAt:  userView.CreatedAt,
+		UpdatedAt:  userView.UpdatedAt,
 	}
 }

@@ -79,7 +79,7 @@ func (postController PostController) CreatePost(controllerContext any) {
 	defer cancel()
 	var createdPostData *postModel.PostCreate = new(postModel.PostCreate)
 	user := ctx.Value(constants.UserContext).(userViewModel.UserView)
-	createdPostData.UserID = user.UserID
+	createdPostData.UserID = user.ID
 	createdPostData.User = user.Name
 	err := ginContext.ShouldBindJSON(&createdPostData)
 	if err != nil {

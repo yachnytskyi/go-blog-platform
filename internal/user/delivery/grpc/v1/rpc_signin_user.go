@@ -32,7 +32,7 @@ func (userGrpcServer *UserGrpcServer) Login(ctx context.Context, request *pb.Log
 	// }
 
 	// Generate the UserTokenPayload.
-	userTokenPayload := domainModel.NewUserTokenPayload(user.Data.UserID, user.Data.Role)
+	userTokenPayload := domainModel.NewUserTokenPayload(user.Data.ID, user.Data.Role)
 
 	// Generate tokens.
 	accessToken := domainUtility.GenerateJWTToken(location+"Login", userGrpcServer.applicationConfig.AccessToken.PrivateKey, userGrpcServer.applicationConfig.AccessToken.ExpiredIn, userTokenPayload)

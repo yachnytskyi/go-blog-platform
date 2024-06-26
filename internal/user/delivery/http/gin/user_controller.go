@@ -157,7 +157,7 @@ func (userController UserController) UpdateCurrentUser(controllerContext any) {
 
 	// Convert the view model to a domain model and update the user.
 	userUpdateData := userViewModel.UserUpdateViewToUserUpdateMapper(userUpdateViewData)
-	userUpdateData.UserID = currentUserID
+	userUpdateData.ID = currentUserID
 	updatedUser := userController.userUseCase.UpdateCurrentUser(ctx, userUpdateData)
 	if validator.IsError(updatedUser.Error) {
 		httpGinCommon.GinNewJSONFailureResponse(ginContext, updatedUser.Error, constants.StatusBadRequest)

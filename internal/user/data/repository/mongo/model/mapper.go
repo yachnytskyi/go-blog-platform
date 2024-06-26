@@ -4,6 +4,7 @@ import (
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	mongoModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
+	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
@@ -43,7 +44,7 @@ func UserCreateToUserCreateRepositoryMapper(userCreate userModel.UserCreate) Use
 }
 
 func UserUpdateToUserUpdateRepositoryMapper(userUpdate userModel.UserUpdate) commonModel.Result[UserUpdateRepository] {
-	userObjectID := mongoModel.HexToObjectIDMapper(location+"UserUpdateToUserUpdateRepositoryMapper", userUpdate.UserID)
+	userObjectID := mongoModel.HexToObjectIDMapper(location+"UserUpdateToUserUpdateRepositoryMapper", userUpdate.ID)
 	if validator.IsError(userObjectID.Error) {
 		return commonModel.NewResultOnFailure[UserUpdateRepository](userObjectID.Error)
 	}
@@ -59,13 +60,11 @@ func UserUpdateToUserUpdateRepositoryMapper(userUpdate userModel.UserUpdate) com
 
 func UserRepositoryToUserMapper(userRepository UserRepository) userModel.User {
 	return userModel.User{
-		UserID:    userRepository.UserID.Hex(),
-		Name:      userRepository.Name,
-		Email:     userRepository.Email,
-		Password:  userRepository.Password,
-		Role:      userRepository.Role,
-		Verified:  userRepository.Verified,
-		CreatedAt: userRepository.CreatedAt,
-		UpdatedAt: userRepository.UpdatedAt,
+		BaseEntity: domain.NewBaseEntity(userRepository.UserID.Hex(), userRepository.CreatedAt, userRepository.UpdatedAt),
+		Name:       userRepository.Name,
+		Email:      userRepository.Email,
+		Password:   userRepository.Password,
+		Role:       userRepository.Role,
+		Verified:   userRepository.Verified,
 	}
 }

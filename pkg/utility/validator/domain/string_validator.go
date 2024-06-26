@@ -63,8 +63,13 @@ func ValidateField(field string, commonValidator domainModel.CommonValidator, va
 // Returns:
 // - A slice of validation errors including any new errors found.
 func ValidateOptionalField(field string, commonValidator domainModel.CommonValidator, validationErrors []error) []error {
-	// Initialize a slice to hold validation errors, preserving existing ones.
-	errors := append([]error(nil), validationErrors...)
+	// If the field is empty, no validation is needed for optional fields.
+	if len(field) == 0 {
+		return validationErrors
+	}
+
+	// Initialize a slice to hold validation errors.
+	errors := validationErrors
 
 	// Check if the string length is invalid.
 	if IsStringLengthInvalid(field, commonValidator.MinLength, commonValidator.MaxLength) {
@@ -114,19 +119,4 @@ func IsStringLengthInvalid(checkedString string, minLength int, maxLength int) b
 // - A boolean indicating whether the string characters are invalid.
 func AreStringCharactersInvalid(checkedString string, regexString string) bool {
 	return !regexp.MustCompile(regexString).MatchString(checkedString)
-}
-
-// IsOptionalStringLengthInvalid checks if the length of the optional input string is outside the specified range.
-// Parameters:
-// - checkedString: The string to check.
-// - minLength: The minimum allowed length.
-// - maxLength: The maximum allowed length.
-// Returns:
-// - A boolean indicating whether the optional string length is invalid.
-func IsOptionalStringLengthInvalid(checkedString string, minLength int, maxLength int) bool {
-	if len(checkedString) == 0 {
-		return true
-	}
-
-	return len(checkedString) < minLength || len(checkedString) > maxLength
 }

@@ -34,7 +34,7 @@ func CorrelationIDMiddleware() gin.HandlerFunc {
 
 		// Retrieve the correlation ID from the request header.
 		correlationID := c.GetHeader(correlationIDHeader)
-		if correlationID == "" {
+		if len(correlationID) == 0 {
 			// Generate a new correlation ID if it's not provided in the request.
 			correlationID = uuid.New().String()
 		}

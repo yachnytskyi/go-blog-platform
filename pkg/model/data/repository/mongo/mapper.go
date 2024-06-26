@@ -55,7 +55,7 @@ func DataToMongoDocumentMapper(location string, incomingData any) commonModel.Re
 // - A Result containing an error if the conversion fails.
 func HexToObjectIDMapper(location, id string) commonModel.Result[primitive.ObjectID] {
 	// Check if the provided id is empty.
-	if id == "" {
+	if len(id) == 0 {
 		// Log and handle the empty id error.
 		internalError := domainError.NewInternalError(location+".HexToObjectIDMapper", emptyID)
 		logging.Logger(internalError)

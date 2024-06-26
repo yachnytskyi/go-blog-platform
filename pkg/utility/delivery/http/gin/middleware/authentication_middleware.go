@@ -70,7 +70,7 @@ func UserContextMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
 
 		// Retrieve the user ID from the context.
 		userID, _ := ctx.Value(constants.UserIDContext).(string)
-		if userID == "" {
+		if len(userID) == 0 {
 			httpInternalError := httpError.NewHTTPInternalError(location+"UserContextMiddleware.ctx.Value", userIDContextMissing)
 			abortWithStatusJSON(ginContext, httpInternalError, constants.StatusUnauthorized)
 			return

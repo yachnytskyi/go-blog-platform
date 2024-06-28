@@ -14,13 +14,11 @@ type Users struct {
 
 type User struct {
 	domainModel.BaseEntity
-	Name      string
-	Email     string
-	Password  string
-	Role      string
-	Verified  bool
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	Name     string
+	Email    string
+	Password string
+	Role     string
+	Verified bool
 }
 
 type UserCreate struct {

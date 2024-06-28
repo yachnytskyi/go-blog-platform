@@ -38,11 +38,11 @@ func AnonymousMiddleware() gin.HandlerFunc {
 // - A boolean indicating whether the user is anonymous.
 func isUserAnonymous(ginContext *gin.Context) bool {
 	// Attempt to retrieve the access token from the Authorization header.
-	authorizationHeader := ginContext.Request.Header.Get(authorization)
+	authorizationHeader := ginContext.Request.Header.Get(constants.Authorization)
 	fields := strings.Fields(authorizationHeader)
 
 	// Check if the Authorization header contains a Bearer token.
-	if validator.IsSliceNotEmpty(fields) && fields[0] == bearer {
+	if validator.IsSliceNotEmpty(fields) && fields[0] == constants.Bearer {
 		return true
 	}
 

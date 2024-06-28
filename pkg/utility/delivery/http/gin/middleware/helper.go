@@ -24,11 +24,11 @@ func extractAccessToken(ginContext *gin.Context) commonModel.Result[string] {
 	// Attempt to retrieve the access token from the cookie.
 	cookie, cookieError := ginContext.Cookie(constants.AccessTokenValue)
 	// Retrieve the Authorization header from the request.
-	authorizationHeader := ginContext.Request.Header.Get(authorization)
+	authorizationHeader := ginContext.Request.Header.Get(constants.Authorization)
 	fields := strings.Fields(authorizationHeader)
 
 	// Check if the Authorization header contains a Bearer token.
-	if validator.IsSliceNotEmpty(fields) && fields[0] == bearer {
+	if validator.IsSliceNotEmpty(fields) && fields[0] == constants.Bearer {
 		// If a Bearer token is present, set the access token.
 		return commonModel.NewResultOnSuccess[string](fields[1])
 	} else if cookieError == nil {

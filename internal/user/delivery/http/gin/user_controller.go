@@ -64,7 +64,7 @@ func (userController UserController) GetCurrentUser(controllerContext any) {
 
 	// Get the current user's ID from the context.
 	// Fetch the current user using the user use case.
-	currentUserID := ctx.Value(constants.UserIDContext).(string)
+	currentUserID := ctx.Value(constants.ID).(string)
 	currentUser := userController.userUseCase.GetUserById(ctx, currentUserID)
 	if validator.IsError(currentUser.Error) {
 		httpGinCommon.GinNewJSONFailureResponse(ginContext, currentUser.Error, constants.StatusBadRequest)
@@ -145,7 +145,7 @@ func (userController UserController) UpdateCurrentUser(controllerContext any) {
 
 	// Get the current user's ID from the context.
 	// Bind the incoming JSON data to a struct.
-	currentUserID := ctx.Value(constants.UserIDContext).(string)
+	currentUserID := ctx.Value(constants.ID).(string)
 	var userUpdateViewData userViewModel.UserUpdateView
 
 	// Bind the incoming JSON data to a struct.
@@ -178,7 +178,7 @@ func (userController UserController) DeleteCurrentUser(controllerContext any) {
 
 	// Extract the current user ID from the context.
 	// Delete the user using the user use case.
-	currentUserID := ctx.Value(constants.UserIDContext).(string)
+	currentUserID := ctx.Value(constants.ID).(string)
 	deletedUser := userController.userUseCase.DeleteUserById(ctx, currentUserID)
 	if validator.IsError(deletedUser) {
 		httpGinCommon.GinNewJSONFailureResponse(ginContext, deletedUser, constants.StatusBadRequest)
@@ -242,7 +242,7 @@ func (userController UserController) RefreshAccessToken(controllerContext any) {
 
 	// Get the current user's ID from the context.
 	// Fetch the current user using the user use case.
-	currentUserID := ctx.Value(constants.UserIDContext).(string)
+	currentUserID := ctx.Value(constants.ID).(string)
 	currentUser := userController.userUseCase.GetUserById(ctx, currentUserID)
 	if validator.IsError(currentUser.Error) {
 		httpGinCommon.GinNewJSONFailureResponse(ginContext, currentUser.Error, constants.StatusBadRequest)

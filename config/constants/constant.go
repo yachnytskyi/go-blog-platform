@@ -5,18 +5,20 @@ import (
 	"time"
 )
 
-// Schemes.
+// Schemes used in the application.
 const (
 	HTTP  = "http"  // HTTP scheme.
 	HTTPS = "https" // HTTPS scheme.
 )
 
-// Headers.
+// HTTP Headers used in the application.
 const (
-	ContentType = "Content-Type" // Content-Type header.
+	ContentType   = "Content-Type"  // Content-Type header.
+	Authorization = "Authorization" // Authorization header.
+	Bearer        = "Bearer"        // Bearer token prefix.
 )
 
-// Pagination
+// Pagination constants.
 const (
 	PageValue            = "page"       // Page query parameter.
 	LimitValue           = "limit"      // Limit query parameter.
@@ -32,26 +34,27 @@ const (
 	SortDescend          = "descend"    // Descending sort order.
 )
 
-// Context timers
+// Context timers.
 const (
 	DefaultContextTimer = 5 * time.Second // Default context timeout duration.
 )
 
-// Datetime format
+// DateTime format.
 const (
 	DateTimeFormat = "02-Jan-2006 03:04 PM MST" // DateTime format string.
 )
 
-// Tokens.
+// Token-related constants.
 const (
-	AccessTokenValue             = "access_token"  // Access token value.
-	RefreshTokenValue            = "refresh_token" // Refresh token value.
-	LoggedInValue                = "logged_in"     // Logged in status value.
-	TokenDomainValue             = "localhost"     // Token domain value.
-	LogoutMaxAgeValue            = -1              // Logout max age value.
-	UserContext       contextKey = "user"          // User  context key.
-	UserIDContext     contextKey = "userID"        // User ID context key.
-	UserRoleContext   contextKey = "userRole"      // User role context key.
+	AccessTokenValue             = "access_token"                          // Access token value.
+	RefreshTokenValue            = "refresh_token"                         // Refresh token value.
+	LoggedInValue                = "logged_in"                             // Logged in status value.
+	TokenDomainValue             = "localhost"                             // Token domain value.
+	LogoutMaxAgeValue            = -1                                      // Logout max age value.
+	User              contextKey = "user"                                  // User context key.
+	ID                contextKey = "id"                                    // ID context key.
+	UserRole          contextKey = "userRole"                              // User role context key.
+	IDContextMissing             = "ID context value is missing or empty." // ID context missing error message.
 )
 
 // Email subjects and URLs.
@@ -62,7 +65,7 @@ const (
 	ForgottenPasswordSubject = "Your password reset token (it is valid for 15 minutes)" // Forgotten password subject.
 )
 
-// Regex patterns.
+// Regex patterns and string length constraints.
 const (
 	StringRegex             = `^[a-zA-z0-9 !@#$€%^&*{}|()=/\;:+-_~'"<>,.? \t]*$`     // General string regex pattern.
 	TitleStringRegex        = `^[a-zA-z0-9 !()=[]:;+-_~'",.? \t]*$`                  // Title string regex pattern.
@@ -79,11 +82,11 @@ const (
 
 // User Notifications.
 const (
-	SendingEmailNotification                 = "We have sent an email with a verification code to the provided address "
+	SendingEmailNotification                 = "We have sent an email with a verification code to the provided address."
 	SendingEmailWithInstructionsNotification = "You will receive an email with detailed instructions shortly."
 )
 
-// HTTP codes.
+// HTTP status codes.
 const (
 	StatusOk               = http.StatusOK               // HTTP 200 OK.
 	StatusCreated          = http.StatusCreated          // HTTP 201 Created.
@@ -92,7 +95,7 @@ const (
 	StatusUnauthorized     = http.StatusUnauthorized     // HTTP 401 Unauthorized.
 	StatusForbidden        = http.StatusForbidden        // HTTP 403 Forbidden.
 	StatusNotFound         = http.StatusNotFound         // HTTP 404 Not Found.
-	StatusMethodNotAllowed = http.StatusMethodNotAllowed /// HTTP 405 Not Allowed.
+	StatusMethodNotAllowed = http.StatusMethodNotAllowed // HTTP 405 Not Allowed.
 	StatusBadGateway       = http.StatusBadGateway       // HTTP 502 Bad Gateway.
 )
 
@@ -125,37 +128,37 @@ const (
 	InvalidHeaderFormat            = "Invalid header format."                                                                                                                       // Invalid header format message.
 )
 
-// Databases.
+// Databases used in the application.
 const (
 	MongoDB = "MongoDB" // MongoDB database name.
 )
 
-// Domains
+// Domains used in the application.
 const (
 	UseCase = "UseCaseV1" // UseCase domain name.
 )
 
-// Deliveries
+// Deliveries used in the application.
 const (
 	Gin = "Gin" // Gin delivery name.
 )
 
-// Common routes
+// Common routes used in the application.
 const (
 	GetAllItemsURL = ""     // Endpoint for fetching all items.
 	GetItemByIdURL = "/:id" // Endpoint for fetching an item by its ID.
 	ItemIdParam    = "id"   // Parameter name for item ID.
 )
 
-// Domain routes.
+// Domain-specific routes.
 const (
 	UsersGroupPath = "/users" // Users domain route.
-	// Initialize other routes here
+	// Initialize other routes here.
 )
 
 // Database table names.
 const (
-	UsersTable = "users" // UsersTable represents the name of the users table in the database.
+	UsersTable = "users" // Users table name in the database.
 )
 
 // contextKey is a custom type for context keys to prevent collisions.

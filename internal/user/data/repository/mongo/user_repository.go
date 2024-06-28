@@ -217,7 +217,7 @@ func (userRepository UserRepository) UpdateCurrentUser(ctx context.Context, user
 	}
 
 	// Map the user update repository to a BSON document for MongoDB update.
-	userUpdateBSON := mongoModel.DataToMongoDocumentMapper(location+"UpdateCurrentUser", userUpdateRepository)
+	userUpdateBSON := mongoModel.DataToMongoDocumentMapper(location+"UpdateCurrentUser", userUpdateRepository.Data)
 	if validator.IsError(userUpdateBSON.Error) {
 		return commonModel.NewResultOnFailure[userModel.User](userUpdateBSON.Error)
 	}

@@ -2,8 +2,11 @@ package model
 
 import (
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
+	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 	domainModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
+	commonUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
+	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
 func UsersToUsersViewMapper(users userModel.Users) UsersView {
@@ -87,13 +90,21 @@ func UserResetPasswordViewToUserResetPassword(user UserResetPasswordView) userMo
 	}
 }
 
-func UserViewToUserMapper(location string, userView UserView) userModel.User {
-	return userModel.User{
-		BaseEntity: domainModel.NewBaseEntity(userView.ID, userView.CreatedAt, userView.UpdatedAt),
+func UserViewToUserMapper(location string, userView UserView) commonModel.Result[userModel.User] {
+	createdAt := commonUtility.ParseDate(location, userView.CreatedAt)
+	if validator.IsError(createdAt.Error) {
+		return commonModel.NewResultOnFailure[userModel.User](createdAt.Error)
+	}
+
+	updatedAt := commonUtility.ParseDate(location, userView.UpdatedAt)
+	if validator.IsError(updatedAt.Error) {
+		return commonModel.NewResultOnFailure[userModel.User](updatedAt.Error)
+	}
+
+	return commonModel.NewResultOnSuccess(userModel.User{
+		BaseEntity: domainModel.NewBaseEntity(userView.ID, createdAt.Data, updatedAt.Data),
 		Name:       userView.Name,
 		Email:      userView.Email,
 		Role:       userView.Role,
-		CreatedAt:  userView.CreatedAt,
-		UpdatedAt:  userView.UpdatedAt,
-	}
+	})
 }

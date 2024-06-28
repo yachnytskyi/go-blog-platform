@@ -14,10 +14,7 @@ import (
 )
 
 const (
-	location             = "pkg.utility.delivery.http.gin.middleware."
-	authorization        = "Authorization"
-	bearer               = "Bearer"
-	userIDContextMissing = "User ID context value is missing or empty."
+	location = "pkg.utility.delivery.http.gin.middleware."
 )
 
 // AuthenticationMiddleware is a Gin middleware for handling user authentication using JWT tokens.
@@ -48,8 +45,8 @@ func AuthenticationMiddleware() gin.HandlerFunc {
 		}
 
 		// Store user information in the context.
-		ctx = context.WithValue(ctx, constants.UserIDContext, userTokenPayload.Data.UserID)
-		ctx = context.WithValue(ctx, constants.UserRoleContext, userTokenPayload.Data.Role)
+		ctx = context.WithValue(ctx, constants.ID, userTokenPayload.Data.UserID)
+		ctx = context.WithValue(ctx, constants.UserRole, userTokenPayload.Data.Role)
 
 		// Update the request's context with the new context containing user information.
 		ginContext.Request = ginContext.Request.WithContext(ctx)
@@ -69,9 +66,9 @@ func UserContextMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
 		defer cancel()
 
 		// Retrieve the user ID from the context.
-		userID, _ := ctx.Value(constants.UserIDContext).(string)
+		userID, _ := ctx.Value(constants.ID).(string)
 		if len(userID) == 0 {
-			httpInternalError := httpError.NewHTTPInternalError(location+"UserContextMiddleware.ctx.Value", userIDContextMissing)
+			httpInternalError := httpError.NewHTTPInternalError(location+"UserContextMiddleware.ctx.Value", constants.IDContextMissing)
 			abortWithStatusJSON(ginContext, httpInternalError, constants.StatusUnauthorized)
 			return
 		}
@@ -88,7 +85,7 @@ func UserContextMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
 		userView := userView.UserToUserViewMapper(user.Data)
 
 		// Store user information in the context.
-		ctx = context.WithValue(ctx, constants.UserContext, userView)
+		ctx = context.WithValue(ctx, constants.User, userView)
 
 		// Update the request's context with the new context containing user information.
 		ginContext.Request = ginContext.Request.WithContext(ctx)

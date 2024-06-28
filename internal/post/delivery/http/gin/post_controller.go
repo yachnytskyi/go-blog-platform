@@ -78,7 +78,7 @@ func (postController PostController) CreatePost(controllerContext any) {
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
 	var createdPostData *postModel.PostCreate = new(postModel.PostCreate)
-	user := ctx.Value(constants.UserContext).(userViewModel.UserView)
+	user := ctx.Value(constants.User).(userViewModel.UserView)
 	createdPostData.UserID = user.ID
 	createdPostData.User = user.Name
 	err := ginContext.ShouldBindJSON(&createdPostData)
@@ -105,7 +105,7 @@ func (postController PostController) UpdatePostById(controllerContext any) {
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
 	postID := ginContext.Param("postID")
-	currentUserID := ctx.Value(constants.UserIDContext).(string)
+	currentUserID := ctx.Value(constants.ID).(string)
 
 	var updatedPostData *postModel.PostUpdate = new(postModel.PostUpdate)
 	updatedPostData.PostID = ginContext.Param("postID")
@@ -137,7 +137,7 @@ func (postController PostController) DeletePostByID(controllerContext any) {
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
 	postID := ginContext.Param("postID")
-	currentUserID := ctx.Value(constants.UserIDContext).(string)
+	currentUserID := ctx.Value(constants.ID).(string)
 	err := postController.postUseCase.DeletePostByID(ctx, postID, currentUserID)
 
 	if err != nil {

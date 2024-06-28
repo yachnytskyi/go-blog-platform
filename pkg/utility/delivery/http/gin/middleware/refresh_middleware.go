@@ -40,8 +40,8 @@ func RefreshTokenAuthenticationMiddleware() gin.HandlerFunc {
 		}
 
 		// Store user information in the context.
-		ctx = context.WithValue(ctx, constants.UserIDContext, userTokenPayload.Data.UserID)
-		ctx = context.WithValue(ctx, constants.UserRoleContext, userTokenPayload.Data.Role)
+		ctx = context.WithValue(ctx, constants.ID, userTokenPayload.Data.UserID)
+		ctx = context.WithValue(ctx, constants.UserRole, userTokenPayload.Data.Role)
 
 		// Update the request's context with the new context containing user information.
 		ginContext.Request = ginContext.Request.WithContext(ctx)

@@ -60,7 +60,7 @@ func UserUpdateToUserUpdateRepositoryMapper(userUpdate userModel.UserUpdate) com
 
 func UserRepositoryToUserMapper(userRepository UserRepository) userModel.User {
 	return userModel.User{
-		BaseEntity: domain.NewBaseEntity(userRepository.UserID.Hex(), userRepository.CreatedAt, userRepository.UpdatedAt),
+		BaseEntity: domain.NewBaseEntity(userRepository.ID.Hex(), userRepository.CreatedAt, userRepository.UpdatedAt),
 		Name:       userRepository.Name,
 		Email:      userRepository.Email,
 		Password:   userRepository.Password,

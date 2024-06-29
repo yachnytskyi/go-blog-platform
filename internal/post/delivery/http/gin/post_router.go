@@ -3,7 +3,7 @@ package gin
 import (
 	"github.com/gin-gonic/gin"
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
-	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
+	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 
 	// user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	httpGinMiddleware "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/middleware"
@@ -11,13 +11,11 @@ import (
 
 type PostRouter struct {
 	postController post.PostController
-	// userUseCase    user.UserUseCase
 }
 
 func NewPostRouter(postController post.PostController) PostRouter {
 	return PostRouter{
 		postController: postController,
-		// userUseCase:    userUseCase,
 	}
 }
 

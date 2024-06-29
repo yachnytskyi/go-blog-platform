@@ -82,8 +82,8 @@ const (
 
 // User Notifications.
 const (
-	SendingEmailNotification                 = "We have sent an email with a verification code to the provided address."
-	SendingEmailWithInstructionsNotification = "You will receive an email with detailed instructions shortly."
+	SendingEmailNotification                 = "We have sent an email with a verification code to the provided address." // Email sent notification.
+	SendingEmailWithInstructionsNotification = "You will receive an email with detailed instructions shortly."           // Email with instructions sent notification.
 )
 
 // HTTP status codes.
@@ -154,6 +154,19 @@ const (
 const (
 	UsersGroupPath = "/users" // Users domain route.
 	// Initialize other routes here.
+)
+
+// User route paths.
+const (
+	RegisterPath          = "/register"                   // Registration route path.
+	ForgottenPasswordPath = "/forgotten-password"         // Forgotten password route path.
+	ResetPasswordPath     = "/reset-password/:resetToken" // Reset password route path with token.
+	LoginPath             = "/login"                      // Login route path.
+	GetCurrentUserPath    = "/current_user"               // Get current user route path.
+	UpdateCurrentUserPath = "/update"                     // Update current user route path.
+	DeleteCurrentUserPath = "/delete"                     // Delete current user route path.
+	RefreshTokenPath      = "/refresh"                    // Refresh token route path.
+	LogoutPath            = "/logout"                     // Logout route path.
 )
 
 // Database table names.

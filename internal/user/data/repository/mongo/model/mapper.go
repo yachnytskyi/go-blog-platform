@@ -58,6 +58,13 @@ func UserUpdateToUserUpdateRepositoryMapper(userUpdate userModel.UserUpdate) com
 	return commonModel.NewResultOnSuccess[UserUpdateRepository](userUpdateRepository)
 }
 
+func UserForgottenPasswordToUserForgottenPasswordRepositoryMapper(userForgottenPassword userModel.UserForgottenPassword) UserForgottenPasswordRepository {
+	return UserForgottenPasswordRepository{
+		ResetToken:  userForgottenPassword.ResetToken,
+		ResetExpiry: userForgottenPassword.ResetExpiry,
+	}
+}
+
 func UserRepositoryToUserMapper(userRepository UserRepository) userModel.User {
 	return userModel.User{
 		BaseEntity: domain.NewBaseEntity(userRepository.ID.Hex(), userRepository.CreatedAt, userRepository.UpdatedAt),

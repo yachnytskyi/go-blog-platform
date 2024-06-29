@@ -92,11 +92,11 @@ func (userUseCaseV1 UserUseCaseV1) Register(ctx context.Context, userCreateData 
 	}
 
 	// Generate a verification token and set user properties.
-	tokenValue := randstr.String(verificationCodeLength)
-	tokenValue = commonUtility.Encode(tokenValue)
+	token := randstr.String(verificationCodeLength)
+	token = commonUtility.Encode(token)
 	userCreate.Data.Role = userRole
 	userCreate.Data.Verified = true
-	userCreate.Data.VerificationCode = tokenValue
+	userCreate.Data.VerificationCode = token
 	currentTime := time.Now()
 	userCreate.Data.CreatedAt = currentTime
 	userCreate.Data.UpdatedAt = currentTime
@@ -110,7 +110,7 @@ func (userUseCaseV1 UserUseCaseV1) Register(ctx context.Context, userCreateData 
 
 	// Prepare email data for user registration.
 	// Send the email verification message and return the created user.
-	emailData := prepareEmailDataForRegistration(createdUser.Data.Name, tokenValue)
+	emailData := prepareEmailDataForRegistration(createdUser.Data.Name, token)
 	sendEmailError := userUseCaseV1.userRepository.SendEmail(createdUser.Data, emailData)
 	if validator.IsError(sendEmailError) {
 		return commonModel.NewResultOnFailure[userModel.User](domainError.HandleError(sendEmailError))
@@ -185,52 +185,61 @@ func (userUseCaseV1 UserUseCaseV1) Login(ctx context.Context, userLoginData user
 	return userToken
 }
 
+// RefreshAccessToken generates a new access token using the provided user information.
+// It creates a UserTokenPayload and uses it to generate new access and refresh tokens.
+// The result is wrapped in a commonModel.Result containing either the tokens or an error.
 func (userUseCaseV1 UserUseCaseV1) RefreshAccessToken(ctx context.Context, user userModel.User) commonModel.Result[userModel.UserToken] {
-	// Generate the UserTokenPayload.
+	// Generate the UserTokenPayload using the user ID and role.
 	userTokenPayload := domainModel.NewUserTokenPayload(user.ID, user.Role)
 
-	// Generate access and refresh tokens.
+	// Generate new access and refresh tokens.
 	userToken := generateToken(userTokenPayload)
 
-	// Return the result containing userToken information.
+	// Return the result containing the updated token information.
 	return userToken
 }
 
-func (userUseCaseV1 UserUseCaseV1) UpdatePasswordResetTokenUserByEmail(ctx context.Context, email string, firstKey string, firstValue string,
-	secondKey string, secondValue time.Time) error {
-	validateEmailError := isEmailValid(email)
-	if validator.IsError(validateEmailError) {
-		return domainError.HandleError(validateEmailError)
-	}
-	updatedUserError := userUseCaseV1.userRepository.UpdatePasswordResetTokenUserByEmail(ctx, email, firstKey, firstValue, secondKey, secondValue)
-	if validator.IsError(updatedUserError) {
-		updatedUserError = domainError.HandleError(updatedUserError)
-		return updatedUserError
+// ForgottenPassword handles the process of initiating a password reset for a user.
+// It validates the email, generates a reset token, updates the user record with the token and expiration,
+// and sends an email with the reset instructions.
+func (userUseCaseV1 UserUseCaseV1) ForgottenPassword(ctx context.Context, userForgottenPassword userModel.UserForgottenPassword) error {
+	// Validate the user forgotten password data.
+	validateEmailError := validateUserForgottenPassword(userForgottenPassword)
+	if validator.IsError(validateEmailError.Error) {
+		return domainError.HandleError(validateEmailError.Error)
 	}
 
-	// Generate verification code.
-	tokenValue := randstr.String(resetTokenLength)
-	encodedTokenValue := commonUtility.Encode(tokenValue)
-	tokenExpirationTime := time.Now().Add(time.Minute * 15)
-
-	// Update the user.
-	fetchedUser := userUseCaseV1.GetUserByEmail(ctx, email)
+	// Fetch the user by email.
+	fetchedUser := userUseCaseV1.GetUserByEmail(ctx, userForgottenPassword.Email)
 	if validator.IsError(fetchedUser.Error) {
 		fetchedUserError := domainError.HandleError(fetchedUser.Error)
 		return fetchedUserError
 	}
-	updatedUserPasswordError := userUseCaseV1.userRepository.UpdatePasswordResetTokenUserByEmail(ctx, fetchedUser.Data.Email, "passwordResetToken", encodedTokenValue, "passwordResetAt", tokenExpirationTime)
+
+	// Generate a reset token and set the expiration time.
+	tokenValue := randstr.String(resetTokenLength)
+	tokenValue = commonUtility.Encode(tokenValue)
+	tokenExpirationTime := time.Now().Add(constants.PasswordResetTokenExpirationTime)
+
+	// Set the reset token and expiration in the user model.
+	userForgottenPassword.ResetToken = tokenValue
+	userForgottenPassword.ResetExpiry = tokenExpirationTime
+
+	// Update the user record with the user forgotten password data.
+	updatedUserPasswordError := userUseCaseV1.userRepository.ForgottenPassword(ctx, userForgottenPassword)
 	if validator.IsError(updatedUserPasswordError) {
 		updatedUserPasswordError = domainError.HandleError(updatedUserPasswordError)
 		return updatedUserPasswordError
 	}
 
+	// Prepare and send the reset email.
 	emailData := prepareEmailDataForUpdatePasswordResetToken(fetchedUser.Data.Name, tokenValue)
 	sendEmailError := userUseCaseV1.userRepository.SendEmail(fetchedUser.Data, emailData)
 	if validator.IsError(sendEmailError) {
 		return domainError.HandleError(sendEmailError)
 	}
 
+	// Return nil to indicate success.
 	return nil
 }
 

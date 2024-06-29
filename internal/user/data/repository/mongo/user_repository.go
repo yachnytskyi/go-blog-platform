@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"strings"
 	"time"
 
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
@@ -26,7 +25,14 @@ const (
 	location                = "user.data.repository.mongo."
 	updateIsNotSuccessful   = "Update was not successful."
 	deletionIsNotSuccessful = "Deletion was not successful."
+	idKey                   = "_id"
+	emailKey                = "email"
+	setKey                  = "$set"
+	resetTokenKey           = "resetToken"
+	resetExpiryKey          = "resetExpiry"
 )
+
+const ()
 
 type UserRepository struct {
 	collection *mongo.Collection
@@ -138,7 +144,7 @@ func (userRepository UserRepository) GetUserById(ctx context.Context, userID str
 // GetUserByEmail retrieves a user by their email from the repository.
 func (userRepository UserRepository) GetUserByEmail(ctx context.Context, email string) commonModel.Result[userModel.User] {
 	// Initialize a User object and define the MongoDB query to find the user by Email.
-	query := bson.M{"email": email}
+	query := bson.M{emailKey: email}
 
 	// Retrieve the user from the database.
 	return userRepository.getUserByQuery(location+"GetUserByEmail", ctx, query)
@@ -147,7 +153,7 @@ func (userRepository UserRepository) GetUserByEmail(ctx context.Context, email s
 func (userRepository UserRepository) CheckEmailDuplicate(ctx context.Context, email string) error {
 	// Initialize a User object and define th MongoDB query to find the user by Email.
 	fetchedUser := userRepositoryModel.UserRepository{}
-	query := bson.M{"email": email}
+	query := bson.M{emailKey: email}
 
 	// Find and decode the user.
 	// If no user is found, return nil (indicating that the email is unique).
@@ -225,8 +231,8 @@ func (userRepository UserRepository) UpdateCurrentUser(ctx context.Context, user
 	// Define the MongoDB query.
 	// Define the update operation.
 	// Execute the update query and retrieve the updated user.
-	query := bson.D{{Key: "_id", Value: userUpdateRepository.Data.UserID}}
-	update := bson.D{{Key: "$set", Value: userUpdateBSON.Data}}
+	query := bson.D{{Key: idKey, Value: userUpdateRepository.Data.UserID}}
+	update := bson.D{{Key: setKey, Value: userUpdateBSON.Data}}
 	result := userRepository.collection.FindOneAndUpdate(ctx, query, update, options.FindOneAndUpdate().SetReturnDocument(1))
 
 	// Decode the updated user from the result.
@@ -269,6 +275,39 @@ func (userRepository UserRepository) DeleteUserById(ctx context.Context, userID 
 	return nil
 }
 
+// ForgottenPassword updates a user's record with a reset token and expiration time.
+// It maps the domain model to the repository model, constructs a query and update operation,
+// and executes the MongoDB update query. If no document is modified, it logs and returns an error.
+func (userRepository UserRepository) ForgottenPassword(ctx context.Context, userForgottenPassword userModel.UserForgottenPassword) error {
+	// Map the user forgotten password model to the repository model.
+	userForgottenPasswordRepository := userRepositoryModel.UserForgottenPasswordToUserForgottenPasswordRepositoryMapper(userForgottenPassword)
+
+	// Define the query to find the user by email.
+	query := bson.D{{Key: emailKey, Value: userForgottenPassword.Email}}
+
+	// Define the update operation to set the reset token and expiration.
+	update := bson.D{{Key: setKey, Value: userForgottenPasswordRepository}}
+
+	// Execute the update operation.
+	result, updateOneError := userRepository.collection.UpdateOne(ctx, query, update)
+	if validator.IsError(updateOneError) {
+		// Log and return an internal error if the update operation fails.
+		internalError := domainError.NewInternalError(location+"ForgottenPassword.UpdateOne", updateOneError.Error())
+		logging.Logger(internalError)
+		return internalError
+	}
+
+	// Check if any document was modified. If not, log and return an error.
+	if result.ModifiedCount == 0 {
+		internalError := domainError.NewInternalError(location+"ForgottenPassword.UpdateOne.ModifiedCount", updateIsNotSuccessful)
+		logging.Logger(internalError)
+		return internalError
+	}
+
+	// Return nil to indicate success.
+	return nil
+}
+
 func (userRepository UserRepository) ResetUserPassword(ctx context.Context, firstKey string, firstValue string, secondKey string, passwordKey, password string) error {
 	// Hash the user's password.
 	hashedPassword := repositoryUtility.HashPassword(location+"ResetUserPassword", password)
@@ -277,7 +316,7 @@ func (userRepository UserRepository) ResetUserPassword(ctx context.Context, firs
 	}
 
 	query := bson.D{{Key: firstKey, Value: firstValue}}
-	update := bson.D{{Key: "$set", Value: bson.D{{Key: passwordKey, Value: hashedPassword}}},
+	update := bson.D{{Key: setKey, Value: bson.D{{Key: passwordKey, Value: hashedPassword}}},
 		{Key: "$unset", Value: bson.D{{Key: firstKey, Value: ""}, {Key: secondKey, Value: ""}}}}
 	result, updateUserPasswordUpdateOneError := userRepository.collection.UpdateOne(ctx, query, update)
 	if validator.IsError(updateUserPasswordUpdateOneError) {
@@ -291,25 +330,6 @@ func (userRepository UserRepository) ResetUserPassword(ctx context.Context, firs
 		return internalError
 	}
 
-	return nil
-}
-
-func (userRepository UserRepository) UpdatePasswordResetTokenUserByEmail(ctx context.Context, email string, firstKey string, firstValue string,
-	secondKey string, SecondValue time.Time) error {
-
-	query := bson.D{{Key: "email", Value: strings.ToLower(email)}}
-	update := bson.D{{Key: "$set", Value: bson.D{{Key: firstKey, Value: firstValue}, {Key: secondKey, Value: secondKey}}}}
-	result, updateUserResetTokenUpdateOneError := userRepository.collection.UpdateOne(ctx, query, update)
-	if validator.IsError(updateUserResetTokenUpdateOneError) {
-		internalError := domainError.NewInternalError(location+"UpdatePasswordResetTokenUserByEmail.UpdateOne", updateUserResetTokenUpdateOneError.Error())
-		logging.Logger(internalError)
-		return internalError
-	}
-	if result.ModifiedCount == 0 {
-		internalError := domainError.NewInternalError(location+"UpdatePasswordResetTokenUserByEmail.UpdateOne.ModifiedCount", updateIsNotSuccessful)
-		logging.Logger(internalError)
-		return internalError
-	}
 	return nil
 }
 
@@ -331,7 +351,7 @@ func (userRepository UserRepository) ensureUniqueEmailIndex(ctx context.Context)
 
 	// Define the index model based on the email field.
 	// Create the unique index in the collection.
-	index := mongo.IndexModel{Keys: bson.M{"email": 1}, Options: option}
+	index := mongo.IndexModel{Keys: bson.M{emailKey: 1}, Options: option}
 	_, userIndexesCreateOneError := userRepository.collection.Indexes().CreateOne(ctx, index)
 	if validator.IsError(userIndexesCreateOneError) {
 		internalError := domainError.NewInternalError(location+"ensureUniqueEmailIndex.Indexes.CreateOne", userIndexesCreateOneError.Error())

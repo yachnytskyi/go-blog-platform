@@ -38,3 +38,8 @@ type UserUpdateRepository struct {
 	Name      string             `bson:"name"`
 	UpdatedAt time.Time          `bson:"updated_at"`
 }
+
+type UserForgottenPasswordRepository struct {
+	ResetToken  string    `bson:"reset_token"`
+	ResetExpiry time.Time `bson:"reset_expiry"`
+}

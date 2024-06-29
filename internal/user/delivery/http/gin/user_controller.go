@@ -2,10 +2,8 @@ package gin
 
 import (
 	"context"
-	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/thanhpk/randstr"
 	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
@@ -274,37 +272,41 @@ func (userController UserController) Logout(controllerContext any) {
 	ginContext.JSON(constants.StatusOk, gin.H{"status": "success"})
 }
 
+// ForgottenPassword handles the request for password recovery.
+// It expects a JSON payload containing the user's email.
+// Upon successful processing, it sends an email with instructions.
+// If errors occur, it handles them and responds with an appropriate error JSON.
 func (userController UserController) ForgottenPassword(controllerContext any) {
+	// Extract the Gin context and create a context with a timeout.
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
-	var userViewEmail userViewModel.UserForgottenPasswordView
 
-	// Bind the incoming JSON data to a struct.
-	shouldBindJSON := ginContext.ShouldBindJSON(&userViewEmail)
+	// Bind the incoming JSON data to a struct representing the forgotten password details.
+	var userForgottenPasswordView userViewModel.UserForgottenPasswordView
+	shouldBindJSON := ginContext.ShouldBindJSON(&userForgottenPasswordView)
 	if validator.IsError(shouldBindJSON) {
+		// Handle JSON binding errors.
 		httpGinCommon.HandleJSONBindingError(ginContext, location+"ForgottenPassword", shouldBindJSON)
 		return
 	}
 
-	fetchedUser := userController.userUseCase.GetUserByEmail(ctx, userViewEmail.Email)
-	if validator.IsError(fetchedUser.Error) {
-		ginContext.JSON(constants.StatusBadGateway, gin.H{"status": "error", "message": fetchedUser.Error})
+	// Convert the view model to a domain model for processing.
+	userForgottenPassword := userViewModel.UserForgottenPasswordViewToUserForgottenPassword(userForgottenPasswordView)
+
+	// Attempt to process the forgotten password request using the user use case.
+	updatedUserError := userController.userUseCase.ForgottenPassword(ctx, userForgottenPassword)
+	if validator.IsError(updatedUserError) {
+		// Handle errors from the use case.
+		jsonResponse := httpModel.NewJSONFailureResponse(httpError.HandleError(updatedUserError))
+		ginContext.JSON(constants.StatusBadRequest, jsonResponse)
 		return
 	}
 
-	// Generate verification code.
-	resetToken := randstr.String(20)
-	passwordResetToken := commonUtility.Encode(resetToken)
-	passwordResetAt := time.Now().Add(time.Minute * 15)
-
-	// Update the user.
-	updatedUser := userController.userUseCase.UpdatePasswordResetTokenUserByEmail(ctx, fetchedUser.Data.Email, "passwordResetToken", passwordResetToken, "passwordResetAt", passwordResetAt)
-	if validator.IsError(updatedUser) {
-		ginContext.JSON(constants.StatusBadGateway, gin.H{"status": "success", "message": updatedUser.Error()})
-		return
-	}
-	ginContext.JSON(constants.StatusOk, gin.H{"status": "success", "message": constants.SendingEmailWithInstructionsNotification})
+	// Send a success response with a welcome message including instructions.
+	welcomeMessage := userViewModel.NewWelcomeMessageView(constants.SendingEmailWithInstructionsNotification + userForgottenPassword.Email)
+	jsonResponse := httpModel.NewJSONSuccessResponse(welcomeMessage)
+	ginContext.JSON(constants.StatusCreated, jsonResponse)
 }
 
 func (userController UserController) ResetUserPassword(controllerContext any) {

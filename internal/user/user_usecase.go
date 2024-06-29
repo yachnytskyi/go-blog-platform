@@ -2,7 +2,6 @@ package user
 
 import (
 	"context"
-	"time"
 
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
@@ -17,6 +16,6 @@ type UserUseCase interface {
 	DeleteUserById(ctx context.Context, userID string) error
 	Login(ctx context.Context, user userModel.UserLogin) commonModel.Result[userModel.UserToken]
 	RefreshAccessToken(ctx context.Context, user userModel.User) commonModel.Result[userModel.UserToken]
+	ForgottenPassword(ctx context.Context, userForgottenPasswordView userModel.UserForgottenPassword) error
 	ResetUserPassword(ctx context.Context, firstKey string, firstValue string, secondKey, passwordKey, password string) error
-	UpdatePasswordResetTokenUserByEmail(ctx context.Context, email string, firstKey string, firstValue string, secondKey string, secondValue time.Time) error
 }

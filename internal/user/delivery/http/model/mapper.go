@@ -9,6 +9,61 @@ import (
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
+func UserViewToUserMapper(location string, userView UserView) commonModel.Result[userModel.User] {
+	createdAt := commonUtility.ParseDate(location, userView.CreatedAt)
+	if validator.IsError(createdAt.Error) {
+		return commonModel.NewResultOnFailure[userModel.User](createdAt.Error)
+	}
+
+	updatedAt := commonUtility.ParseDate(location, userView.UpdatedAt)
+	if validator.IsError(updatedAt.Error) {
+		return commonModel.NewResultOnFailure[userModel.User](updatedAt.Error)
+	}
+
+	return commonModel.NewResultOnSuccess(userModel.User{
+		BaseEntity: domainModel.NewBaseEntity(userView.ID, createdAt.Data, updatedAt.Data),
+		Name:       userView.Name,
+		Email:      userView.Email,
+		Role:       userView.Role,
+	})
+}
+
+func UserCreateViewToUserCreateMapper(user UserCreateView) userModel.UserCreate {
+	return userModel.UserCreate{
+		Name:            user.Name,
+		Email:           user.Email,
+		Password:        user.Password,
+		PasswordConfirm: user.PasswordConfirm,
+	}
+}
+
+func UserUpdateViewToUserUpdateMapper(user UserUpdateView) userModel.UserUpdate {
+	return userModel.UserUpdate{
+		ID:   user.ID,
+		Name: user.Name,
+	}
+}
+
+func UserLoginViewToUserLoginMapper(user UserLoginView) userModel.UserLogin {
+	return userModel.UserLogin{
+		Email:    user.Email,
+		Password: user.Password,
+	}
+}
+
+func UserForgottenPasswordViewToUserForgottenPassword(userForgottenPasswordView UserForgottenPasswordView) userModel.UserForgottenPassword {
+	return userModel.UserForgottenPassword{
+		Email: userForgottenPasswordView.Email,
+	}
+}
+
+func UserResetPasswordViewToUserResetPassword(user UserResetPasswordView) userModel.UserResetPassword {
+	return userModel.UserResetPassword{
+		Password:        user.Password,
+		PasswordConfirm: user.PasswordConfirm,
+	}
+}
+
 func UsersToUsersViewMapper(users userModel.Users) UsersView {
 	usersView := make([]UserView, len(users.Users))
 	for index, user := range users.Users {
@@ -40,29 +95,6 @@ func UserToUserViewMapper(user userModel.User) UserView {
 	}
 }
 
-func UserCreateViewToUserCreateMapper(user UserCreateView) userModel.UserCreate {
-	return userModel.UserCreate{
-		Name:            user.Name,
-		Email:           user.Email,
-		Password:        user.Password,
-		PasswordConfirm: user.PasswordConfirm,
-	}
-}
-
-func UserUpdateViewToUserUpdateMapper(user UserUpdateView) userModel.UserUpdate {
-	return userModel.UserUpdate{
-		ID:   user.ID,
-		Name: user.Name,
-	}
-}
-
-func UserLoginViewToUserLoginMapper(user UserLoginView) userModel.UserLogin {
-	return userModel.UserLogin{
-		Email:    user.Email,
-		Password: user.Password,
-	}
-}
-
 func UserLoginToUserLoginViewMapper(user userModel.UserLogin) UserLoginView {
 	return UserLoginView{
 		Email:    user.Email,
@@ -77,34 +109,8 @@ func UserTokenToUserTokenViewMapper(user userModel.UserToken) UserTokenView {
 	}
 }
 
-func UserForgottenPasswordViewToUserForgottenPassword(user UserForgottenPasswordView) userModel.UserForgottenPassword {
-	return userModel.UserForgottenPassword{
-		Email: user.Email,
+func UserForgottenPasswordToUserForgottenPasswordViewMapper(userForgottenPassword userModel.UserForgottenPassword) UserForgottenPasswordView {
+	return UserForgottenPasswordView{
+		Email: userForgottenPassword.Email,
 	}
-}
-
-func UserResetPasswordViewToUserResetPassword(user UserResetPasswordView) userModel.UserResetPassword {
-	return userModel.UserResetPassword{
-		Password:        user.Password,
-		PasswordConfirm: user.PasswordConfirm,
-	}
-}
-
-func UserViewToUserMapper(location string, userView UserView) commonModel.Result[userModel.User] {
-	createdAt := commonUtility.ParseDate(location, userView.CreatedAt)
-	if validator.IsError(createdAt.Error) {
-		return commonModel.NewResultOnFailure[userModel.User](createdAt.Error)
-	}
-
-	updatedAt := commonUtility.ParseDate(location, userView.UpdatedAt)
-	if validator.IsError(updatedAt.Error) {
-		return commonModel.NewResultOnFailure[userModel.User](updatedAt.Error)
-	}
-
-	return commonModel.NewResultOnSuccess(userModel.User{
-		BaseEntity: domainModel.NewBaseEntity(userView.ID, createdAt.Data, updatedAt.Data),
-		Name:       userView.Name,
-		Email:      userView.Email,
-		Role:       userView.Role,
-	})
 }

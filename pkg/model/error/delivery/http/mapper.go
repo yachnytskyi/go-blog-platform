@@ -15,7 +15,7 @@ func ValidationErrorToHTTPValidationErrorMapper(validationError domainError.Vali
 	return NewHTTPValidationError(
 		validationError.Field,
 		validationError.FieldType,
-		validationError.Location,
+		validationError.Notification,
 	)
 }
 

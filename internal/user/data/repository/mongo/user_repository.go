@@ -22,14 +22,10 @@ import (
 )
 
 const (
-	location                = "user.data.repository.mongo."
-	updateIsNotSuccessful   = "Update was not successful."
-	deletionIsNotSuccessful = "Deletion was not successful."
-	idKey                   = "_id"
-	emailKey                = "email"
-	setKey                  = "$set"
-	resetTokenKey           = "resetToken"
-	resetExpiryKey          = "resetExpiry"
+	location       = "user.data.repository.mongo."
+	emailKey       = "email"
+	resetTokenKey  = "resetToken"
+	resetExpiryKey = "resetExpiry"
 )
 
 const ()
@@ -231,8 +227,8 @@ func (userRepository UserRepository) UpdateCurrentUser(ctx context.Context, user
 	// Define the MongoDB query.
 	// Define the update operation.
 	// Execute the update query and retrieve the updated user.
-	query := bson.D{{Key: idKey, Value: userUpdateRepository.Data.UserID}}
-	update := bson.D{{Key: setKey, Value: userUpdateBSON.Data}}
+	query := bson.D{{Key: mongoModel.IDKey, Value: userUpdateRepository.Data.UserID}}
+	update := bson.D{{Key: mongoModel.SetKey, Value: userUpdateBSON.Data}}
 	result := userRepository.collection.FindOneAndUpdate(ctx, query, update, options.FindOneAndUpdate().SetReturnDocument(1))
 
 	// Decode the updated user from the result.
@@ -268,7 +264,7 @@ func (userRepository UserRepository) DeleteUserById(ctx context.Context, userID 
 
 	// Check if any user was deleted
 	if result.DeletedCount == 0 {
-		internalError := domainError.NewInternalError(location+"Delete.DeleteOne.DeletedCount", deletionIsNotSuccessful)
+		internalError := domainError.NewInternalError(location+"Delete.DeleteOne.DeletedCount", mongoModel.DeletionIsNotSuccessful)
 		logging.Logger(internalError)
 		return internalError
 	}
@@ -282,13 +278,11 @@ func (userRepository UserRepository) ForgottenPassword(ctx context.Context, user
 	// Map the user forgotten password model to the repository model.
 	userForgottenPasswordRepository := userRepositoryModel.UserForgottenPasswordToUserForgottenPasswordRepositoryMapper(userForgottenPassword)
 
-	// Define the query to find the user by email.
-	query := bson.D{{Key: emailKey, Value: userForgottenPassword.Email}}
-
-	// Define the update operation to set the reset token and expiration.
-	update := bson.D{{Key: setKey, Value: userForgottenPasswordRepository}}
-
+	// Define the MongoDB query.
+	// Define the update operation.
 	// Execute the update operation.
+	query := bson.D{{Key: emailKey, Value: userForgottenPassword.Email}}
+	update := bson.D{{Key: mongoModel.SetKey, Value: userForgottenPasswordRepository}}
 	result, updateOneError := userRepository.collection.UpdateOne(ctx, query, update)
 	if validator.IsError(updateOneError) {
 		// Log and return an internal error if the update operation fails.
@@ -299,7 +293,7 @@ func (userRepository UserRepository) ForgottenPassword(ctx context.Context, user
 
 	// Check if any document was modified. If not, log and return an error.
 	if result.ModifiedCount == 0 {
-		internalError := domainError.NewInternalError(location+"ForgottenPassword.UpdateOne.ModifiedCount", updateIsNotSuccessful)
+		internalError := domainError.NewInternalError(location+"ForgottenPassword.UpdateOne.ModifiedCount", mongoModel.UpdateIsNotSuccessful)
 		logging.Logger(internalError)
 		return internalError
 	}
@@ -316,8 +310,8 @@ func (userRepository UserRepository) ResetUserPassword(ctx context.Context, firs
 	}
 
 	query := bson.D{{Key: firstKey, Value: firstValue}}
-	update := bson.D{{Key: setKey, Value: bson.D{{Key: passwordKey, Value: hashedPassword}}},
-		{Key: "$unset", Value: bson.D{{Key: firstKey, Value: ""}, {Key: secondKey, Value: ""}}}}
+	update := bson.D{{Key: mongoModel.SetKey, Value: bson.D{{Key: passwordKey, Value: hashedPassword.Data}}},
+		{Key: mongoModel.UnsetKey, Value: bson.D{{Key: firstKey, Value: ""}, {Key: secondKey, Value: ""}}}}
 	result, updateUserPasswordUpdateOneError := userRepository.collection.UpdateOne(ctx, query, update)
 	if validator.IsError(updateUserPasswordUpdateOneError) {
 		internalError := domainError.NewInternalError(location+"ResetUserPassword.UpdateOne", updateUserPasswordUpdateOneError.Error())

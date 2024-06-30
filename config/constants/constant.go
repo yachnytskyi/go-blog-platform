@@ -46,15 +46,16 @@ const (
 
 // Token-related constants.
 const (
-	AccessTokenValue             = "access_token"                          // Access token value.
-	RefreshTokenValue            = "refresh_token"                         // Refresh token value.
-	LoggedInValue                = "logged_in"                             // Logged in status value.
-	TokenDomainValue             = "localhost"                             // Token domain value.
-	LogoutMaxAgeValue            = -1                                      // Logout max age value.
-	User              contextKey = "user"                                  // User context key.
-	ID                contextKey = "id"                                    // ID context key.
-	UserRole          contextKey = "userRole"                              // User role context key.
-	IDContextMissing             = "ID context value is missing or empty." // ID context missing error message.
+	AccessTokenValue                            = "access_token"                          // Access token value.
+	RefreshTokenValue                           = "refresh_token"                         // Refresh token value.
+	LoggedInValue                               = "logged_in"                             // Logged in status value.
+	TokenDomainValue                            = "localhost"                             // Token domain value.
+	LogoutMaxAgeValue                           = -1                                      // Logout max age value.
+	User                             contextKey = "user"                                  // User context key.
+	ID                               contextKey = "id"                                    // ID context key.
+	UserRole                         contextKey = "userRole"                              // User role context key.
+	IDContextMissing                            = "ID context value is missing or empty." // ID context missing error message.
+	PasswordResetTokenExpirationTime            = time.Hour * 24                          // PasswordResetTokenExpirationTime represents the duration after which a password reset token expires.
 )
 
 // Email subjects and URLs.

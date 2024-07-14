@@ -59,6 +59,7 @@ func UserForgottenPasswordViewToUserForgottenPassword(userForgottenPasswordView 
 
 func UserResetPasswordViewToUserResetPassword(user UserResetPasswordView) userModel.UserResetPassword {
 	return userModel.UserResetPassword{
+		ResetToken:      user.ResetToken,
 		Password:        user.Password,
 		PasswordConfirm: user.PasswordConfirm,
 	}

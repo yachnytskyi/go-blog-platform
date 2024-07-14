@@ -5,7 +5,7 @@ Core:
 
 Security:
   Cookie_Secure: true
-  Http_Only: false
+  HTTP_Only: true
   Rate_Limit: 5.0
   Content_Security_Policy_Header:
     Key: "Content-Security-Policy"

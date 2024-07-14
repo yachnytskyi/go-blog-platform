@@ -16,23 +16,29 @@ const (
 // - err: The error to be handled.
 //
 // Returns:
-// - An error mapped to its corresponding HTTP error .
+// - An error mapped to its corresponding HTTP error.
 func HandleError(err error) error {
 	switch errorType := err.(type) {
 	case domainError.ValidationError:
-		// Map domain validation error to HTTP validation error .
+		// Map domain validation error to HTTP validation error.
 		return ValidationErrorToHTTPValidationErrorMapper(errorType)
 	case domainError.ValidationErrors:
 		// Map domain validation errors to HTTP validation errors .
 		return ValidationErrorsToHTTPValidationErrorsMapper(errorType)
 	case domainError.AuthorizationError:
-		// Map domain authorization error to HTTP authorization error .
+		// Map domain authorization error to HTTP authorization error.
 		return AuthorizationErrorToHTTPAuthorizationErrorMapper(errorType)
 	case domainError.ItemNotFoundError:
-		// Map domain item not found error to HTTP item not found error .
+		// Map domain item not found error to HTTP item not found error.
 		return ItemNotFoundErrorToHTTPItemNotFoundErrorMapper(errorType)
+	case domainError.InvalidTokenError:
+		// Map domain invalid token error to HTTP invalid token error.
+		return InvalidTokenErrorToHTTPIvalidTokenErrorMapper(errorType)
+	case domainError.TimeExpiredError:
+		return TimeExpiredErrorToHTTPTimeExpiredErrorMapper(errorType)
+		// Map time expired   error to HTTP time expired error.
 	case domainError.PaginationError:
-		// Map domain pagination error to HTTP pagination error .
+		// Map domain pagination error to HTTP pagination error.
 		return PaginationErrorToHTTPPaginationErrorMapper(errorType)
 	case HTTPAuthorizationError:
 		// Return HTTP authorization error directly.
@@ -41,7 +47,7 @@ func HandleError(err error) error {
 		// Return HTTP request error directly.
 		return errorType
 	case HTTPInternalError:
-		// Add internal error notification and return HTTP internal error .
+		// Add internal error notification and return HTTP internal error.
 		errorType.Notification = constants.InternalErrorNotification
 		return errorType
 	case HTTPInternalErrors:

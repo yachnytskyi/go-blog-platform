@@ -125,7 +125,7 @@ func ValidateInputMiddleware() gin.HandlerFunc {
 		}
 
 		// Check if the content type is in the list of allowed content types.
-		if validator.IsStringNotEmpty(contentType) && validator.IsSliceNotContains(securityConfig.AllowedContentTypes, contentType) {
+		if len(contentType) > 0 && validator.IsSliceNotContains(securityConfig.AllowedContentTypes, contentType) {
 			allowedContentTypes := strings.Join(config.GetSecurityConfig().AllowedContentTypes, ", ")
 			notification := constants.InvalidHTTPMethodNotification + allowedContentTypes
 

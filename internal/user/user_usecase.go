@@ -17,5 +17,5 @@ type UserUseCase interface {
 	Login(ctx context.Context, user userModel.UserLogin) commonModel.Result[userModel.UserToken]
 	RefreshAccessToken(ctx context.Context, user userModel.User) commonModel.Result[userModel.UserToken]
 	ForgottenPassword(ctx context.Context, userForgottenPasswordView userModel.UserForgottenPassword) error
-	ResetUserPassword(ctx context.Context, firstKey string, firstValue string, secondKey, passwordKey, password string) error
+	ResetUserPassword(ctx context.Context, userResetPassword userModel.UserResetPassword) error
 }

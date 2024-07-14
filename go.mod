@@ -17,8 +17,11 @@ require (
 )
 
 require (
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-playground/validator/v10 v10.14.0 // indirect
 	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/stretchr/testify v1.9.0
 	golang.org/x/time v0.1.0 // indirect
 )
 

@@ -102,6 +102,28 @@ func NewHTTPItemNotFoundError(notification string) HTTPItemNotFoundError {
 	}
 }
 
+// HTTPInvalidTokenError represents an invalid token error, embedding BaseError and implementing the error interface.
+type HTTPInvalidTokenError struct {
+	HTTPBaseError
+}
+
+// HTTPInvalidTokenError creates a new HTTPInvalidTokenError with the given location and notification message.
+func NewHTTPInvalidTokenError(notification string) HTTPInvalidTokenError {
+	return HTTPInvalidTokenError{NewHTTPBaseError(notification)}
+}
+
+// HTTPTimeExpiredError represents a time expired error, embedding HTTPBaseError and implementing the error interface.
+type HTTPTimeExpiredError struct {
+	HTTPBaseError
+}
+
+// NewHTTPTimeExpiredError creates a new HTTPTimeExpiredError with the given notification message.
+func NewHTTPTimeExpiredError(notification string) HTTPTimeExpiredError {
+	return HTTPTimeExpiredError{
+		HTTPBaseError: NewHTTPBaseError(notification),
+	}
+}
+
 // HTTPPaginationError represents a pagination error, embedding HTTPBaseError and adding field-specific details.
 type HTTPPaginationError struct {
 	CurrentPage string `json:"current_page"` // The current page number.

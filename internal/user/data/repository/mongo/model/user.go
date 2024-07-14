@@ -43,3 +43,11 @@ type UserForgottenPasswordRepository struct {
 	ResetToken  string    `bson:"reset_token"`
 	ResetExpiry time.Time `bson:"reset_expiry"`
 }
+
+type UserResetPasswordRepository struct {
+	Password string `bson:"password"`
+}
+
+type UserResetTokenRepository struct {
+	ResetExpiry time.Time `bson:"reset_expiry"`
+}

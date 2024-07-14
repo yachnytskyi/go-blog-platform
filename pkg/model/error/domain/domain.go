@@ -118,6 +118,26 @@ func NewItemNotFoundError(location, query, notification string) ItemNotFoundErro
 	}
 }
 
+// InvalidTokenError represents an invalid token error, embedding BaseError and implementing the error interface.
+type InvalidTokenError struct {
+	BaseError
+}
+
+// InvalidTokenError creates a new InvalidTokenError with the given location and notification message.
+func NewInvalidTokenError(location, notification string) InvalidTokenError {
+	return InvalidTokenError{NewBaseError(location, notification)}
+}
+
+// TimeExpiredError represents a time expired error, embedding BaseError and implementing the error interface.
+type TimeExpiredError struct {
+	BaseError
+}
+
+// TimeExpiredError creates a new TimeExpiredError with the given location and notification message.
+func NewTimeExpiredError(location, notification string) TimeExpiredError {
+	return TimeExpiredError{NewBaseError(location, notification)}
+}
+
 // PaginationError represents a pagination error, embedding BaseError and adding pagination-specific details.
 type PaginationError struct {
 	BaseError

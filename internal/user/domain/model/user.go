@@ -56,8 +56,13 @@ type UserForgottenPassword struct {
 }
 
 type UserResetPassword struct {
+	ResetToken      string
 	Password        string
 	PasswordConfirm string
+}
+
+type UserResetToken struct {
+	ResetExpiry time.Time
 }
 
 type EmailData struct {

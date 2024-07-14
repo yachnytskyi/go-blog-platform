@@ -7,7 +7,6 @@ import (
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
 	postModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
 const (
@@ -45,8 +44,8 @@ func (postUseCaseV1 *PostUseCaseV1) UpdatePostById(ctx context.Context, postID s
 	}
 
 	userID := fetchedPost.UserID
-	if validator.AreStringsNotEqual(currentUserID, userID) {
-		return nil, domainError.NewAuthorizationError(location+"UpdatePostById.AreStringsNotEqual", constants.AuthorizationErrorNotification)
+	if currentUserID != userID {
+		return nil, domainError.NewAuthorizationError(location, constants.AuthorizationErrorNotification)
 	}
 
 	updatedPost, err := postUseCaseV1.postRepository.UpdatePostById(ctx, postID, post)
@@ -61,8 +60,8 @@ func (postUseCaseV1 *PostUseCaseV1) DeletePostByID(ctx context.Context, postID s
 	}
 
 	userID := fetchedPost.UserID
-	if validator.AreStringsNotEqual(currentUserID, userID) {
-		return domainError.NewAuthorizationError(location+"DeletePostByID.AreStringsNotEqual", constants.AuthorizationErrorNotification)
+	if currentUserID != userID {
+		return domainError.NewAuthorizationError(location, constants.AuthorizationErrorNotification)
 	}
 
 	deletedPost := postUseCaseV1.postRepository.DeletePostByID(ctx, postID)

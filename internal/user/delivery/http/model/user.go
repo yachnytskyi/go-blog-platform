@@ -56,6 +56,7 @@ type UserForgottenPasswordView struct {
 
 // [POST].
 type UserResetPasswordView struct {
+	ResetToken      string `json:"reset_token"`
 	Password        string `json:"password"`
 	PasswordConfirm string `json:"password_confirm"`
 }

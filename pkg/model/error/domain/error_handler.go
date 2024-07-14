@@ -30,6 +30,14 @@ func HandleError(err error) error {
 		// Set a standardized notification message for item not found errors.
 		errorType.Notification = constants.ItemNotFoundErrorNotification
 		return errorType
+	case InvalidTokenError:
+		// Return the validation errors as is.
+		return errorType
+	case TimeExpiredError:
+		// Set a standardized notification message for item not found errors.
+		// Return the validation errors as is.
+		// errorType.Notification = constants.TimeExpiredErrorNotification
+		return errorType
 	case PaginationError:
 		// Set a standardized notification message for pagination errors.
 		errorType.Notification = constants.PaginationErrorNotification

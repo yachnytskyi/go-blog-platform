@@ -71,6 +71,32 @@ func ItemNotFoundErrorToHTTPItemNotFoundErrorMapper(itemNotFoundError domainErro
 	)
 }
 
+// InvalidTokenErrorToHTTPIvalidTokenErrorMapper maps a domain InvalidTokenError to an HTTP InvalidTokenError.
+//
+// Parameters:
+// - invalidTokenError: The domain InvalidTokenError to be mapped.
+//
+// Returns:
+// - An HTTPInvalidTokenError populated with the notification from the domain error.
+func InvalidTokenErrorToHTTPIvalidTokenErrorMapper(invalidTokenError domainError.InvalidTokenError) HTTPInvalidTokenError {
+	return NewHTTPInvalidTokenError(
+		invalidTokenError.Notification,
+	)
+}
+
+// TimeExpiredErrorToHTTPTimeExpiredErrorMapper maps a domain TimeExpiredError to an HTTP TimeExpiredError.
+//
+// Parameters:
+// - timeExpiredError: The domain TimeExpiredError to be mapped.
+//
+// Returns:
+// - An HTTPTimeExpiredError populated with the notification from the domain error.
+func TimeExpiredErrorToHTTPTimeExpiredErrorMapper(timeExpiredError domainError.TimeExpiredError) HTTPTimeExpiredError {
+	return NewHTTPTimeExpiredError(
+		timeExpiredError.Notification,
+	)
+}
+
 // PaginationErrorToHTTPPaginationErrorMapper maps a domain PaginationError to an HTTP PaginationError.
 //
 // Parameters:

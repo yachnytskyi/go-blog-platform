@@ -12,24 +12,6 @@ const (
 	location = "user.data.repository.mongo.model."
 )
 
-func UserRepositoryToUsersRepositoryMapper(usersRepository []UserRepository) UsersRepository {
-	return UsersRepository{
-		Users: append([]UserRepository{}, usersRepository...),
-	}
-}
-
-func UsersRepositoryToUsersMapper(usersRepository UsersRepository) userModel.Users {
-	users := make([]userModel.User, len(usersRepository.Users))
-	for index, userRepository := range usersRepository.Users {
-		users[index] = UserRepositoryToUserMapper(userRepository)
-	}
-
-	return userModel.Users{
-		PaginationResponse: usersRepository.PaginationResponse,
-		Users:              users,
-	}
-}
-
 func UserCreateToUserCreateRepositoryMapper(userCreate userModel.UserCreate) UserCreateRepository {
 	return UserCreateRepository{
 		Name:             userCreate.Name,
@@ -58,10 +40,40 @@ func UserUpdateToUserUpdateRepositoryMapper(userUpdate userModel.UserUpdate) com
 	return commonModel.NewResultOnSuccess[UserUpdateRepository](userUpdateRepository)
 }
 
+func UserResetTokenRepositoryToUserTokenMapper(userResetTokenRepository UserResetTokenRepository) userModel.UserResetToken {
+	return userModel.UserResetToken{
+		ResetExpiry: userResetTokenRepository.ResetExpiry,
+	}
+}
+
 func UserForgottenPasswordToUserForgottenPasswordRepositoryMapper(userForgottenPassword userModel.UserForgottenPassword) UserForgottenPasswordRepository {
 	return UserForgottenPasswordRepository{
 		ResetToken:  userForgottenPassword.ResetToken,
 		ResetExpiry: userForgottenPassword.ResetExpiry,
+	}
+}
+
+func UserResetPasswordToUserResetPasswordRepositoryMapper(userResetPassword userModel.UserResetPassword) UserResetPasswordRepository {
+	return UserResetPasswordRepository{
+		Password: userResetPassword.Password,
+	}
+}
+
+func UserRepositoryToUsersRepositoryMapper(usersRepository []UserRepository) UsersRepository {
+	return UsersRepository{
+		Users: append([]UserRepository{}, usersRepository...),
+	}
+}
+
+func UsersRepositoryToUsersMapper(usersRepository UsersRepository) userModel.Users {
+	users := make([]userModel.User, len(usersRepository.Users))
+	for index, userRepository := range usersRepository.Users {
+		users[index] = UserRepositoryToUserMapper(userRepository)
+	}
+
+	return userModel.Users{
+		PaginationResponse: usersRepository.PaginationResponse,
+		Users:              users,
 	}
 }
 

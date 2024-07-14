@@ -114,7 +114,11 @@ func ValidateOptionalField(field string, commonValidator domainModel.CommonValid
 // Returns:
 // - A boolean indicating whether the string length is invalid.
 func IsStringLengthInvalid(checkedString string, minLength int, maxLength int) bool {
-	return len(checkedString) < minLength || len(checkedString) > maxLength
+	if len(checkedString) < minLength || len(checkedString) > maxLength {
+		return true
+	}
+
+	return false
 }
 
 // AreStringCharactersInvalid checks if the characters in the input string match the specified regex pattern.
@@ -126,5 +130,9 @@ func IsStringLengthInvalid(checkedString string, minLength int, maxLength int) b
 // Returns:
 // - A boolean indicating whether the string characters are invalid.
 func AreStringCharactersInvalid(checkedString string, regexString string) bool {
-	return !regexp.MustCompile(regexString).MatchString(checkedString)
+	if regexp.MustCompile(regexString).MatchString(checkedString) {
+		return false
+	}
+
+	return true
 }

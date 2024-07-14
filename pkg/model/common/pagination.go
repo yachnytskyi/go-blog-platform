@@ -181,10 +181,17 @@ func buildPageLink(paginationResponse PaginationResponse, pageNumber int) string
 	baseURL := paginationResponse.BaseURL
 
 	// Construct the query parameters string.
-	queryParams := fmt.Sprintf("%s=%d&%s=%d&%s=%s&%s=%s",
-		constants.PageValue, pageNumber, constants.LimitValue, paginationResponse.Limit,
-		constants.OrderByValue, paginationResponse.OrderBy,
-		constants.SortOrderValue, paginationResponse.SortOrder)
+	queryParams := fmt.Sprintf(
+		"%s=%d&%s=%d&%s=%s&%s=%s",
+		constants.Page,
+		pageNumber,
+		constants.Limit,
+		paginationResponse.Limit,
+		constants.OrderBy,
+		paginationResponse.OrderBy,
+		constants.SortOrder,
+		paginationResponse.SortOrder,
+	)
 
 	// Combine the base URL and query parameters.
 	return fmt.Sprintf("%s?%s", baseURL, queryParams)

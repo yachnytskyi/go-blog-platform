@@ -18,10 +18,10 @@ import (
 // - commonModel.PaginationQuery: The parsed pagination parameters.
 func ParsePaginationQuery(ginContext *gin.Context) commonModel.PaginationQuery {
 	// Extract the page, limit, orderBy, and sortOrder query parameters from the Gin context.
-	page := ginContext.DefaultQuery(constants.PageValue, constants.DefaultPage)
-	limit := ginContext.DefaultQuery(constants.LimitValue, constants.DefaultLimit)
-	orderBy := ginContext.DefaultQuery(constants.OrderByValue, constants.DefaultOrderBy)
-	sortOrder := ginContext.DefaultQuery(constants.SortOrderValue, constants.DefaultSortOrder)
+	page := ginContext.DefaultQuery(constants.Page, constants.DefaultPage)
+	limit := ginContext.DefaultQuery(constants.Limit, constants.DefaultLimit)
+	orderBy := ginContext.DefaultQuery(constants.OrderBy, constants.DefaultOrderBy)
+	sortOrder := ginContext.DefaultQuery(constants.SortOrder, constants.DefaultSortOrder)
 
 	// Convert and validate the extracted values.
 	convertedPage := commonModel.GetPage(page)

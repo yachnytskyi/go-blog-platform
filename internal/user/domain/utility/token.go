@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domainModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
@@ -15,15 +16,13 @@ import (
 )
 
 const (
-	signingMethod   = "RS256"
-	userIDClaim     = "user_id"
-	userRoleClaim   = "user_role"
-	expirationClaim = "exp"
-	issuedAtClaim   = "iat"
-	notBeforeClaim  = "nbf"
-	// location            = "internal.user.domain.utility."
-	unexpectedMethod    = "unexpected method: %s"
-	invalidTokenMessage = "validate: invalid token"
+	signingMethod    = "RS256"
+	userIDClaim      = "user_id"
+	userRoleClaim    = "user_role"
+	expirationClaim  = "exp"
+	issuedAtClaim    = "iat"
+	notBeforeClaim   = "nbf"
+	unexpectedMethod = "unexpected method: %s"
 )
 
 // GenerateJWTToken generates a JWT token with the provided UserTokenPayload, using the given private key,
@@ -77,20 +76,21 @@ func ValidateJWTToken(location, token, publicKey string) commonModel.Result[doma
 	// Extract and validate the claims from the parsed token.
 	claims, ok := parsedToken.Data.Claims.(jwt.MapClaims)
 	if ok && parsedToken.Data.Valid {
-		payload := domainModel.UserTokenPayload{
-			UserID: fmt.Sprint(claims[userIDClaim]),
-			Role:   fmt.Sprint(claims[userRoleClaim]),
-		}
+		payload := domainModel.NewUserTokenPayload(
+			fmt.Sprint(claims[userIDClaim]),
+			fmt.Sprint(claims[userRoleClaim]),
+		)
 
 		return commonModel.NewResultOnSuccess[domainModel.UserTokenPayload](payload)
 	}
 
-	internalError := domainError.NewInternalError(location+".ValidateJWTToken.Claims.ok", invalidTokenMessage)
-	logging.Logger(internalError)
-	return commonModel.NewResultOnFailure[domainModel.UserTokenPayload](internalError)
+	invalidTokenError := domainError.NewInvalidTokenError(location+".ValidateJWTToken.Claims.ok", constants.InvalidTokenErrorMessage)
+	logging.Logger(invalidTokenError)
+	return commonModel.NewResultOnFailure[domainModel.UserTokenPayload](invalidTokenError)
 }
 
-// decodeBase64String decodes a base64-encoded string into a byte slice.
+// decodeBase64String decodes a base64-encoded string into a byte slice and returns a Result containing the decoded bytes
+// or an error if the decoding fails.
 func decodeBase64String(location, base64String string) commonModel.Result[[]byte] {
 	decodedPrivateKey, decodeStringError := base64.StdEncoding.DecodeString(base64String)
 	if validator.IsError(decodeStringError) {
@@ -102,7 +102,8 @@ func decodeBase64String(location, base64String string) commonModel.Result[[]byte
 	return commonModel.NewResultOnSuccess[[]byte](decodedPrivateKey)
 }
 
-// generateClaims generates JWT claims with the specified token lifetime and UserTokenPayload.
+// generateClaims generates JWT claims with the specified token lifetime and UserTokenPayload,
+// setting standard claims like userID, userRole, expiration, issuedAt, and notBefore.
 func generateClaims(tokenLifeTime time.Duration, now time.Time, userTokenPayload domainModel.UserTokenPayload) jwt.MapClaims {
 	return jwt.MapClaims{
 		userIDClaim:     userTokenPayload.UserID,
@@ -114,6 +115,7 @@ func generateClaims(tokenLifeTime time.Duration, now time.Time, userTokenPayload
 }
 
 // createSignedToken creates a signed JWT token using the provided private key and claims.
+// It returns a Result containing the signed token string or an error if signing fails.
 func createSignedToken(location string, key *rsa.PrivateKey, claims jwt.MapClaims) commonModel.Result[string] {
 	token, createSignedTokenError := jwt.NewWithClaims(jwt.GetSigningMethod(signingMethod), claims).SignedString(key)
 	if validator.IsError(createSignedTokenError) {
@@ -125,7 +127,8 @@ func createSignedToken(location string, key *rsa.PrivateKey, claims jwt.MapClaim
 	return commonModel.NewResultOnSuccess[string](token)
 }
 
-// parsePublicKey parses the RSA Public key from the provided byte slice.
+// parsePublicKey parses the RSA public key from the provided byte slice and returns a Result containing the parsed key
+// or an error if the parsing fails.
 func parsePublicKey(location string, decodedPublicKey []byte) commonModel.Result[*rsa.PublicKey] {
 	key, parsePublicKeyError := jwt.ParseRSAPublicKeyFromPEM(decodedPublicKey)
 	if validator.IsError(parsePublicKeyError) {
@@ -137,7 +140,8 @@ func parsePublicKey(location string, decodedPublicKey []byte) commonModel.Result
 	return commonModel.NewResultOnSuccess[*rsa.PublicKey](key)
 }
 
-// parsePrivateKey parses the RSA private key from the provided byte slice.
+// parsePrivateKey parses the RSA private key from the provided byte slice and returns a Result containing the parsed key
+// or an error if the parsing fails.
 func parsePrivateKey(location string, decodedPrivateKey []byte) commonModel.Result[*rsa.PrivateKey] {
 	key, parsePrivateKeyError := jwt.ParseRSAPrivateKeyFromPEM(decodedPrivateKey)
 	if validator.IsError(parsePrivateKeyError) {
@@ -151,6 +155,7 @@ func parsePrivateKey(location string, decodedPrivateKey []byte) commonModel.Resu
 }
 
 // parseToken parses and verifies the JWT token using the provided public key.
+// It returns a Result containing the parsed token or an error if the parsing fails.
 func parseToken(location, token string, key *rsa.PublicKey) commonModel.Result[*jwt.Token] {
 	parsedToken, parseError := jwt.Parse(token, func(t *jwt.Token) (any, error) {
 		_, ok := t.Method.(*jwt.SigningMethodRSA)

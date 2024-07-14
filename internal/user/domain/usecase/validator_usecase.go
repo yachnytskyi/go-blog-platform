@@ -36,6 +36,7 @@ const (
 	EmailField            = "email"
 	passwordField         = "password"
 	emailOrPasswordFields = "email or password"
+	resetTokenField       = "reset token"
 )
 
 // Validators for email, username, and password fields.
@@ -58,6 +59,12 @@ var (
 		FieldRegex: usernameRegex,
 		MinLength:  constants.MinStringLength,
 		MaxLength:  constants.MaxStringLength,
+	}
+	tokenValidator = domainModel.CommonValidator{
+		FieldName:  resetTokenField,
+		FieldRegex: usernameRegex,
+		MinLength:  resetTokenLength,
+		MaxLength:  resetTokenLength,
 	}
 	// Add more validators for other fields as needed.
 )
@@ -129,12 +136,12 @@ func validateUserLogin(userLogin userModel.UserLogin) common.Result[userModel.Us
 // validateUserForgottenPassword validates the fields of the UserForgottenPassword struct.
 func validateUserForgottenPassword(userForgottenPassword userModel.UserForgottenPassword) common.Result[userModel.UserForgottenPassword] {
 	// Initialize a slice to hold validation errors.
-	validationErrors := make([]error, 0, 1)
+	validationErrors := make([]error, 0, 2)
 
 	// Sanitize input fields.
 	userForgottenPassword.Email = domainUtility.SanitizeAndToLowerString(userForgottenPassword.Email)
 
-	// Perform validation for the email field.
+	// Perform validation for each field.
 	validationErrors = validateEmail(userForgottenPassword.Email, validationErrors)
 
 	// Return validation result based on presence of errors.
@@ -151,11 +158,13 @@ func validateResetPassword(userResetPassword userModel.UserResetPassword) common
 	validationErrors := make([]error, 0, 2)
 
 	// Sanitize input fields.
+	userResetPassword.ResetToken = domainUtility.SanitizeString(userResetPassword.ResetToken)
 	userResetPassword.Password = domainUtility.SanitizeString(userResetPassword.Password)
 	userResetPassword.PasswordConfirm = domainUtility.SanitizeString(userResetPassword.PasswordConfirm)
 
 	// Perform validation for each field.
 	validationErrors = validatePassword(userResetPassword.Password, userResetPassword.PasswordConfirm, validationErrors)
+	validationErrors = domainValidator.ValidateField(userResetPassword.ResetToken, tokenValidator, validationErrors)
 
 	// Return validation result based on presence of errors.
 	if validator.IsSliceNotEmpty(validationErrors) {
@@ -223,8 +232,8 @@ func validatePassword(password, passwordConfirm string, validationErrors []error
 	}
 
 	// Check if passwords match.
-	if validator.AreStringsNotEqual(password, passwordConfirm) {
-		validationError := domainError.NewValidationError(location+"validatePassword.AreStringsNotEqual", passwordValidator.FieldName, constants.FieldRequired, passwordsDoNotMatch)
+	if password != passwordConfirm {
+		validationError := domainError.NewValidationError(location, passwordValidator.FieldName, constants.FieldRequired, passwordsDoNotMatch)
 		logging.Logger(validationError)
 		errors = append(errors, validationError)
 		return errors

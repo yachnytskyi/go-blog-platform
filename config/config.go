@@ -49,7 +49,7 @@ type Core struct {
 // Security defines the security settings for the application.
 type Security struct {
 	CookieSecure                    bool     `mapstructure:"Cookie_Secure"`
-	HttpOnly                        bool     `mapstructure:"Http_Only"`
+	HTTPOnly                        bool     `mapstructure:"HTTP_Only"`
 	RateLimit                       float64  `mapstructure:"Rate_Limit"`
 	ContentSecurityPolicyHeader     Header   `mapstructure:"Content_Security_Policy_Header"`
 	ContentSecurityPolicyHeaderFull Header   `mapstructure:"Content_Security_Policy_Header_Full"`

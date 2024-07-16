@@ -12,6 +12,10 @@ import (
 type UseCaseV1 struct {
 }
 
+// NewUseCaseV1 creates a new instance of UseCaseV1.
+//
+// Returns:
+// - *UseCaseV1: The initialized UseCaseV1 instance.
 func NewUseCaseV1() *UseCaseV1 {
 	return &UseCaseV1{}
 }

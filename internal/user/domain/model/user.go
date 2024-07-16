@@ -83,7 +83,7 @@ type EmailData struct {
 	Subject      string // Subject of the email
 }
 
-// NewUsers creates a new instance of Users with provided users and pagination response.
+// NewUsers creates a new instance of Users with provided details.
 func NewUsers(users []User, paginationResponse commonModel.PaginationResponse) Users {
 	return Users{
 		Users:              users,
@@ -119,7 +119,7 @@ func NewUserUpdate(id, name string) UserUpdate {
 	}
 }
 
-// NewUserLogin creates a new instance of UserLogin with provided email and password.
+// NewUserLogin creates a new instance of UserLogin with provided details.
 func NewUserLogin(email, password string) UserLogin {
 	return UserLogin{
 		Email:    email,
@@ -127,7 +127,7 @@ func NewUserLogin(email, password string) UserLogin {
 	}
 }
 
-// NewUserToken creates a new instance of UserToken with provided access token and refresh token.
+// NewUserToken creates a new instance of UserToken with provided details.
 func NewUserToken(accessToken, refreshToken string) UserToken {
 	return UserToken{
 		AccessToken:  accessToken,
@@ -151,7 +151,7 @@ func NewUserResetPassword(resetToken, password, passwordConfirm string) UserRese
 	}
 }
 
-// NewUserResetToken creates a new instance of UserResetToken with provided reset token expiry.
+// NewUserResetToken creates a new instance of UserResetToken with provided details.
 func NewUserResetToken(resetExpiry time.Time) UserResetToken {
 	return UserResetToken{
 		ResetExpiry: resetExpiry,

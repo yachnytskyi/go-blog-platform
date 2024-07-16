@@ -11,7 +11,7 @@ type TokenView struct {
 	Token string `json:"token"`
 }
 
-// UsersView represents a view for multiple users with pagination information.
+// UsersView represents a view for multiple users with provided details.
 type UsersView struct {
 	UsersView              []UserView                       `json:"users"`
 	HTTPPaginationResponse httpModel.HTTPPaginationResponse `json:"pagination_response"`
@@ -68,14 +68,14 @@ type UserWelcomeMessageView struct {
 	Notification string `json:"notification"`
 }
 
-// NewWelcomeMessageView creates a new instance of UserWelcomeMessageView with a notification message.
+// NewWelcomeMessageView creates a new instance of UserWelcomeMessageView with provided details.
 func NewWelcomeMessageView(notification string) UserWelcomeMessageView {
 	return UserWelcomeMessageView{
 		Notification: notification,
 	}
 }
 
-// NewUsersView creates a new instance of UsersView with provided user views and pagination response.
+// NewUsersView creates a new instance of UsersView with provided details.
 func NewUsersView(users []UserView, paginationResponse httpModel.HTTPPaginationResponse) UsersView {
 	return UsersView{
 		UsersView:              users,
@@ -83,9 +83,7 @@ func NewUsersView(users []UserView, paginationResponse httpModel.HTTPPaginationR
 	}
 }
 
-// NewUserView creates a new instance of UserView with the provided attributes.
-// Returns:
-// - UserView: The initialized UserView struct with the specified attributes.
+// NewUserView creates a new instance of UserView with provided details.
 func NewUserView(id string, createdAt, updatedAt time.Time, name, email, role string) UserView {
 	return UserView{
 		BaseEntity: httpModel.NewBaseEntity(id, createdAt, updatedAt),
@@ -95,7 +93,7 @@ func NewUserView(id string, createdAt, updatedAt time.Time, name, email, role st
 	}
 }
 
-// NewUserCreateView creates a new instance of UserCreateView with provided name, email, password, and password confirmation.
+// NewUserCreateView creates a new instance of UserCreateView with provided details.
 func NewUserCreateView(name, email, password, passwordConfirm string) UserCreateView {
 	return UserCreateView{
 		Name:            name,
@@ -105,7 +103,7 @@ func NewUserCreateView(name, email, password, passwordConfirm string) UserCreate
 	}
 }
 
-// NewUserUpdateView creates a new instance of UserUpdateView with provided ID and name.
+// NewUserUpdateView creates a new instance of UserUpdateView with provided details.
 func NewUserUpdateView(id, name string) UserUpdateView {
 	return UserUpdateView{
 		ID:   id,
@@ -113,7 +111,7 @@ func NewUserUpdateView(id, name string) UserUpdateView {
 	}
 }
 
-// NewUserLoginView creates a new instance of UserLoginView with provided email and password.
+// NewUserLoginView creates a new instance of UserLoginView with provided details.
 func NewUserLoginView(email, password string) UserLoginView {
 	return UserLoginView{
 		Email:    email,
@@ -121,14 +119,14 @@ func NewUserLoginView(email, password string) UserLoginView {
 	}
 }
 
-// NewUserForgottenPasswordView creates a new instance of UserForgottenPasswordView with provided email.
+// NewUserForgottenPasswordView creates a new instance of UserForgottenPasswordView with provided details.
 func NewUserForgottenPasswordView(email string) UserForgottenPasswordView {
 	return UserForgottenPasswordView{
 		Email: email,
 	}
 }
 
-// NewUserResetPasswordView creates a new instance of UserResetPasswordView with provided reset token, password, and password confirmation.
+// NewUserResetPasswordView creates a new instance of UserResetPasswordView with provided details.
 func NewUserResetPasswordView(resetToken, password, passwordConfirm string) UserResetPasswordView {
 	return UserResetPasswordView{
 		ResetToken:      resetToken,
@@ -137,7 +135,7 @@ func NewUserResetPasswordView(resetToken, password, passwordConfirm string) User
 	}
 }
 
-// NewUserTokenView creates a new instance of UserTokenView with provided access token and refresh token.
+// NewUserTokenView creates a new instance of UserTokenView with provided details.
 func NewUserTokenView(accessToken, refreshToken string) UserTokenView {
 	return UserTokenView{
 		AccessToken:  accessToken,

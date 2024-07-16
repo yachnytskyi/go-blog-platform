@@ -33,6 +33,10 @@ type MongoDBRepository struct {
 	MongoClient *mongo.Client // MongoDB client instance.
 }
 
+// NewMongoDBRepository creates a new instance of MongoDBRepository.
+//
+// Returns:
+// - *MongoDBRepository: The initialized MongoDBRepository instance.
 func NewMongoDBRepository() *MongoDBRepository {
 	return &MongoDBRepository{}
 }

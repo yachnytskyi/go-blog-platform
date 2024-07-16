@@ -15,10 +15,10 @@ func SanitizeString(data string) string {
 	return strings.TrimSpace(data)
 }
 
-// ToLowerString converts the input string to lowercase.
+// ToLowerString maps the input string to lowercase.
 //
 // Parameters:
-// - data: The string to be converted to lowercase.
+// - data: The string to be mapped to lowercase.
 //
 // Returns:
 // - The lowercase string.
@@ -27,10 +27,10 @@ func ToLowerString(data string) string {
 }
 
 // SanitizeAndToLowerString trims leading and trailing white spaces from the input string
-// and converts it to lowercase by utilizing SanitizeString and ToLowerString functions.
+// and maps it to lowercase by utilizing SanitizeString and ToLowerString functions.
 //
 // Parameters:
-// - data: The string to be sanitized and converted to lowercase.
+// - data: The string to be sanitized and mapped to lowercase.
 //
 // Returns:
 // - The sanitized and lowercase string.

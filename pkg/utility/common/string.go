@@ -28,8 +28,7 @@ func Encode(data string) string {
 // - encodedString: The base64 encoded string to be decoded.
 //
 // Returns:
-// - A Result containing the decoded string data.
-// - A Result containing an error if the decoding fails, wrapped in a domain-specific error with logging.
+// - commonModel.Result[string]: The result containing the decoded string data if successful, or an error if the decoding fails.
 func Decode(location, encodedString string) commonModel.Result[string] {
 	decodedBytes, decodeStringError := base64.StdEncoding.DecodeString(encodedString)
 	if validator.IsError(decodeStringError) {

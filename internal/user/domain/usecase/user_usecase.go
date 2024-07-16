@@ -31,6 +31,12 @@ type UserUseCaseV1 struct {
 }
 
 // NewUserUseCaseV1 creates a new instance of UserUseCaseV1 with the given user repository.
+//
+// Parameters:
+// - userRepository (user.UserRepository): The user repository instance that handles data access operations.
+//
+// Returns:
+// - UserUseCaseV1: The initialized UserUseCaseV1 instance.
 func NewUserUseCaseV1(userRepository user.UserRepository) user.UserUseCase {
 	return UserUseCaseV1{userRepository: userRepository}
 }

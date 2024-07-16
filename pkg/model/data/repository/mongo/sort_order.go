@@ -10,7 +10,7 @@ const (
 	sortDescend = -1 // Numeric value representing descending sort order.
 )
 
-// SetSortOrder converts a user-provided sort order string into a corresponding
+// SetSortOrder maps a user-provided sort order string into a corresponding
 // numeric value used for sorting. It handles both ascending ("ascend") and
 // descending ("descend") sort orders. If the input is neither of these, it
 // falls back to the default sort order defined in constants.
@@ -26,7 +26,7 @@ const (
 //   - -1 for descending order ("descend")
 //   - The default sort order defined in constants if the input is not recognized.
 func SetSortOrder(sortOrder string) int {
-	// Convert the sort order string to lower case for case-insensitive comparison.
+	// Map the sort order string to lower case for case-insensitive comparison.
 	sortOrder = domainUtility.ToLowerString(sortOrder)
 
 	// Determine the corresponding numeric sort order value based on the input string.

@@ -28,6 +28,12 @@ type UserController struct {
 }
 
 // NewUserController creates a new instance of UserController.
+//
+// Parameters:
+// - userUseCase (user.UserUseCase): The user use case instance that handles business logic operations.
+//
+// Returns:
+// - UserController: The initialized UserController instance.
 func NewUserController(userUseCase user.UserUseCase) UserController {
 	return UserController{userUseCase: userUseCase}
 }

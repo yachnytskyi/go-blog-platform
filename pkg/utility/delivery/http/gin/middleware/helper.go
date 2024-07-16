@@ -18,8 +18,7 @@ import (
 // - ginContext: The Gin context containing the HTTP request.
 //
 // Returns:
-// - A Result containing the extracted access token as a string.
-// - A Result containing an error if the access token is not found or invalid.
+// - commonModel.Result[string]: The result containing the extracted access token as a string if successful, or an error if the access token is not found or invalid.
 func extractAccessToken(ginContext *gin.Context) commonModel.Result[string] {
 	// Attempt to retrieve the access token from the cookie.
 	cookie, cookieError := ginContext.Cookie(constants.AccessTokenValue)
@@ -48,8 +47,7 @@ func extractAccessToken(ginContext *gin.Context) commonModel.Result[string] {
 // - ginContext: The Gin context containing the HTTP request.
 //
 // Returns:
-// - A Result containing the extracted refresh token as a string.
-// - A Result containing an error if the refresh token is not found or invalid.
+// - commonModel.Result[string]: The result containing the extracted refresh token as a string if successful, or an error if the refresh token is not found or invalid.
 func extractRefreshToken(ginContext *gin.Context) commonModel.Result[string] {
 	// Attempt to retrieve the refresh token from the cookie.
 	refreshToken, refreshTokenError := ginContext.Cookie(constants.RefreshTokenValue)

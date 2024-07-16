@@ -23,9 +23,9 @@ func ParsePaginationQuery(ginContext *gin.Context) commonModel.PaginationQuery {
 	orderBy := ginContext.DefaultQuery(constants.OrderBy, constants.DefaultOrderBy)
 	sortOrder := ginContext.DefaultQuery(constants.SortOrder, constants.DefaultSortOrder)
 
-	// Convert and validate the extracted values.
-	convertedPage := commonModel.GetPage(page)
-	convertedLimit := commonModel.GetLimit(limit)
+	// Maps and validate the extracted values.
+	mappedPage := commonModel.GetPage(page)
+	mappedLimit := commonModel.GetLimit(limit)
 
 	// Extract the scheme from the request.
 	scheme := constants.HTTP
@@ -43,5 +43,11 @@ func ParsePaginationQuery(ginContext *gin.Context) commonModel.PaginationQuery {
 	baseURL := fmt.Sprintf("%s://%s%s", scheme, host, rawURL.Path)
 
 	// Create and return a commonModel.PaginationQuery struct.
-	return commonModel.NewPaginationQuery(convertedPage, convertedLimit, orderBy, sortOrder, baseURL)
+	return commonModel.NewPaginationQuery(
+		mappedPage,
+		mappedLimit,
+		orderBy,
+		sortOrder,
+		baseURL,
+	)
 }

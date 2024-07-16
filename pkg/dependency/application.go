@@ -9,42 +9,50 @@ import (
 
 // CreateApplication initializes the application by setting up the container,
 // injecting dependencies, and configuring the server.
+//
+// Parameters:
+// - ctx (context.Context): The context for managing request deadlines and cancellation signals.
+//
+// Returns:
+// - *applicationModel.Container: The initialized container with all dependencies and server configurations.
 func CreateApplication(ctx context.Context) *applicationModel.Container {
-	// Initialize a new container for holding factory interfaces.
-	// Initialize a structure to hold the server routers.
+	// Initialize a new container for holding the factories.
 	container := &applicationModel.Container{}
+
+	// Initialize a structure to hold the server routers.
 	serverRouters := applicationModel.ServerRouters{}
 
 	// Inject repository dependencies into the container.
 	factory.InjectRepository(ctx, container)
 
-	// Create a new repository instance using the repository factory in the container.
-	database := container.RepositoryFactory.NewRepository(ctx)
+	// Inject repository dependencies into the container.
+	repository := container.Repository.NewRepository(ctx)
 
 	// Create specific repositories using the repository instance.
-	userRepository := container.RepositoryFactory.NewUserRepository(database)
-	postRepository := container.RepositoryFactory.NewPostRepository(database)
+	userRepository := container.Repository.NewUserRepository(repository)
+	postRepository := container.Repository.NewPostRepository(repository)
 
 	// Inject use case dependencies into the container.
 	factory.InjectUseCase(ctx, container)
 
 	// Create the use cases using the repositories.
-	serverRouters.UserUseCase = container.UseCaseFactory.NewUserUseCase(userRepository)
-	postUseCase := container.UseCaseFactory.NewPostUseCase(postRepository)
+	userUseCase := container.UseCase.NewUserUseCase(userRepository)
+	postUseCase := container.UseCase.NewPostUseCase(postRepository)
+	serverRouters.UserUseCase = userUseCase
 
 	// Inject delivery dependencies into the container.
 	factory.InjectDelivery(ctx, container)
 
 	// Create the controllers using the use cases.
-	userController := container.DeliveryFactory.NewUserController(serverRouters.UserUseCase)
-	postController := container.DeliveryFactory.NewPostController(serverRouters.UserUseCase, postUseCase)
+	userController := container.Delivery.NewUserController(userUseCase)
+	postController := container.Delivery.NewPostController(userUseCase, postUseCase)
 
 	// Initialize the routers using the controllers.
-	serverRouters.UserRouter = container.DeliveryFactory.NewUserRouter(userController)
-	serverRouters.PostRouter = container.DeliveryFactory.NewPostRouter(postController)
+	serverRouters.UserRouter = container.Delivery.NewUserRouter(userController)
+	serverRouters.PostRouter = container.Delivery.NewPostRouter(postController)
 
 	// Initialize the server with the configured routers.
-	container.DeliveryFactory.InitializeServer(serverRouters)
+	container.Delivery.InitializeServer(serverRouters)
 
 	// Return the initialized container.
 	return container

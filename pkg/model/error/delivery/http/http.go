@@ -17,6 +17,12 @@ func (httpBaseError HTTPBaseError) Error() string {
 }
 
 // NewHTTPBaseError creates a new HTTPBaseError with the given notification message.
+//
+// Parameters:
+// - notification: The notification message for the error.
+//
+// Returns:
+// - A new instance of HTTPBaseError with the provided notification message.
 func NewHTTPBaseError(notification string) HTTPBaseError {
 	return HTTPBaseError{
 		Notification: notification,
@@ -29,6 +35,12 @@ type HTTPBaseErrors struct {
 }
 
 // NewHTTPBaseErrors creates a new HTTPBaseErrors with the given slice of errors.
+//
+// Parameters:
+// - errors: A slice of errors to be included in the collection.
+//
+// Returns:
+// - A new instance of HTTPBaseErrors with the provided errors.
 func NewHTTPBaseErrors(errors []error) HTTPBaseErrors {
 	return HTTPBaseErrors{Errors: errors}
 }
@@ -46,6 +58,9 @@ func (httpBaseErrors HTTPBaseErrors) Error() string {
 }
 
 // Len returns the number of errors in the HTTPBaseErrors collection.
+//
+// Returns:
+// - The number of errors in the collection.
 func (httpBaseErrors HTTPBaseErrors) Len() int {
 	return len(httpBaseErrors.Errors)
 }
@@ -58,6 +73,14 @@ type HTTPValidationError struct {
 }
 
 // NewHTTPValidationError creates a new HTTPValidationError with the given details.
+//
+// Parameters:
+// - field: The field that caused the validation error.
+// - fieldType: The type of the field.
+// - notification: The notification message for the error.
+//
+// Returns:
+// - A new instance of HTTPValidationError with the provided details.
 func NewHTTPValidationError(field, fieldType, notification string) HTTPValidationError {
 	return HTTPValidationError{
 		Field:         field,
@@ -72,6 +95,12 @@ type HTTPValidationErrors struct {
 }
 
 // NewHTTPValidationErrors creates a new HTTPValidationErrors collection with the given slice of errors.
+//
+// Parameters:
+// - errors: A slice of errors to be included in the collection.
+//
+// Returns:
+// - A new instance of HTTPValidationErrors with the provided errors.
 func NewHTTPValidationErrors(errors []error) HTTPValidationErrors {
 	return HTTPValidationErrors{NewHTTPBaseErrors(errors)}
 }
@@ -83,6 +112,13 @@ type HTTPAuthorizationError struct {
 }
 
 // NewHTTPAuthorizationError creates a new HTTPAuthorizationError with the given location and notification message.
+//
+// Parameters:
+// - location: The location where the error occurred.
+// - notification: The notification message for the error.
+//
+// Returns:
+// - A new instance of HTTPAuthorizationError with the provided details.
 func NewHTTPAuthorizationError(location, notification string) HTTPAuthorizationError {
 	return HTTPAuthorizationError{
 		Location:      location,
@@ -96,18 +132,30 @@ type HTTPItemNotFoundError struct {
 }
 
 // NewHTTPItemNotFoundError creates a new HTTPItemNotFoundError with the given notification message.
+//
+// Parameters:
+// - notification: The notification message for the error.
+//
+// Returns:
+// - A new instance of HTTPItemNotFoundError with the provided notification message.
 func NewHTTPItemNotFoundError(notification string) HTTPItemNotFoundError {
 	return HTTPItemNotFoundError{
 		HTTPBaseError: NewHTTPBaseError(notification),
 	}
 }
 
-// HTTPInvalidTokenError represents an invalid token error, embedding BaseError and implementing the error interface.
+// HTTPInvalidTokenError represents an invalid token error, embedding HTTPBaseError and implementing the error interface.
 type HTTPInvalidTokenError struct {
 	HTTPBaseError
 }
 
-// HTTPInvalidTokenError creates a new HTTPInvalidTokenError with the given location and notification message.
+// NewHTTPInvalidTokenError creates a new HTTPInvalidTokenError with the given notification message.
+//
+// Parameters:
+// - notification: The notification message for the error.
+//
+// Returns:
+// - A new instance of HTTPInvalidTokenError with the provided notification message.
 func NewHTTPInvalidTokenError(notification string) HTTPInvalidTokenError {
 	return HTTPInvalidTokenError{NewHTTPBaseError(notification)}
 }
@@ -118,6 +166,12 @@ type HTTPTimeExpiredError struct {
 }
 
 // NewHTTPTimeExpiredError creates a new HTTPTimeExpiredError with the given notification message.
+//
+// Parameters:
+// - notification: The notification message for the error.
+//
+// Returns:
+// - A new instance of HTTPTimeExpiredError with the provided notification message.
 func NewHTTPTimeExpiredError(notification string) HTTPTimeExpiredError {
 	return HTTPTimeExpiredError{
 		HTTPBaseError: NewHTTPBaseError(notification),
@@ -132,6 +186,14 @@ type HTTPPaginationError struct {
 }
 
 // NewHTTPPaginationError creates a new HTTPPaginationError with the given details.
+//
+// Parameters:
+// - currentPage: The current page number.
+// - totalPages: The total number of pages.
+// - notification: The notification message for the error.
+//
+// Returns:
+// - A new instance of HTTPPaginationError with the provided details.
 func NewHTTPPaginationError(currentPage, totalPages, notification string) HTTPPaginationError {
 	return HTTPPaginationError{
 		CurrentPage:   currentPage,
@@ -148,6 +210,14 @@ type HTTPRequestError struct {
 }
 
 // NewHTTPRequestError creates a new HTTPRequestError with the given location, request type, and notification message.
+//
+// Parameters:
+// - location: The location where the error occurred.
+// - requestType: The type of the request that caused the error.
+// - notification: The notification message for the error.
+//
+// Returns:
+// - A new instance of HTTPRequestError with the provided details.
 func NewHTTPRequestError(location, requestType, notification string) HTTPRequestError {
 	return HTTPRequestError{
 		Location:      location,
@@ -163,6 +233,13 @@ type HTTPInternalError struct {
 }
 
 // NewHTTPInternalError creates a new HTTPInternalError with the given location and notification message.
+//
+// Parameters:
+// - location: The location where the error occurred.
+// - notification: The notification message for the error.
+//
+// Returns:
+// - A new instance of HTTPInternalError with the provided details.
 func NewHTTPInternalError(location, notification string) HTTPInternalError {
 	return HTTPInternalError{
 		Location:      location,
@@ -176,16 +253,30 @@ type HTTPInternalErrors struct {
 }
 
 // NewHTTPInternalErrors creates a new HTTPInternalErrors collection with the given slice of errors.
+//
+// Parameters:
+// - errors: A slice of errors to be included in the collection.
+//
+// Returns:
+// - A new instance of HTTPInternalErrors with the provided errors.
 func NewHTTPInternalErrors(errors []error) HTTPInternalErrors {
 	return HTTPInternalErrors{NewHTTPBaseErrors(errors)}
 }
 
 // MarshalJSON customizes the JSON output for HTTPValidationErrors.
+//
+// Returns:
+// - A JSON-encoded byte slice representing the validation errors.
+// - An error if the marshaling fails.
 func (httpValidationErrors HTTPValidationErrors) MarshalJSON() ([]byte, error) {
 	return json.Marshal(httpValidationErrors.Errors)
 }
 
 // MarshalJSON customizes the JSON output for HTTPInternalErrors.
+//
+// Returns:
+// - A JSON-encoded byte slice representing the internal errors.
+// - An error if the marshaling fails.
 func (httpInternalErrors HTTPInternalErrors) MarshalJSON() ([]byte, error) {
 	return json.Marshal(httpInternalErrors.Errors)
 }

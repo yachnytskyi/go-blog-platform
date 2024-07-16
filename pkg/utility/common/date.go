@@ -28,8 +28,7 @@ func FormatDate(data time.Time) string {
 // - data: The string to be parsed into a time.Time instance.
 //
 // Returns:
-// - A result containing the parsed time.Time instance.
-// - A result containing an error if the parsing fails, wrapped in a Error-specific error with logging.
+// - commonModel.Result[time.Time]: The result containing the parsed time.Time instance if successful, or an error if the parsing fails.
 func ParseDate(location, data string) commonModel.Result[time.Time] {
 	parsedTime, parseError := time.Parse(constants.DateTimeFormat, data)
 	if validator.IsError(parseError) {

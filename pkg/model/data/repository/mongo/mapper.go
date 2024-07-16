@@ -13,32 +13,31 @@ const (
 	emptyID = "Id is empty"
 )
 
-// DataToMongoDocumentMapper converts the incoming data to a BSON document.
-// It uses BSON marshaling and unmarshaling to perform the conversion.
+// DataToMongoDocumentMapper maps the incoming data to a BSON document.
+// It performs the following steps:
+// 1. Marshals the incoming data to BSON format.
+// 2. Checks for errors during marshaling and logs them if any.
+// 3. Unmarshals the BSON data into a BSON document.
+// 4. Checks for errors during unmarshaling and logs them if any.
+// 5. Returns the BSON document wrapped in a commonModel.Result.
 //
 // Parameters:
-// - ctx: A context to support cancellation and timeout.
-// - location: A string representing the location or context for error logging.
-// - incomingData: The data to be converted to a BSON document.
+// - location (string): A string representing the location or context for error logging.
+// - incomingData (any): The data to be mapped to a BSON document.
 //
 // Returns:
-// - A Result containing a pointer to a BSON document.
-// - A Result containing an error if the conversion fails.
+// - commonModel.Result[*bson.D]: The result containing either the BSON document or an error.
 func DataToMongoDocumentMapper(location string, incomingData any) commonModel.Result[*bson.D] {
-	// Marshal incoming data to BSON format.
 	data, err := bson.Marshal(incomingData)
 	if validator.IsError(err) {
-		// Log and handle the marshaling error.
 		internalError := domainError.NewInternalError(location+".DataToMongoDocumentMapper.bson.Marshal", err.Error())
 		logging.Logger(internalError)
 		return commonModel.NewResultOnFailure[*bson.D](internalError)
 	}
 
-	// Unmarshal the BSON data into a BSON document.
 	var document bson.D
 	err = bson.Unmarshal(data, &document)
 	if err != nil {
-		// Log and handle the unmarshaling error.
 		internalError := domainError.NewInternalError(location+".DataToMongoDocumentMapper.bson.Unmarshal", err.Error())
 		logging.Logger(internalError)
 		return commonModel.NewResultOnFailure[*bson.D](internalError)
@@ -47,36 +46,32 @@ func DataToMongoDocumentMapper(location string, incomingData any) commonModel.Re
 	return commonModel.NewResultOnSuccess[*bson.D](&document)
 }
 
-// HexToObjectIDMapper converts a hexadecimal string representation of MongoDB ObjectID
-// to its corresponding primitive.ObjectID type.
+// HexToObjectIDMapper maps a hexadecimal string representation of MongoDB ObjectID to its corresponding primitive.ObjectID type.
+// It performs the following steps:
+// 1. Checks if the provided ID is empty and logs an error if it is.
+// 2. Attempts to map the hexadecimal string to a primitive.ObjectID.
+// 3. Checks for errors during mapping and logs them if any.
+// 4. Returns the mapped ObjectID wrapped in a commonModel.Result.
 //
 // Parameters:
-// - location: A string representing the location or context for error logging.
-// - id: The hexadecimal string to be converted.
+// - location (string): A string representing the location or context for error logging.
+// - id (string): The hexadecimal string to be mapped.
 //
 // Returns:
-// - A Result containing the converted ObjectID if successful.
-// - A Result containing an error if the conversion fails.
+// - commonModel.Result[primitive.ObjectID]: The result containing either the mapped ObjectID or an error.
 func HexToObjectIDMapper(location, id string) commonModel.Result[primitive.ObjectID] {
-	// Check if the provided id is empty.
 	if len(id) == 0 {
-		// Log and handle the empty id error.
 		internalError := domainError.NewInternalError(location+".HexToObjectIDMapper", emptyID)
 		logging.Logger(internalError)
-		// Return a failure result with the internal error.
 		return commonModel.NewResultOnFailure[primitive.ObjectID](internalError)
 	}
 
-	// Convert the hexadecimal string to primitive.ObjectID.
 	objectID, objectIDFromHexError := primitive.ObjectIDFromHex(id)
 	if validator.IsError(objectIDFromHexError) {
-		// Log and handle the conversion error.
 		internalError := domainError.NewInternalError(location+".HexToObjectIDMapper.primitive.ObjectIDFromHex", objectIDFromHexError.Error())
 		logging.Logger(internalError)
-		// Return a default ObjectID and the error.
 		return commonModel.NewResultOnFailure[primitive.ObjectID](internalError)
 	}
 
-	// Return the successfully converted ObjectID.
 	return commonModel.NewResultOnSuccess[primitive.ObjectID](objectID)
 }

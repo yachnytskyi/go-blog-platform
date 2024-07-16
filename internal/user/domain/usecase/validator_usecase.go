@@ -70,6 +70,10 @@ var (
 )
 
 // validateUserCreate validates the fields of the UserCreate struct.
+// Parameters:
+// - userCreate: The UserCreate struct containing the user details to be validated.
+// Returns:
+// - A common.Result containing either the validated UserCreate struct or validation errors.
 func validateUserCreate(userCreate userModel.UserCreate) common.Result[userModel.UserCreate] {
 	// Initialize a slice to hold validation errors.
 	validationErrors := make([]error, 0, 4)
@@ -94,6 +98,10 @@ func validateUserCreate(userCreate userModel.UserCreate) common.Result[userModel
 }
 
 // validateUserUpdate validates the fields of the UserUpdate struct.
+// Parameters:
+// - userUpdate: The UserUpdate struct containing the user details to be validated.
+// Returns:
+// - A common.Result containing either the validated UserUpdate struct or validation errors.
 func validateUserUpdate(userUpdate userModel.UserUpdate) common.Result[userModel.UserUpdate] {
 	// Initialize a slice to hold validation errors.
 	validationErrors := make([]error, 0, 1)
@@ -113,6 +121,10 @@ func validateUserUpdate(userUpdate userModel.UserUpdate) common.Result[userModel
 }
 
 // validateUserLogin validates the fields of the UserLogin struct.
+// Parameters:
+// - userLogin: The UserLogin struct containing the login details to be validated.
+// Returns:
+// - A common.Result containing either the validated UserLogin struct or validation errors.
 func validateUserLogin(userLogin userModel.UserLogin) common.Result[userModel.UserLogin] {
 	// Initialize a slice to hold validation errors.
 	validationErrors := make([]error, 0, 2)
@@ -133,7 +145,11 @@ func validateUserLogin(userLogin userModel.UserLogin) common.Result[userModel.Us
 	return common.NewResultOnSuccess[userModel.UserLogin](userLogin)
 }
 
-// validateUserForgottenPassword validates the fields of the UserForgottenPassword struct.
+// validateUserForgottenPassword validates the email field for forgotten password requests.
+// Parameters:
+// - userForgottenPassword: The UserForgottenPassword struct containing the email to be validated.
+// Returns:
+// - A common.Result containing either the validated UserForgottenPassword struct or validation errors.
 func validateUserForgottenPassword(userForgottenPassword userModel.UserForgottenPassword) common.Result[userModel.UserForgottenPassword] {
 	// Initialize a slice to hold validation errors.
 	validationErrors := make([]error, 0, 2)
@@ -152,7 +168,11 @@ func validateUserForgottenPassword(userForgottenPassword userModel.UserForgotten
 	return common.NewResultOnSuccess[userModel.UserForgottenPassword](userForgottenPassword)
 }
 
-// validateResetPassword validates the fields of the UserResetPassword struct.
+// validateResetPassword validates the fields of the ResetPassword struct.
+// Parameters:
+// - resetPassword: The ResetPassword struct containing the reset password details to be validated.
+// Returns:
+// - A common.Result containing either the validated ResetPassword struct or validation errors.
 func validateResetPassword(userResetPassword userModel.UserResetPassword) common.Result[userModel.UserResetPassword] {
 	// Initialize a slice to hold validation errors.
 	validationErrors := make([]error, 0, 2)
@@ -174,7 +194,12 @@ func validateResetPassword(userResetPassword userModel.UserResetPassword) common
 	return common.NewResultOnSuccess[userModel.UserResetPassword](userResetPassword)
 }
 
-// validateEmail validates the email field using regex and other checks.
+// validateEmail validates an email string based on common email validation rules and domain existence.
+// Parameters:
+// - email: The email string to be validated.
+// - validationErrors: A slice of error to accumulate validation errors.
+// Returns:
+// - The updated slice of validation errors.
 func validateEmail(email string, validationErrors []error) []error {
 	// Initialize the errors slice with the given validationErrors to accumulate any validation errors.
 	// This allows appending new errors while preserving the existing ones.
@@ -208,7 +233,13 @@ func validateEmail(email string, validationErrors []error) []error {
 	return errors
 }
 
-// validatePassword validates the password and password confirmation fields.
+// validatePassword validates the password and confirmation password fields.
+// Parameters:
+// - password: The password string to be validated.
+// - passwordConfirm: The confirmation password string to be validated.
+// - validationErrors: A slice of error to accumulate validation errors.
+// Returns:
+// - The updated slice of validation errors.
 func validatePassword(password, passwordConfirm string, validationErrors []error) []error {
 	// Initialize the errors slice with the given validationErrors to accumulate any validation errors.
 	// This allows appending new errors while preserving the existing ones.
@@ -242,14 +273,26 @@ func validatePassword(password, passwordConfirm string, validationErrors []error
 	return errors
 }
 
-// isEmailDomainNotValid checks if the email domain is valid by performing an MX record lookup.
+// isEmailDomainNotValid checks if the email domain exists by resolving DNS records.
+// Parameters:
+// - email: The email string to be checked.
+// Returns:
+// - A boolean indicating if the email domain does not exist.
 func isEmailDomainNotValid(emailString string) bool {
+	// Extract the domain part of the email.
 	host := strings.Split(emailString, "@")[1]
+
+	// Resolve DNS records for the email domain.
 	_, lookupMXError := net.LookupMX(host)
 	return validator.IsError(lookupMXError)
 }
 
-// arePasswordsNotEqual compares the hashed password with the provided password.
+// arePasswordsNotEqual checks if the provided password and confirmation password are not equal.
+// Parameters:
+// - password: The password string.
+// - passwordConfirm: The confirmation password string.
+// Returns:
+// - A boolean indicating if the passwords are not equal.
 func arePasswordsNotEqual(hashedPassword string, checkedPassword string) error {
 	if validator.IsError(bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(checkedPassword))) {
 		validationError := domainError.NewValidationError(location+"arePasswordsNotEqual.CompareHashAndPassword", emailOrPasswordFields, constants.FieldRequired, passwordsDoNotMatch)
@@ -261,7 +304,11 @@ func arePasswordsNotEqual(hashedPassword string, checkedPassword string) error {
 	return nil
 }
 
-// isEmailValid performs basic email validation checks.
+// isEmailValid checks if the provided email is valid based on common email validation rules and domain existence.
+// Parameters:
+// - email: The email string to be validated.
+// Returns:
+// - A boolean indicating if the email is valid.
 func isEmailValid(email string) error {
 	if domainValidator.IsStringLengthInvalid(email, constants.MinStringLength, constants.MaxStringLength) {
 		notification := fmt.Sprintf(constants.StringAllowedLength, constants.MinStringLength, constants.MaxStringLength)

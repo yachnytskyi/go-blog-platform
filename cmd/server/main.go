@@ -12,11 +12,6 @@ import (
 	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 )
 
-const (
-	// Message to log if the application fails to initialize.
-	failedInitialization = "Failed to initialize application"
-)
-
 // init is called before the main function to perform setup tasks.
 func init() {
 	// Load configuration settings from config files or environment variables.
@@ -33,8 +28,8 @@ func main() {
 
 	// Launch the server in a separate goroutine.
 	go func() {
-		// Launch the server using the delivery factory from the container.
-		container.DeliveryFactory.LaunchServer(ctx, container)
+		// Launch the server using the delivery from the container.
+		container.Delivery.LaunchServer(ctx, container)
 	}()
 
 	// Set up a channel to listen for OS signals (e.g., SIGINT, SIGTERM).

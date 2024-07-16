@@ -21,6 +21,16 @@ type PaginationQuery struct {
 }
 
 // NewPaginationQuery creates a new PaginationQuery with the given parameters.
+//
+// Parameters:
+// - page: The page number to retrieve.
+// - limit: The maximum number of items per page.
+// - orderBy: The field to order by.
+// - sortOrder: The sorting direction ("asc" for ascending, "desc" for descending).
+// - baseURL: The base URL for pagination.
+//
+// Returns:
+// - A new instance of PaginationQuery with calculated skip value.
 func NewPaginationQuery(page, limit int, orderBy, sortOrder, baseURL string) PaginationQuery {
 	return PaginationQuery{
 		Page:      page,
@@ -32,7 +42,13 @@ func NewPaginationQuery(page, limit int, orderBy, sortOrder, baseURL string) Pag
 	}
 }
 
-// GetPage converts a string to an integer representing the page number.
+// GetPage maps a string to an integer representing the page number.
+//
+// Parameters:
+// - page: The string representing the page number.
+//
+// Returns:
+// - The integer value of the page number. Defaults to constants.DefaultPage if conversion fails or the value is invalid.
 func GetPage(page string) int {
 	intPage, stringConversionError := strconv.Atoi(page)
 	if validator.IsError(stringConversionError) {
@@ -45,7 +61,13 @@ func GetPage(page string) int {
 	return intPage
 }
 
-// GetLimit converts a string to an integer representing the maximum items per page.
+// GetLimit maps a string to an integer representing the maximum items per page.
+//
+// Parameters:
+// - limit: The string representing the maximum items per page.
+//
+// Returns:
+// - The integer value of the limit. Defaults to constants.DefaultLimit if conversion fails or the value is invalid.
 func GetLimit(limit string) int {
 	intLimit, stringConversionError := strconv.Atoi(limit)
 	if validator.IsError(stringConversionError) {
@@ -59,6 +81,13 @@ func GetLimit(limit string) int {
 }
 
 // calculateSkip calculates the number of items to skip based on the current page and limit.
+//
+// Parameters:
+// - page: The current page number.
+// - limit: The maximum number of items per page.
+//
+// Returns:
+// - The number of items to skip for pagination.
 func calculateSkip(page, limit int) int {
 	if page == 0 {
 		return page
@@ -68,6 +97,12 @@ func calculateSkip(page, limit int) int {
 }
 
 // isLimitInvalid checks if a limit value is valid.
+//
+// Parameters:
+// - data: The limit value to check.
+//
+// Returns:
+// - True if the limit value is invalid, otherwise false.
 func isLimitInvalid(data int) bool {
 	if data <= 0 || data > constants.MaxItemsPerPage {
 		return true
@@ -77,6 +112,12 @@ func isLimitInvalid(data int) bool {
 }
 
 // SetCorrectPage adjusts the PaginationQuery to ensure it's valid, especially when there are not enough items to reach the current page.
+//
+// Parameters:
+// - paginationQuery: The current pagination query.
+//
+// Returns:
+// - The adjusted PaginationQuery with corrected page and skip values.
 func SetCorrectPage(paginationQuery PaginationQuery) PaginationQuery {
 	if paginationQuery.TotalItems <= paginationQuery.Skip {
 		paginationQuery.Page = calculateTotalPages(paginationQuery.TotalItems, paginationQuery.Limit)
@@ -101,6 +142,12 @@ type PaginationResponse struct {
 }
 
 // NewPaginationResponse creates a new PaginationResponse with the given parameters.
+//
+// Parameters:
+// - paginationQuery: The current pagination query.
+//
+// Returns:
+// - A new instance of PaginationResponse with calculated values and generated page links.
 func NewPaginationResponse(paginationQuery PaginationQuery) PaginationResponse {
 	totalPages := calculateTotalPages(paginationQuery.TotalItems, paginationQuery.Limit)
 	paginationResponse := PaginationResponse{
@@ -120,12 +167,27 @@ func NewPaginationResponse(paginationQuery PaginationQuery) PaginationResponse {
 }
 
 // calculateTotalPages calculates the total number of pages based on total items and limit.
+//
+// Parameters:
+// - totalItems: The total number of items.
+// - limit: The maximum number of items per page.
+//
+// Returns:
+// - The total number of pages.
 func calculateTotalPages(totalItems, limit int) int {
 	totalPages := float64(totalItems) / float64(limit)
 	return int(math.Ceil(totalPages))
 }
 
 // calculateItemsLeft calculates the number of items remaining on the current page.
+//
+// Parameters:
+// - page: The current page number.
+// - totalItems: The total number of items.
+// - limit: The maximum number of items per page.
+//
+// Returns:
+// - The number of items remaining on the current page.
 func calculateItemsLeft(page, totalItems, limit int) int {
 	if (totalItems - (page * limit)) < 0 {
 		return 0
@@ -135,6 +197,13 @@ func calculateItemsLeft(page, totalItems, limit int) int {
 }
 
 // generatePageLinks creates page links for pagination based on the current page, total pages, and other parameters.
+//
+// Parameters:
+// - paginationResponse: The current pagination response containing pagination details.
+// - amountOfPages: The number of pages to show in the pagination links.
+//
+// Returns:
+// - An array of page links.
 func generatePageLinks(paginationResponse PaginationResponse, amountOfPages int) []string {
 	// Preallocate memory for the pageLinks slice based on amountOfPages, adding space for potential first and last page links.
 	pageLinks := make([]string, 0, amountOfPages+2)
@@ -177,6 +246,13 @@ func generatePageLinks(paginationResponse PaginationResponse, amountOfPages int)
 }
 
 // buildPageLink builds the page link with given page number.
+//
+// Parameters:
+// - paginationResponse: The current pagination response containing pagination details.
+// - pageNumber: The page number to build the link for.
+//
+// Returns:
+// - The constructed page link as a string.
 func buildPageLink(paginationResponse PaginationResponse, pageNumber int) string {
 	baseURL := paginationResponse.BaseURL
 

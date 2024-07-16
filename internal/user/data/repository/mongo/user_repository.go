@@ -29,6 +29,7 @@ const (
 	resetExpiryKey = "reset_expiry"
 )
 
+// UserRepository provides methods to interact with the user collection in the database.
 type UserRepository struct {
 	collection *mongo.Collection
 }
@@ -38,6 +39,12 @@ type UserRepository struct {
 // 1. Initializes the UserRepository with the given MongoDB collection.
 // 2. Ensures a unique index on the email field during initialization.
 // 3. Handles any potential errors during index creation.
+//
+// Parameters:
+// - database (*mongo.Database): The MongoDB database instance.
+//
+// Returns:
+// - UserRepository: The initialized UserRepository.
 func NewUserRepository(database *mongo.Database) UserRepository {
 	repository := UserRepository{collection: database.Collection(constants.UsersTable)}
 
@@ -63,6 +70,13 @@ func NewUserRepository(database *mongo.Database) UserRepository {
 // 5. Queries the database to fetch users and processes the results.
 // 6. Checks for cursor errors after processing the results.
 // 7. Maps the repository model to domain ones and returns the result.
+//
+// Parameters:
+// - ctx (context.Context): The context for managing request deadlines and cancellation signals.
+// - paginationQuery (commonModel.PaginationQuery): The pagination query parameters.
+//
+// Returns:
+// - commonModel.Result[userModel.Users]: The result containing either the list of users or an error.
 func (userRepository UserRepository) GetAllUsers(ctx context.Context, paginationQuery commonModel.PaginationQuery) commonModel.Result[userModel.Users] {
 	// Initialize the query with an empty BSON document.
 	query := bson.M{}
@@ -139,6 +153,13 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 // 2. Defines the MongoDB query to find the user by ObjectID.
 // 3. Uses the getUserByQuery method to retrieve the user from the database.
 // 4. Returns the result, which may be either a success with the user data or a failure with an error.
+//
+// Parameters:
+// - ctx (context.Context): The context for managing request deadlines and cancellation signals.
+// - userID (string): The unique identifier of the user to be fetched.
+//
+// Returns:
+// - commonModel.Result[userModel.User]: The result containing either the user data or an error.
 func (userRepository UserRepository) GetUserById(ctx context.Context, userID string) commonModel.Result[userModel.User] {
 	userObjectID := mongoModel.HexToObjectIDMapper(location+"GetUserById", userID)
 	if validator.IsError(userObjectID.Error) {
@@ -155,6 +176,13 @@ func (userRepository UserRepository) GetUserById(ctx context.Context, userID str
 // 1. Defines the MongoDB query to find the user by email.
 // 2. Uses the getUserByQuery method to retrieve the user from the database.
 // 3. Returns the result, which may be either a success with the user data or a failure with an error.
+//
+// Parameters:
+// - ctx (context.Context): The context for managing request deadlines and cancellation signals.
+// - email (string): The email address of the user to be fetched.
+//
+// Returns:
+// - commonModel.Result[userModel.User]: The result containing either the user data or an error.
 func (userRepository UserRepository) GetUserByEmail(ctx context.Context, email string) commonModel.Result[userModel.User] {
 	// Define the MongoDB query to find the user by email.
 	query := bson.M{emailKey: email}
@@ -170,6 +198,13 @@ func (userRepository UserRepository) GetUserByEmail(ctx context.Context, email s
 // 3. If no user is found, returns nil (indicating that the email is unique).
 // 4. If an error occurs during the database query, logs it as an internal error and returns the error.
 // 5. If a user with the given email is found, returns a validation error indicating that the email already exists.
+//
+// Parameters:
+// - ctx (context.Context): The context for managing request deadlines and cancellation signals.
+// - email (string): The email address to be checked for duplication.
+//
+// Returns:
+// - error: An error indicating whether the email is unique or already exists in the repository.
 func (userRepository UserRepository) CheckEmailDuplicate(ctx context.Context, email string) error {
 	// Initialize a User object and define the MongoDB query to find the user by email.
 	fetchedUser := userRepositoryModel.UserRepository{}
@@ -203,6 +238,13 @@ func (userRepository UserRepository) CheckEmailDuplicate(ctx context.Context, em
 // 3. Sets the hashed password in the repository model.
 // 4. Inserts the user into the database by executing the MongoDB insert query.
 // 5. Retrieves the created user from the database, maps it back to the domain model, and returns the result.
+//
+// Parameters:
+// - ctx (context.Context): The context for managing request deadlines and cancellation signals.
+// - userCreate (userModel.UserCreate): The data for creating the user.
+//
+// Returns:
+// - commonModel.Result[userModel.User]: The result containing either the user data or an error.
 func (userRepository UserRepository) Register(ctx context.Context, userCreate userModel.UserCreate) commonModel.Result[userModel.User] {
 	// Map the incoming user data to the repository model.
 	userCreateRepository := userRepositoryModel.UserCreateToUserCreateRepositoryMapper(userCreate)
@@ -237,6 +279,13 @@ func (userRepository UserRepository) Register(ctx context.Context, userCreate us
 // 3. Constructs a MongoDB query and update operation.
 // 4. Executes the MongoDB update query and retrieves the updated user.
 // 5. Decodes the updated user from the result, maps it back to the domain model, and returns the result.
+//
+// Parameters:
+// - ctx (context.Context): The context for managing request deadlines and cancellation signals.
+// - userUpdate (userModel.UserUpdate): The data for updating the user.
+//
+// Returns:
+// - commonModel.Result[userModel.User]: The result containing either the user data or an error.
 func (userRepository UserRepository) UpdateCurrentUser(ctx context.Context, userUpdate userModel.UserUpdate) commonModel.Result[userModel.User] {
 	// Map user update data to a repository model.
 	userUpdateRepository := userRepositoryModel.UserUpdateToUserUpdateRepositoryMapper(userUpdate)
@@ -276,6 +325,13 @@ func (userRepository UserRepository) UpdateCurrentUser(ctx context.Context, user
 // 4. Handles any errors encountered during the delete operation, logging and returning them if necessary.
 // 5. Checks if any documents were deleted and handles cases where no documents were deleted.
 // 6. Returns nil to indicate a successful operation.
+//
+// Parameters:
+// - ctx (context.Context): The context for managing request deadlines and cancellation signals.
+// - userID (string): The unique identifier of the user to be deleted.
+//
+// Returns:
+// - error: An error if any occurred during the operation, otherwise nil.
 func (userRepository UserRepository) DeleteUserById(ctx context.Context, userID string) error {
 	// Maps the provided userID string to a MongoDB ObjectID.
 	userObjectID := mongoModel.HexToObjectIDMapper(location+"GetUserById", userID)
@@ -311,6 +367,13 @@ func (userRepository UserRepository) DeleteUserById(ctx context.Context, userID 
 // 2. Executes the query and decodes the result into a UserResetTokenRepository model.
 // 3. Handles any errors that occur during the query or decoding, logging and returning an appropriate error message.
 // 4. Maps the repository model to the domain model and returns the result.
+//
+// Parameters:
+// - ctx (context.Context): The context for managing request deadlines and cancellation signals.
+// - token (string): The reset token of the user to be fetched.
+//
+// Returns:
+// - commonModel.Result[userModel.UserResetToken]: The result containing either the user data or an error.
 func (userRepository UserRepository) GetUserByResetToken(ctx context.Context, token string) commonModel.Result[userModel.UserResetToken] {
 	// Define the MongoDB query to find the user by the reset token.
 	query := bson.M{resetTokenKey: token}
@@ -338,6 +401,13 @@ func (userRepository UserRepository) GetUserByResetToken(ctx context.Context, to
 // 4. Handles any errors encountered during the update operation, logging and returning them if necessary.
 // 5. Checks if the update operation modified any documents and handles cases where no documents were modified.
 // 6. Returns nil to indicate a successful operation.
+//
+// Parameters:
+// - ctx (context.Context): The context for managing request deadlines and cancellation signals.
+// - userForgottenPassword (userModel.UserForgottenPassword): The data for updating the user's forgotten password.
+//
+// Returns:
+// - error: An error if the operation fails, otherwise nil.
 func (userRepository UserRepository) ForgottenPassword(ctx context.Context, userForgottenPassword userModel.UserForgottenPassword) error {
 	// Define the MongoDB query.
 	query := bson.D{{Key: emailKey, Value: userForgottenPassword.Email}}
@@ -381,8 +451,14 @@ func (userRepository UserRepository) ForgottenPassword(ctx context.Context, user
 // 3. Constructs a MongoDB query and update operation.
 // 4. Executes the MongoDB update query and retrieves the updated user.
 // 5. Checks if the update operation modified any documents and handles cases where no documents were modified.
+//
+// Parameters:
+// - ctx (context.Context): The context for managing request deadlines and cancellation signals.
+// - userResetPassword (userModel.UserResetPassword): The data for resetting the user's password.
+//
+// Returns:
+// - error: An error if the operation fails, otherwise nil.
 func (userRepository UserRepository) ResetUserPassword(ctx context.Context, userResetPassword userModel.UserResetPassword) error {
-
 	// Map the user reset password data to a repository model.
 	userResetPasswordRepository := userRepositoryModel.UserResetPasswordToUserResetPasswordRepositoryMapper(userResetPassword)
 
@@ -439,6 +515,13 @@ func (userRepository UserRepository) ResetUserPassword(ctx context.Context, user
 // 2. Checks for any errors returned by the SendEmail function.
 // 3. If an error is encountered, it is returned.
 // 4. If no error occurs, the method returns nil indicating success.
+//
+// Parameters:
+// - user (userModel.User): The user to whom the email will be sent.
+// - data (userModel.EmailData): The data to be included in the email.
+//
+// Returns:
+// - error: An error if the operation fails, otherwise nil.
 func (userRepository UserRepository) SendEmail(user userModel.User, data userModel.EmailData) error {
 	// Send the email using the Mail repository.
 	sendEmailError := userRepositoryMail.SendEmail(location+"SendEmail", user, data)
@@ -456,6 +539,13 @@ func (userRepository UserRepository) SendEmail(user userModel.User, data userMod
 // 2. Defines the index model based on the email field.
 // 3. Creates the unique index in the collection.
 // 4. If an error occurs during index creation, it logs the error and returns an internal error.
+//
+// Parameters:
+// - ctx (context.Context): The context for managing request deadlines and cancellation signals.
+// - location (string): The location string for logging and error handling.
+//
+// Returns:
+// - error: An error if the operation fails, otherwise nil.
 func (userRepository UserRepository) ensureUniqueEmailIndex(ctx context.Context, location string) error {
 	// Create options for the index, setting it as unique.
 	option := options.Index()
@@ -482,6 +572,14 @@ func (userRepository UserRepository) ensureUniqueEmailIndex(ctx context.Context,
 // 2. Executes the query to find the user in the database and decodes the result.
 // 3. If an error occurs during the query execution or decoding, it logs the error and returns an item not found error.
 // 4. If the user is found, maps the repository model to the domain model and returns the result.
+//
+// Parameters:
+// - location (string): The location string for logging and error handling.
+// - ctx (context.Context): The context for managing request deadlines and cancellation signals.
+// - query (bson.M): The MongoDB query to find the user.
+//
+// Returns:
+// - commonModel.Result[userModel.User]: The result containing either the user data or an error.
 func (userRepository UserRepository) getUserByQuery(location string, ctx context.Context, query bson.M) commonModel.Result[userModel.User] {
 	// Initialize a User object and find the user based on the provided query.
 	fetchedUser := userRepositoryModel.UserRepository{}

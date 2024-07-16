@@ -10,9 +10,27 @@ import (
 // Container holds the factory interfaces required to initialize and manage dependencies.
 // It encapsulates the logic for creating repositories, use cases, and delivery components.
 type Container struct {
-	RepositoryFactory RepositoryFactory // Interface for creating repository instances.
-	UseCaseFactory    UseCaseFactory    // Interface for creating use cases.
-	DeliveryFactory   DeliveryFactory   // Interface for creating delivery components and initializing the server.
+	Repository Repository // Interface for creating repository instances.
+	UseCase    UseCase    // Interface for creating use cases.
+	Delivery   Delivery   // Interface for creating delivery components and initializing the server.
+}
+
+// NewContainer initializes and returns a new Container with the provided factories.
+// This function ensures that the Container is populated with the necessary factories for creating repositories, use cases, and delivery components.
+//
+// Parameters:
+// - repository (Repository): The factory for creating repository instances.
+// - useCase (UseCase): The factory for creating use cases.
+// - delivery (Delivery): The factory for creating delivery components and initializing the server.
+//
+// Returns:
+// - *Container: The initialized container with the provided interface values.
+func NewContainer(repository Repository, useCase UseCase, delivery Delivery) *Container {
+	return &Container{
+		Repository: repository,
+		UseCase:    useCase,
+		Delivery:   delivery,
+	}
 }
 
 // ServerRouters holds the routers for different entities, managing the routing for user and post-related endpoints.
@@ -23,19 +41,9 @@ type ServerRouters struct {
 	PostRouter  post.PostRouter  // Router for post-related endpoints.
 }
 
-// NewContainer initializes and returns a new Container with the provided factories.
-// This function ensures that the Container is populated with the necessary factories for creating repositories, use cases, and delivery components.
-func NewContainer(repositoryFactory RepositoryFactory, useCaseFactory UseCaseFactory, deliveryFactory DeliveryFactory) *Container {
-	return &Container{
-		RepositoryFactory: repositoryFactory,
-		UseCaseFactory:    useCaseFactory,
-		DeliveryFactory:   deliveryFactory,
-	}
-}
-
-// RepositoryFactory defines methods for creating different repository instances and managing their lifecycle.
+// Repository defines methods for creating different repository instances and managing their lifecycle.
 // Implementations of this interface will handle the creation and disposal of various repositories.
-type RepositoryFactory interface {
+type Repository interface {
 	// NewRepository creates and returns a new repository instance.
 	NewRepository(ctx context.Context) any
 	// CloseRepository closes the repository instance and releases resources.
@@ -46,18 +54,18 @@ type RepositoryFactory interface {
 	NewPostRepository(db any) post.PostRepository
 }
 
-// UseCaseFactory defines methods for creating use cases.
+// UseCase defines methods for creating use cases.
 // This interface provides factory methods to create instances of use cases for different domains, like users and posts.
-type UseCaseFactory interface {
+type UseCase interface {
 	// NewUserUseCase creates and returns a new UserUseCase instance using the provided repository.
 	NewUserUseCase(repository any) user.UserUseCase
 	// NewPostUseCase creates and returns a new PostUseCase instance using the provided repository.
 	NewPostUseCase(repository any) post.PostUseCase
 }
 
-// DeliveryFactory defines methods for creating delivery components, initializing the server, and managing its lifecycle.
+// Delivery defines methods for creating delivery components, initializing the server, and managing its lifecycle.
 // This interface ensures that the server and its components are correctly initialized, started, and shut down.
-type DeliveryFactory interface {
+type Delivery interface {
 	// InitializeServer initializes the server with the provided routers configuration.
 	InitializeServer(serverConfig ServerRouters)
 	// LaunchServer starts the server using the provided context and container.

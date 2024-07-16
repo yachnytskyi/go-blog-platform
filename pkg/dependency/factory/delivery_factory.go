@@ -6,7 +6,7 @@ import (
 
 	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	deliveryFactory "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/delivery"
+	delivery "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/delivery"
 	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
@@ -16,22 +16,21 @@ const (
 	unsupportedDelivery = "Unsupported delivery type: %s"
 )
 
-// InjectDelivery injects the appropriate delivery factory into the container based on the configuration.
-// It initializes the delivery factory according to the application's core configuration settings.
+// InjectDelivery injects the appropriate delivery into the container based on the configuration.
+// It initializes the delivery according to the application's core configuration settings.
 //
 // Parameters:
 // - ctx: The context for managing request-scoped values, cancellation, and timeouts.
-// - container: The dependency injection container where the delivery factory will be registered.
+// - container: The dependency injection container where the delivery will be registered.
 func InjectDelivery(ctx context.Context, container *applicationModel.Container) {
-	// Load the core configuration and the Gin configuration.
+	// Load the core configuration.
 	coreConfig := config.GetCoreConfig()
-	ginConfig := config.GetGinConfig()
 
-	// Determine the delivery type and inject the corresponding factory into the container.
+	// Determine the delivery type and inject the corresponding delivery into the container.
 	switch coreConfig.Delivery {
 	case constants.Gin:
-		// Inject the GinFactory into the container if the delivery type is Gin.
-		container.DeliveryFactory = &deliveryFactory.GinFactory{Gin: ginConfig}
+		// Inject the GinDelivery into the container if the delivery type is Gin.
+		container.Delivery = delivery.NewGinDelivery()
 		// Add other delivery options here as needed.
 	default:
 		// Create an error message for the unsupported delivery type.

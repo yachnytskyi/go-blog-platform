@@ -153,6 +153,7 @@ func LoadConfig() {
 	}
 }
 
+// loadDefaultEnvironment attempts to load the default environment configuration.
 func loadDefaultEnvironment() {
 	// Attempt to load the default environment file.
 	defaultEnvironmentError := godotenv.Load(defaultEnvironmentsPath + defaultDockerEnvironment)
@@ -168,6 +169,7 @@ func loadDefaultEnvironment() {
 	logging.Logger(infoMessage)
 }
 
+// loadDefaultConfig attempts to load the default application configuration.
 func loadDefaultConfig() {
 	// Attempt to load the default configuration file.
 	viper.SetConfigFile(defaultConfigPath)
@@ -184,37 +186,37 @@ func loadDefaultConfig() {
 	logging.Logger(infoMessage)
 }
 
-// GetCoreConfig is a helper function to retrieve the core configuration.
+// GetCoreConfig retrieves the core configuration.
 func GetCoreConfig() Core {
 	return AppConfig.Core
 }
 
-// GetSecurityConfig is a helper function to retrieve the security configuration.
+// GetSecurityConfig retrieves the security configuration.
 func GetSecurityConfig() Security {
 	return AppConfig.Security
 }
 
-// GetMongoDBConfig is a helper function to retrieve the MongoDB configuration.
+// GetMongoDBConfig retrieves the MongoDB configuration.
 func GetMongoDBConfig() MongoDB {
 	return AppConfig.MongoDB
 }
 
-// GetGinConfig is a helper function to retrieve the Gin configuration.
+// GetGinConfig retrieves the Gin configuration.
 func GetGinConfig() Gin {
 	return AppConfig.Gin
 }
 
-// GetEmailConfig is a helper function to retrieve the Email configuration.
+// GetEmailConfig retrieves the Email configuration.
 func GetEmailConfig() Email {
 	return AppConfig.Email
 }
 
-// GetAccessConfig is a helper function to retrieve the Access Token configuration.
+// GetAccessConfig retrieves the Access Token configuration.
 func GetAccessConfig() AccessToken {
 	return AppConfig.AccessToken
 }
 
-// GetRefreshConfig is a helper function to retrieve the Refresh Token configuration.
+// GetRefreshConfig retrieves the Refresh Token configuration.
 func GetRefreshConfig() RefreshToken {
 	return AppConfig.RefreshToken
 }

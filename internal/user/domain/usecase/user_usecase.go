@@ -197,11 +197,11 @@ func (userUseCaseV1 UserUseCaseV1) ResetUserPassword(ctx context.Context, userRe
 		return domainError.HandleError(userResetPassword.Error)
 	}
 
-	fetchedToken := userUseCaseV1.userRepository.GetResetToken(ctx, token.Data)
-	if validator.IsError(fetchedToken.Error) {
-		return domainError.HandleError(fetchedToken.Error)
+	fetchedResetExpiry := userUseCaseV1.userRepository.GetResetExpiry(ctx, token.Data)
+	if validator.IsError(fetchedResetExpiry.Error) {
+		return domainError.HandleError(fetchedResetExpiry.Error)
 	}
-	if validator.IsTimeNotValid(fetchedToken.Data.ResetExpiry) {
+	if validator.IsTimeNotValid(fetchedResetExpiry.Data.ResetExpiry) {
 		timeExpiredError := domainError.NewTimeExpiredError(location+"ResetUserPassword", constants.TimeExpiredErrorNotification)
 		logging.Logger(timeExpiredError)
 		return domainError.HandleError(timeExpiredError)

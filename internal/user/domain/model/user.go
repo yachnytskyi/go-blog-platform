@@ -61,7 +61,7 @@ type UserResetPassword struct {
 	PasswordConfirm string
 }
 
-type UserResetToken struct {
+type UserResetExpiry struct {
 	ResetExpiry time.Time
 }
 
@@ -135,8 +135,8 @@ func NewUserResetPassword(resetToken, password, passwordConfirm string) UserRese
 	}
 }
 
-func NewUserResetToken(resetExpiry time.Time) UserResetToken {
-	return UserResetToken{
+func NewUserResetExpiry(resetExpiry time.Time) UserResetExpiry {
+	return UserResetExpiry{
 		ResetExpiry: resetExpiry,
 	}
 }

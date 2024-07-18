@@ -58,9 +58,9 @@ func UserUpdateToUserUpdateRepositoryMapper(location string, userUpdate userMode
 	))
 }
 
-func UserResetTokenRepositoryToUserTokenMapper(userResetTokenRepository UserResetTokenRepository) userModel.UserResetToken {
-	return userModel.NewUserResetToken(
-		userResetTokenRepository.ResetExpiry,
+func UserResetExpiryRepositoryToUserResetExpiryMapper(userResetExpiry UserResetExpiryRepository) userModel.UserResetExpiry {
+	return userModel.NewUserResetExpiry(
+		userResetExpiry.ResetExpiry,
 	)
 }
 

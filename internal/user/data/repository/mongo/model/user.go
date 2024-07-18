@@ -48,7 +48,7 @@ type UserResetPasswordRepository struct {
 	Password string `bson:"password"`
 }
 
-type UserResetTokenRepository struct {
+type UserResetExpiryRepository struct {
 	ResetExpiry time.Time `bson:"reset_expiry"`
 }
 
@@ -97,8 +97,8 @@ func NewUserResetPasswordRepository(password string) UserResetPasswordRepository
 	}
 }
 
-func NewUserResetTokenRepository(resetExpiry time.Time) UserResetTokenRepository {
-	return UserResetTokenRepository{
+func NewUserResetExpiryRepository(resetExpiry time.Time) UserResetExpiryRepository {
+	return UserResetExpiryRepository{
 		ResetExpiry: resetExpiry,
 	}
 }

@@ -222,19 +222,19 @@ func (userRepository UserRepository) DeleteUserById(ctx context.Context, userID 
 	return nil
 }
 
-// GetResetToken retrieves a reset token based on the provided reset token from the database.
-func (userRepository UserRepository) GetResetToken(ctx context.Context, token string) commonModel.Result[userModel.UserResetToken] {
-	fetchedUser := userRepositoryModel.UserResetTokenRepository{}
+// GetResetExpiry retrieves a reset token based on the provided reset token from the database.
+func (userRepository UserRepository) GetResetExpiry(ctx context.Context, token string) commonModel.Result[userModel.UserResetExpiry] {
+	fetchedResetExpiry := userRepositoryModel.UserResetExpiryRepository{}
 	query := bson.M{resetTokenKey: token}
-	userFindOneError := userRepository.collection.FindOne(ctx, query).Decode(&fetchedUser)
+	userFindOneError := userRepository.collection.FindOne(ctx, query).Decode(&fetchedResetExpiry)
 	if validator.IsError(userFindOneError) {
-		invalidTokenError := domainError.NewInvalidTokenError(location+"GetResetToken.Decode", userFindOneError.Error())
+		invalidTokenError := domainError.NewInvalidTokenError(location+"GetResetExpiry.Decode", userFindOneError.Error())
 		logging.Logger(invalidTokenError)
 		invalidTokenError.Notification = constants.InvalidTokenErrorMessage
-		return commonModel.NewResultOnFailure[userModel.UserResetToken](invalidTokenError)
+		return commonModel.NewResultOnFailure[userModel.UserResetExpiry](invalidTokenError)
 	}
 
-	return commonModel.NewResultOnSuccess[userModel.UserResetToken](userRepositoryModel.UserResetTokenRepositoryToUserTokenMapper(fetchedUser))
+	return commonModel.NewResultOnSuccess[userModel.UserResetExpiry](userRepositoryModel.UserResetExpiryRepositoryToUserResetExpiryMapper(fetchedResetExpiry))
 }
 
 // ForgottenPassword updates a user's record with a reset token and expiration time.

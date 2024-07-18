@@ -13,16 +13,8 @@ import (
 )
 
 // extractAccessToken extracts the access token from the request headers or cookies.
-//
-// Parameters:
-// - ginContext: The Gin context containing the HTTP request.
-//
-// Returns:
-// - commonModel.Result[string]: The result containing the extracted access token as a string if successful, or an error if the access token is not found or invalid.
-func extractAccessToken(ginContext *gin.Context) commonModel.Result[string] {
-	// Attempt to retrieve the access token from the cookie.
+func extractAccessToken(ginContext *gin.Context, location string) commonModel.Result[string] {
 	cookie, cookieError := ginContext.Cookie(constants.AccessTokenValue)
-	// Retrieve the Authorization header from the request.
 	authorizationHeader := ginContext.Request.Header.Get(constants.Authorization)
 	fields := strings.Fields(authorizationHeader)
 
@@ -36,38 +28,24 @@ func extractAccessToken(ginContext *gin.Context) commonModel.Result[string] {
 	}
 
 	// If access token is still empty, create and log an HTTP authorization error.
-	httpAuthorizationError := httpError.NewHTTPAuthorizationError(location+"extractAccessToken.accessToken", constants.LoggingErrorNotification)
+	httpAuthorizationError := httpError.NewHTTPAuthorizationError(location+".extractAccessToken.accessToken", constants.LoggingErrorNotification)
 	logging.Logger(httpAuthorizationError)
 	return commonModel.NewResultOnFailure[string](httpAuthorizationError)
 }
 
 // extractRefreshToken extracts the refresh token from the request cookies.
-//
-// Parameters:
-// - ginContext: The Gin context containing the HTTP request.
-//
-// Returns:
-// - commonModel.Result[string]: The result containing the extracted refresh token as a string if successful, or an error if the refresh token is not found or invalid.
 func extractRefreshToken(ginContext *gin.Context) commonModel.Result[string] {
-	// Attempt to retrieve the refresh token from the cookie.
 	refreshToken, refreshTokenError := ginContext.Cookie(constants.RefreshTokenValue)
 	if validator.IsError(refreshTokenError) {
-		// If refresh token is missing, create and log an HTTP authorization error.
-		httpAuthorizationError := httpError.NewHTTPAuthorizationError(location+"extractRefreshToken.refreshToken", constants.LoggingErrorNotification)
+		httpAuthorizationError := httpError.NewHTTPAuthorizationError(location+".extractRefreshToken.refreshToken", constants.LoggingErrorNotification)
 		logging.Logger(httpAuthorizationError)
 		return commonModel.NewResultOnFailure[string](httpAuthorizationError)
 	}
 
-	// Return the extracted refresh token.
 	return commonModel.NewResultOnSuccess[string](refreshToken)
 }
 
 // abortWithStatusJSON aborts the request, logs the error, and responds with a JSON error.
-//
-// Parameters:
-// - ginContext: The Gin context used to generate the JSON response.
-// - err: The error to be included in the response.
-// - httpCode: The HTTP status code to be set in the response.
 func abortWithStatusJSON(ginContext *gin.Context, err error, httpCode int) {
 	logging.Logger(err)
 	jsonResponse := httpModel.NewJSONFailureResponse(httpError.HandleError(err))

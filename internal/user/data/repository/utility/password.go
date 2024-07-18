@@ -8,6 +8,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// HashPassword generates a hashed password from a plain text password.
 func HashPassword(location, password string) commonModel.Result[string] {
 	hashedPassword, generateFromPasswordError := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if validator.IsError(generateFromPasswordError) {

@@ -7,10 +7,6 @@ import (
 )
 
 // CleanCookies is a helper function for Gin controllers that clears specific cookies.
-// Parameters:
-//   - ctx: The Gin context which provides access to the request and response objects.
-//   - path: The path attribute for the cookies to be cleared. This specifies the URL path
-//     for which the cookies are valid. The cookies will be cleared for this path.
 func CleanCookies(ctx *gin.Context, path string) {
 	// Retrieve application configuration for cookie settings.
 	securityConfig := config.GetSecurityConfig()

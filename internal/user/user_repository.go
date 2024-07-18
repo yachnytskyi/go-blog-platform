@@ -18,5 +18,5 @@ type UserRepository interface {
 	DeleteUserById(ctx context.Context, userID string) error
 	ForgottenPassword(ctx context.Context, userForgottenPassword userModel.UserForgottenPassword) error
 	ResetUserPassword(ctx context.Context, userResetPassword userModel.UserResetPassword) error
-	GetUserByResetToken(ctx context.Context, token string) commonModel.Result[userModel.UserResetToken]
+	GetResetToken(ctx context.Context, token string) commonModel.Result[userModel.UserResetToken]
 }

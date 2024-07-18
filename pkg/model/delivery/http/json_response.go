@@ -6,11 +6,10 @@ import (
 )
 
 const (
-	success = "success" // Constant representing a successful operation.
-	fail    = "fail"    // Constant representing a failed operation.
+	success = "success"
+	fail    = "fail"
 )
 
-// JSONResponse represents the structure of an HTTP JSON response.
 type JSONResponse struct {
 	Data   any    `json:"data,omitempty"`   // The data field for successful responses.
 	Error  error  `json:"error,omitempty"`  // The error field for single errors.
@@ -18,13 +17,6 @@ type JSONResponse struct {
 	Status string `json:"status"`           // The status of the response, either "success" or "fail".
 }
 
-// NewJSONSuccessResponse creates a JSON response for a successful operation.
-//
-// Parameters:
-// - data: The data to be included in the response.
-//
-// Returns:
-// - A JSONResponse with the "Data" field populated and the "Status" set to "success".
 func NewJSONSuccessResponse(data any) JSONResponse {
 	return JSONResponse{
 		Data:   data,
@@ -32,13 +24,6 @@ func NewJSONSuccessResponse(data any) JSONResponse {
 	}
 }
 
-// NewJSONFailureResponse creates a JSON response for a failed operation.
-//
-// Parameters:
-// - err: The error to be included in the response.
-//
-// Returns:
-// - A JSONResponse with the "Status" set to "fail" and the "Error" or "Errors" field populated based on the type of error.
 func NewJSONFailureResponse(err error) JSONResponse {
 	jsonResponse := JSONResponse{Status: fail}
 
@@ -58,16 +43,11 @@ func NewJSONFailureResponse(err error) JSONResponse {
 	return jsonResponse
 }
 
-// SetStatus sets the "Status" field based on the presence of "Data," "Error," or "Errors."
-//
-// Parameters:
-// - jsonResponse: A pointer to the JSONResponse whose status needs to be set.
 func SetStatus(jsonResponse *JSONResponse) {
 	switch {
 	case validator.IsValueNotEmpty(jsonResponse.Data):
 		jsonResponse.Status = success
 	case validator.IsError(jsonResponse.Error) || validator.IsError(jsonResponse.Errors):
-		// Optionally handle cases where neither Data nor Error/Errors are set.
 		jsonResponse.Status = fail
 	}
 }

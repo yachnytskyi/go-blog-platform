@@ -117,14 +117,11 @@ type Email struct {
 // LoadConfig loads the application configuration from environment variables and defaults.
 // It sets up the global AppConfig variable.
 func LoadConfig() {
-	// Load environment variables from the .env file.
 	loadEnvironmentsError := godotenv.Load(environmentsPath + localDevEnvironment)
 	if validator.IsError(loadEnvironmentsError) {
-		// Log and attempt to load default environment.
 		loadEnvironmentsInternalError := domainError.NewInternalError(location+"Load", loadEnvironmentsError.Error())
 		logging.Logger(loadEnvironmentsInternalError)
 
-		// Attempt to load default environment.
 		loadDefaultEnvironment()
 	}
 
@@ -136,11 +133,9 @@ func LoadConfig() {
 	// Read the configuration file.
 	readInConfigError := viper.ReadInConfig()
 	if validator.IsError(readInConfigError) {
-		// Log and attempt to load default configuration.
 		readInInternalError := domainError.NewInternalError(location+"ReadInConfig", readInConfigError.Error())
 		logging.Logger(readInInternalError)
 
-		// Attempt to set default configurations.
 		loadDefaultConfig()
 	}
 
@@ -155,10 +150,8 @@ func LoadConfig() {
 
 // loadDefaultEnvironment attempts to load the default environment configuration.
 func loadDefaultEnvironment() {
-	// Attempt to load the default environment file.
 	defaultEnvironmentError := godotenv.Load(defaultEnvironmentsPath + defaultDockerEnvironment)
 	if validator.IsError(defaultEnvironmentError) {
-		// Log and panic if loading the default environment file fails.
 		internalError := domainError.NewInternalError(location+"loadDefaultEnvironment", defaultEnvironmentError.Error())
 		logging.Logger(internalError)
 		panic(internalError)
@@ -171,11 +164,9 @@ func loadDefaultEnvironment() {
 
 // loadDefaultConfig attempts to load the default application configuration.
 func loadDefaultConfig() {
-	// Attempt to load the default configuration file.
 	viper.SetConfigFile(defaultConfigPath)
 	defaultConfigError := viper.ReadInConfig()
 	if validator.IsError(defaultConfigError) {
-		// Log and panic if loading the default configuration file fails.
 		defaultConfigInternalError := domainError.NewInternalError(location+"loadDefaultConfig", defaultConfigError.Error())
 		logging.Logger(defaultConfigInternalError)
 		panic(defaultConfigInternalError)

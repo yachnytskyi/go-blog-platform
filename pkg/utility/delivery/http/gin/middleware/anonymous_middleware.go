@@ -10,34 +10,23 @@ import (
 )
 
 // AnonymousMiddleware is a Gin middleware to check if the user is anonymous based on the presence of an access token.
-// Returns a Gin middleware handler function.
 func AnonymousMiddleware() gin.HandlerFunc {
 	return func(ginContext *gin.Context) {
-		// Check if a user is anonymous
 		anonymousAccessToken := isUserAnonymous(ginContext)
 
 		// If the access token is present, indicating that the user is already authenticated.
 		if anonymousAccessToken {
-			// Create a custom error message indicating that the user is already authenticated.
 			httpAuthorizationError := httpError.NewHTTPAuthorizationError(location+"AnonymousMiddleware.anonymousAccessToken", constants.AlreadyLoggedInNotification)
 			abortWithStatusJSON(ginContext, httpAuthorizationError, constants.StatusForbidden)
 			return
 		}
 
-		// Continue to the next middleware or handler in the chain.
 		ginContext.Next()
 	}
 }
 
 // isUserAnonymous checks if the user is anonymous based on the presence of an access token.
-//
-// Parameters:
-// - ginContext: The Gin context containing the HTTP request.
-//
-// Returns:
-// - A boolean indicating whether the user is anonymous.
 func isUserAnonymous(ginContext *gin.Context) bool {
-	// Attempt to retrieve the access token from the Authorization header.
 	authorizationHeader := ginContext.Request.Header.Get(constants.Authorization)
 	fields := strings.Fields(authorizationHeader)
 

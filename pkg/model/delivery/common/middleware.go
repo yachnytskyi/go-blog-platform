@@ -1,10 +1,10 @@
 package common
 
 import (
+	"fmt"
 	"time"
 )
 
-// HTTPIncomingLog represents a log entry for incoming HTTP requests.
 type HTTPIncomingLog struct {
 	Location      string    `json:"location"`       // The location where the log entry is created.
 	CorrelationID string    `json:"correlation_id"` // Unique identifier to correlate logs.
@@ -15,7 +15,6 @@ type HTTPIncomingLog struct {
 	UserAgent     string    `json:"user_agent"`     // The user agent string from the client making the request.
 }
 
-// HTTPOutgoingLog represents a log entry for outgoing HTTP responses.
 type HTTPOutgoingLog struct {
 	Location       string        `json:"location"`        // The location where the log entry is created.
 	CorrelationID  string        `json:"correlation_id"`  // Unique identifier to correlate logs.
@@ -28,18 +27,6 @@ type HTTPOutgoingLog struct {
 	Duration       time.Duration `json:"duration"`        // The duration taken to process the request and send the response.
 }
 
-// NewHTTPIncomingLog creates a new instance of HTTPIncomingLog with the current time.
-//
-// Parameters:
-// - location: The location where the log entry is created.
-// - correlationID: Unique identifier to correlate logs.
-// - method: The HTTP method of the incoming request.
-// - url: The URL of the incoming request.
-// - ip: The IP address of the client making the request.
-// - userAgent: The user agent string from the client making the request.
-//
-// Returns:
-// - A new instance of HTTPIncomingLog instance populated with the provided values and the current time.
 func NewHTTPIncomingLog(location, correlationID, method, url, ip, userAgent string) HTTPIncomingLog {
 	return HTTPIncomingLog{
 		Location:      location,
@@ -52,20 +39,6 @@ func NewHTTPIncomingLog(location, correlationID, method, url, ip, userAgent stri
 	}
 }
 
-// NewHTTPOutgoingLog creates a new instance of HTTPOutgoingLog with the current time and response details.
-//
-// Parameters:
-// - location: The location where the log entry is created.
-// - correlationID: Unique identifier to correlate logs.
-// - method: The HTTP method of the request corresponding to the response.
-// - url: The URL of the request corresponding to the response.
-// - ip: The IP address of the client that made the request.
-// - userAgent: The user agent string from the client that made the request.
-// - status: The HTTP status code of the response.
-// - duration: The duration taken to process the request and send the response.
-//
-// Returns:
-// - A new instance of HTTPOutgoingLog instance populated with the provided values and the current time.
 func NewHTTPOutgoingLog(location, correlationID, method, url, ip, userAgent string, status int, duration time.Duration) HTTPOutgoingLog {
 	return HTTPOutgoingLog{
 		Location:       location,
@@ -78,4 +51,46 @@ func NewHTTPOutgoingLog(location, correlationID, method, url, ip, userAgent stri
 		ResponseStatus: status,
 		Duration:       duration,
 	}
+}
+
+func (log HTTPIncomingLog) String() string {
+	return fmt.Sprintf(
+		"location: %s, "+
+			"correlation_id: %s, "+
+			"time: %s, "+
+			"request_method: %s, "+
+			"request_url: %s, "+
+			"client_ip: %s, "+
+			"user_agent: %s",
+		log.Location,
+		log.CorrelationID,
+		log.Time.Format(time.RFC3339),
+		log.RequestMethod,
+		log.RequestURL,
+		log.ClientIP,
+		log.UserAgent,
+	)
+}
+
+func (log HTTPOutgoingLog) String() string {
+	return fmt.Sprintf(
+		"location: %s, "+
+			"correlation_id: %s, "+
+			"time: %s, "+
+			"request_method: %s, "+
+			"request_url: %s, "+
+			"client_ip: %s, "+
+			"user_agent: %s, "+
+			"response_status: %d, "+
+			"duration: %s",
+		log.Location,
+		log.CorrelationID,
+		log.Time.Format(time.RFC3339),
+		log.RequestMethod,
+		log.RequestURL,
+		log.ClientIP,
+		log.UserAgent,
+		log.ResponseStatus,
+		log.Duration,
+	)
 }

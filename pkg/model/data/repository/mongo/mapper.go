@@ -13,20 +13,6 @@ const (
 	emptyID = "Id is empty"
 )
 
-// DataToMongoDocumentMapper maps the incoming data to a BSON document.
-// It performs the following steps:
-// 1. Marshals the incoming data to BSON format.
-// 2. Checks for errors during marshaling and logs them if any.
-// 3. Unmarshals the BSON data into a BSON document.
-// 4. Checks for errors during unmarshaling and logs them if any.
-// 5. Returns the BSON document wrapped in a commonModel.Result.
-//
-// Parameters:
-// - location (string): A string representing the location or context for error logging.
-// - incomingData (any): The data to be mapped to a BSON document.
-//
-// Returns:
-// - commonModel.Result[*bson.D]: The result containing either the BSON document or an error.
 func DataToMongoDocumentMapper(location string, incomingData any) commonModel.Result[*bson.D] {
 	data, err := bson.Marshal(incomingData)
 	if validator.IsError(err) {
@@ -46,19 +32,6 @@ func DataToMongoDocumentMapper(location string, incomingData any) commonModel.Re
 	return commonModel.NewResultOnSuccess[*bson.D](&document)
 }
 
-// HexToObjectIDMapper maps a hexadecimal string representation of MongoDB ObjectID to its corresponding primitive.ObjectID type.
-// It performs the following steps:
-// 1. Checks if the provided ID is empty and logs an error if it is.
-// 2. Attempts to map the hexadecimal string to a primitive.ObjectID.
-// 3. Checks for errors during mapping and logs them if any.
-// 4. Returns the mapped ObjectID wrapped in a commonModel.Result.
-//
-// Parameters:
-// - location (string): A string representing the location or context for error logging.
-// - id (string): The hexadecimal string to be mapped.
-//
-// Returns:
-// - commonModel.Result[primitive.ObjectID]: The result containing either the mapped ObjectID or an error.
 func HexToObjectIDMapper(location, id string) commonModel.Result[primitive.ObjectID] {
 	if len(id) == 0 {
 		internalError := domainError.NewInternalError(location+".HexToObjectIDMapper", emptyID)

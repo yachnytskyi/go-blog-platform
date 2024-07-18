@@ -9,7 +9,7 @@ type UserController interface {
 	DeleteCurrentUser(controllerContext any)
 	Login(controllerContext any)
 	RefreshAccessToken(controllerContext any)
+	Logout(controllerContext any)
 	ForgottenPassword(controllerContext any)
 	ResetUserPassword(controllerContext any)
-	Logout(controllerContext any)
 }

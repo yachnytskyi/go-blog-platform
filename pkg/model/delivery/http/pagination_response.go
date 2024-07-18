@@ -1,6 +1,5 @@
 package http
 
-// HTTPPaginationResponse represents the pagination information for a paginated API response.
 type HTTPPaginationResponse struct {
 	CurrentPage int      `json:"current_page"`         // The current page number being viewed.
 	TotalPages  int      `json:"total_pages"`          // The total number of pages available.
@@ -13,21 +12,6 @@ type HTTPPaginationResponse struct {
 	PageLinks   []string `json:"page_links,omitempty"` // A list of links to other pages (optional).
 }
 
-// NewHTTPPaginationResponse creates a new instance of HTTPPaginationResponse.
-//
-// Parameters:
-// - currentPage: The current page number being viewed.
-// - totalPages: The total number of pages available.
-// - pagesLeft: The number of pages left to view.
-// - totalItems: The total number of items available.
-// - itemsLeft: The number of items left to view.
-// - limit: The number of items per page.
-// - orderBy: (Optional) The field by which the items are ordered.
-// - sortOrder: (Optional) The order in which the items are sorted.
-// - pageLinks: (Optional) A list of links to other pages.
-//
-// Returns:
-// - A new instance of HTTPPaginationResponse populated with the provided data.
 func NewHTTPPaginationResponse(currentPage, totalPages, pagesLeft, itemsLeft, totalItems, limit int, orderBy, sortOrder string, pageLinks []string) HTTPPaginationResponse {
 	return HTTPPaginationResponse{
 		CurrentPage: currentPage,

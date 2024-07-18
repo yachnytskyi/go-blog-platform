@@ -18,40 +18,30 @@ const (
 )
 
 // AuthenticationMiddleware is a Gin middleware for handling user authentication using JWT tokens.
-// Returns a Gin middleware handler function.
 func AuthenticationMiddleware() gin.HandlerFunc {
 	return func(ginContext *gin.Context) {
-		// Create a context with timeout.
 		ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 		defer cancel()
 
-		// Extract the refresh token from the request headers or cookies.
-		accessToken := extractAccessToken(ginContext)
+		// Extract the access token from the request headers or cookies.
+		accessToken := extractAccessToken(ginContext, location)
 		if validator.IsError(accessToken.Error) {
-			// Abort the request with an unauthorized status and respond with a JSON error.
 			abortWithStatusJSON(ginContext, accessToken.Error, constants.StatusUnauthorized)
 			return
 		}
 
-		// Get the application configuration.
+		// Extract the access token from the request headers or cookies.
 		accessTokenConfig := config.GetAccessConfig()
-		// Validate the JWT token.
-		userTokenPayload := domainUtility.ValidateJWTToken(location+".AuthenticationMiddleware", accessToken.Data, accessTokenConfig.PublicKey)
+		userTokenPayload := domainUtility.ValidateJWTToken(location+"AuthenticationMiddleware", accessToken.Data, accessTokenConfig.PublicKey)
 		if validator.IsError(userTokenPayload.Error) {
-			// Handle token validation error and respond with an unauthorized status and JSON error.
 			httpAuthorizationError := httpError.NewHTTPAuthorizationError(location+"AuthenticationMiddleware.ValidateJWTToken", constants.LoggingErrorNotification)
 			abortWithStatusJSON(ginContext, httpAuthorizationError, constants.StatusUnauthorized)
 			return
 		}
 
-		// Store user information in the context.
 		ctx = context.WithValue(ctx, constants.ID, userTokenPayload.Data.UserID)
 		ctx = context.WithValue(ctx, constants.UserRole, userTokenPayload.Data.Role)
-
-		// Update the request's context with the new context containing user information.
 		ginContext.Request = ginContext.Request.WithContext(ctx)
-
-		// Continue to the next middleware or handler in the chain.
 		ginContext.Next()
 	}
 }
@@ -61,11 +51,9 @@ func AuthenticationMiddleware() gin.HandlerFunc {
 // Note: This middleware should be placed after the AuthenticationMiddleware in the middleware chain to ensure the user ID is available.
 func UserContextMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
 	return func(ginContext *gin.Context) {
-		// Create a context with a timeout.
 		ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 		defer cancel()
 
-		// Retrieve the user ID from the context.
 		userID, _ := ctx.Value(constants.ID).(string)
 		if len(userID) == 0 {
 			httpInternalError := httpError.NewHTTPInternalError(location+"UserContextMiddleware.ctx.Value", constants.IDContextMissing)
@@ -73,24 +61,15 @@ func UserContextMiddleware(userUseCase user.UserUseCase) gin.HandlerFunc {
 			return
 		}
 
-		// Fetch user details using the user use case.
 		user := userUseCase.GetUserById(ctx, userID)
 		if validator.IsError(user.Error) {
-			// If an error occurs during user retrieval, abort the request with an unauthorized status and respond with a JSON error.
 			abortWithStatusJSON(ginContext, user.Error, constants.StatusUnauthorized)
 			return
 		}
 
-		// Map user data to a user view model.
 		userView := userView.UserToUserViewMapper(user.Data)
-
-		// Store user information in the context.
 		ctx = context.WithValue(ctx, constants.User, userView)
-
-		// Update the request's context with the new context containing user information.
 		ginContext.Request = ginContext.Request.WithContext(ctx)
-
-		// Continue to the next middleware or handler.
 		ginContext.Next()
 	}
 }

@@ -9,7 +9,7 @@ import (
 	useCase "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/usecase"
 	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
+	logger "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logger"
 )
 
 const (
@@ -27,7 +27,7 @@ func InjectUseCase(ctx context.Context, container *applicationModel.Container) {
 	default:
 		notification := fmt.Sprintf(unsupportedUseCase, coreConfig.UseCase)
 		internalError := domainError.NewInternalError(location+"InjectUseCase", notification)
-		logging.Logger(internalError)
+		logger.Logger(internalError)
 		applicationModel.GracefulShutdown(ctx, container)
 		panic(internalError)
 	}

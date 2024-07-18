@@ -11,7 +11,7 @@ import (
 	domainModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/domain"
-	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
+	logger "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logger"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	domainValidator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator/domain"
 	bcrypt "golang.org/x/crypto/bcrypt"
@@ -175,7 +175,7 @@ func validatePassword(location, password, passwordConfirm string, validationErro
 			passwordsDoNotMatch,
 		)
 
-		logging.Logger(validationError)
+		logger.Logger(validationError)
 		errors = append(errors, validationError)
 	}
 
@@ -194,7 +194,7 @@ func checkEmailDomain(location, emailString string) error {
 			invalidEmailDomain,
 		)
 
-		logging.Logger(validationError)
+		logger.Logger(validationError)
 		return validationError
 	}
 
@@ -210,7 +210,7 @@ func checkPasswords(location, hashedPassword string, checkedPassword string) err
 			passwordsDoNotMatch,
 		)
 
-		logging.Logger(validationError)
+		logger.Logger(validationError)
 		validationError.Notification = invalidEmailOrPassword
 		return validationError
 	}
@@ -237,7 +237,7 @@ func validateField(location, fieldValue string, commonValidator domainModel.Comm
 			notification,
 		)
 
-		logging.Logger(validationError)
+		logger.Logger(validationError)
 		return validationError
 	}
 	if domainValidator.AreStringCharactersInvalid(fieldValue, commonValidator.FieldRegex) {
@@ -248,7 +248,7 @@ func validateField(location, fieldValue string, commonValidator domainModel.Comm
 			commonValidator.Notification,
 		)
 
-		logging.Logger(validationError)
+		logger.Logger(validationError)
 		return validationError
 	}
 

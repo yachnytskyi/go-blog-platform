@@ -7,7 +7,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
+	logger "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logger"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
@@ -120,7 +120,7 @@ func LoadConfig() {
 	loadEnvironmentsError := godotenv.Load(environmentsPath + localDevEnvironment)
 	if validator.IsError(loadEnvironmentsError) {
 		loadEnvironmentsInternalError := domainError.NewInternalError(location+"Load", loadEnvironmentsError.Error())
-		logging.Logger(loadEnvironmentsInternalError)
+		logger.Logger(loadEnvironmentsInternalError)
 
 		loadDefaultEnvironment()
 	}
@@ -134,7 +134,7 @@ func LoadConfig() {
 	readInConfigError := viper.ReadInConfig()
 	if validator.IsError(readInConfigError) {
 		readInInternalError := domainError.NewInternalError(location+"ReadInConfig", readInConfigError.Error())
-		logging.Logger(readInInternalError)
+		logger.Logger(readInInternalError)
 
 		loadDefaultConfig()
 	}
@@ -143,7 +143,7 @@ func LoadConfig() {
 	unmarshalError := viper.Unmarshal(&AppConfig)
 	if validator.IsError(unmarshalError) {
 		internalError := domainError.NewInternalError(location+"Unmarshal", unmarshalError.Error())
-		logging.Logger(internalError)
+		logger.Logger(internalError)
 		panic(internalError)
 	}
 }
@@ -153,13 +153,13 @@ func loadDefaultEnvironment() {
 	defaultEnvironmentError := godotenv.Load(defaultEnvironmentsPath + defaultDockerEnvironment)
 	if validator.IsError(defaultEnvironmentError) {
 		internalError := domainError.NewInternalError(location+"loadDefaultEnvironment", defaultEnvironmentError.Error())
-		logging.Logger(internalError)
+		logger.Logger(internalError)
 		panic(internalError)
 	}
 
 	// Log an informational message indicating the use of a default environment path.
 	infoMessage := domainError.NewInfoMessage(location+"loadDefaultEnvironment", "Using default environment path")
-	logging.Logger(infoMessage)
+	logger.Logger(infoMessage)
 }
 
 // loadDefaultConfig attempts to load the default application configuration.
@@ -168,13 +168,13 @@ func loadDefaultConfig() {
 	defaultConfigError := viper.ReadInConfig()
 	if validator.IsError(defaultConfigError) {
 		defaultConfigInternalError := domainError.NewInternalError(location+"loadDefaultConfig", defaultConfigError.Error())
-		logging.Logger(defaultConfigInternalError)
+		logger.Logger(defaultConfigInternalError)
 		panic(defaultConfigInternalError)
 	}
 
 	// Log an informational message indicating the use of a default configuration path.
 	infoMessage := domainError.NewInfoMessage(location+"loadDefaultConfig", "Using default configuration path")
-	logging.Logger(infoMessage)
+	logger.Logger(infoMessage)
 }
 
 // GetCoreConfig retrieves the core configuration.

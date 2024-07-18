@@ -9,7 +9,7 @@ import (
 	repository "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/data/repository"
 	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
+	logger "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logger"
 )
 
 const (
@@ -25,7 +25,7 @@ func InjectRepository(ctx context.Context, container *applicationModel.Container
 	default:
 		notification := fmt.Sprintf(unsupportedDatabase, coreConfig.Database)
 		internalError := domainError.NewInternalError(location+"InjectRepository", notification)
-		logging.Logger(internalError)
+		logger.Logger(internalError)
 		applicationModel.GracefulShutdown(ctx, container)
 		panic(internalError)
 	}

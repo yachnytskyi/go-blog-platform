@@ -7,7 +7,7 @@ import (
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	domainModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
+	logger "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logger"
 )
 
 const (
@@ -27,7 +27,7 @@ func ValidateField(location, field string, commonValidator domainModel.CommonVal
 			commonValidator.Notification,
 		)
 
-		logging.Logger(validationError)
+		logger.Logger(validationError)
 		errors = append(errors, validationError)
 		return errors
 	}
@@ -41,7 +41,7 @@ func ValidateField(location, field string, commonValidator domainModel.CommonVal
 			commonValidator.Notification,
 		)
 
-		logging.Logger(validationError)
+		logger.Logger(validationError)
 		errors = append(errors, validationError)
 		return errors
 	}
@@ -65,7 +65,7 @@ func ValidateOptionalField(location, field string, commonValidator domainModel.C
 			commonValidator.Notification,
 		)
 
-		logging.Logger(validationError)
+		logger.Logger(validationError)
 		errors = append(errors, validationError)
 		return errors
 	}
@@ -79,7 +79,7 @@ func ValidateOptionalField(location, field string, commonValidator domainModel.C
 			commonValidator.Notification,
 		)
 
-		logging.Logger(validationError)
+		logger.Logger(validationError)
 		errors = append(errors, validationError)
 		return errors
 	}

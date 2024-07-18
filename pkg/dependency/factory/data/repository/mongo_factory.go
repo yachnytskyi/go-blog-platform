@@ -11,7 +11,7 @@ import (
 	userRepository "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/mongo"
 	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
+	logger "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logger"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -51,7 +51,7 @@ func (mongoDBRepository *MongoDBRepository) NewRepository(ctx context.Context) a
 		panic(dbConnectionFailure)
 	}
 
-	logging.Logger(dbConnectionSuccess)
+	logger.Logger(dbConnectionSuccess)
 	return mongoDBRepository.MongoClient.Database(mongoDBConfig.Name)
 }
 
@@ -59,10 +59,10 @@ func (mongoDBRepository *MongoDBRepository) CloseRepository(ctx context.Context)
 	disconnectError := mongoDBRepository.MongoClient.Disconnect(ctx)
 	if validator.IsError(disconnectError) {
 		internalError := domainError.NewInternalError(location+"CloseRepository.Disconnect", disconnectError.Error())
-		logging.Logger(internalError)
+		logger.Logger(internalError)
 	}
 
-	logging.Logger(dbConnectionClosed)
+	logger.Logger(dbConnectionClosed)
 }
 
 func (mongoDBRepository *MongoDBRepository) NewUserRepository(database any) user.UserRepository {
@@ -87,13 +87,13 @@ func connectToMongo(ctx context.Context, mongoConnection *options.ClientOptions)
 			return commonModel.NewResultOnSuccess[*mongo.Client](client)
 		}
 
-		logging.Logger(domainError.NewInternalError(location+"connectToMongo.MongoClient.Connect", connectError.Error()))
+		logger.Logger(domainError.NewInternalError(location+"connectToMongo.MongoClient.Connect", connectError.Error()))
 		delay += retryDelayInterval
 		time.Sleep(delay)
 	}
 
 	internalError := domainError.NewInternalError(location+"connectToMongo.MongoClient.Connect", connectError.Error())
-	logging.Logger(internalError)
+	logger.Logger(internalError)
 	return commonModel.NewResultOnFailure[*mongo.Client](internalError)
 }
 
@@ -108,7 +108,7 @@ func pingMongo(ctx context.Context, client *mongo.Client) error {
 			return nil
 		}
 
-		logging.Logger(domainError.NewInternalError(location+"pingMongo.MongoClient.Ping", connectError.Error()))
+		logger.Logger(domainError.NewInternalError(location+"pingMongo.MongoClient.Ping", connectError.Error()))
 		delay += retryDelayInterval
 		time.Sleep(delay)
 	}

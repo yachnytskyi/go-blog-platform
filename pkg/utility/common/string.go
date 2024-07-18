@@ -6,7 +6,7 @@ import (
 
 	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
+	logger "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logger"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
@@ -20,7 +20,7 @@ func Decode(location, encodedString string) commonModel.Result[string] {
 	decodedBytes, decodeStringError := base64.StdEncoding.DecodeString(encodedString)
 	if validator.IsError(decodeStringError) {
 		internalError := domainError.NewInternalError(location+".Decode.DecodeString", decodeStringError.Error())
-		logging.Logger(internalError)
+		logger.Logger(internalError)
 		return commonModel.NewResultOnFailure[string](internalError)
 	}
 

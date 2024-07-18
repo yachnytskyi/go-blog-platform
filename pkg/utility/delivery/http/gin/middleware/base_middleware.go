@@ -14,7 +14,7 @@ import (
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/common"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
-	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
+	logger "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logger"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
@@ -128,14 +128,14 @@ func TimeoutMiddleware() gin.HandlerFunc {
 	}
 }
 
-// LoggingMiddleware logs incoming requests and outgoing responses with additional context.
-func LoggingMiddleware() gin.HandlerFunc {
+// LoggerMiddleware logs incoming requests and outgoing responses with additional context.
+func LoggerMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 		correlationID := c.GetString("X-Correlation-ID")
 
 		httpIncomingLog := commonModel.NewHTTPIncomingLog(
-			location+"LoggingMiddleware",
+			location+"LoggerMiddleware",
 			correlationID,
 			c.Request.Method,
 			c.Request.URL.Path,
@@ -146,7 +146,7 @@ func LoggingMiddleware() gin.HandlerFunc {
 		c.Next()
 
 		httpOutgoingLog := commonModel.NewHTTPOutgoingLog(
-			location+"LoggingMiddleware",
+			location+"LoggerMiddleware",
 			correlationID,
 			c.Request.Method,
 			c.Request.URL.Path,
@@ -156,7 +156,7 @@ func LoggingMiddleware() gin.HandlerFunc {
 			time.Since(start),
 		)
 
-		logging.Logger(httpIncomingLog)
-		logging.Logger(httpOutgoingLog)
+		logger.Logger(httpIncomingLog)
+		logger.Logger(httpOutgoingLog)
 	}
 }

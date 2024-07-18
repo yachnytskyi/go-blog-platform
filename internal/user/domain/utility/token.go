@@ -11,7 +11,7 @@ import (
 	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domainModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
+	logger "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logger"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
@@ -78,7 +78,7 @@ func ValidateJWTToken(location, token, publicKey string) commonModel.Result[doma
 	}
 
 	invalidTokenError := domainError.NewInvalidTokenError(location+".ValidateJWTToken.Claims.ok", constants.InvalidTokenErrorMessage)
-	logging.Logger(invalidTokenError)
+	logger.Logger(invalidTokenError)
 	return commonModel.NewResultOnFailure[domainModel.UserTokenPayload](invalidTokenError)
 }
 
@@ -87,7 +87,7 @@ func decodeBase64String(location, base64String string) commonModel.Result[[]byte
 	decodedPrivateKey, decodeStringError := base64.StdEncoding.DecodeString(base64String)
 	if validator.IsError(decodeStringError) {
 		internalError := domainError.NewInternalError(location+".decodeBase64String.StdEncoding.DecodeString", decodeStringError.Error())
-		logging.Logger(internalError)
+		logger.Logger(internalError)
 		return commonModel.NewResultOnFailure[[]byte](internalError)
 	}
 
@@ -110,7 +110,7 @@ func createSignedToken(location string, key *rsa.PrivateKey, claims jwt.MapClaim
 	token, createSignedTokenError := jwt.NewWithClaims(jwt.GetSigningMethod(signingMethod), claims).SignedString(key)
 	if validator.IsError(createSignedTokenError) {
 		internalError := domainError.NewInternalError(location+".createSignedToken.NewWithClaims", createSignedTokenError.Error())
-		logging.Logger(internalError)
+		logger.Logger(internalError)
 		return commonModel.NewResultOnFailure[string](internalError)
 	}
 
@@ -122,7 +122,7 @@ func parsePublicKey(location string, decodedPublicKey []byte) commonModel.Result
 	key, parsePublicKeyError := jwt.ParseRSAPublicKeyFromPEM(decodedPublicKey)
 	if validator.IsError(parsePublicKeyError) {
 		internalError := domainError.NewInternalError(location+".parsePublicKey.ParseRSAPublicKeyFromPEM", parsePublicKeyError.Error())
-		logging.Logger(internalError)
+		logger.Logger(internalError)
 		return commonModel.NewResultOnFailure[*rsa.PublicKey](internalError)
 	}
 
@@ -134,7 +134,7 @@ func parsePrivateKey(location string, decodedPrivateKey []byte) commonModel.Resu
 	key, parsePrivateKeyError := jwt.ParseRSAPrivateKeyFromPEM(decodedPrivateKey)
 	if validator.IsError(parsePrivateKeyError) {
 		internalError := domainError.NewInternalError(location+".parsePrivateKey.ParseRSAPrivateKeyFromPEM", parsePrivateKeyError.Error())
-		logging.Logger(internalError)
+		logger.Logger(internalError)
 		return commonModel.NewResultOnFailure[*rsa.PrivateKey](internalError)
 	}
 
@@ -150,13 +150,13 @@ func parseToken(location, token string, key *rsa.PublicKey) commonModel.Result[*
 		}
 
 		internalError := domainError.NewInternalError(location+".parseToken.jwt.Parse.Ok", unexpectedMethod+" t.Header[alg]")
-		logging.Logger(internalError)
+		logger.Logger(internalError)
 		return nil, internalError
 	})
 
 	if validator.IsError(parseError) {
 		internalError := domainError.NewInternalError(location+"parseToken.jwt.Parse", parseError.Error())
-		logging.Logger(internalError)
+		logger.Logger(internalError)
 		return commonModel.NewResultOnFailure[*jwt.Token](internalError)
 	}
 

@@ -9,7 +9,7 @@ import (
 	delivery "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/delivery"
 	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
+	logger "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logger"
 )
 
 const (
@@ -25,7 +25,7 @@ func InjectDelivery(ctx context.Context, container *applicationModel.Container) 
 	default:
 		notification := fmt.Sprintf(unsupportedDelivery, coreConfig.Delivery)
 		internalError := domainError.NewInternalError(location+".InjectDelivery", notification)
-		logging.Logger(internalError)
+		logger.Logger(internalError)
 		applicationModel.GracefulShutdown(ctx, container)
 		panic(internalError)
 	}

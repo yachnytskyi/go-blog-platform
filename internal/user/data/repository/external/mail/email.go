@@ -14,7 +14,7 @@ import (
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
+	logger "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logger"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	"gopkg.in/gomail.v2"
 )
@@ -31,7 +31,7 @@ func parseTemplateDirectory(location, templatePath string) commonModel.Result[*t
 	filePathWalkError := filepath.Walk(templatePath, func(path string, info os.FileInfo, walkError error) error {
 		if validator.IsError(walkError) {
 			internalError := domainError.NewInternalError(location+".parseTemplateDirectory.Walk", walkError.Error())
-			logging.Logger(internalError)
+			logger.Logger(internalError)
 			return internalError
 		}
 		if info.IsDir() {
@@ -42,10 +42,10 @@ func parseTemplateDirectory(location, templatePath string) commonModel.Result[*t
 		return nil
 	})
 
-	logging.Logger(loggerMessage)
+	logger.Logger(loggerMessage)
 	if validator.IsError(filePathWalkError) {
 		internalError := domainError.NewInternalError(location+".parseTemplateDirectory."+loggerMessage, filePathWalkError.Error())
-		logging.Logger(internalError)
+		logger.Logger(internalError)
 		return commonModel.NewResultOnFailure[*template.Template](internalError)
 	}
 
@@ -53,7 +53,7 @@ func parseTemplateDirectory(location, templatePath string) commonModel.Result[*t
 	parseFiles, parseFilesError := template.ParseFiles(paths...)
 	if validator.IsError(parseFilesError) {
 		internalError := domainError.NewInternalError(location+".ParseFiles."+loggerMessage, parseFilesError.Error())
-		logging.Logger(internalError)
+		logger.Logger(internalError)
 		return commonModel.NewResultOnFailure[*template.Template](internalError)
 	}
 
@@ -79,7 +79,7 @@ func SendEmail(location string, user userModel.User, data userModel.EmailData) e
 	dialAndSendError := dialer.DialAndSend(prepareSendMessage.Data)
 	if validator.IsError(dialAndSendError) {
 		internalError := domainError.NewInternalError(location+".SendEmail.DialAndSend", dialAndSendError.Error())
-		logging.Logger(internalError)
+		logger.Logger(internalError)
 		return internalError
 	}
 
@@ -97,7 +97,7 @@ func prepareSendMessage(location, userEmail string, data userModel.EmailData) co
 	template := parseTemplateDirectory(location+".prepareSendMessage", data.TemplatePath)
 	if validator.IsError(template.Error) {
 		internalError := domainError.NewInternalError(location+".SendEmail.PrepareSendMessage.parseTemplateDirectory", template.Error.Error())
-		logging.Logger(internalError)
+		logger.Logger(internalError)
 		return commonModel.NewResultOnFailure[*gomail.Message](internalError)
 	}
 
@@ -105,7 +105,7 @@ func prepareSendMessage(location, userEmail string, data userModel.EmailData) co
 	emailTemplate := template.Data.Lookup(data.TemplateName)
 	if emailTemplate == nil {
 		internalError := domainError.NewInternalError(location+".SendEmail.PrepareSendMessage.TemplateNotFound", constants.EmailTemplateNotFound)
-		logging.Logger(internalError)
+		logger.Logger(internalError)
 		return commonModel.NewResultOnFailure[*gomail.Message](internalError)
 	}
 
@@ -113,7 +113,7 @@ func prepareSendMessage(location, userEmail string, data userModel.EmailData) co
 	executeError := emailTemplate.Execute(&body, &data)
 	if validator.IsError(executeError) {
 		internalError := domainError.NewInternalError(location+".SendEmail.PrepareSendMessage.Execute", executeError.Error())
-		logging.Logger(internalError)
+		logger.Logger(internalError)
 		return commonModel.NewResultOnFailure[*gomail.Message](internalError)
 	}
 

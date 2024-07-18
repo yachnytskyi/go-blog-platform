@@ -8,7 +8,7 @@ import (
 	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
-	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
+	logger "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logger"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
@@ -29,7 +29,7 @@ func extractAccessToken(ginContext *gin.Context, location string) commonModel.Re
 
 	// If access token is still empty, create and log an HTTP authorization error.
 	httpAuthorizationError := httpError.NewHTTPAuthorizationError(location+".extractAccessToken.accessToken", constants.LoggingErrorNotification)
-	logging.Logger(httpAuthorizationError)
+	logger.Logger(httpAuthorizationError)
 	return commonModel.NewResultOnFailure[string](httpAuthorizationError)
 }
 
@@ -38,7 +38,7 @@ func extractRefreshToken(ginContext *gin.Context) commonModel.Result[string] {
 	refreshToken, refreshTokenError := ginContext.Cookie(constants.RefreshTokenValue)
 	if validator.IsError(refreshTokenError) {
 		httpAuthorizationError := httpError.NewHTTPAuthorizationError(location+".extractRefreshToken.refreshToken", constants.LoggingErrorNotification)
-		logging.Logger(httpAuthorizationError)
+		logger.Logger(httpAuthorizationError)
 		return commonModel.NewResultOnFailure[string](httpAuthorizationError)
 	}
 
@@ -47,7 +47,7 @@ func extractRefreshToken(ginContext *gin.Context) commonModel.Result[string] {
 
 // abortWithStatusJSON aborts the request, logs the error, and responds with a JSON error.
 func abortWithStatusJSON(ginContext *gin.Context, err error, httpCode int) {
-	logging.Logger(err)
+	logger.Logger(err)
 	jsonResponse := httpModel.NewJSONFailureResponse(httpError.HandleError(err))
 	ginContext.AbortWithStatusJSON(httpCode, jsonResponse)
 }

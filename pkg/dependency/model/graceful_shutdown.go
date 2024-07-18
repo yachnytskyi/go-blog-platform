@@ -3,7 +3,7 @@ package model
 import (
 	"context"
 
-	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
+	logger "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logger"
 )
 
 const (
@@ -18,5 +18,5 @@ func GracefulShutdown(ctx context.Context, container *Container) {
 		container.Repository.CloseRepository(ctx)
 	}
 
-	logging.Logger(completed)
+	logger.Logger(completed)
 }

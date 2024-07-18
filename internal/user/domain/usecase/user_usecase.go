@@ -14,7 +14,7 @@ import (
 	domainModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	commonUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
-	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
+	logger "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logger"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
@@ -203,7 +203,7 @@ func (userUseCaseV1 UserUseCaseV1) ResetUserPassword(ctx context.Context, userRe
 	}
 	if validator.IsTimeNotValid(fetchedResetExpiry.Data.ResetExpiry) {
 		timeExpiredError := domainError.NewTimeExpiredError(location+"ResetUserPassword", constants.TimeExpiredErrorNotification)
-		logging.Logger(timeExpiredError)
+		logger.Logger(timeExpiredError)
 		return domainError.HandleError(timeExpiredError)
 	}
 

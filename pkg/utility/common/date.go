@@ -6,7 +6,7 @@ import (
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
+	logger "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logger"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
@@ -20,7 +20,7 @@ func ParseDate(location, data string) commonModel.Result[time.Time] {
 	parsedTime, parseError := time.Parse(constants.DateTimeFormat, data)
 	if validator.IsError(parseError) {
 		internalError := domainError.NewInternalError(location+".ParseDate.time.Parse", parseError.Error())
-		logging.Logger(internalError)
+		logger.Logger(internalError)
 		return commonModel.NewResultOnFailure[time.Time](internalError)
 	}
 

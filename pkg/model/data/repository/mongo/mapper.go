@@ -3,7 +3,7 @@ package mongo
 import (
 	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-	logging "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
+	logger "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logger"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -17,7 +17,7 @@ func DataToMongoDocumentMapper(location string, incomingData any) commonModel.Re
 	data, err := bson.Marshal(incomingData)
 	if validator.IsError(err) {
 		internalError := domainError.NewInternalError(location+".DataToMongoDocumentMapper.bson.Marshal", err.Error())
-		logging.Logger(internalError)
+		logger.Logger(internalError)
 		return commonModel.NewResultOnFailure[*bson.D](internalError)
 	}
 
@@ -25,7 +25,7 @@ func DataToMongoDocumentMapper(location string, incomingData any) commonModel.Re
 	err = bson.Unmarshal(data, &document)
 	if err != nil {
 		internalError := domainError.NewInternalError(location+".DataToMongoDocumentMapper.bson.Unmarshal", err.Error())
-		logging.Logger(internalError)
+		logger.Logger(internalError)
 		return commonModel.NewResultOnFailure[*bson.D](internalError)
 	}
 
@@ -35,14 +35,14 @@ func DataToMongoDocumentMapper(location string, incomingData any) commonModel.Re
 func HexToObjectIDMapper(location, id string) commonModel.Result[primitive.ObjectID] {
 	if len(id) == 0 {
 		internalError := domainError.NewInternalError(location+".HexToObjectIDMapper", emptyID)
-		logging.Logger(internalError)
+		logger.Logger(internalError)
 		return commonModel.NewResultOnFailure[primitive.ObjectID](internalError)
 	}
 
 	objectID, objectIDFromHexError := primitive.ObjectIDFromHex(id)
 	if validator.IsError(objectIDFromHexError) {
 		internalError := domainError.NewInternalError(location+".HexToObjectIDMapper.primitive.ObjectIDFromHex", objectIDFromHexError.Error())
-		logging.Logger(internalError)
+		logger.Logger(internalError)
 		return commonModel.NewResultOnFailure[primitive.ObjectID](internalError)
 	}
 

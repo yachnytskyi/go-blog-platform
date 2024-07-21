@@ -10,22 +10,21 @@ import (
 // CreateApplication initializes the application by setting up the container,
 // injecting dependencies, and configuring the server.
 func CreateApplication(ctx context.Context) *applicationModel.Container {
-	// Initialize the factories
 	loggerFactory := factory.NewLoggerFactory(ctx)
-	repositoryFactory := factory.NewRepositoryFactory(ctx)
-	usecaseFactory := factory.NewUseCaseFactory(ctx, repositoryFactory)
-	deliveryFactory := factory.NewDeliveryFactory(ctx, repositoryFactory)
 
 	// Create repositories
+	repositoryFactory := factory.NewRepositoryFactory(ctx)
 	repository := repositoryFactory.NewRepository(ctx, loggerFactory)
 	userRepository := repositoryFactory.NewUserRepository(repository)
 	postRepository := repositoryFactory.NewPostRepository(repository)
 
 	// Create use cases
+	usecaseFactory := factory.NewUseCaseFactory(ctx, repositoryFactory)
 	userUseCase := usecaseFactory.NewUserUseCase(userRepository)
 	postUseCase := usecaseFactory.NewPostUseCase(postRepository)
 
 	// Create controllers
+	deliveryFactory := factory.NewDeliveryFactory(ctx, repositoryFactory)
 	userController := deliveryFactory.NewUserController(userUseCase)
 	postController := deliveryFactory.NewPostController(userUseCase, postUseCase)
 

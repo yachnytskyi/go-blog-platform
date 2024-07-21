@@ -16,17 +16,18 @@ const (
 	unsupportedDelivery = "Unsupported delivery type: %s"
 )
 
-func InjectDelivery(ctx context.Context, container *applicationModel.Container) {
+func NewDeliveryFactory(ctx context.Context, repository applicationModel.Repository) applicationModel.Delivery {
 	coreConfig := config.GetCoreConfig()
 
 	switch coreConfig.Delivery {
 	case constants.Gin:
-		container.Delivery = delivery.NewGinDelivery()
+		return delivery.NewGinDelivery()
+	// Add other delivery options here as needed.
 	default:
 		notification := fmt.Sprintf(unsupportedDelivery, coreConfig.Delivery)
-		internalError := domainError.NewInternalError(location+".InjectDelivery", notification)
+		internalError := domainError.NewInternalError(location+".NewDeliveryFactory", notification)
 		logger.Logger(internalError)
-		applicationModel.GracefulShutdown(ctx, container)
+		applicationModel.GracefulShutdown(ctx, repository, nil)
 		panic(internalError)
 	}
 }

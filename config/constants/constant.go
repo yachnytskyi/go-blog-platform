@@ -81,6 +81,15 @@ const (
 	False                   = "false"                                                // False value.
 )
 
+// Server Notifications.
+const (
+	DatabaseConnectionSuccess = "Database connection is established..."
+	DatabaseConnectionClosed  = "Database connection has been successfully closed..."
+	DatabaseConnectionFailure = "Failed to establish database connection"
+	ServerConnectionSuccess   = "Server is successfully launched..."
+	ServerConnectionClosed    = "Server has been successfully shutdown..."
+)
+
 // User Notifications.
 const (
 	LogoutNotificationMessage                = "You are successfully logged out."                                               // Logout success message.
@@ -131,6 +140,10 @@ const (
 	InvalidContentTypeNotification = "Invalid content type. You can use only them from the following list: "                                                                        // Invalid content type message.
 	InvalidHeaderFormat            = "Invalid header format."
 	InvalidTokenErrorMessage       = "The token is invalid. Please use the correct token." // Error message for invalid tokens.
+)
+
+const (
+	Zerolog = "Zerolog"
 )
 
 // Databases used in the application.

@@ -10,26 +10,32 @@ import (
 // CreateApplication initializes the application by setting up the container,
 // injecting dependencies, and configuring the server.
 func CreateApplication(ctx context.Context) *applicationModel.Container {
-	container := &applicationModel.Container{}
-	serverRouters := applicationModel.ServerRouters{}
+	// Initialize the factories
+	loggerFactory := factory.NewLoggerFactory(ctx)
+	repositoryFactory := factory.NewRepositoryFactory(ctx)
+	usecaseFactory := factory.NewUseCaseFactory(ctx, repositoryFactory)
+	deliveryFactory := factory.NewDeliveryFactory(ctx, repositoryFactory)
 
-	factory.InjectRepository(ctx, container)
-	repository := container.Repository.NewRepository(ctx)
-	userRepository := container.Repository.NewUserRepository(repository)
-	postRepository := container.Repository.NewPostRepository(repository)
+	// Create repositories
+	repository := repositoryFactory.NewRepository(ctx, loggerFactory)
+	userRepository := repositoryFactory.NewUserRepository(repository)
+	postRepository := repositoryFactory.NewPostRepository(repository)
 
-	factory.InjectUseCase(ctx, container)
-	userUseCase := container.UseCase.NewUserUseCase(userRepository)
-	postUseCase := container.UseCase.NewPostUseCase(postRepository)
-	serverRouters.UserUseCase = userUseCase
+	// Create use cases
+	userUseCase := usecaseFactory.NewUserUseCase(userRepository)
+	postUseCase := usecaseFactory.NewPostUseCase(postRepository)
 
-	factory.InjectDelivery(ctx, container)
-	userController := container.Delivery.NewUserController(userUseCase)
-	postController := container.Delivery.NewPostController(userUseCase, postUseCase)
+	// Create controllers
+	userController := deliveryFactory.NewUserController(userUseCase)
+	postController := deliveryFactory.NewPostController(userUseCase, postUseCase)
 
-	serverRouters.UserRouter = container.Delivery.NewUserRouter(userController)
-	serverRouters.PostRouter = container.Delivery.NewPostRouter(postController)
+	container := applicationModel.NewContainer(loggerFactory, repositoryFactory, usecaseFactory, deliveryFactory)
+	serverRouters := applicationModel.NewServerRouters(
+		userUseCase,
+		deliveryFactory.NewUserRouter(userController),
+		deliveryFactory.NewPostRouter(postController),
+	)
 
-	container.Delivery.InitializeServer(serverRouters)
+	container.Delivery.NewDelivery(serverRouters)
 	return container
 }

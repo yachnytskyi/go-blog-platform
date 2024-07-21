@@ -13,22 +13,22 @@ import (
 )
 
 const (
-	location           = "pkg/dependency"
+	location           = "pkg.dependency.factory."
 	unsupportedUseCase = "Unsupported use case type: %s"
 )
 
-// InjectUseCase injects the appropriate use case into the container based on the configuration.
-func InjectUseCase(ctx context.Context, container *applicationModel.Container) {
+func NewUseCaseFactory(ctx context.Context, repository applicationModel.Repository) applicationModel.UseCase {
 	coreConfig := config.GetCoreConfig()
 
 	switch coreConfig.UseCase {
 	case constants.UseCase:
-		container.UseCase = useCase.NewUseCaseV1()
+		return useCase.NewUseCaseV1()
+	// Add other domain options here as needed.
 	default:
 		notification := fmt.Sprintf(unsupportedUseCase, coreConfig.UseCase)
-		internalError := domainError.NewInternalError(location+"InjectUseCase", notification)
+		internalError := domainError.NewInternalError(location+"NewUseCaseFactory", notification)
 		logger.Logger(internalError)
-		applicationModel.GracefulShutdown(ctx, container)
+		applicationModel.GracefulShutdown(ctx, repository, nil)
 		panic(internalError)
 	}
 }

@@ -29,7 +29,7 @@ func main() {
 	// Launch the server in a separate goroutine.
 	go func() {
 		// Launch the server using the delivery from the container.
-		container.Delivery.LaunchServer(ctx, container)
+		container.Delivery.LaunchServer(ctx, container.Repository)
 	}()
 
 	// Set up a channel to listen for OS signals (e.g., SIGINT, SIGTERM).
@@ -40,5 +40,5 @@ func main() {
 	<-quit
 
 	// Perform a graceful shutdown when a signal is received.
-	applicationModel.GracefulShutdown(ctx, container)
+	applicationModel.GracefulShutdown(ctx, container.Repository, container.Delivery)
 }

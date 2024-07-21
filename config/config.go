@@ -41,6 +41,7 @@ type ApplicationConfig struct {
 
 // Core defines the core settings for the application.
 type Core struct {
+	Logger   string `mapstructure:"Logger"`
 	Database string `mapstructure:"Database"`
 	UseCase  string `mapstructure:"UseCase"`
 	Delivery string `mapstructure:"Delivery"`

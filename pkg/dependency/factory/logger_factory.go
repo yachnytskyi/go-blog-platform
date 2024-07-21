@@ -6,26 +6,26 @@ import (
 
 	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/data/repository"
+	zerolog "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/logger/zerolog"
 	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	logger "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logger"
 )
 
 const (
-	unsupportedDatabase = "Unsupported database type: %s"
+	unsupportedLogger = "Unsupported logger type: %s"
 )
 
-func NewRepositoryFactory(ctx context.Context) applicationModel.Repository {
+func NewLoggerFactory(ctx context.Context) applicationModel.Logger {
 	coreConfig := config.GetCoreConfig()
 
-	switch coreConfig.Database {
-	case constants.MongoDB:
-		return repository.NewMongoDBRepository()
-	// Add other repository options here as needed.
+	switch coreConfig.Logger {
+	case constants.Zerolog:
+		return zerolog.NewZerolog()
+	// Add other logger options here as needed.
 	default:
-		notification := fmt.Sprintf(unsupportedDatabase, coreConfig.Database)
-		internalError := domainError.NewInternalError(location+"NewRepositoryFactory", notification)
+		notification := fmt.Sprintf(unsupportedLogger, coreConfig.Logger)
+		internalError := domainError.NewInternalError(location+"NewLoggerFactory", notification)
 		logger.Logger(internalError)
 		applicationModel.GracefulShutdown(ctx, nil, nil)
 		panic(internalError)

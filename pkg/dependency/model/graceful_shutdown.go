@@ -10,12 +10,12 @@ const (
 	completed = "Graceful shutdown of the app"
 )
 
-func GracefulShutdown(ctx context.Context, container *Container) {
-	if container.Delivery != nil {
-		container.Delivery.CloseServer(ctx)
+func GracefulShutdown(ctx context.Context, repository Repository, delivery Delivery) {
+	if delivery != nil {
+		delivery.CloseServer(ctx)
 	}
-	if container.Repository != nil {
-		container.Repository.CloseRepository(ctx)
+	if repository != nil {
+		repository.CloseRepository(ctx)
 	}
 
 	logger.Logger(completed)

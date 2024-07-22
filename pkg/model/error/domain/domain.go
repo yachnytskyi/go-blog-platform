@@ -55,7 +55,9 @@ type InfoMessage struct {
 }
 
 func NewInfoMessage(location, notification string) InfoMessage {
-	return InfoMessage{NewBaseError(location, notification)}
+	return InfoMessage{
+		NewBaseError(location, notification),
+	}
 }
 
 type ValidationError struct {
@@ -81,7 +83,9 @@ type ValidationErrors struct {
 }
 
 func NewValidationErrors(errors []error) ValidationErrors {
-	return ValidationErrors{NewBaseErrors(errors)}
+	return ValidationErrors{
+		NewBaseErrors(errors),
+	}
 }
 
 type AuthorizationError struct {
@@ -89,7 +93,9 @@ type AuthorizationError struct {
 }
 
 func NewAuthorizationError(location, notification string) AuthorizationError {
-	return AuthorizationError{NewBaseError(location, notification)}
+	return AuthorizationError{
+		NewBaseError(location, notification),
+	}
 }
 
 type ItemNotFoundError struct {
@@ -113,7 +119,9 @@ type InvalidTokenError struct {
 }
 
 func NewInvalidTokenError(location, notification string) InvalidTokenError {
-	return InvalidTokenError{NewBaseError(location, notification)}
+	return InvalidTokenError{
+		NewBaseError(location, notification),
+	}
 }
 
 type TimeExpiredError struct {
@@ -121,7 +129,9 @@ type TimeExpiredError struct {
 }
 
 func NewTimeExpiredError(location, notification string) TimeExpiredError {
-	return TimeExpiredError{NewBaseError(location, notification)}
+	return TimeExpiredError{
+		NewBaseError(location, notification),
+	}
 }
 
 type PaginationError struct {
@@ -147,5 +157,7 @@ type InternalError struct {
 }
 
 func NewInternalError(location, notification string) InternalError {
-	return InternalError{NewBaseError(location, notification)}
+	return InternalError{
+		NewBaseError(location, notification),
+	}
 }

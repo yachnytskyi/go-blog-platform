@@ -7,13 +7,12 @@ import (
 	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
-
 	httpGinCookie "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin/utility/cookie"
 	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
-	httpGinCommon "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/common"
-
+	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
+	httpGinCommon "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/common"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
@@ -23,11 +22,15 @@ const (
 )
 
 type UserController struct {
-	userUseCase user.UserUseCase
+	Logger      applicationModel.Logger
+	UserUseCase user.UserUseCase
 }
 
-func NewUserController(userUseCase user.UserUseCase) UserController {
-	return UserController{userUseCase: userUseCase}
+func NewUserController(logger applicationModel.Logger, userUseCase user.UserUseCase) UserController {
+	return UserController{
+		Logger:      logger,
+		UserUseCase: userUseCase,
+	}
 }
 
 func (userController UserController) GetAllUsers(controllerContext any) {
@@ -36,7 +39,7 @@ func (userController UserController) GetAllUsers(controllerContext any) {
 	defer cancel()
 
 	paginationQuery := httpGinCommon.ParsePaginationQuery(ginContext)
-	fetchedUsers := userController.userUseCase.GetAllUsers(ctx, paginationQuery)
+	fetchedUsers := userController.UserUseCase.GetAllUsers(ctx, paginationQuery)
 	if validator.IsError(fetchedUsers.Error) {
 		httpGinCommon.GinNewJSONFailureResponse(ginContext, fetchedUsers.Error, constants.StatusBadRequest)
 		return
@@ -54,7 +57,7 @@ func (userController UserController) GetCurrentUser(controllerContext any) {
 	defer cancel()
 
 	currentUserID := ctx.Value(constants.ID).(string)
-	currentUser := userController.userUseCase.GetUserById(ctx, currentUserID)
+	currentUser := userController.UserUseCase.GetUserById(ctx, currentUserID)
 	if validator.IsError(currentUser.Error) {
 		httpGinCommon.GinNewJSONFailureResponse(ginContext, currentUser.Error, constants.StatusBadRequest)
 		return
@@ -72,7 +75,7 @@ func (userController UserController) GetUserById(controllerContext any) {
 	defer cancel()
 
 	userID := ginContext.Param(constants.ItemIdParam)
-	fetchedUser := userController.userUseCase.GetUserById(ctx, userID)
+	fetchedUser := userController.UserUseCase.GetUserById(ctx, userID)
 	if validator.IsError(fetchedUser.Error) {
 		httpGinCommon.GinNewJSONFailureResponse(ginContext, fetchedUser.Error, constants.StatusBadRequest)
 		return
@@ -92,12 +95,12 @@ func (userController UserController) Register(controllerContext any) {
 	var userCreateViewData userViewModel.UserCreateView
 	shouldBindJSON := ginContext.ShouldBindJSON(&userCreateViewData)
 	if validator.IsError(shouldBindJSON) {
-		httpGinCommon.HandleJSONBindingError(ginContext, location+"Register", shouldBindJSON)
+		httpGinCommon.HandleJSONBindingError(ginContext, userController.Logger, location+"Register", shouldBindJSON)
 		return
 	}
 
 	userCreateData := userViewModel.UserCreateViewToUserCreateMapper(userCreateViewData)
-	createdUser := userController.userUseCase.Register(ctx, userCreateData)
+	createdUser := userController.UserUseCase.Register(ctx, userCreateData)
 	if validator.IsError(createdUser.Error) {
 		httpGinCommon.GinNewJSONFailureResponse(ginContext, createdUser.Error, constants.StatusBadRequest)
 		return
@@ -118,13 +121,13 @@ func (userController UserController) UpdateCurrentUser(controllerContext any) {
 	var userUpdateViewData userViewModel.UserUpdateView
 	shouldBindJSON := ginContext.ShouldBindJSON(&userUpdateViewData)
 	if validator.IsError(shouldBindJSON) {
-		httpGinCommon.HandleJSONBindingError(ginContext, location+"UpdateCurrentUser", shouldBindJSON)
+		httpGinCommon.HandleJSONBindingError(ginContext, userController.Logger, location+"UpdateCurrentUser", shouldBindJSON)
 		return
 	}
 
 	userUpdateData := userViewModel.UserUpdateViewToUserUpdateMapper(userUpdateViewData)
 	userUpdateData.ID = currentUserID
-	updatedUser := userController.userUseCase.UpdateCurrentUser(ctx, userUpdateData)
+	updatedUser := userController.UserUseCase.UpdateCurrentUser(ctx, userUpdateData)
 	if validator.IsError(updatedUser.Error) {
 		httpGinCommon.GinNewJSONFailureResponse(ginContext, updatedUser.Error, constants.StatusBadRequest)
 		return
@@ -142,7 +145,7 @@ func (userController UserController) DeleteCurrentUser(controllerContext any) {
 	defer cancel()
 
 	currentUserID := ctx.Value(constants.ID).(string)
-	deletedUser := userController.userUseCase.DeleteUserById(ctx, currentUserID)
+	deletedUser := userController.UserUseCase.DeleteUserById(ctx, currentUserID)
 	if validator.IsError(deletedUser) {
 		httpGinCommon.GinNewJSONFailureResponse(ginContext, deletedUser, constants.StatusBadRequest)
 		return
@@ -160,12 +163,12 @@ func (userController UserController) Login(controllerContext any) {
 	var userLoginViewData userViewModel.UserLoginView
 	shouldBindJSON := ginContext.ShouldBindJSON(&userLoginViewData)
 	if validator.IsError(shouldBindJSON) {
-		httpGinCommon.HandleJSONBindingError(ginContext, location+"Login", shouldBindJSON)
+		httpGinCommon.HandleJSONBindingError(ginContext, userController.Logger, location+"Login", shouldBindJSON)
 		return
 	}
 
 	userLoginData := userViewModel.UserLoginViewToUserLoginMapper(userLoginViewData)
-	userToken := userController.userUseCase.Login(ctx, userLoginData)
+	userToken := userController.UserUseCase.Login(ctx, userLoginData)
 	if validator.IsError(userToken.Error) {
 		jsonResponse := httpModel.NewJSONFailureResponse(httpError.HandleError(userToken.Error))
 		ginContext.JSON(constants.StatusBadRequest, jsonResponse)
@@ -187,13 +190,13 @@ func (userController UserController) RefreshAccessToken(controllerContext any) {
 	defer cancel()
 
 	currentUserID := ctx.Value(constants.ID).(string)
-	currentUser := userController.userUseCase.GetUserById(ctx, currentUserID)
+	currentUser := userController.UserUseCase.GetUserById(ctx, currentUserID)
 	if validator.IsError(currentUser.Error) {
 		httpGinCommon.GinNewJSONFailureResponse(ginContext, currentUser.Error, constants.StatusBadRequest)
 		return
 	}
 
-	userToken := userController.userUseCase.RefreshAccessToken(ctx, currentUser.Data)
+	userToken := userController.UserUseCase.RefreshAccessToken(ctx, currentUser.Data)
 	if validator.IsError(userToken.Error) {
 		jsonResponse := httpModel.NewJSONFailureResponse(httpError.HandleError(userToken.Error))
 		ginContext.JSON(constants.StatusBadRequest, jsonResponse)
@@ -227,12 +230,12 @@ func (userController UserController) ForgottenPassword(controllerContext any) {
 	var userForgottenPasswordView userViewModel.UserForgottenPasswordView
 	shouldBindJSON := ginContext.ShouldBindJSON(&userForgottenPasswordView)
 	if validator.IsError(shouldBindJSON) {
-		httpGinCommon.HandleJSONBindingError(ginContext, location+"ForgottenPassword", shouldBindJSON)
+		httpGinCommon.HandleJSONBindingError(ginContext, userController.Logger, location+"ForgottenPassword", shouldBindJSON)
 		return
 	}
 
 	userForgottenPassword := userViewModel.UserForgottenPasswordViewToUserForgottenPassword(userForgottenPasswordView)
-	updatedUserError := userController.userUseCase.ForgottenPassword(ctx, userForgottenPassword)
+	updatedUserError := userController.UserUseCase.ForgottenPassword(ctx, userForgottenPassword)
 	if validator.IsError(updatedUserError) {
 		jsonResponse := httpModel.NewJSONFailureResponse(httpError.HandleError(updatedUserError))
 		ginContext.JSON(constants.StatusBadRequest, jsonResponse)
@@ -253,7 +256,7 @@ func (userController UserController) ResetUserPassword(controllerContext any) {
 	var userResetPasswordView userViewModel.UserResetPasswordView
 	shouldBindJSON := ginContext.ShouldBindJSON(&userResetPasswordView)
 	if validator.IsError(shouldBindJSON) {
-		httpGinCommon.HandleJSONBindingError(ginContext, location+"ResetUserPassword", shouldBindJSON)
+		httpGinCommon.HandleJSONBindingError(ginContext, userController.Logger, location+"ResetUserPassword", shouldBindJSON)
 		return
 	}
 
@@ -261,7 +264,7 @@ func (userController UserController) ResetUserPassword(controllerContext any) {
 	userResetPasswordView.ResetToken = resetToken
 	userResetPassword := userViewModel.UserResetPasswordViewToUserResetPassword(userResetPasswordView)
 
-	resetUserPasswordError := userController.userUseCase.ResetUserPassword(ctx, userResetPassword)
+	resetUserPasswordError := userController.UserUseCase.ResetUserPassword(ctx, userResetPassword)
 	if validator.IsError(resetUserPasswordError) {
 		jsonResponse := httpModel.NewJSONFailureResponse(httpError.HandleError(resetUserPasswordError))
 		ginContext.JSON(constants.StatusBadRequest, jsonResponse)

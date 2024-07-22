@@ -8,7 +8,7 @@ import (
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
 	postRepositoryModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/data/repository/mongo/model"
 	postModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
-
+	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	mongoModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	"go.mongodb.org/mongo-driver/bson"
@@ -21,11 +21,15 @@ const (
 )
 
 type PostRepository struct {
+	Logger     applicationModel.Logger
 	collection *mongo.Collection
 }
 
-func NewPostRepository(db *mongo.Database) post.PostRepository {
-	return &PostRepository{collection: db.Collection("posts")}
+func NewPostRepository(db *mongo.Database, logger applicationModel.Logger) post.PostRepository {
+	return &PostRepository{
+		Logger:     logger,
+		collection: db.Collection("posts"),
+	}
 }
 
 func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int, limit int) (*postModel.Posts, error) {
@@ -82,7 +86,7 @@ func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int,
 }
 
 func (postRepository *PostRepository) GetPostById(ctx context.Context, postID string) (*postModel.Post, error) {
-	postObjectID := mongoModel.HexToObjectIDMapper(location+"GetPostById", postID)
+	postObjectID := mongoModel.HexToObjectIDMapper(postRepository.Logger, location+"GetPostById", postID)
 	if validator.IsError(postObjectID.Error) {
 		return nil, postObjectID.Error
 	}
@@ -102,7 +106,7 @@ func (postRepository *PostRepository) GetPostById(ctx context.Context, postID st
 }
 
 func (postRepository *PostRepository) CreatePost(ctx context.Context, post *postModel.PostCreate) (*postModel.Post, error) {
-	postMappedToRepository, postCreateToPostCreateRepositoryMapperError := postRepositoryModel.PostCreateToPostCreateRepositoryMapper(post)
+	postMappedToRepository, postCreateToPostCreateRepositoryMapperError := postRepositoryModel.PostCreateToPostCreateRepositoryMapper(postRepository.Logger, post)
 	if validator.IsError(postCreateToPostCreateRepositoryMapperError) {
 		return nil, postCreateToPostCreateRepositoryMapperError
 	}
@@ -138,7 +142,7 @@ func (postRepository *PostRepository) CreatePost(ctx context.Context, post *post
 }
 
 func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID string, postUpdate *postModel.PostUpdate) (*postModel.Post, error) {
-	postUpdateRepository, postUpdateToPostUpdateRepositoryMapper := postRepositoryModel.PostUpdateToPostUpdateRepositoryMapper(postUpdate)
+	postUpdateRepository, postUpdateToPostUpdateRepositoryMapper := postRepositoryModel.PostUpdateToPostUpdateRepositoryMapper(postRepository.Logger, postUpdate)
 	if validator.IsError(postUpdateToPostUpdateRepositoryMapper) {
 		return nil, postUpdateToPostUpdateRepositoryMapper
 	}
@@ -146,12 +150,12 @@ func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID
 	postUpdateRepository.UpdatedAt = time.Now()
 
 	// Map the user update repository to a BSON document for MongoDB update.
-	postUpdateBson := mongoModel.DataToMongoDocumentMapper(location+"UpdatePostById", postUpdateRepository)
+	postUpdateBson := mongoModel.DataToMongoDocumentMapper(postRepository.Logger, location+"UpdatePostById", postUpdateRepository)
 	if validator.IsError(postUpdateBson.Error) {
 		return nil, postUpdateBson.Error
 	}
 
-	postObjectID := mongoModel.HexToObjectIDMapper(location+"UpdatePostById", postID)
+	postObjectID := mongoModel.HexToObjectIDMapper(postRepository.Logger, location+"UpdatePostById", postID)
 	if validator.IsError(postObjectID.Error) {
 		return nil, postObjectID.Error
 	}
@@ -170,7 +174,7 @@ func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID
 }
 
 func (postRepository *PostRepository) DeletePostByID(ctx context.Context, postID string) error {
-	postObjectID := mongoModel.HexToObjectIDMapper(location+"GetPostById", postID)
+	postObjectID := mongoModel.HexToObjectIDMapper(postRepository.Logger, location+"GetPostById", postID)
 	if validator.IsError(postObjectID.Error) {
 		return postObjectID.Error
 	}

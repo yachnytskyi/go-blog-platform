@@ -4,15 +4,20 @@ import (
 	"github.com/gin-gonic/gin"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
+	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	httpGinMiddleware "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/middleware"
 )
 
 type UserRouter struct {
-	userController user.UserController
+	Logger         applicationModel.Logger
+	UserController user.UserController
 }
 
-func NewUserRouter(userController user.UserController) UserRouter {
-	return UserRouter{userController: userController}
+func NewUserRouter(logger applicationModel.Logger, userController user.UserController) UserRouter {
+	return UserRouter{
+		Logger:         logger,
+		UserController: userController,
+	}
 }
 
 // UserRouter defines the user-related routes and connects them to the corresponding controller methods.
@@ -24,62 +29,62 @@ func (userRouter UserRouter) UserRouter(routerGroup any) {
 	publicRoutes := router.Group("")
 	{
 		publicRoutes.GET(constants.GetAllItemsURL, func(ginContext *gin.Context) {
-			userRouter.userController.GetAllUsers(ginContext)
+			userRouter.UserController.GetAllUsers(ginContext)
 		})
 
 		publicRoutes.GET(constants.GetItemByIdURL, func(ginContext *gin.Context) {
-			userRouter.userController.GetUserById(ginContext)
+			userRouter.UserController.GetUserById(ginContext)
 		})
 
 		publicRoutes.POST(constants.ForgottenPasswordPath, func(ginContext *gin.Context) {
-			userRouter.userController.ForgottenPassword(ginContext)
+			userRouter.UserController.ForgottenPassword(ginContext)
 		})
 
 		publicRoutes.PATCH(constants.ResetPasswordPath, func(ginContext *gin.Context) {
-			userRouter.userController.ResetUserPassword(ginContext)
+			userRouter.UserController.ResetUserPassword(ginContext)
 		})
 	}
 
 	// Public routes with anonymous middleware.
 	publicAnonymousRoutes := router.Group("")
-	publicAnonymousRoutes.Use(httpGinMiddleware.AnonymousMiddleware())
+	publicAnonymousRoutes.Use(httpGinMiddleware.AnonymousMiddleware(userRouter.Logger))
 	{
 		publicAnonymousRoutes.POST(constants.LoginPath, func(ginContext *gin.Context) {
-			userRouter.userController.Login(ginContext)
+			userRouter.UserController.Login(ginContext)
 		})
 
 		publicAnonymousRoutes.POST(constants.RegisterPath, func(ginContext *gin.Context) {
-			userRouter.userController.Register(ginContext)
+			userRouter.UserController.Register(ginContext)
 		})
 	}
 
 	// Authenticated routes with authentication middleware.
 	authenticatedRoutes := router.Group("")
-	authenticatedRoutes.Use(httpGinMiddleware.AuthenticationMiddleware())
+	authenticatedRoutes.Use(httpGinMiddleware.AuthenticationMiddleware(userRouter.Logger))
 	{
 		authenticatedRoutes.GET(constants.GetCurrentUserPath, func(ginContext *gin.Context) {
-			userRouter.userController.GetCurrentUser(ginContext)
+			userRouter.UserController.GetCurrentUser(ginContext)
 		})
 
 		authenticatedRoutes.PUT(constants.UpdateCurrentUserPath, func(ginContext *gin.Context) {
-			userRouter.userController.UpdateCurrentUser(ginContext)
+			userRouter.UserController.UpdateCurrentUser(ginContext)
 		})
 
 		authenticatedRoutes.DELETE(constants.DeleteCurrentUserPath, func(ginContext *gin.Context) {
-			userRouter.userController.DeleteCurrentUser(ginContext)
+			userRouter.UserController.DeleteCurrentUser(ginContext)
 		})
 	}
 
 	// Token-related routes with refresh token authentication middleware.
 	tokenRoutes := router.Group("")
-	tokenRoutes.Use(httpGinMiddleware.RefreshTokenAuthenticationMiddleware())
+	tokenRoutes.Use(httpGinMiddleware.RefreshTokenAuthenticationMiddleware(userRouter.Logger))
 	{
 		tokenRoutes.GET(constants.RefreshTokenPath, func(ginContext *gin.Context) {
-			userRouter.userController.RefreshAccessToken(ginContext)
+			userRouter.UserController.RefreshAccessToken(ginContext)
 		})
 
 		tokenRoutes.GET(constants.LogoutPath, func(ginContext *gin.Context) {
-			userRouter.userController.Logout(ginContext)
+			userRouter.UserController.Logout(ginContext)
 		})
 	}
 }

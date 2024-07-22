@@ -2,6 +2,7 @@ package model
 
 import (
 	postModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
+	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	mongoModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
@@ -32,8 +33,8 @@ func PostRepositoryToPostMapper(postRepository *PostRepository) *postModel.Post 
 	}
 }
 
-func PostCreateToPostCreateRepositoryMapper(postCreate *postModel.PostCreate) (*PostCreateRepository, error) {
-	userObjectID := mongoModel.HexToObjectIDMapper(location+"PostCreateToPostCreateRepositoryMapper", postCreate.UserID)
+func PostCreateToPostCreateRepositoryMapper(logger applicationModel.Logger, postCreate *postModel.PostCreate) (*PostCreateRepository, error) {
+	userObjectID := mongoModel.HexToObjectIDMapper(logger, location+"PostCreateToPostCreateRepositoryMapper", postCreate.UserID)
 	if validator.IsError(userObjectID.Error) {
 		return &PostCreateRepository{}, userObjectID.Error
 	}
@@ -49,13 +50,13 @@ func PostCreateToPostCreateRepositoryMapper(postCreate *postModel.PostCreate) (*
 	}, nil
 }
 
-func PostUpdateToPostUpdateRepositoryMapper(postUpdate *postModel.PostUpdate) (*PostUpdateRepository, error) {
-	postObjectID := mongoModel.HexToObjectIDMapper(location+"PostUpdateToPostUpdateRepositoryMapper.postObjectID", postUpdate.PostID)
+func PostUpdateToPostUpdateRepositoryMapper(logger applicationModel.Logger, postUpdate *postModel.PostUpdate) (*PostUpdateRepository, error) {
+	postObjectID := mongoModel.HexToObjectIDMapper(logger, location+"PostUpdateToPostUpdateRepositoryMapper.postObjectID", postUpdate.PostID)
 	if validator.IsError(postObjectID.Error) {
 		return &PostUpdateRepository{}, postObjectID.Error
 	}
 
-	userObjectID := mongoModel.HexToObjectIDMapper(location+"PostUpdateToPostUpdateRepositoryMapper.userObjectID", postUpdate.UserID)
+	userObjectID := mongoModel.HexToObjectIDMapper(logger, location+"PostUpdateToPostUpdateRepositoryMapper.userObjectID", postUpdate.UserID)
 	if validator.IsError(userObjectID.Error) {
 		return &PostUpdateRepository{}, userObjectID.Error
 	}

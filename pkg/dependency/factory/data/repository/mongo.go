@@ -13,7 +13,6 @@ import (
 	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-	logger "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logger"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -21,7 +20,7 @@ import (
 )
 
 const (
-	location           = "pkg.dependency.data.repository.mongo.NewRepository."
+	location           = "pkg.dependency.data.repository.mongo."
 	retryDelayInterval = 30 * time.Second
 	maxRetryAttempts   = 5
 )
@@ -31,53 +30,51 @@ type MongoDBRepository struct {
 	MongoClient *mongo.Client
 }
 
-func NewMongoDBRepository() *MongoDBRepository {
-	return &MongoDBRepository{}
+func NewMongoDBRepository(logger applicationModel.Logger) *MongoDBRepository {
+	return &MongoDBRepository{Logger: logger}
 }
 
-func (mongoDBRepository *MongoDBRepository) NewRepository(ctx context.Context, logger applicationModel.Logger) any {
+func (mongoDBRepository *MongoDBRepository) NewRepository(ctx context.Context) any {
 	mongoDBConfig := config.GetMongoDBConfig()
 	var connectError error
-	mongoDBRepository.Logger = logger
 
 	mongoConnection := options.Client().ApplyURI(mongoDBConfig.URI)
-	mongoClient := connectToMongo(ctx, mongoConnection)
+	mongoClient := connectToMongo(ctx, mongoDBRepository.Logger, mongoConnection)
 	mongoDBRepository.MongoClient = mongoClient.Data
 	if validator.IsError(mongoClient.Error) {
-		mongoDBRepository.Logger.Panic(constants.DatabaseConnectionFailure)
+		mongoDBRepository.Logger.Panic(domainError.NewInternalError(location+"NewRepository.mongoClient", constants.DatabaseConnectionFailure))
 	}
 
-	connectError = pingMongo(ctx, mongoDBRepository.MongoClient)
+	connectError = pingMongo(ctx, mongoDBRepository.Logger, mongoDBRepository.MongoClient)
 	if validator.IsError(connectError) {
-		mongoDBRepository.Logger.Panic(constants.DatabaseConnectionFailure)
+		mongoDBRepository.Logger.Panic(domainError.NewInternalError(location+"NewRepository.pingMongo", constants.DatabaseConnectionFailure))
 	}
 
-	mongoDBRepository.Logger.Info(constants.DatabaseConnectionSuccess)
+	mongoDBRepository.Logger.Info(domainError.NewInfoMessage(location+"NewRepository", constants.DatabaseConnectionSuccess))
 	return mongoDBRepository.MongoClient.Database(mongoDBConfig.Name)
 }
 
 func (mongoDBRepository *MongoDBRepository) CloseRepository(ctx context.Context) {
 	disconnectError := mongoDBRepository.MongoClient.Disconnect(ctx)
 	if validator.IsError(disconnectError) {
-		internalError := domainError.NewInternalError(location+"CloseRepository.Disconnect", disconnectError.Error())
-		logger.Logger(internalError)
+		mongoDBRepository.Logger.Panic(domainError.NewInternalError(location+"CloseRepository.Disconnect", disconnectError.Error()))
 	}
 
-	logger.Logger(constants.DatabaseConnectionClosed)
+	mongoDBRepository.Logger.Info(domainError.NewInfoMessage(location+"CloseRepository", constants.DatabaseConnectionSuccess))
 }
 
 func (mongoDBRepository *MongoDBRepository) NewUserRepository(database any) user.UserRepository {
 	mongoDB := database.(*mongo.Database)
-	return userRepository.NewUserRepository(mongoDB)
+	return userRepository.NewUserRepository(mongoDB, mongoDBRepository.Logger)
 }
 
 func (mongoDBRepository *MongoDBRepository) NewPostRepository(database any) post.PostRepository {
 	mongoDB := database.(*mongo.Database)
-	return postRepository.NewPostRepository(mongoDB)
+	return postRepository.NewPostRepository(mongoDB, mongoDBRepository.Logger)
 }
 
 // connectToMongo attempts to connect to MongoDB server with retries.
-func connectToMongo(ctx context.Context, mongoConnection *options.ClientOptions) commonModel.Result[*mongo.Client] {
+func connectToMongo(ctx context.Context, logger applicationModel.Logger, mongoConnection *options.ClientOptions) commonModel.Result[*mongo.Client] {
 	var client *mongo.Client
 	var connectError error
 	var delay = time.Second
@@ -88,18 +85,18 @@ func connectToMongo(ctx context.Context, mongoConnection *options.ClientOptions)
 			return commonModel.NewResultOnSuccess[*mongo.Client](client)
 		}
 
-		logger.Logger(domainError.NewInternalError(location+"connectToMongo.MongoClient.Connect", connectError.Error()))
+		logger.Error(domainError.NewInternalError(location+"connectToMongo.MongoClient.Connect", connectError.Error()))
 		delay += retryDelayInterval
 		time.Sleep(delay)
 	}
 
 	internalError := domainError.NewInternalError(location+"connectToMongo.MongoClient.Connect", connectError.Error())
-	logger.Logger(internalError)
+	logger.Error(internalError)
 	return commonModel.NewResultOnFailure[*mongo.Client](internalError)
 }
 
 // pingMongo attempts to ping the MongoDB server with retries.
-func pingMongo(ctx context.Context, client *mongo.Client) error {
+func pingMongo(ctx context.Context, logger applicationModel.Logger, client *mongo.Client) error {
 	var connectError error
 	var delay = time.Second
 
@@ -109,7 +106,7 @@ func pingMongo(ctx context.Context, client *mongo.Client) error {
 			return nil
 		}
 
-		logger.Logger(domainError.NewInternalError(location+"pingMongo.MongoClient.Ping", connectError.Error()))
+		logger.Error(domainError.NewInternalError(location+"pingMongo.MongoClient.Ping", connectError.Error()))
 		delay += retryDelayInterval
 		time.Sleep(delay)
 	}

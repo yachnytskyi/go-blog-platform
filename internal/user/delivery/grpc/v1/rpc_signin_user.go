@@ -35,12 +35,24 @@ func (userGrpcServer *UserGrpcServer) Login(ctx context.Context, request *pb.Log
 	userTokenPayload := domainModel.NewUserTokenPayload(user.Data.ID, user.Data.Role)
 
 	// Generate tokens.
-	accessToken := domainUtility.GenerateJWTToken(location+"Login", userGrpcServer.applicationConfig.AccessToken.PrivateKey, userGrpcServer.applicationConfig.AccessToken.ExpiredIn, userTokenPayload)
+	accessToken := domainUtility.GenerateJWTToken(
+		userGrpcServer.Logger,
+		location+"Login",
+		userGrpcServer.applicationConfig.AccessToken.PrivateKey,
+		userGrpcServer.applicationConfig.AccessToken.ExpiredIn,
+		userTokenPayload,
+	)
 	if validator.IsError(accessToken.Error) {
 		return nil, status.Errorf(codes.PermissionDenied, accessToken.Error.Error())
 	}
 
-	refreshToken := domainUtility.GenerateJWTToken(location+"Login", userGrpcServer.applicationConfig.RefreshToken.PrivateKey, userGrpcServer.applicationConfig.RefreshToken.ExpiredIn, userTokenPayload)
+	refreshToken := domainUtility.GenerateJWTToken(
+		userGrpcServer.Logger,
+		location+"Login",
+		userGrpcServer.applicationConfig.RefreshToken.PrivateKey,
+		userGrpcServer.applicationConfig.RefreshToken.ExpiredIn,
+		userTokenPayload,
+	)
 	if validator.IsError(refreshToken.Error) {
 		return nil, status.Errorf(codes.PermissionDenied, refreshToken.Error.Error())
 	}

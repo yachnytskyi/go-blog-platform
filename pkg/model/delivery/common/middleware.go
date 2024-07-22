@@ -3,6 +3,8 @@ package common
 import (
 	"fmt"
 	"time"
+
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 )
 
 type HTTPIncomingLog struct {
@@ -53,7 +55,7 @@ func NewHTTPOutgoingLog(location, correlationID, method, url, ip, userAgent stri
 	}
 }
 
-func (log HTTPIncomingLog) String() string {
+func (log HTTPIncomingLog) Error() string {
 	return fmt.Sprintf(
 		"location: %s, "+
 			"correlation_id: %s, "+
@@ -64,7 +66,7 @@ func (log HTTPIncomingLog) String() string {
 			"user_agent: %s",
 		log.Location,
 		log.CorrelationID,
-		log.Time.Format(time.RFC3339),
+		log.Time.Format(constants.DateTimeFormat),
 		log.RequestMethod,
 		log.RequestURL,
 		log.ClientIP,
@@ -72,7 +74,7 @@ func (log HTTPIncomingLog) String() string {
 	)
 }
 
-func (log HTTPOutgoingLog) String() string {
+func (log HTTPOutgoingLog) Error() string {
 	return fmt.Sprintf(
 		"location: %s, "+
 			"correlation_id: %s, "+
@@ -85,7 +87,7 @@ func (log HTTPOutgoingLog) String() string {
 			"duration: %s",
 		log.Location,
 		log.CorrelationID,
-		log.Time.Format(time.RFC3339),
+		log.Time.Format(constants.DateTimeFormat),
 		log.RequestMethod,
 		log.RequestURL,
 		log.ClientIP,

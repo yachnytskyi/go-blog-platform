@@ -24,21 +24,21 @@ type ServerRouters struct {
 
 // Logger is an interface that defines methods for logging at different levels.
 type Logger interface {
-	Trace(data any)
-	Debug(data any)
-	Info(data any)
-	Warn(data any)
-	Error(data any)
-	Fatal(data any)
-	Panic(data any)
+	Trace(data error)
+	Debug(data error)
+	Info(data error)
+	Warn(data error)
+	Error(data error)
+	Fatal(data error)
+	Panic(data error)
 }
 
 // Repository is an interface that defines methods for creating and managing repository instances.
 type Repository interface {
-	NewRepository(ctx context.Context, logger Logger) any
+	NewRepository(ctx context.Context) any
 	CloseRepository(ctx context.Context)
-	NewUserRepository(db any) user.UserRepository
-	NewPostRepository(db any) post.PostRepository
+	NewUserRepository(repository any) user.UserRepository
+	NewPostRepository(repository any) post.PostRepository
 }
 
 // UseCase is an interface that defines methods for creating use case instances.

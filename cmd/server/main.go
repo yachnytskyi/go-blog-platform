@@ -40,5 +40,5 @@ func main() {
 	<-quit
 
 	// Perform a graceful shutdown when a signal is received.
-	applicationModel.GracefulShutdown(ctx, container.Repository, container.Delivery)
+	applicationModel.GracefulShutdown(ctx, container.Logger, container.Repository, container.Delivery)
 }

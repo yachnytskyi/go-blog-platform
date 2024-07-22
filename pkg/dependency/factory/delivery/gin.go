@@ -18,7 +18,6 @@ import (
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	httpGinCommon "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/common"
 	httpGinMiddleware "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/middleware"
-	logger "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logger"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
@@ -27,18 +26,19 @@ const (
 )
 
 type GinDelivery struct {
-	Server *http.Server // HTTP server instance.
-	Router *gin.Engine  // Gin router engine instance.
+	Logger applicationModel.Logger
+	Server *http.Server
+	Router *gin.Engine
 }
 
-func NewGinDelivery() *GinDelivery {
-	return &GinDelivery{}
+func NewGinDelivery(logger applicationModel.Logger) *GinDelivery {
+	return &GinDelivery{Logger: logger}
 }
 
 func (ginDelivery *GinDelivery) NewDelivery(serverRouters applicationModel.ServerRouters) {
 	ginConfig := config.GetGinConfig()
 	ginDelivery.Router = gin.Default()
-	applyMiddleware(ginDelivery.Router)
+	applyMiddleware(ginDelivery.Router, ginDelivery.Logger)
 	configureCORS(ginDelivery.Router, ginConfig)
 	router := ginDelivery.Router.Group(ginConfig.ServerGroup)
 
@@ -46,8 +46,8 @@ func (ginDelivery *GinDelivery) NewDelivery(serverRouters applicationModel.Serve
 	serverRouters.UserRouter.UserRouter(router)
 	serverRouters.PostRouter.PostRouter(router, serverRouters.UserUseCase)
 
-	setNoRouteHandler(ginDelivery.Router)
-	setNoMethodHandler(ginDelivery.Router)
+	setNoRouteHandler(ginDelivery.Router, ginDelivery.Logger)
+	setNoMethodHandler(ginDelivery.Router, ginDelivery.Logger)
 	ginDelivery.Router.HandleMethodNotAllowed = true
 
 	ginDelivery.Server = &http.Server{
@@ -63,32 +63,30 @@ func (ginDelivery *GinDelivery) LaunchServer(ctx context.Context, repository app
 		runError := ginDelivery.Router.Run(":" + ginConfig.Port)
 		if validator.IsError(runError) {
 			repository.CloseRepository(ctx)
-			internalError := domainError.NewInternalError(location+"LaunchServer.Router.Run", runError.Error())
-			logger.Logger(internalError)
+			ginDelivery.Logger.Panic(domainError.NewInternalError(location+"LaunchServer.Router.Run", runError.Error()))
 		}
 	}()
 
-	logger.Logger(constants.ServerConnectionSuccess)
+	ginDelivery.Logger.Info(domainError.NewInfoMessage(location+"LaunchServer", constants.ServerConnectionSuccess))
 }
 
 func (ginDelivery *GinDelivery) CloseServer(ctx context.Context) {
 	shutDownError := ginDelivery.Server.Shutdown(ctx)
 	if validator.IsError(shutDownError) {
-		internalError := domainError.NewInternalError(location+"CloseServer.Server.Shutdown", shutDownError.Error())
-		logger.Logger(internalError)
+		ginDelivery.Logger.Panic(domainError.NewInternalError(location+"CloseServer.Server.Shutdown", shutDownError.Error()))
 	}
 
-	logger.Logger(constants.ServerConnectionClosed)
+	ginDelivery.Logger.Info(domainError.NewInfoMessage(location+"CloseServer", constants.ServerConnectionClosed))
 }
 
 func (ginDelivery *GinDelivery) NewUserController(useCase any) user.UserController {
 	userUseCase := useCase.(user.UserUseCase)
-	return userDelivery.NewUserController(userUseCase)
+	return userDelivery.NewUserController(ginDelivery.Logger, userUseCase)
 }
 
 func (ginDelivery *GinDelivery) NewUserRouter(controller any) user.UserRouter {
 	userController := controller.(user.UserController)
-	return userDelivery.NewUserRouter(userController)
+	return userDelivery.NewUserRouter(ginDelivery.Logger, userController)
 }
 
 func (ginDelivery *GinDelivery) NewPostController(userUseCaseInterface, postUseCaseInterface any) post.PostController {
@@ -99,17 +97,17 @@ func (ginDelivery *GinDelivery) NewPostController(userUseCaseInterface, postUseC
 
 func (ginDelivery *GinDelivery) NewPostRouter(controller any) post.PostRouter {
 	postController := controller.(post.PostController)
-	return postDelivery.NewPostRouter(postController)
+	return postDelivery.NewPostRouter(ginDelivery.Logger, postController)
 }
 
-func applyMiddleware(router *gin.Engine) {
+func applyMiddleware(router *gin.Engine, logger applicationModel.Logger) {
 	router.Use(httpGinMiddleware.CorrelationIDMiddleware())
 	router.Use(httpGinMiddleware.SecureHeadersMiddleware())
 	router.Use(httpGinMiddleware.CSPMiddleware())
 	router.Use(httpGinMiddleware.RateLimitMiddleware())
-	router.Use(httpGinMiddleware.ValidateInputMiddleware())
-	router.Use(httpGinMiddleware.TimeoutMiddleware())
-	router.Use(httpGinMiddleware.LoggerMiddleware())
+	router.Use(httpGinMiddleware.ValidateInputMiddleware(logger))
+	router.Use(httpGinMiddleware.TimeoutMiddleware(logger))
+	router.Use(httpGinMiddleware.LoggerMiddleware(logger))
 }
 
 func configureCORS(router *gin.Engine, ginConfig config.Gin) {
@@ -119,22 +117,22 @@ func configureCORS(router *gin.Engine, ginConfig config.Gin) {
 	router.Use(cors.New(corsConfig))
 }
 
-func setNoRouteHandler(router *gin.Engine) {
+func setNoRouteHandler(router *gin.Engine, logger applicationModel.Logger) {
 	router.NoRoute(func(ginContext *gin.Context) {
 		requestedPath := ginContext.Request.URL.Path
 		errorMessage := fmt.Sprintf(constants.RouteNotFoundNotification, requestedPath)
 		httpRequestError := httpError.NewHTTPRequestError(location+"NewDelivery.setNoRouteHandler.ginDelivery.Router.NoRoute", requestedPath, errorMessage)
-		logger.Logger(httpRequestError)
+		logger.Error(httpRequestError)
 		httpGinCommon.GinNewJSONFailureResponse(ginContext, httpRequestError, constants.StatusNotFound)
 	})
 }
 
-func setNoMethodHandler(router *gin.Engine) {
+func setNoMethodHandler(router *gin.Engine, logger applicationModel.Logger) {
 	router.NoMethod(func(ginContext *gin.Context) {
 		forbiddenMethod := ginContext.Request.Method
 		errorMessage := fmt.Sprintf(constants.MethodNotAllowedNotification, forbiddenMethod)
 		httpRequestError := httpError.NewHTTPRequestError(location+"NewDelivery.setNoMethodHandler.ginDelivery.Router.NoMethod", forbiddenMethod, errorMessage)
-		logger.Logger(httpRequestError)
+		logger.Error(httpRequestError)
 		httpGinCommon.GinNewJSONFailureResponse(ginContext, httpRequestError, constants.StatusMethodNotAllowed)
 	})
 }

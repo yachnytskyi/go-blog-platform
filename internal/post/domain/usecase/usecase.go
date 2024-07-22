@@ -6,6 +6,7 @@ import (
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
 	postModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
+	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
 
@@ -14,25 +15,29 @@ const (
 )
 
 type PostUseCaseV1 struct {
-	postRepository post.PostRepository
+	Logger         applicationModel.Logger
+	PostRepository post.PostRepository
 }
 
-func NewPostUseCaseV1(postRepository post.PostRepository) post.PostUseCase {
-	return &PostUseCaseV1{postRepository: postRepository}
+func NewPostUseCaseV1(logger applicationModel.Logger, postRepository post.PostRepository) post.PostUseCase {
+	return &PostUseCaseV1{
+		Logger:         logger,
+		PostRepository: postRepository,
+	}
 }
 
 func (postUseCaseV1 *PostUseCaseV1) GetAllPosts(ctx context.Context, page int, limit int) (*postModel.Posts, error) {
-	fetchedPosts, err := postUseCaseV1.postRepository.GetAllPosts(ctx, page, limit)
+	fetchedPosts, err := postUseCaseV1.PostRepository.GetAllPosts(ctx, page, limit)
 	return fetchedPosts, err
 }
 
 func (postUseCaseV1 *PostUseCaseV1) GetPostById(ctx context.Context, postID string) (*postModel.Post, error) {
-	fetchedPost, err := postUseCaseV1.postRepository.GetPostById(ctx, postID)
+	fetchedPost, err := postUseCaseV1.PostRepository.GetPostById(ctx, postID)
 	return fetchedPost, err
 }
 
 func (postUseCaseV1 *PostUseCaseV1) CreatePost(ctx context.Context, post *postModel.PostCreate) (*postModel.Post, error) {
-	createdPost, err := postUseCaseV1.postRepository.CreatePost(ctx, post)
+	createdPost, err := postUseCaseV1.PostRepository.CreatePost(ctx, post)
 	return createdPost, err
 }
 
@@ -48,7 +53,7 @@ func (postUseCaseV1 *PostUseCaseV1) UpdatePostById(ctx context.Context, postID s
 		return nil, domainError.NewAuthorizationError(location, constants.AuthorizationErrorNotification)
 	}
 
-	updatedPost, err := postUseCaseV1.postRepository.UpdatePostById(ctx, postID, post)
+	updatedPost, err := postUseCaseV1.PostRepository.UpdatePostById(ctx, postID, post)
 	return updatedPost, err
 }
 
@@ -64,6 +69,6 @@ func (postUseCaseV1 *PostUseCaseV1) DeletePostByID(ctx context.Context, postID s
 		return domainError.NewAuthorizationError(location, constants.AuthorizationErrorNotification)
 	}
 
-	deletedPost := postUseCaseV1.postRepository.DeletePostByID(ctx, postID)
+	deletedPost := postUseCaseV1.PostRepository.DeletePostByID(ctx, postID)
 	return deletedPost
 }

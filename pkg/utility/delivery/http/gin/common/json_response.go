@@ -3,9 +3,9 @@ package common
 import (
 	"github.com/gin-gonic/gin"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
+	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
-	logger "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logger"
 )
 
 // GinNewJSONFailureResponse generates a JSON response for a failed operation.
@@ -15,8 +15,8 @@ func GinNewJSONFailureResponse(ginContext *gin.Context, err error, httpCode int)
 }
 
 // HandleJSONBindingError handles errors that occur during JSON data binding.
-func HandleJSONBindingError(ginContext *gin.Context, location string, err error) {
+func HandleJSONBindingError(ginContext *gin.Context, logger applicationModel.Logger, location string, err error) {
 	httpInternalError := httpError.NewHTTPInternalError(location+".ShouldBindJSON", err.Error())
-	logger.Logger(httpInternalError)
+	logger.Error(httpInternalError)
 	GinNewJSONFailureResponse(ginContext, httpInternalError, constants.StatusBadRequest)
 }

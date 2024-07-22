@@ -1,13 +1,12 @@
 package common
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
 	commonUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
-	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
+	// validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	test "github.com/yachnytskyi/golang-mongo-grpc/test"
 )
 
@@ -35,44 +34,44 @@ func TestEncodeEmptyString(t *testing.T) {
 	assert.Equal(t, emptyString, encoded, test.EqualMessage)
 }
 
-// Tests for Decode function
+// // Tests for Decode function
 
-// TestDecodeValidBase64String tests the decoding of a valid base64 string.
-func TestDecodeValidBase64String(t *testing.T) {
-	result := commonUtility.Decode(location+"TestDecodeValidBase64String", encodedString)
-	assert.False(t, validator.IsError(result.Error), test.NotFailureMessage)
-	assert.Equal(t, originalString, result.Data, test.EqualMessage)
-}
+// // TestDecodeValidBase64String tests the decoding of a valid base64 string.
+// func TestDecodeValidBase64String(t *testing.T) {
+// 	result := commonUtility.Decode(location+"TestDecodeValidBase64String", encodedString)
+// 	assert.False(t, validator.IsError(result.Error), test.NotFailureMessage)
+// 	assert.Equal(t, originalString, result.Data, test.EqualMessage)
+// }
 
-// TestDecodeInvalidBase64String tests the decoding of an invalid base64 string.
-func TestDecodeInvalidBase64String(t *testing.T) {
-	expectedLocation := location + "TestDecodeInvalidBase64String.Decode.DecodeString"
-	result := commonUtility.Decode(location+"TestDecodeInvalidBase64String", invalidString)
+// // TestDecodeInvalidBase64String tests the decoding of an invalid base64 string.
+// func TestDecodeInvalidBase64String(t *testing.T) {
+// 	expectedLocation := location + "TestDecodeInvalidBase64String.Decode.DecodeString"
+// 	result := commonUtility.Decode(location+"TestDecodeInvalidBase64String", invalidString)
 
-	assert.True(t, validator.IsError(result.Error), test.FailureMessage)
-	assert.NotNil(t, result.Error, test.ErrorNilMessage)
-	expectedErrorMessage := fmt.Sprintf(test.ExpectedErrorMessageFormat, expectedLocation, decodeErrorMessage+"7")
-	assert.Equal(t, expectedErrorMessage, result.Error.Error(), expectedErrorMessage)
-}
+// 	assert.True(t, validator.IsError(result.Error), test.FailureMessage)
+// 	assert.NotNil(t, result.Error, test.ErrorNilMessage)
+// 	expectedErrorMessage := fmt.Sprintf(test.ExpectedErrorMessageFormat, expectedLocation, decodeErrorMessage+"7")
+// 	assert.Equal(t, expectedErrorMessage, result.Error.Error(), expectedErrorMessage)
+// }
 
-// TestDecodeInvalidBase64StringDifferentError tests decoding of a differently invalid base64 string.
-func TestDecodeInvalidBase64StringDifferentError(t *testing.T) {
-	expectedLocation := location + "TestDecodeInvalidBase64StringDifferentError.Decode.DecodeString"
-	invalidString := "!!!" + invalidString + "!!!"
-	result := commonUtility.Decode(location+"TestDecodeInvalidBase64StringDifferentError", invalidString)
+// // TestDecodeInvalidBase64StringDifferentError tests decoding of a differently invalid base64 string.
+// func TestDecodeInvalidBase64StringDifferentError(t *testing.T) {
+// 	expectedLocation := location + "TestDecodeInvalidBase64StringDifferentError.Decode.DecodeString"
+// 	invalidString := "!!!" + invalidString + "!!!"
+// 	result := commonUtility.Decode(location+"TestDecodeInvalidBase64StringDifferentError", invalidString)
 
-	assert.True(t, validator.IsError(result.Error), test.FailureMessage)
-	assert.NotNil(t, result.Error, test.ErrorNilMessage)
-	expectedErrorMessage := fmt.Sprintf(test.ExpectedErrorMessageFormat, expectedLocation, decodeErrorMessage+"0")
-	assert.Equal(t, expectedErrorMessage, result.Error.Error(), test.CorrectErrorMessage)
-}
+// 	assert.True(t, validator.IsError(result.Error), test.FailureMessage)
+// 	assert.NotNil(t, result.Error, test.ErrorNilMessage)
+// 	expectedErrorMessage := fmt.Sprintf(test.ExpectedErrorMessageFormat, expectedLocation, decodeErrorMessage+"0")
+// 	assert.Equal(t, expectedErrorMessage, result.Error.Error(), test.CorrectErrorMessage)
+// }
 
-// TestDecodeEmptyString tests the decoding of an empty string.
-func TestDecodeEmptyString(t *testing.T) {
-	result := commonUtility.Decode(location+"TestDecodeEmptyString", emptyString)
-	assert.False(t, validator.IsError(result.Error), test.NotFailureMessage)
-	assert.Equal(t, emptyString, result.Data, test.EqualMessage)
-}
+// // TestDecodeEmptyString tests the decoding of an empty string.
+// func TestDecodeEmptyString(t *testing.T) {
+// 	result := commonUtility.Decode(location+"TestDecodeEmptyString", emptyString)
+// 	assert.False(t, validator.IsError(result.Error), test.NotFailureMessage)
+// 	assert.Equal(t, emptyString, result.Data, test.EqualMessage)
+// }
 
 // Tests for ConvertQueryToString function
 

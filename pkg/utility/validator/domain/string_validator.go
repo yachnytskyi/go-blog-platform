@@ -5,9 +5,9 @@ import (
 	"regexp"
 
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
+	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	domainModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-	logger "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logger"
 )
 
 const (
@@ -15,7 +15,7 @@ const (
 )
 
 // ValidateField validates a required field based on the provided commonValidator.
-func ValidateField(location, field string, commonValidator domainModel.CommonValidator, validationErrors []error) []error {
+func ValidateField(logger applicationModel.Logger, location, field string, commonValidator domainModel.CommonValidator, validationErrors []error) []error {
 	errors := validationErrors
 
 	if IsStringLengthInvalid(field, commonValidator.MinLength, commonValidator.MaxLength) {
@@ -27,7 +27,7 @@ func ValidateField(location, field string, commonValidator domainModel.CommonVal
 			commonValidator.Notification,
 		)
 
-		logger.Logger(validationError)
+		logger.Warn(validationError)
 		errors = append(errors, validationError)
 		return errors
 	}
@@ -41,7 +41,7 @@ func ValidateField(location, field string, commonValidator domainModel.CommonVal
 			commonValidator.Notification,
 		)
 
-		logger.Logger(validationError)
+		logger.Warn(validationError)
 		errors = append(errors, validationError)
 		return errors
 	}
@@ -50,7 +50,7 @@ func ValidateField(location, field string, commonValidator domainModel.CommonVal
 }
 
 // ValidateOptionalField validates an optional field based on the provided commonValidator.
-func ValidateOptionalField(location, field string, commonValidator domainModel.CommonValidator, validationErrors []error) []error {
+func ValidateOptionalField(logger applicationModel.Logger, location, field string, commonValidator domainModel.CommonValidator, validationErrors []error) []error {
 	if len(field) == 0 {
 		return validationErrors
 	}
@@ -65,7 +65,7 @@ func ValidateOptionalField(location, field string, commonValidator domainModel.C
 			commonValidator.Notification,
 		)
 
-		logger.Logger(validationError)
+		logger.Warn(validationError)
 		errors = append(errors, validationError)
 		return errors
 	}
@@ -79,7 +79,7 @@ func ValidateOptionalField(location, field string, commonValidator domainModel.C
 			commonValidator.Notification,
 		)
 
-		logger.Logger(validationError)
+		logger.Warn(validationError)
 		errors = append(errors, validationError)
 		return errors
 	}

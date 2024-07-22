@@ -1,12 +1,13 @@
-package http
+package model
 
 import (
-	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
 
 func HandleError(err error) error {
 	switch errorType := err.(type) {
+	case domainError.InfoMessage:
+		return InfoMessageToHTTPInfoMessageMapper(errorType)
 	case domainError.ValidationError:
 		return ValidationErrorToHTTPValidationErrorMapper(errorType)
 	case domainError.ValidationErrors:
@@ -21,11 +22,8 @@ func HandleError(err error) error {
 		return TimeExpiredErrorToHTTPTimeExpiredErrorMapper(errorType)
 	case domainError.PaginationError:
 		return PaginationErrorToHTTPPaginationErrorMapper(errorType)
-	case HTTPInternalError:
-		errorType.Notification = constants.InternalErrorNotification
-		return errorType
-	case HTTPInternalErrors:
-		return errorType
+	case domainError.InternalError:
+		return InternalErrorToHTTPInternalErrorMapper(errorType)
 	default:
 		return errorType
 	}

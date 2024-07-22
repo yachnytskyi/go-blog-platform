@@ -10,25 +10,25 @@ import (
 // CreateApplication initializes the application by setting up the container,
 // injecting dependencies, and configuring the server.
 func CreateApplication(ctx context.Context) *applicationModel.Container {
-	loggerFactory := factory.NewLoggerFactory(ctx)
+	logger := factory.NewLogger(ctx)
 
 	// Create repositories
-	repositoryFactory := factory.NewRepositoryFactory(ctx)
-	repository := repositoryFactory.NewRepository(ctx, loggerFactory)
+	repositoryFactory := factory.NewRepositoryFactory(ctx, logger)
+	repository := repositoryFactory.NewRepository(ctx)
 	userRepository := repositoryFactory.NewUserRepository(repository)
 	postRepository := repositoryFactory.NewPostRepository(repository)
 
 	// Create use cases
-	usecaseFactory := factory.NewUseCaseFactory(ctx, repositoryFactory)
+	usecaseFactory := factory.NewUseCaseFactory(ctx, logger, repositoryFactory)
 	userUseCase := usecaseFactory.NewUserUseCase(userRepository)
 	postUseCase := usecaseFactory.NewPostUseCase(postRepository)
 
 	// Create controllers
-	deliveryFactory := factory.NewDeliveryFactory(ctx, repositoryFactory)
+	deliveryFactory := factory.NewDeliveryFactory(ctx, logger, repositoryFactory)
 	userController := deliveryFactory.NewUserController(userUseCase)
 	postController := deliveryFactory.NewPostController(userUseCase, postUseCase)
 
-	container := applicationModel.NewContainer(loggerFactory, repositoryFactory, usecaseFactory, deliveryFactory)
+	container := applicationModel.NewContainer(logger, repositoryFactory, usecaseFactory, deliveryFactory)
 	serverRouters := applicationModel.NewServerRouters(
 		userUseCase,
 		deliveryFactory.NewUserRouter(userController),

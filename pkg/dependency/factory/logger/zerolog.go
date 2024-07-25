@@ -5,9 +5,8 @@ import (
 	"os"
 
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/logger/model"
+	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/logger/model"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
@@ -17,17 +16,17 @@ type Zerolog struct {
 
 func NewZerolog() *Zerolog {
 	// Set the time format and global log level for zerolog.
-	zerolog.TimeFieldFormat = constants.DateTimeFormat
+	zerolog.TimeFieldFormat = constants.LoggerDateTimeFormat
 	zerolog.SetGlobalLevel(zerolog.TraceLevel)
 
 	// Create a new zerolog logger with console output.
-	logger := log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: constants.DateTimeFormat})
+	logger := zerolog.New(os.Stderr).With().Timestamp().Logger()
 	return &Zerolog{logger: logger}
 }
 
 // logWithLevel handles the common logic for logging at different levels.
 func (l *Zerolog) logWithLevel(level zerolog.Level, data error) {
-	data = httpModel.HandleError(data)
+	data = model.HandleError(data)
 	jsonData, marshalError := json.Marshal(data)
 	if validator.IsError(marshalError) {
 		l.logger.Error().Err(marshalError).Msg("")
@@ -37,19 +36,19 @@ func (l *Zerolog) logWithLevel(level zerolog.Level, data error) {
 	// Log the data at the specified level.
 	switch level {
 	case zerolog.TraceLevel:
-		l.logger.Trace().RawJSON("", jsonData).Msg("")
+		l.logger.Trace().RawJSON("trace", jsonData).Msg("")
 	case zerolog.DebugLevel:
-		l.logger.Debug().RawJSON("", jsonData).Msg("")
+		l.logger.Debug().RawJSON("debug", jsonData).Msg("")
 	case zerolog.InfoLevel:
-		l.logger.Info().RawJSON("", jsonData).Msg("")
+		l.logger.Info().RawJSON("info", jsonData).Msg("")
 	case zerolog.WarnLevel:
-		l.logger.Warn().RawJSON("", jsonData).Msg("")
+		l.logger.Warn().RawJSON("warn", jsonData).Msg("")
 	case zerolog.ErrorLevel:
-		l.logger.Error().RawJSON("", jsonData).Msg("")
+		l.logger.Error().RawJSON("error", jsonData).Msg("")
 	case zerolog.FatalLevel:
-		l.logger.Fatal().RawJSON("", jsonData).Msg("")
+		l.logger.Fatal().RawJSON("fatal", jsonData).Msg("")
 	case zerolog.PanicLevel:
-		l.logger.Panic().RawJSON("", jsonData).Msg("")
+		l.logger.Panic().RawJSON("panic", jsonData).Msg("")
 	}
 }
 

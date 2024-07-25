@@ -111,9 +111,10 @@ const (
 	DefaultContextTimer = 5 * time.Second // Default context timeout duration.
 )
 
-// DateTime format.
+// DateTime formats.
 const (
-	DateTimeFormat = "02-Jan-2006 03:04:05 PM MST" // DateTime format string.
+	DateTimeFormat       = "02-Jan-2006 03:04:05 PM MST" // Format for human-readable dates.
+	LoggerDateTimeFormat = time.RFC3339                  // Format for machine-readable dates (ISO 8601).
 )
 
 // Token-related constants.

@@ -9,7 +9,7 @@ import (
 	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	test "github.com/yachnytskyi/golang-mongo-grpc/test"
-	mock "github.com/yachnytskyi/golang-mongo-grpc/test/mock"
+	mock "github.com/yachnytskyi/golang-mongo-grpc/test/unit/mock/common"
 )
 
 const (

@@ -1,7 +1,6 @@
 package http
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 )
@@ -11,7 +10,7 @@ type HTTPBaseError struct {
 }
 
 func (httpBaseError HTTPBaseError) Error() string {
-	return fmt.Sprintf("notification: %s", httpBaseError.Notification)
+	return fmt.Sprintf(`{"notification": "%s"}`, httpBaseError.Notification)
 }
 
 func NewHTTPBaseError(notification string) HTTPBaseError {
@@ -30,13 +29,16 @@ func NewHTTPBaseErrors(errors []error) HTTPBaseErrors {
 
 func (httpBaseErrors HTTPBaseErrors) Error() string {
 	var result strings.Builder
-	for index, baseError := range httpBaseErrors.Errors {
-		if index > 0 {
-			result.WriteString(": ")
+	result.WriteString(`[`)
+	for i, baseError := range httpBaseErrors.Errors {
+		if i > 0 {
+			result.WriteString(", ")
 		}
-		result.WriteString(baseError.Error())
+		if e, ok := baseError.(HTTPBaseError); ok {
+			result.WriteString(fmt.Sprintf(`{"notification": "%s"}`, e.Notification))
+		}
 	}
-
+	result.WriteString(`]`)
 	return result.String()
 }
 
@@ -59,7 +61,10 @@ func NewHTTPValidationError(field, fieldType, notification string) HTTPValidatio
 }
 
 func (httpValidationError HTTPValidationError) Error() string {
-	return fmt.Sprintf("%s field: %s type: %s", httpValidationError.HTTPBaseError.Error(), httpValidationError.Field, httpValidationError.FieldType)
+	return fmt.Sprintf(`{"notification": "%s", "field": "%s", "type": "%s"}`,
+		httpValidationError.Notification,
+		httpValidationError.Field,
+		httpValidationError.FieldType)
 }
 
 type HTTPValidationErrors struct {
@@ -80,10 +85,6 @@ func NewHTTPAuthorizationError(location, notification string) HTTPAuthorizationE
 		Location:      location,
 		HTTPBaseError: NewHTTPBaseError(notification),
 	}
-}
-
-func (httpAuthorizationError HTTPAuthorizationError) Error() string {
-	return fmt.Sprintf("location: %s %s", httpAuthorizationError.Location, httpAuthorizationError.HTTPBaseError.Error())
 }
 
 type HTTPItemNotFoundError struct {
@@ -129,7 +130,10 @@ func NewHTTPPaginationError(currentPage, totalPages, notification string) HTTPPa
 }
 
 func (httpPaginationError HTTPPaginationError) Error() string {
-	return fmt.Sprintf("%s current page: %s total pages: %s", httpPaginationError.HTTPBaseError.Error(), httpPaginationError.CurrentPage, httpPaginationError.TotalPages)
+	return fmt.Sprintf(`{"notification": "%s", "current_page": "%s", "total_pages": "%s"}`,
+		httpPaginationError.Notification,
+		httpPaginationError.CurrentPage,
+		httpPaginationError.TotalPages)
 }
 
 type HTTPRequestError struct {
@@ -147,7 +151,10 @@ func NewHTTPRequestError(location, requestType, notification string) HTTPRequest
 }
 
 func (httpRequestError HTTPRequestError) Error() string {
-	return fmt.Sprintf("location: %s request type: %s %s", httpRequestError.Location, httpRequestError.RequestType, httpRequestError.HTTPBaseError.Error())
+	return fmt.Sprintf(`{"location": "%s", "request_type": "%s", "notification": "%s"}`,
+		httpRequestError.Location,
+		httpRequestError.RequestType,
+		httpRequestError.Notification)
 }
 
 type HTTPInternalError struct {
@@ -163,7 +170,9 @@ func NewHTTPInternalError(location, notification string) HTTPInternalError {
 }
 
 func (httpInternalError HTTPInternalError) Error() string {
-	return fmt.Sprintf("location: %s %s", httpInternalError.Location, httpInternalError.HTTPBaseError.Error())
+	return fmt.Sprintf(`{"location": "%s", "notification": "%s"}`,
+		httpInternalError.Location,
+		httpInternalError.Notification)
 }
 
 type HTTPInternalErrors struct {
@@ -172,12 +181,4 @@ type HTTPInternalErrors struct {
 
 func NewHTTPInternalErrors(errors []error) HTTPInternalErrors {
 	return HTTPInternalErrors{NewHTTPBaseErrors(errors)}
-}
-
-func (httpValidationErrors HTTPValidationErrors) MarshalJSON() ([]byte, error) {
-	return json.Marshal(httpValidationErrors.Errors)
-}
-
-func (httpInternalErrors HTTPInternalErrors) MarshalJSON() ([]byte, error) {
-	return json.Marshal(httpInternalErrors.Errors)
 }

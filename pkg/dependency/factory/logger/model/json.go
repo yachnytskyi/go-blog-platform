@@ -12,7 +12,7 @@ type JSONBaseError struct {
 }
 
 func (jsonBaseError JSONBaseError) Error() string {
-	return fmt.Sprintf("notification: %s", jsonBaseError.Notification)
+	return fmt.Sprintf(`{"location": "%s", "notification": "%s"}`, jsonBaseError.Location, jsonBaseError.Notification)
 }
 
 func NewJSONBaseError(location, notification string) JSONBaseError {
@@ -32,13 +32,18 @@ func NewJSONBaseErrors(errors []error) JSONBaseErrors {
 
 func (jsonBaseErrors JSONBaseErrors) Error() string {
 	var result strings.Builder
-	for index, baseError := range jsonBaseErrors.Errors {
-		if index > 0 {
-			result.WriteString(": ")
+	result.WriteString(`[`)
+	for i, baseError := range jsonBaseErrors.Errors {
+		if i > 0 {
+			result.WriteString(", ")
 		}
-		result.WriteString(baseError.Error())
+		result.WriteString(`{`)
+		if e, ok := baseError.(JSONBaseError); ok {
+			result.WriteString(fmt.Sprintf(`"location": "%s", "notification": "%s"`, e.Location, e.Notification))
+		}
+		result.WriteString(`}`)
 	}
-
+	result.WriteString(`]`)
 	return result.String()
 }
 
@@ -57,21 +62,17 @@ func NewJSONInfoMessage(location, notification string) JSONInfoMessage {
 }
 
 type JSONValidationError struct {
+	JSONBaseError
 	Field     string `json:"field"`
 	FieldType string `json:"type"`
-	JSONBaseError
 }
 
 func NewJSONValidationError(location, field, fieldType, notification string) JSONValidationError {
 	return JSONValidationError{
+		JSONBaseError: NewJSONBaseError(location, notification),
 		Field:         field,
 		FieldType:     fieldType,
-		JSONBaseError: NewJSONBaseError(location, notification),
 	}
-}
-
-func (jsonValidationError JSONValidationError) Error() string {
-	return fmt.Sprintf("%s field: %s type: %s", jsonValidationError.JSONBaseError.Error(), jsonValidationError.Field, jsonValidationError.FieldType)
 }
 
 type JSONValidationErrors struct {
@@ -83,19 +84,13 @@ func NewJSONValidationErrors(errors []error) JSONValidationErrors {
 }
 
 type JSONAuthorizationError struct {
-	Location string `json:"location"`
 	JSONBaseError
 }
 
 func NewJSONAuthorizationError(location, notification string) JSONAuthorizationError {
 	return JSONAuthorizationError{
-		Location:      location,
 		JSONBaseError: NewJSONBaseError(location, notification),
 	}
-}
-
-func (jsonAuthorizationError JSONAuthorizationError) Error() string {
-	return fmt.Sprintf("location: %s %s", jsonAuthorizationError.Location, jsonAuthorizationError.JSONBaseError.Error())
 }
 
 type JSONItemNotFoundError struct {
@@ -142,10 +137,6 @@ func NewJSONPaginationError(location, currentPage, totalPages, notification stri
 	}
 }
 
-func (jsonPaginationError JSONPaginationError) Error() string {
-	return fmt.Sprintf("%s current page: %s total pages: %s", jsonPaginationError.JSONBaseError.Error(), jsonPaginationError.CurrentPage, jsonPaginationError.TotalPages)
-}
-
 type JSONRequestError struct {
 	Location    string `json:"location"`
 	RequestType string `json:"request_type"`
@@ -160,10 +151,6 @@ func NewJSONRequestError(location, requestType, notification string) JSONRequest
 	}
 }
 
-func (jsonRequestError JSONRequestError) Error() string {
-	return fmt.Sprintf("location: %s request type: %s %s", jsonRequestError.Location, jsonRequestError.RequestType, jsonRequestError.JSONBaseError.Error())
-}
-
 type JSONInternalError struct {
 	Location string `json:"location"`
 	JSONBaseError
@@ -174,10 +161,6 @@ func NewJSONInternalError(location, notification string) JSONInternalError {
 		Location:      location,
 		JSONBaseError: NewJSONBaseError(location, notification),
 	}
-}
-
-func (jsonInternalError JSONInternalError) Error() string {
-	return fmt.Sprintf("location: %s %s", jsonInternalError.Location, jsonInternalError.JSONBaseError.Error())
 }
 
 type JSONInternalErrors struct {

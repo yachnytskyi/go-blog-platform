@@ -16,7 +16,7 @@ type BaseError struct {
 }
 
 func (baseError BaseError) Error() string {
-	return fmt.Sprintf("location: %s notification: %s", baseError.Location, baseError.Notification)
+	return fmt.Sprintf(`{"location": "%s", "notification": "%s"}`, baseError.Location, baseError.Notification)
 }
 
 func NewBaseError(location, notification string) BaseError {
@@ -36,13 +36,18 @@ func NewBaseErrors(errors []error) BaseErrors {
 
 func (baseErrors BaseErrors) Error() string {
 	var result strings.Builder
-	for index, baseError := range baseErrors.Errors {
-		if index > 0 {
-			result.WriteString(": ")
+	result.WriteString(`[`)
+	for i, baseError := range baseErrors.Errors {
+		if i > 0 {
+			result.WriteString(", ")
 		}
-		result.WriteString(baseError.Error())
+		result.WriteString(`{`)
+		if e, ok := baseError.(BaseError); ok {
+			result.WriteString(fmt.Sprintf(`"location": "%s", "notification": "%s"`, e.Location, e.Notification))
+		}
+		result.WriteString(`}`)
 	}
-
+	result.WriteString(`]`)
 	return result.String()
 }
 
@@ -75,7 +80,11 @@ func NewValidationError(location, field, fieldType, notification string) Validat
 }
 
 func (validationError ValidationError) Error() string {
-	return fmt.Sprintf("%s field: %s type: %s", validationError.BaseError.Error(), validationError.Field, validationError.FieldType)
+	return fmt.Sprintf(`{"location": "%s", "notification": "%s", "field": "%s", "type": "%s"}`,
+		validationError.Location,
+		validationError.Notification,
+		validationError.Field,
+		validationError.FieldType)
 }
 
 type ValidationErrors struct {
@@ -110,8 +119,11 @@ func NewItemNotFoundError(location, query, notification string) ItemNotFoundErro
 	}
 }
 
-func (itemNotFound ItemNotFoundError) Error() string {
-	return fmt.Sprintf("%s query: %s", itemNotFound.BaseError.Error(), itemNotFound.Query)
+func (itemNotFoundError ItemNotFoundError) Error() string {
+	return fmt.Sprintf(`{"location": "%s", "notification": "%s", "query": "%s"}`,
+		itemNotFoundError.Location,
+		itemNotFoundError.Notification,
+		itemNotFoundError.Query)
 }
 
 type InvalidTokenError struct {
@@ -149,7 +161,11 @@ func NewPaginationError(location, currentPage, totalPages, notification string) 
 }
 
 func (paginationError PaginationError) Error() string {
-	return fmt.Sprintf("%s current page: %s total pages: %s", paginationError.BaseError.Error(), paginationError.CurrentPage, paginationError.TotalPages)
+	return fmt.Sprintf(`{"location": "%s", "notification": "%s", "current_page": "%s", "total_pages": "%s"}`,
+		paginationError.Location,
+		paginationError.Notification,
+		paginationError.CurrentPage,
+		paginationError.TotalPages)
 }
 
 type InternalError struct {

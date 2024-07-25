@@ -1,7 +1,7 @@
 package http
 
 import (
-	domainModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
@@ -17,18 +17,18 @@ type JSONResponse struct {
 	Status string `json:"status"`           // The status of the response, either "success" or "fail".
 }
 
-func NewJSONSuccessResponse(data any) JSONResponse {
+func NewJSONResponseOnSuccess(data any) JSONResponse {
 	return JSONResponse{
 		Data:   data,
 		Status: success,
 	}
 }
 
-func NewJSONFailureResponse(err error) JSONResponse {
+func NewJSONResponseOnFailure(err error) JSONResponse {
 	jsonResponse := JSONResponse{Status: fail}
 
 	switch errorType := err.(type) {
-	case domainModel.Errors:
+	case model.Errors:
 		if errorType.Len() == 1 {
 			jsonResponse.Error = errorType
 		} else {

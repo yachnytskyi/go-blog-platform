@@ -3,7 +3,7 @@ package model
 import (
 	"time"
 
-	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
+	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 )
 
 type TokenView struct {
@@ -11,12 +11,12 @@ type TokenView struct {
 }
 
 type UsersView struct {
-	UsersView              []UserView                       `json:"users"`
-	HTTPPaginationResponse httpModel.HTTPPaginationResponse `json:"pagination_response"`
+	UsersView              []UserView                   `json:"users"`
+	HTTPPaginationResponse model.HTTPPaginationResponse `json:"pagination_response"`
 }
 
 type UserView struct {
-	httpModel.BaseEntity
+	model.BaseEntity
 	Name  string `json:"name"`
 	Email string `json:"email"`
 	Role  string `json:"role"`
@@ -64,7 +64,7 @@ func NewWelcomeMessageView(notification string) UserWelcomeMessageView {
 	}
 }
 
-func NewUsersView(users []UserView, paginationResponse httpModel.HTTPPaginationResponse) UsersView {
+func NewUsersView(users []UserView, paginationResponse model.HTTPPaginationResponse) UsersView {
 	return UsersView{
 		UsersView:              users,
 		HTTPPaginationResponse: paginationResponse,
@@ -73,7 +73,7 @@ func NewUsersView(users []UserView, paginationResponse httpModel.HTTPPaginationR
 
 func NewUserView(id string, createdAt, updatedAt time.Time, name, email, role string) UserView {
 	return UserView{
-		BaseEntity: httpModel.NewBaseEntity(id, createdAt, updatedAt),
+		BaseEntity: model.NewBaseEntity(id, createdAt, updatedAt),
 		Name:       name,
 		Email:      email,
 		Role:       role,

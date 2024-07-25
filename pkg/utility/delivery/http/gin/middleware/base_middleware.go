@@ -10,9 +10,9 @@ import (
 	"github.com/didip/tollbooth_gin"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
+	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
+	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/common"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -37,26 +37,21 @@ func CorrelationIDMiddleware() gin.HandlerFunc {
 }
 
 // SecureHeadersMiddleware adds secure headers to HTTP responses.
-func SecureHeadersMiddleware() gin.HandlerFunc {
+func SecureHeadersMiddleware(config *config.ApplicationConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		securityConfig := config.GetSecurityConfig()
-
-		c.Header(securityConfig.ContentSecurityPolicyHeader.Key, securityConfig.ContentSecurityPolicyHeader.Value)
-		c.Header(securityConfig.StrictTransportSecurityHeader.Key, securityConfig.StrictTransportSecurityHeader.Value)
-		c.Header(securityConfig.XContentTypeOptionsHeader.Key, securityConfig.XContentTypeOptionsHeader.Value)
-
+		c.Header(config.Security.ContentSecurityPolicyHeader.Key, config.Security.ContentSecurityPolicyHeader.Value)
+		c.Header(config.Security.StrictTransportSecurityHeader.Key, config.Security.StrictTransportSecurityHeader.Value)
+		c.Header(config.Security.XContentTypeOptionsHeader.Key, config.Security.XContentTypeOptionsHeader.Value)
 		c.Next()
 	}
 }
 
 // CSPMiddleware adds Content Security Policy (CSP) headers to HTTP responses.
-func CSPMiddleware() gin.HandlerFunc {
+func CSPMiddleware(config *config.ApplicationConfig) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		securityConfig := config.GetSecurityConfig()
-
 		c.Writer.Header().Set(
-			securityConfig.ContentSecurityPolicyHeaderFull.Key,
-			securityConfig.ContentSecurityPolicyHeaderFull.Value,
+			config.Security.ContentSecurityPolicyHeaderFull.Key,
+			config.Security.ContentSecurityPolicyHeaderFull.Value,
 		)
 
 		c.Next()
@@ -64,14 +59,12 @@ func CSPMiddleware() gin.HandlerFunc {
 }
 
 // RateLimitMiddleware implements rate limiting to control the number of requests from clients.
-func RateLimitMiddleware() gin.HandlerFunc {
-	securityConfig := config.GetSecurityConfig()
-
+func RateLimitMiddleware(config *config.ApplicationConfig) gin.HandlerFunc {
 	limiterOptions := &limiter.ExpirableOptions{
 		DefaultExpirationTTL: time.Second,
 	}
 
-	limiter := tollbooth.NewLimiter(securityConfig.RateLimit, limiterOptions)
+	limiter := tollbooth.NewLimiter(config.Security.RateLimit, limiterOptions)
 	return func(c *gin.Context) {
 		tollbooth_gin.LimitHandler(limiter)(c)
 		c.Next()
@@ -79,14 +72,13 @@ func RateLimitMiddleware() gin.HandlerFunc {
 }
 
 // ValidateInputMiddleware allows specific HTTP methods and checks for the content type.
-func ValidateInputMiddleware(logger applicationModel.Logger) gin.HandlerFunc {
+func ValidateInputMiddleware(config *config.ApplicationConfig, logger model.Logger) gin.HandlerFunc {
 	return func(ginContext *gin.Context) {
 		contentType := ginContext.GetHeader(constants.ContentType)
-		securityConfig := config.GetSecurityConfig()
 
 		// Check if the request method is in the list of allowed methods.
-		if validator.IsSliceNotContains(securityConfig.AllowedHTTPMethods, ginContext.Request.Method) {
-			allowedMethods := strings.Join(config.GetSecurityConfig().AllowedHTTPMethods, ", ")
+		if validator.IsSliceNotContains(config.Security.AllowedHTTPMethods, ginContext.Request.Method) {
+			allowedMethods := strings.Join(config.Security.AllowedHTTPMethods, ", ")
 			notification := constants.InvalidHTTPMethodNotification + allowedMethods
 			httpRequestError := httpError.NewHTTPRequestError(location+"ValidateInputMiddleware.AllowedHTTPMethods", ginContext.Request.Method, notification)
 			abortWithStatusJSON(ginContext, logger, httpRequestError, constants.StatusBadRequest)
@@ -94,8 +86,8 @@ func ValidateInputMiddleware(logger applicationModel.Logger) gin.HandlerFunc {
 		}
 
 		// Check if the content type is in the list of allowed content types.
-		if len(contentType) > 0 && validator.IsSliceNotContains(securityConfig.AllowedContentTypes, contentType) {
-			allowedContentTypes := strings.Join(config.GetSecurityConfig().AllowedContentTypes, ", ")
+		if len(contentType) > 0 && validator.IsSliceNotContains(config.Security.AllowedContentTypes, contentType) {
+			allowedContentTypes := strings.Join(config.Security.AllowedContentTypes, ", ")
 			notification := constants.InvalidHTTPMethodNotification + allowedContentTypes
 			httpRequestError := httpError.NewHTTPRequestError(location+"ValidateInputMiddleware.AllowedContentTypes", contentType, notification)
 			abortWithStatusJSON(ginContext, logger, httpRequestError, constants.StatusBadRequest)
@@ -107,7 +99,7 @@ func ValidateInputMiddleware(logger applicationModel.Logger) gin.HandlerFunc {
 }
 
 // TimeoutMiddleware sets a timeout for each request.
-func TimeoutMiddleware(logger applicationModel.Logger) gin.HandlerFunc {
+func TimeoutMiddleware(logger model.Logger) gin.HandlerFunc {
 	return func(ginContext *gin.Context) {
 		ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 		defer cancel()
@@ -129,7 +121,7 @@ func TimeoutMiddleware(logger applicationModel.Logger) gin.HandlerFunc {
 }
 
 // LoggerMiddleware logs incoming requests and outgoing responses with additional context.
-func LoggerMiddleware(logger applicationModel.Logger) gin.HandlerFunc {
+func LoggerMiddleware(logger model.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 		correlationID := c.GetString("X-Correlation-ID")

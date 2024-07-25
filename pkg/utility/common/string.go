@@ -4,8 +4,8 @@ import (
 	"encoding/base64"
 	"fmt"
 
-	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
-	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
+	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
+	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
@@ -16,15 +16,15 @@ func Encode(data string) string {
 }
 
 // Decode decodes a base64 encoded string and returns the original data.
-func Decode(logger applicationModel.Logger, location, encodedString string) commonModel.Result[string] {
+func Decode(logger model.Logger, location, encodedString string) common.Result[string] {
 	decodedBytes, decodeStringError := base64.StdEncoding.DecodeString(encodedString)
 	if validator.IsError(decodeStringError) {
 		internalError := domainError.NewInternalError(location+".Decode.DecodeString", decodeStringError.Error())
 		logger.Error(internalError)
-		return commonModel.NewResultOnFailure[string](internalError)
+		return common.NewResultOnFailure[string](internalError)
 	}
 
-	return commonModel.NewResultOnSuccess[string](string(decodedBytes))
+	return common.NewResultOnSuccess[string](string(decodedBytes))
 }
 
 func ConvertQueryToString(query any) string {

@@ -9,11 +9,11 @@ import (
 	"path/filepath"
 
 	"github.com/k3a/html2text"
-	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
-	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
-	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
+	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
+	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
+	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
+	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	"gopkg.in/gomail.v2"
@@ -24,7 +24,7 @@ const (
 )
 
 // parseTemplateDirectory walks through the specified directory and parses all template files.
-func parseTemplateDirectory(logger applicationModel.Logger, location, templatePath string) commonModel.Result[*template.Template] {
+func parseTemplateDirectory(logger model.Logger, location, templatePath string) common.Result[*template.Template] {
 	var paths []string
 
 	// Walk through the directory and gather all file paths.
@@ -46,7 +46,7 @@ func parseTemplateDirectory(logger applicationModel.Logger, location, templatePa
 	if validator.IsError(filePathWalkError) {
 		internalError := domainError.NewInternalError(location+".parseTemplateDirectory."+parsingMessage, filePathWalkError.Error())
 		logger.Error(internalError)
-		return commonModel.NewResultOnFailure[*template.Template](internalError)
+		return common.NewResultOnFailure[*template.Template](internalError)
 	}
 
 	// Parse all collected template files.
@@ -54,24 +54,24 @@ func parseTemplateDirectory(logger applicationModel.Logger, location, templatePa
 	if validator.IsError(parseFilesError) {
 		internalError := domainError.NewInternalError(location+".ParseFiles."+parsingMessage, parseFilesError.Error())
 		logger.Error(internalError)
-		return commonModel.NewResultOnFailure[*template.Template](internalError)
+		return common.NewResultOnFailure[*template.Template](internalError)
 	}
 
-	return commonModel.NewResultOnSuccess[*template.Template](parseFiles)
+	return common.NewResultOnSuccess[*template.Template](parseFiles)
 }
 
 // SendEmail sends an email to the specified user using the provided email data.
-func SendEmail(logger applicationModel.Logger, location string, user userModel.User, data userModel.EmailData) error {
-	emailConfig := config.GetEmailConfig()
-	smtpPass := emailConfig.SMTPPassword
-	smtpUser := emailConfig.SMTPUser
-	smtpHost := emailConfig.SMTPHost
-	smtpPort := emailConfig.SMTPPort
+func SendEmail(configInstance model.Config, logger model.Logger, location string, user user.User, data user.EmailData) error {
+	config := configInstance.GetConfig()
+	smtpPass := config.Email.SMTPPassword
+	smtpUser := config.Email.SMTPUser
+	smtpHost := config.Email.SMTPHost
+	smtpPort := config.Email.SMTPPort
 
 	dialer := gomail.NewDialer(smtpHost, smtpPort, smtpUser, smtpPass)
 	dialer.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 
-	prepareSendMessage := prepareSendMessage(logger, location+".SendEmail", user.Email, data)
+	prepareSendMessage := prepareSendMessage(config, logger, location+".SendEmail", user.Email, data)
 	if validator.IsError(prepareSendMessage.Error) {
 		return prepareSendMessage.Error
 	}
@@ -87,9 +87,8 @@ func SendEmail(logger applicationModel.Logger, location string, user userModel.U
 }
 
 // prepareSendMessage prepares the email message to be sent.
-func prepareSendMessage(logger applicationModel.Logger, location, userEmail string, data userModel.EmailData) commonModel.Result[*gomail.Message] {
-	emailConfig := config.GetEmailConfig()
-	from := emailConfig.EmailFrom
+func prepareSendMessage(config *config.ApplicationConfig, logger model.Logger, location, userEmail string, data user.EmailData) common.Result[*gomail.Message] {
+	from := config.Email.EmailFrom
 	to := userEmail
 
 	// Parse the template directory to get the templates.
@@ -98,7 +97,7 @@ func prepareSendMessage(logger applicationModel.Logger, location, userEmail stri
 	if validator.IsError(template.Error) {
 		internalError := domainError.NewInternalError(location+".SendEmail.PrepareSendMessage.parseTemplateDirectory", template.Error.Error())
 		logger.Error(internalError)
-		return commonModel.NewResultOnFailure[*gomail.Message](internalError)
+		return common.NewResultOnFailure[*gomail.Message](internalError)
 	}
 
 	// Retrieve the specific email template.
@@ -106,7 +105,7 @@ func prepareSendMessage(logger applicationModel.Logger, location, userEmail stri
 	if emailTemplate == nil {
 		internalError := domainError.NewInternalError(location+".SendEmail.PrepareSendMessage.TemplateNotFound", constants.EmailTemplateNotFound)
 		logger.Error(internalError)
-		return commonModel.NewResultOnFailure[*gomail.Message](internalError)
+		return common.NewResultOnFailure[*gomail.Message](internalError)
 	}
 
 	// Execute the template to generate the email body.
@@ -114,7 +113,7 @@ func prepareSendMessage(logger applicationModel.Logger, location, userEmail stri
 	if validator.IsError(executeError) {
 		internalError := domainError.NewInternalError(location+".SendEmail.PrepareSendMessage.Execute", executeError.Error())
 		logger.Error(internalError)
-		return commonModel.NewResultOnFailure[*gomail.Message](internalError)
+		return common.NewResultOnFailure[*gomail.Message](internalError)
 	}
 
 	// Create a new email message.
@@ -125,5 +124,5 @@ func prepareSendMessage(logger applicationModel.Logger, location, userEmail stri
 	message.SetBody("text/html", body.String())
 	message.AddAlternative("text/plain", html2text.HTML2Text(body.String()))
 
-	return commonModel.NewResultOnSuccess[*gomail.Message](message)
+	return common.NewResultOnSuccess[*gomail.Message](message)
 }

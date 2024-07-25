@@ -1,29 +1,36 @@
 package model
 
 import (
+	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
 
 func HandleError(err error) error {
 	switch errorType := err.(type) {
+	case httpError.HTTPAuthorizationError:
+		return HTTPAuthorizationErrorToJSONAuthorizationErrorMapper(errorType)
+	case httpError.HTTPRequestError:
+		return HTTPRequestErrorToJSONRequestErrorMapper(errorType)
+	case httpError.HTTPInternalError:
+		return HTTPInternalErrorToJSONInternalErrorMapper(errorType)
 	case domainError.InfoMessage:
-		return InfoMessageToHTTPInfoMessageMapper(errorType)
+		return InfoMessageToJSONInfoMessageMapper(errorType)
 	case domainError.ValidationError:
-		return ValidationErrorToHTTPValidationErrorMapper(errorType)
+		return ValidationErrorToJSONValidationErrorMapper(errorType)
 	case domainError.ValidationErrors:
-		return ValidationErrorsToHTTPValidationErrorsMapper(errorType)
+		return ValidationErrorsToJSONValidationErrorsMapper(errorType)
 	case domainError.AuthorizationError:
-		return AuthorizationErrorToHTTPAuthorizationErrorMapper(errorType)
+		return AuthorizationErrorToJSONAuthorizationErrorMapper(errorType)
 	case domainError.ItemNotFoundError:
-		return ItemNotFoundErrorToHTTPItemNotFoundErrorMapper(errorType)
+		return ItemNotFoundErrorToJSONItemNotFoundErrorMapper(errorType)
 	case domainError.InvalidTokenError:
-		return InvalidTokenErrorToHTTPIvalidTokenErrorMapper(errorType)
+		return InvalidTokenErrorToJSONIvalidTokenErrorMapper(errorType)
 	case domainError.TimeExpiredError:
-		return TimeExpiredErrorToHTTPTimeExpiredErrorMapper(errorType)
+		return TimeExpiredErrorToJSONTimeExpiredErrorMapper(errorType)
 	case domainError.PaginationError:
-		return PaginationErrorToHTTPPaginationErrorMapper(errorType)
+		return PaginationErrorToJSONPaginationErrorMapper(errorType)
 	case domainError.InternalError:
-		return InternalErrorToHTTPInternalErrorMapper(errorType)
+		return InternalErrorToJSONInternalErrorMapper(errorType)
 	default:
 		return errorType
 	}

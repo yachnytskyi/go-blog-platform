@@ -21,5 +21,6 @@ func BSONToString(query bson.M) string {
 	if len(result) > 0 {
 		result = result[:len(result)-2] // Remove trailing comma and space
 	}
+
 	return result
 }

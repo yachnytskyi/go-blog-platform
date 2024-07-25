@@ -5,7 +5,7 @@ import (
 	"regexp"
 
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
+	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	domainModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
@@ -15,7 +15,7 @@ const (
 )
 
 // ValidateField validates a required field based on the provided commonValidator.
-func ValidateField(logger applicationModel.Logger, location, field string, commonValidator domainModel.CommonValidator, validationErrors []error) []error {
+func ValidateField(logger model.Logger, location, field string, commonValidator domainModel.CommonValidator, validationErrors []error) []error {
 	errors := validationErrors
 
 	if IsStringLengthInvalid(field, commonValidator.MinLength, commonValidator.MaxLength) {
@@ -50,7 +50,7 @@ func ValidateField(logger applicationModel.Logger, location, field string, commo
 }
 
 // ValidateOptionalField validates an optional field based on the provided commonValidator.
-func ValidateOptionalField(logger applicationModel.Logger, location, field string, commonValidator domainModel.CommonValidator, validationErrors []error) []error {
+func ValidateOptionalField(logger model.Logger, location, field string, commonValidator domainModel.CommonValidator, validationErrors []error) []error {
 	if len(field) == 0 {
 		return validationErrors
 	}

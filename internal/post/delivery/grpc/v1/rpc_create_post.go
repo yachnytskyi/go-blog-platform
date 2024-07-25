@@ -5,14 +5,14 @@ import (
 	"strings"
 
 	postProtobufV1 "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/grpc/v1/model/pb"
-	postModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
+	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func (postGrpcServer *PostGrpcServer) CreatePost(ctx context.Context, createdPostData *postProtobufV1.PostCreate) (*postProtobufV1.PostView, error) {
-	post := &postModel.PostCreate{
+	post := &post.PostCreate{
 		Title:   createdPostData.Title,
 		Content: createdPostData.Content,
 		Image:   createdPostData.Image,

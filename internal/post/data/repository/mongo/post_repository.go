@@ -8,7 +8,7 @@ import (
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
 	postRepositoryModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/data/repository/mongo/model"
 	postModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
-	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
+	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	mongoModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	"go.mongodb.org/mongo-driver/bson"
@@ -21,11 +21,11 @@ const (
 )
 
 type PostRepository struct {
-	Logger     applicationModel.Logger
+	Logger     model.Logger
 	collection *mongo.Collection
 }
 
-func NewPostRepository(db *mongo.Database, logger applicationModel.Logger) post.PostRepository {
+func NewPostRepository(logger model.Logger, db *mongo.Database) post.PostRepository {
 	return &PostRepository{
 		Logger:     logger,
 		collection: db.Collection("posts"),

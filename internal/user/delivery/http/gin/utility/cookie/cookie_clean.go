@@ -2,26 +2,25 @@ package cookie
 
 import (
 	"github.com/gin-gonic/gin"
-	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
+	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 )
 
 // CleanCookies is a helper function for Gin controllers that clears specific cookies.
-func CleanCookies(ctx *gin.Context, path string) {
-	// Retrieve application configuration for cookie settings.
-	securityConfig := config.GetSecurityConfig()
+func CleanCookies(ctx *gin.Context, configInstance model.Config, path string) {
+	config := configInstance.GetConfig()
 
 	// Clear the access token cookie by setting its value to an empty string and
 	// configuring it with the logout max age, path, and domain.
 	// The security settings from the configuration are applied to ensure proper handling.
 	ctx.SetCookie(
-		constants.AccessTokenValue,  // Name of the cookie
-		"",                          // Value of the cookie (empty to clear)
-		constants.LogoutMaxAgeValue, // Max age of the cookie
-		path,                        // Path for which the cookie is valid
-		constants.TokenDomainValue,  // Domain for which the cookie is valid
-		securityConfig.CookieSecure, // Secure flag from configuration
-		securityConfig.HTTPOnly,     // HTTPOnly flag from configuration
+		constants.AccessTokenValue,   // Name of the cookie
+		"",                           // Value of the cookie (empty to clear)
+		constants.LogoutMaxAgeValue,  // Max age of the cookie
+		path,                         // Path for which the cookie is valid
+		constants.TokenDomainValue,   // Domain for which the cookie is valid
+		config.Security.CookieSecure, // Secure flag from configuration
+		config.Security.HTTPOnly,     // HTTPOnly flag from configuration
 	)
 
 	// Clear the refresh token cookie in a similar manner.
@@ -31,8 +30,8 @@ func CleanCookies(ctx *gin.Context, path string) {
 		constants.LogoutMaxAgeValue,
 		path,
 		constants.TokenDomainValue,
-		securityConfig.CookieSecure,
-		securityConfig.HTTPOnly,
+		config.Security.CookieSecure,
+		config.Security.HTTPOnly,
 	)
 
 	// Clear the "loggedIn" cookie in the same way.
@@ -42,7 +41,7 @@ func CleanCookies(ctx *gin.Context, path string) {
 		constants.LogoutMaxAgeValue,
 		path,
 		constants.TokenDomainValue,
-		securityConfig.CookieSecure,
-		securityConfig.HTTPOnly,
+		config.Security.CookieSecure,
+		config.Security.HTTPOnly,
 	)
 }

@@ -5,6 +5,7 @@ import (
 
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
+	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
 )
 
 // Container holds the factory interfaces required to initialize and manage dependencies.
@@ -21,6 +22,11 @@ type ServerRouters struct {
 	UserRouter  user.UserRouter
 	PostRouter  post.PostRouter
 } // Add other routers as needed
+
+// Config is an interface that defines a method for retrieving the application's configuration.
+type Config interface {
+	GetConfig() *config.ApplicationConfig
+}
 
 // Logger is an interface that defines methods for logging at different levels.
 type Logger interface {

@@ -3,14 +3,14 @@ package model
 import (
 	"time"
 
-	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
+	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	mongoModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type UsersRepository struct {
 	Users              []UserRepository
-	PaginationResponse commonModel.PaginationResponse
+	PaginationResponse common.PaginationResponse
 }
 
 type UserRepository struct {

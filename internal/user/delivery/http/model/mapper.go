@@ -1,54 +1,54 @@
 package model
 
 import (
-	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
-	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
+	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
+	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 )
 
-func UserCreateViewToUserCreateMapper(user UserCreateView) userModel.UserCreate {
-	return userModel.NewUserCreate(
-		user.Name,
-		user.Email,
-		user.Password,
-		user.PasswordConfirm,
+func UserCreateViewToUserCreateMapper(userCreateView UserCreateView) user.UserCreate {
+	return user.NewUserCreate(
+		userCreateView.Name,
+		userCreateView.Email,
+		userCreateView.Password,
+		userCreateView.PasswordConfirm,
 	)
 }
 
-func UserUpdateViewToUserUpdateMapper(user UserUpdateView) userModel.UserUpdate {
-	return userModel.NewUserUpdate(
-		user.ID,
-		user.Name,
+func UserUpdateViewToUserUpdateMapper(userUpdateView UserUpdateView) user.UserUpdate {
+	return user.NewUserUpdate(
+		userUpdateView.ID,
+		userUpdateView.Name,
 	)
 }
 
-func UserLoginViewToUserLoginMapper(user UserLoginView) userModel.UserLogin {
-	return userModel.NewUserLogin(
-		user.Email,
-		user.Password,
+func UserLoginViewToUserLoginMapper(userLoginView UserLoginView) user.UserLogin {
+	return user.NewUserLogin(
+		userLoginView.Email,
+		userLoginView.Password,
 	)
 }
 
-func UserForgottenPasswordViewToUserForgottenPassword(userForgottenPasswordView UserForgottenPasswordView) userModel.UserForgottenPassword {
-	return userModel.NewUserForgottenPassword(
+func UserForgottenPasswordViewToUserForgottenPassword(userForgottenPasswordView UserForgottenPasswordView) user.UserForgottenPassword {
+	return user.NewUserForgottenPassword(
 		userForgottenPasswordView.Email,
 	)
 }
 
-func UserResetPasswordViewToUserResetPassword(user UserResetPasswordView) userModel.UserResetPassword {
-	return userModel.NewUserResetPassword(
-		user.ResetToken,
-		user.Password,
-		user.PasswordConfirm,
+func UserResetPasswordViewToUserResetPassword(userResetPasswordView UserResetPasswordView) user.UserResetPassword {
+	return user.NewUserResetPassword(
+		userResetPasswordView.ResetToken,
+		userResetPasswordView.Password,
+		userResetPasswordView.PasswordConfirm,
 	)
 }
 
-func UsersToUsersViewMapper(users userModel.Users) UsersView {
+func UsersToUsersViewMapper(users user.Users) UsersView {
 	usersView := make([]UserView, len(users.Users))
 	for index, user := range users.Users {
 		usersView[index] = UserToUserViewMapper(user)
 	}
 
-	return NewUsersView(usersView, httpModel.NewHTTPPaginationResponse(
+	return NewUsersView(usersView, model.NewHTTPPaginationResponse(
 		users.PaginationResponse.Page,
 		users.PaginationResponse.TotalPages,
 		users.PaginationResponse.PagesLeft,
@@ -61,7 +61,7 @@ func UsersToUsersViewMapper(users userModel.Users) UsersView {
 	))
 }
 
-func UserToUserViewMapper(user userModel.User) UserView {
+func UserToUserViewMapper(user user.User) UserView {
 	return NewUserView(
 		user.ID,
 		user.CreatedAt,
@@ -72,21 +72,21 @@ func UserToUserViewMapper(user userModel.User) UserView {
 	)
 }
 
-func UserLoginToUserLoginViewMapper(user userModel.UserLogin) UserLoginView {
+func UserLoginToUserLoginViewMapper(userLogin user.UserLogin) UserLoginView {
 	return NewUserLoginView(
-		user.Email,
-		user.Password,
+		userLogin.Email,
+		userLogin.Password,
 	)
 }
 
-func UserTokenToUserTokenViewMapper(user userModel.UserToken) UserTokenView {
+func UserTokenToUserTokenViewMapper(userToken user.UserToken) UserTokenView {
 	return NewUserTokenView(
-		user.AccessToken,
-		user.RefreshToken,
+		userToken.AccessToken,
+		userToken.RefreshToken,
 	)
 }
 
-func UserForgottenPasswordToUserForgottenPasswordViewMapper(userForgottenPassword userModel.UserForgottenPassword) UserForgottenPasswordView {
+func UserForgottenPasswordToUserForgottenPasswordViewMapper(userForgottenPassword user.UserForgottenPassword) UserForgottenPasswordView {
 	return NewUserForgottenPasswordView(
 		userForgottenPassword.Email,
 	)

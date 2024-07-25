@@ -6,17 +6,10 @@ import (
 	"os/signal"
 	"syscall"
 
-	config "github.com/yachnytskyi/golang-mongo-grpc/config"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	dependency "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency"
-	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
+	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 )
-
-// init is called before the main function to perform setup tasks.
-func init() {
-	// Load configuration settings from config files or environment variables.
-	config.LoadConfig()
-}
 
 func main() {
 	// Create a context with a timeout for the entire application lifecycle.
@@ -40,5 +33,5 @@ func main() {
 	<-quit
 
 	// Perform a graceful shutdown when a signal is received.
-	applicationModel.GracefulShutdown(ctx, container.Logger, container.Repository, container.Delivery)
+	model.GracefulShutdown(ctx, container.Logger, container.Repository, container.Delivery)
 }

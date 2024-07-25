@@ -3,17 +3,17 @@ package model
 import (
 	"time"
 
-	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
-	userModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
+	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
+	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
 )
 
 type Users struct {
 	Users              []User
-	PaginationResponse commonModel.PaginationResponse
+	PaginationResponse common.PaginationResponse
 }
 
 type User struct {
-	userModel.BaseEntity
+	model.BaseEntity
 	Name     string
 	Email    string
 	Password string
@@ -73,7 +73,7 @@ type EmailData struct {
 	Subject      string
 }
 
-func NewUsers(users []User, paginationResponse commonModel.PaginationResponse) Users {
+func NewUsers(users []User, paginationResponse common.PaginationResponse) Users {
 	return Users{
 		Users:              users,
 		PaginationResponse: paginationResponse,
@@ -82,7 +82,7 @@ func NewUsers(users []User, paginationResponse commonModel.PaginationResponse) U
 
 func NewUser(id string, createdAt, updatedAt time.Time, name, email, password, role string, verified bool) User {
 	return User{
-		BaseEntity: userModel.NewBaseEntity(id, createdAt, updatedAt),
+		BaseEntity: model.NewBaseEntity(id, createdAt, updatedAt),
 		Name:       name,
 		Email:      email,
 		Password:   password,

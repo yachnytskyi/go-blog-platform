@@ -5,6 +5,78 @@ import (
 	"time"
 )
 
+// Application version.
+const (
+	Version = "v1" // Version of the application.
+)
+
+// Environment configuration paths.
+const (
+	EnvironmentsPath        = "config/environment/.env."                  // Base path for environment configuration files.
+	LocalDevEnvironment     = "local.dev"                                 // Local development environment.
+	DockerDevEnvironment    = "docker.dev"                                // Docker development environment.
+	DefaultEnvironmentsPath = "config/environment/.env."                  // Default path for environment configuration files.
+	DefaultConfigPath       = "config/yaml/v1/local.dev.application.yaml" // Default path for the application configuration file.
+)
+
+// Configuration libraries used in the application.
+const (
+	Viper  = "Viper" // Viper configuration library.
+	Config = Viper   // Default configuration library.
+
+)
+
+// Logger libraries used in the application.
+const (
+	Zerolog = "Zerolog" // Zerolog logger library.
+)
+
+// Databases used in the application.
+const (
+	MongoDB = "MongoDB" // MongoDB database name.
+)
+
+// Domains used in the application.
+const (
+	UseCase = "UseCaseV1" // UseCase domain name.
+)
+
+// Deliveries used in the application.
+const (
+	Gin = "Gin" // Gin delivery name.
+)
+
+// Common routes used in the application.
+const (
+	GetAllItemsURL = ""     // Endpoint for fetching all items.
+	GetItemByIdURL = "/:id" // Endpoint for fetching an item by its ID.
+	ItemIdParam    = "id"   // Parameter name for item ID.
+)
+
+// Domain-specific routes.
+const (
+	UsersGroupPath = "/users" // Users domain route.
+	// Initialize other routes here.
+)
+
+// User route paths.
+const (
+	RegisterPath          = "/register"           // Registration route path.
+	ForgottenPasswordPath = "/forgotten-password" // Forgotten password route path.
+	ResetPasswordPath     = "/reset-password/:id" // Reset password route path with token.
+	LoginPath             = "/login"              // Login route path.
+	GetCurrentUserPath    = "/current_user"       // Get current user route path.
+	UpdateCurrentUserPath = "/update"             // Update current user route path.
+	DeleteCurrentUserPath = "/delete"             // Delete current user route path.
+	RefreshTokenPath      = "/refresh"            // Refresh token route path.
+	LogoutPath            = "/logout"             // Logout route path.
+)
+
+// Database table names.
+const (
+	UsersTable = "users" // Users table name in the database.
+)
+
 // Schemes used in the application.
 const (
 	HTTP  = "http"  // HTTP scheme.
@@ -41,7 +113,7 @@ const (
 
 // DateTime format.
 const (
-	DateTimeFormat = "02-Jan-2006 03:04 PM MST" // DateTime format string.
+	DateTimeFormat = "02-Jan-2006 03:04:05 PM MST" // DateTime format string.
 )
 
 // Token-related constants.
@@ -140,56 +212,6 @@ const (
 	InvalidContentTypeNotification = "Invalid content type. You can use only them from the following list: "                                                                        // Invalid content type message.
 	InvalidHeaderFormat            = "Invalid header format."
 	InvalidTokenErrorMessage       = "The token is invalid. Please use the correct token." // Error message for invalid tokens.
-)
-
-const (
-	Zerolog = "Zerolog"
-)
-
-// Databases used in the application.
-const (
-	MongoDB = "MongoDB" // MongoDB database name.
-)
-
-// Domains used in the application.
-const (
-	UseCase = "UseCaseV1" // UseCase domain name.
-)
-
-// Deliveries used in the application.
-const (
-	Gin = "Gin" // Gin delivery name.
-)
-
-// Common routes used in the application.
-const (
-	GetAllItemsURL = ""     // Endpoint for fetching all items.
-	GetItemByIdURL = "/:id" // Endpoint for fetching an item by its ID.
-	ItemIdParam    = "id"   // Parameter name for item ID.
-)
-
-// Domain-specific routes.
-const (
-	UsersGroupPath = "/users" // Users domain route.
-	// Initialize other routes here.
-)
-
-// User route paths.
-const (
-	RegisterPath          = "/register"           // Registration route path.
-	ForgottenPasswordPath = "/forgotten-password" // Forgotten password route path.
-	ResetPasswordPath     = "/reset-password/:id" // Reset password route path with token.
-	LoginPath             = "/login"              // Login route path.
-	GetCurrentUserPath    = "/current_user"       // Get current user route path.
-	UpdateCurrentUserPath = "/update"             // Update current user route path.
-	DeleteCurrentUserPath = "/delete"             // Delete current user route path.
-	RefreshTokenPath      = "/refresh"            // Refresh token route path.
-	LogoutPath            = "/logout"             // Logout route path.
-)
-
-// Database table names.
-const (
-	UsersTable = "users" // Users table name in the database.
 )
 
 // contextKey is a custom type for context keys to prevent collisions.

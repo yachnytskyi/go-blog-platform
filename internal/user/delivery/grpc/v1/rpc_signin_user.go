@@ -2,10 +2,11 @@ package v1
 
 import (
 	"context"
+	"time"
 
 	pb "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1/model/pb"
-	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
-	domainModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
+	utility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
+	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -32,25 +33,29 @@ func (userGrpcServer *UserGrpcServer) Login(ctx context.Context, request *pb.Log
 	// }
 
 	// Generate the UserTokenPayload.
-	userTokenPayload := domainModel.NewUserTokenPayload(user.Data.ID, user.Data.Role)
+	userTokenPayload := model.NewUserTokenPayload(user.Data.ID, user.Data.Role)
 
 	// Generate tokens.
-	accessToken := domainUtility.GenerateJWTToken(
+	accessToken := utility.GenerateJWTToken(
 		userGrpcServer.Logger,
 		location+"Login",
-		userGrpcServer.applicationConfig.AccessToken.PrivateKey,
-		userGrpcServer.applicationConfig.AccessToken.ExpiredIn,
+		"",
+		time.Duration(2),
+		// userGrpcServer.applicationConfig.AccessToken.PrivateKey,
+		// userGrpcServer.applicationConfig.AccessToken.ExpiredIn,
 		userTokenPayload,
 	)
 	if validator.IsError(accessToken.Error) {
 		return nil, status.Errorf(codes.PermissionDenied, accessToken.Error.Error())
 	}
 
-	refreshToken := domainUtility.GenerateJWTToken(
+	refreshToken := utility.GenerateJWTToken(
 		userGrpcServer.Logger,
 		location+"Login",
-		userGrpcServer.applicationConfig.RefreshToken.PrivateKey,
-		userGrpcServer.applicationConfig.RefreshToken.ExpiredIn,
+		"",
+		time.Duration(2),
+		// userGrpcServer.applicationConfig.RefreshToken.PrivateKey,
+		// userGrpcServer.applicationConfig.RefreshToken.ExpiredIn,
 		userTokenPayload,
 	)
 	if validator.IsError(refreshToken.Error) {

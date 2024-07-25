@@ -3,7 +3,7 @@ package http
 import (
 	"time"
 
-	commonUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
+	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
 )
 
 type BaseEntity struct {
@@ -13,8 +13,8 @@ type BaseEntity struct {
 }
 
 func NewBaseEntity(id string, createdAt, updatedAt time.Time) BaseEntity {
-	createdAtFormatted := commonUtility.FormatDate(createdAt)
-	updatedAtFormatted := commonUtility.FormatDate(updatedAt)
+	createdAtFormatted := utility.FormatDate(createdAt)
+	updatedAtFormatted := utility.FormatDate(updatedAt)
 	return BaseEntity{
 		ID:        id,
 		CreatedAt: createdAtFormatted,

@@ -6,7 +6,7 @@ import (
 	"time"
 
 	postProtobufV1 "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/grpc/v1/model/pb"
-	postModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
+	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -16,7 +16,7 @@ func (postGrpcServer *PostGrpcServer) UpdatePostById(ctx context.Context, update
 	postID := updatedPostData.GetPostID()
 	userID := updatedPostData.GetUserID()
 
-	post := &postModel.PostUpdate{
+	post := &post.PostUpdate{
 		Title:     updatedPostData.GetTitle(),
 		Content:   updatedPostData.GetContent(),
 		Image:     updatedPostData.GetImage(),

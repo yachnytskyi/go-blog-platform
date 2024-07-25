@@ -6,7 +6,7 @@ import (
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
 	postModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
-	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
+	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
 
@@ -15,11 +15,11 @@ const (
 )
 
 type PostUseCaseV1 struct {
-	Logger         applicationModel.Logger
+	Logger         model.Logger
 	PostRepository post.PostRepository
 }
 
-func NewPostUseCaseV1(logger applicationModel.Logger, postRepository post.PostRepository) post.PostUseCase {
+func NewPostUseCaseV1(logger model.Logger, postRepository post.PostRepository) post.PostUseCase {
 	return &PostUseCaseV1{
 		Logger:         logger,
 		PostRepository: postRepository,

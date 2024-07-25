@@ -1,8 +1,8 @@
 package model
 
 import (
-	postModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
-	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
+	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
+	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	mongoModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
@@ -11,8 +11,8 @@ const (
 	location = "post.data.depository.mongo."
 )
 
-func PostsRepositoryToPostsMapper(postsRepository []*PostRepository) []*postModel.Post {
-	posts := make([]*postModel.Post, len(postsRepository))
+func PostsRepositoryToPostsMapper(postsRepository []*PostRepository) []*post.Post {
+	posts := make([]*post.Post, len(postsRepository))
 	for index, postRepository := range postsRepository {
 		posts[index] = PostRepositoryToPostMapper(postRepository)
 	}
@@ -20,8 +20,8 @@ func PostsRepositoryToPostsMapper(postsRepository []*PostRepository) []*postMode
 	return posts
 }
 
-func PostRepositoryToPostMapper(postRepository *PostRepository) *postModel.Post {
-	return &postModel.Post{
+func PostRepositoryToPostMapper(postRepository *PostRepository) *post.Post {
+	return &post.Post{
 		PostID:    postRepository.PostID.Hex(),
 		UserID:    postRepository.UserID.Hex(),
 		Title:     postRepository.Title,
@@ -33,7 +33,7 @@ func PostRepositoryToPostMapper(postRepository *PostRepository) *postModel.Post 
 	}
 }
 
-func PostCreateToPostCreateRepositoryMapper(logger applicationModel.Logger, postCreate *postModel.PostCreate) (*PostCreateRepository, error) {
+func PostCreateToPostCreateRepositoryMapper(logger model.Logger, postCreate *post.PostCreate) (*PostCreateRepository, error) {
 	userObjectID := mongoModel.HexToObjectIDMapper(logger, location+"PostCreateToPostCreateRepositoryMapper", postCreate.UserID)
 	if validator.IsError(userObjectID.Error) {
 		return &PostCreateRepository{}, userObjectID.Error
@@ -50,7 +50,7 @@ func PostCreateToPostCreateRepositoryMapper(logger applicationModel.Logger, post
 	}, nil
 }
 
-func PostUpdateToPostUpdateRepositoryMapper(logger applicationModel.Logger, postUpdate *postModel.PostUpdate) (*PostUpdateRepository, error) {
+func PostUpdateToPostUpdateRepositoryMapper(logger model.Logger, postUpdate *post.PostUpdate) (*PostUpdateRepository, error) {
 	postObjectID := mongoModel.HexToObjectIDMapper(logger, location+"PostUpdateToPostUpdateRepositoryMapper.postObjectID", postUpdate.PostID)
 	if validator.IsError(postObjectID.Error) {
 		return &PostUpdateRepository{}, postObjectID.Error

@@ -20,7 +20,12 @@ import (
 )
 
 const (
-	parsingMessage = "parsing template..."
+	parsingMessage     = "parsing template..."
+	messageFrom        = "From"
+	messageTo          = "To"
+	messageHeader      = "Subject"
+	messageBody        = "text/html"
+	messageAlternative = "text/plain"
 )
 
 // parseTemplateDirectory walks through the specified directory and parses all template files.
@@ -95,7 +100,7 @@ func prepareSendMessage(config *config.ApplicationConfig, logger model.Logger, l
 	var body bytes.Buffer
 	template := parseTemplateDirectory(logger, location+".prepareSendMessage", data.TemplatePath)
 	if validator.IsError(template.Error) {
-		internalError := domainError.NewInternalError(location+".SendEmail.PrepareSendMessage.parseTemplateDirectory", template.Error.Error())
+		internalError := domainError.NewInternalError(location+".prepareSendMessage.parseTemplateDirectory", template.Error.Error())
 		logger.Error(internalError)
 		return common.NewResultOnFailure[*gomail.Message](internalError)
 	}
@@ -103,7 +108,7 @@ func prepareSendMessage(config *config.ApplicationConfig, logger model.Logger, l
 	// Retrieve the specific email template.
 	emailTemplate := template.Data.Lookup(data.TemplateName)
 	if emailTemplate == nil {
-		internalError := domainError.NewInternalError(location+".SendEmail.PrepareSendMessage.TemplateNotFound", constants.EmailTemplateNotFound)
+		internalError := domainError.NewInternalError(location+".prepareSendMessage.Lookup", constants.EmailTemplateNotFound)
 		logger.Error(internalError)
 		return common.NewResultOnFailure[*gomail.Message](internalError)
 	}
@@ -111,18 +116,17 @@ func prepareSendMessage(config *config.ApplicationConfig, logger model.Logger, l
 	// Execute the template to generate the email body.
 	executeError := emailTemplate.Execute(&body, &data)
 	if validator.IsError(executeError) {
-		internalError := domainError.NewInternalError(location+".SendEmail.PrepareSendMessage.Execute", executeError.Error())
+		internalError := domainError.NewInternalError(location+".prepareSendMessage.Execute", executeError.Error())
 		logger.Error(internalError)
 		return common.NewResultOnFailure[*gomail.Message](internalError)
 	}
 
 	// Create a new email message.
 	message := gomail.NewMessage()
-	message.SetHeader("From", from)
-	message.SetHeader("To", to)
-	message.SetHeader("Subject", data.Subject)
-	message.SetBody("text/html", body.String())
-	message.AddAlternative("text/plain", html2text.HTML2Text(body.String()))
-
+	message.SetHeader(messageFrom, from)
+	message.SetHeader(messageTo, to)
+	message.SetHeader(messageHeader, data.Subject)
+	message.SetBody(messageBody, body.String())
+	message.AddAlternative(messageAlternative, html2text.HTML2Text(body.String()))
 	return common.NewResultOnSuccess[*gomail.Message](message)
 }

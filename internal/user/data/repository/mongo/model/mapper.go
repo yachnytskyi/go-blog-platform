@@ -8,6 +8,12 @@ import (
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
+func UserRepositoryToUsersRepositoryMapper(usersRepository []UserRepository) UsersRepository {
+	return NewUsersRepository(
+		append([]UserRepository{}, usersRepository...),
+	)
+}
+
 func UsersRepositoryToUsersMapper(usersRepository UsersRepository) userModel.Users {
 	users := make([]userModel.User, len(usersRepository.Users))
 	for index, userRepository := range usersRepository.Users {
@@ -30,6 +36,12 @@ func UserRepositoryToUserMapper(userRepository UserRepository) userModel.User {
 		userRepository.Password,
 		userRepository.Role,
 		userRepository.Verified,
+	)
+}
+
+func UserResetExpiryRepositoryToUserResetExpiryMapper(userResetExpiryRepository UserResetExpiryRepository) userModel.UserResetExpiry {
+	return userModel.NewUserResetExpiry(
+		userResetExpiryRepository.ResetExpiry,
 	)
 }
 
@@ -59,12 +71,6 @@ func UserUpdateToUserUpdateRepositoryMapper(logger model.Logger, location string
 	))
 }
 
-func UserResetExpiryRepositoryToUserResetExpiryMapper(userResetExpiry UserResetExpiryRepository) userModel.UserResetExpiry {
-	return userModel.NewUserResetExpiry(
-		userResetExpiry.ResetExpiry,
-	)
-}
-
 func UserForgottenPasswordToUserForgottenPasswordRepositoryMapper(userForgottenPassword userModel.UserForgottenPassword) UserForgottenPasswordRepository {
 	return NewUserForgottenPasswordRepository(
 		userForgottenPassword.ResetToken,
@@ -75,11 +81,5 @@ func UserForgottenPasswordToUserForgottenPasswordRepositoryMapper(userForgottenP
 func UserResetPasswordToUserResetPasswordRepositoryMapper(userResetPassword userModel.UserResetPassword) UserResetPasswordRepository {
 	return NewUserResetPasswordRepository(
 		userResetPassword.Password,
-	)
-}
-
-func UserRepositoryToUsersRepositoryMapper(usersRepository []UserRepository) UsersRepository {
-	return NewUsersRepository(
-		append([]UserRepository{}, usersRepository...),
 	)
 }

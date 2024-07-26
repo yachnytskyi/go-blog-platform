@@ -19,8 +19,8 @@ type PaginationQuery struct {
 	TotalItems int    // Total number of items.
 }
 
-func NewPaginationQuery(page, limit int, orderBy, sortOrder, baseURL string) PaginationQuery {
-	return PaginationQuery{
+func NewPaginationQuery(page, limit int, orderBy, sortOrder, baseURL string) *PaginationQuery {
+	return &PaginationQuery{
 		Page:      page,
 		Limit:     limit,
 		OrderBy:   orderBy,
@@ -70,13 +70,11 @@ func isLimitInvalid(data int) bool {
 	return false
 }
 
-func SetCorrectPage(paginationQuery PaginationQuery) PaginationQuery {
+func (paginationQuery *PaginationQuery) SetCorrectPage() {
 	if paginationQuery.TotalItems <= paginationQuery.Skip {
 		paginationQuery.Page = calculateTotalPages(paginationQuery.TotalItems, paginationQuery.Limit)
 		paginationQuery.Skip = calculateSkip(paginationQuery.Page, paginationQuery.Limit)
 	}
-
-	return paginationQuery
 }
 
 type PaginationResponse struct {
@@ -92,7 +90,7 @@ type PaginationResponse struct {
 	BaseURL    string   // Base URL for pagination.
 }
 
-func NewPaginationResponse(paginationQuery PaginationQuery) PaginationResponse {
+func NewPaginationResponse(paginationQuery *PaginationQuery) *PaginationResponse {
 	totalPages := calculateTotalPages(paginationQuery.TotalItems, paginationQuery.Limit)
 	paginationResponse := PaginationResponse{
 		Page:       paginationQuery.Page,
@@ -107,7 +105,7 @@ func NewPaginationResponse(paginationQuery PaginationQuery) PaginationResponse {
 	}
 
 	paginationResponse.PageLinks = generatePageLinks(paginationResponse, constants.DefaultAmountOfPages) // You can specify the number of pages to show here.
-	return paginationResponse
+	return &paginationResponse
 }
 
 func calculateTotalPages(totalItems, limit int) int {

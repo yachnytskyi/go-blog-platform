@@ -16,7 +16,7 @@ type BaseError struct {
 }
 
 func (baseError BaseError) Error() string {
-	return fmt.Sprintf(`{"location": "%s", "notification": "%s"}`, baseError.Location, baseError.Notification)
+	return fmt.Sprintf("location: %s notification: %s", baseError.Location, baseError.Notification)
 }
 
 func NewBaseError(location, notification string) BaseError {
@@ -36,18 +36,14 @@ func NewBaseErrors(errors []error) BaseErrors {
 
 func (baseErrors BaseErrors) Error() string {
 	var result strings.Builder
-	result.WriteString(`[`)
+	result.WriteString("[")
 	for i, baseError := range baseErrors.Errors {
 		if i > 0 {
 			result.WriteString(", ")
 		}
-		result.WriteString(`{`)
-		if e, ok := baseError.(BaseError); ok {
-			result.WriteString(fmt.Sprintf(`"location": "%s", "notification": "%s"`, e.Location, e.Notification))
-		}
-		result.WriteString(`}`)
+		result.WriteString(baseError.Error())
 	}
-	result.WriteString(`]`)
+	result.WriteString("]")
 	return result.String()
 }
 
@@ -61,7 +57,7 @@ type InfoMessage struct {
 
 func NewInfoMessage(location, notification string) InfoMessage {
 	return InfoMessage{
-		NewBaseError(location, notification),
+		BaseError: NewBaseError(location, notification),
 	}
 }
 
@@ -80,7 +76,7 @@ func NewValidationError(location, field, fieldType, notification string) Validat
 }
 
 func (validationError ValidationError) Error() string {
-	return fmt.Sprintf(`{"location": "%s", "notification": "%s", "field": "%s", "type": "%s"}`,
+	return fmt.Sprintf("location: %s notification: %s field: %s type: %s",
 		validationError.Location,
 		validationError.Notification,
 		validationError.Field,
@@ -93,7 +89,7 @@ type ValidationErrors struct {
 
 func NewValidationErrors(errors []error) ValidationErrors {
 	return ValidationErrors{
-		NewBaseErrors(errors),
+		BaseErrors: NewBaseErrors(errors),
 	}
 }
 
@@ -103,7 +99,7 @@ type AuthorizationError struct {
 
 func NewAuthorizationError(location, notification string) AuthorizationError {
 	return AuthorizationError{
-		NewBaseError(location, notification),
+		BaseError: NewBaseError(location, notification),
 	}
 }
 
@@ -120,7 +116,7 @@ func NewItemNotFoundError(location, query, notification string) ItemNotFoundErro
 }
 
 func (itemNotFoundError ItemNotFoundError) Error() string {
-	return fmt.Sprintf(`{"location": "%s", "notification": "%s", "query": "%s"}`,
+	return fmt.Sprintf("location: %s notification: %s query: %s",
 		itemNotFoundError.Location,
 		itemNotFoundError.Notification,
 		itemNotFoundError.Query)
@@ -132,7 +128,7 @@ type InvalidTokenError struct {
 
 func NewInvalidTokenError(location, notification string) InvalidTokenError {
 	return InvalidTokenError{
-		NewBaseError(location, notification),
+		BaseError: NewBaseError(location, notification),
 	}
 }
 
@@ -142,7 +138,7 @@ type TimeExpiredError struct {
 
 func NewTimeExpiredError(location, notification string) TimeExpiredError {
 	return TimeExpiredError{
-		NewBaseError(location, notification),
+		BaseError: NewBaseError(location, notification),
 	}
 }
 
@@ -161,7 +157,7 @@ func NewPaginationError(location, currentPage, totalPages, notification string) 
 }
 
 func (paginationError PaginationError) Error() string {
-	return fmt.Sprintf(`{"location": "%s", "notification": "%s", "current_page": "%s", "total_pages": "%s"}`,
+	return fmt.Sprintf("location: %s notification: %s current_page: %s total_pages: %s",
 		paginationError.Location,
 		paginationError.Notification,
 		paginationError.CurrentPage,
@@ -174,6 +170,6 @@ type InternalError struct {
 
 func NewInternalError(location, notification string) InternalError {
 	return InternalError{
-		NewBaseError(location, notification),
+		BaseError: NewBaseError(location, notification),
 	}
 }

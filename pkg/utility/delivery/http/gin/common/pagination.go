@@ -9,7 +9,7 @@ import (
 )
 
 // ParsePaginationQuery parses and extracts pagination parameters from the provided Gin context.
-func ParsePaginationQuery(ginContext *gin.Context) *common.PaginationQuery {
+func ParsePaginationQuery(ginContext *gin.Context) common.PaginationQuery {
 	page := ginContext.DefaultQuery(constants.Page, constants.DefaultPage)
 	limit := ginContext.DefaultQuery(constants.Limit, constants.DefaultLimit)
 	orderBy := ginContext.DefaultQuery(constants.OrderBy, constants.DefaultOrderBy)

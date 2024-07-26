@@ -8,7 +8,7 @@ import (
 )
 
 type UserRepository interface {
-	GetAllUsers(ctx context.Context, paginationQuery *common.PaginationQuery) common.Result[*user.Users]
+	GetAllUsers(ctx context.Context, paginationQuery common.PaginationQuery) common.Result[user.Users]
 	GetUserById(ctx context.Context, userID string) common.Result[user.User]
 	GetUserByEmail(ctx context.Context, email string) common.Result[user.User]
 	CheckEmailDuplicate(ctx context.Context, email string) error

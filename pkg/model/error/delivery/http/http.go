@@ -10,7 +10,7 @@ type HTTPBaseError struct {
 }
 
 func (httpBaseError HTTPBaseError) Error() string {
-	return fmt.Sprintf(`{"notification": "%s"}`, httpBaseError.Notification)
+	return fmt.Sprintf("notification: %s", httpBaseError.Notification)
 }
 
 func NewHTTPBaseError(notification string) HTTPBaseError {
@@ -29,16 +29,14 @@ func NewHTTPBaseErrors(errors []error) HTTPBaseErrors {
 
 func (httpBaseErrors HTTPBaseErrors) Error() string {
 	var result strings.Builder
-	result.WriteString(`[`)
+	result.WriteString("[")
 	for i, baseError := range httpBaseErrors.Errors {
 		if i > 0 {
 			result.WriteString(", ")
 		}
-		if e, ok := baseError.(HTTPBaseError); ok {
-			result.WriteString(fmt.Sprintf(`{"notification": "%s"}`, e.Notification))
-		}
+		result.WriteString(baseError.Error())
 	}
-	result.WriteString(`]`)
+	result.WriteString("]")
 	return result.String()
 }
 
@@ -61,10 +59,10 @@ func NewHTTPValidationError(field, fieldType, notification string) HTTPValidatio
 }
 
 func (httpValidationError HTTPValidationError) Error() string {
-	return fmt.Sprintf(`{"notification": "%s", "field": "%s", "type": "%s"}`,
-		httpValidationError.Notification,
+	return fmt.Sprintf("field: %s type: %s notification: %s",
 		httpValidationError.Field,
-		httpValidationError.FieldType)
+		httpValidationError.FieldType,
+		httpValidationError.Notification)
 }
 
 type HTTPValidationErrors struct {
@@ -87,6 +85,12 @@ func NewHTTPAuthorizationError(location, notification string) HTTPAuthorizationE
 	}
 }
 
+func (httpAuthorizationError HTTPAuthorizationError) Error() string {
+	return fmt.Sprintf("location: %s notification: %s",
+		httpAuthorizationError.Location,
+		httpAuthorizationError.Notification)
+}
+
 type HTTPItemNotFoundError struct {
 	HTTPBaseError
 }
@@ -97,12 +101,20 @@ func NewHTTPItemNotFoundError(notification string) HTTPItemNotFoundError {
 	}
 }
 
+func (httpItemNotFoundError HTTPItemNotFoundError) Error() string {
+	return fmt.Sprintf("notification: %s", httpItemNotFoundError.Notification)
+}
+
 type HTTPInvalidTokenError struct {
 	HTTPBaseError
 }
 
 func NewHTTPInvalidTokenError(notification string) HTTPInvalidTokenError {
 	return HTTPInvalidTokenError{NewHTTPBaseError(notification)}
+}
+
+func (httpInvalidTokenError HTTPInvalidTokenError) Error() string {
+	return fmt.Sprintf("notification: %s", httpInvalidTokenError.Notification)
 }
 
 type HTTPTimeExpiredError struct {
@@ -113,6 +125,10 @@ func NewHTTPTimeExpiredError(notification string) HTTPTimeExpiredError {
 	return HTTPTimeExpiredError{
 		HTTPBaseError: NewHTTPBaseError(notification),
 	}
+}
+
+func (httpTimeExpiredError HTTPTimeExpiredError) Error() string {
+	return fmt.Sprintf("notification: %s", httpTimeExpiredError.Notification)
 }
 
 type HTTPPaginationError struct {
@@ -130,10 +146,10 @@ func NewHTTPPaginationError(currentPage, totalPages, notification string) HTTPPa
 }
 
 func (httpPaginationError HTTPPaginationError) Error() string {
-	return fmt.Sprintf(`{"notification": "%s", "current_page": "%s", "total_pages": "%s"}`,
-		httpPaginationError.Notification,
+	return fmt.Sprintf("current_page: %s total_pages: %s notification: %s",
 		httpPaginationError.CurrentPage,
-		httpPaginationError.TotalPages)
+		httpPaginationError.TotalPages,
+		httpPaginationError.Notification)
 }
 
 type HTTPRequestError struct {
@@ -151,7 +167,7 @@ func NewHTTPRequestError(location, requestType, notification string) HTTPRequest
 }
 
 func (httpRequestError HTTPRequestError) Error() string {
-	return fmt.Sprintf(`{"location": "%s", "request_type": "%s", "notification": "%s"}`,
+	return fmt.Sprintf("location: %s request_type: %s notification: %s",
 		httpRequestError.Location,
 		httpRequestError.RequestType,
 		httpRequestError.Notification)
@@ -170,7 +186,7 @@ func NewHTTPInternalError(location, notification string) HTTPInternalError {
 }
 
 func (httpInternalError HTTPInternalError) Error() string {
-	return fmt.Sprintf(`{"location": "%s", "notification": "%s"}`,
+	return fmt.Sprintf("location: %s notification: %s",
 		httpInternalError.Location,
 		httpInternalError.Notification)
 }

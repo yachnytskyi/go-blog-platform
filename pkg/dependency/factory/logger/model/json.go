@@ -12,7 +12,7 @@ type JSONBaseError struct {
 }
 
 func (jsonBaseError JSONBaseError) Error() string {
-	return fmt.Sprintf(`{"location": "%s", "notification": "%s"}`, jsonBaseError.Location, jsonBaseError.Notification)
+	return fmt.Sprintf("location: %s notification: %s", jsonBaseError.Location, jsonBaseError.Notification)
 }
 
 func NewJSONBaseError(location, notification string) JSONBaseError {
@@ -32,18 +32,14 @@ func NewJSONBaseErrors(errors []error) JSONBaseErrors {
 
 func (jsonBaseErrors JSONBaseErrors) Error() string {
 	var result strings.Builder
-	result.WriteString(`[`)
+	result.WriteString("[")
 	for i, baseError := range jsonBaseErrors.Errors {
 		if i > 0 {
 			result.WriteString(", ")
 		}
-		result.WriteString(`{`)
-		if e, ok := baseError.(JSONBaseError); ok {
-			result.WriteString(fmt.Sprintf(`"location": "%s", "notification": "%s"`, e.Location, e.Notification))
-		}
-		result.WriteString(`}`)
+		result.WriteString(baseError.Error())
 	}
-	result.WriteString(`]`)
+	result.WriteString("]")
 	return result.String()
 }
 

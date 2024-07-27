@@ -13,15 +13,14 @@ import (
 )
 
 const (
-	location                           = "pkg.dependency.factory.config."
-	defaultEnvironmentPathNotification = "Using default configuration path"
+	location = "pkg.dependency.factory.config."
 )
 
 type Viper struct {
 	ApplicationConfig *config.ApplicationConfig
 }
 
-func NewViper() *Viper {
+func NewViper() Viper {
 	loadEnvironmentsError := godotenv.Load(constants.EnvironmentsPath + constants.LocalDevEnvironment)
 	if validator.IsError(loadEnvironmentsError) {
 		loadEnvironmentsInternalError := domainError.NewInternalError(location+"Load", loadEnvironmentsError.Error())
@@ -48,7 +47,7 @@ func NewViper() *Viper {
 	}
 
 	applicationConfig := viperConfigToApplicationConfigMapper(&viperConfig)
-	return &Viper{
+	return Viper{
 		ApplicationConfig: applicationConfig,
 	}
 }
@@ -58,16 +57,16 @@ func loadDefaultEnvironment() {
 	if validator.IsError(defaultEnvironmentError) {
 		panic(domainError.NewInternalError(location+"loadDefaultEnvironment", defaultEnvironmentError.Error()))
 	}
-	log.Println(domainError.NewInfoMessage(location+"loadDefaultEnvironment", "Using default environment path"))
+	log.Println(domainError.NewInfoMessage(location+"loadDefaultEnvironment", constants.DefaultConfigPathNotification))
 }
 
 func loadDefaultConfig(viper *viper.Viper) {
 	viper.SetConfigFile(constants.DefaultConfigPath)
-	defaultConfigError := viper.ReadInConfig()
-	if validator.IsError(defaultConfigError) {
-		panic(domainError.NewInternalError(location+"loadDefaultConfig", defaultConfigError.Error()))
+	readInConfigError := viper.ReadInConfig()
+	if validator.IsError(readInConfigError) {
+		panic(domainError.NewInternalError(location+"loadDefaultConfig", readInConfigError.Error()))
 	}
-	log.Println(domainError.NewInfoMessage(location+"loadDefaultConfig", defaultEnvironmentPathNotification))
+	log.Println(domainError.NewInfoMessage(location+"loadDefaultConfig", constants.DefaultConfigPathNotification))
 }
 
 func (viper Viper) GetConfig() *config.ApplicationConfig {

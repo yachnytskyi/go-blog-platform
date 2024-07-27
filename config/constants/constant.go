@@ -12,11 +12,13 @@ const (
 
 // Environment configuration paths.
 const (
-	EnvironmentsPath        = "config/environment/.env."                  // Base path for environment configuration files.
-	LocalDevEnvironment     = "local.dev"                                 // Local development environment.
-	DockerDevEnvironment    = "docker.dev"                                // Docker development environment.
-	DefaultEnvironmentsPath = "config/environment/.env."                  // Default path for environment configuration files.
-	DefaultConfigPath       = "config/yaml/v1/local.dev.application.yaml" // Default path for the application configuration file.
+	EnvironmentsPath                   = "config/environment/.env."                  // Base path for environment configuration files.
+	LocalDevEnvironment                = "local.dev"                                 // Local development environment.
+	DockerDevEnvironment               = "docker.dev"                                // Docker development environment.
+	DefaultEnvironmentsPath            = "config/environment/.env."                  // Default path for environment configuration files.
+	DefaultConfigPath                  = "config/yaml/v1/local.dev.application.yaml" // Default path for the application configuration file.
+	DefaultConfigPathNotification      = "Using default configuration path"          // 	// Notification message for using the default configuration path.
+	DefaultEnrironmentPathNotification = "Using default environment path"            // 	// Notification message for using the default environment path.
 )
 
 // Configuration libraries used in the application.

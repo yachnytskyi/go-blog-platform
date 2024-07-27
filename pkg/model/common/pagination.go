@@ -32,10 +32,7 @@ func NewPaginationQuery(page, limit uint64, orderBy, sortOrder, baseURL string) 
 
 func GetPage(page string) uint64 {
 	uintPage, stringConversionError := strconv.ParseUint(page, 0, 0)
-	if validator.IsError(stringConversionError) {
-		uintPage, _ = strconv.ParseUint(constants.DefaultPage, 0, 0)
-	}
-	if uintPage == 0 {
+	if validator.IsError(stringConversionError) || uintPage == 0 {
 		uintPage, _ = strconv.ParseUint(constants.DefaultPage, 0, 0)
 	}
 

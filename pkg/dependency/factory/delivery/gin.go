@@ -60,7 +60,7 @@ func (ginDelivery *GinDelivery) NewDelivery(serverRouters model.ServerRouters) {
 	}
 }
 
-func (ginDelivery *GinDelivery) LaunchServer(ctx context.Context, repository model.Repository) {
+func (ginDelivery GinDelivery) LaunchServer(ctx context.Context, repository model.Repository) {
 	config := ginDelivery.Config.GetConfig()
 
 	go func() {
@@ -74,7 +74,7 @@ func (ginDelivery *GinDelivery) LaunchServer(ctx context.Context, repository mod
 	ginDelivery.Logger.Info(domainError.NewInfoMessage(location+"LaunchServer", constants.ServerConnectionSuccess))
 }
 
-func (ginDelivery *GinDelivery) CloseServer(ctx context.Context) {
+func (ginDelivery GinDelivery) CloseServer(ctx context.Context) {
 	shutDownError := ginDelivery.Server.Shutdown(ctx)
 	if validator.IsError(shutDownError) {
 		ginDelivery.Logger.Panic(domainError.NewInternalError(location+"CloseServer.Server.Shutdown", shutDownError.Error()))
@@ -83,23 +83,23 @@ func (ginDelivery *GinDelivery) CloseServer(ctx context.Context) {
 	ginDelivery.Logger.Info(domainError.NewInfoMessage(location+"CloseServer", constants.ServerConnectionClosed))
 }
 
-func (ginDelivery *GinDelivery) NewUserController(useCase any) user.UserController {
+func (ginDelivery GinDelivery) NewUserController(useCase any) user.UserController {
 	userUseCase := useCase.(user.UserUseCase)
 	return userDelivery.NewUserController(ginDelivery.Config, ginDelivery.Logger, userUseCase)
 }
 
-func (ginDelivery *GinDelivery) NewUserRouter(controller any) user.UserRouter {
+func (ginDelivery GinDelivery) NewUserRouter(controller any) user.UserRouter {
 	userController := controller.(user.UserController)
 	return userDelivery.NewUserRouter(ginDelivery.Config, ginDelivery.Logger, userController)
 }
 
-func (ginDelivery *GinDelivery) NewPostController(userUseCaseInterface, postUseCaseInterface any) post.PostController {
+func (ginDelivery GinDelivery) NewPostController(userUseCaseInterface, postUseCaseInterface any) post.PostController {
 	userUseCase := userUseCaseInterface.(user.UserUseCase)
 	postUseCase := postUseCaseInterface.(post.PostUseCase)
 	return postDelivery.NewPostController(userUseCase, postUseCase)
 }
 
-func (ginDelivery *GinDelivery) NewPostRouter(controller any) post.PostRouter {
+func (ginDelivery GinDelivery) NewPostRouter(controller any) post.PostRouter {
 	postController := controller.(post.PostController)
 	return postDelivery.NewPostRouter(ginDelivery.Config, ginDelivery.Logger, postController)
 }

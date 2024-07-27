@@ -31,7 +31,7 @@ type UserUseCaseV1 struct {
 	UserRepository user.UserRepository
 }
 
-func NewUserUseCaseV1(config model.Config, logger model.Logger, userRepository user.UserRepository) user.UserUseCase {
+func NewUserUseCaseV1(config model.Config, logger model.Logger, userRepository user.UserRepository) UserUseCaseV1 {
 	return UserUseCaseV1{
 		Config:         config,
 		Logger:         logger,

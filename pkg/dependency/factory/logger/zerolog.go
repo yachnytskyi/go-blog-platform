@@ -14,18 +14,18 @@ type Zerolog struct {
 	logger zerolog.Logger
 }
 
-func NewZerolog() *Zerolog {
+func NewZerolog() Zerolog {
 	// Set the time format and global log level for zerolog.
 	zerolog.TimeFieldFormat = constants.LoggerDateTimeFormat
 	zerolog.SetGlobalLevel(zerolog.TraceLevel)
 
 	// Create a new zerolog logger with console output.
 	logger := zerolog.New(os.Stderr).With().Timestamp().Logger()
-	return &Zerolog{logger: logger}
+	return Zerolog{logger: logger}
 }
 
 // logWithLevel handles the common logic for logging at different levels.
-func (l *Zerolog) logWithLevel(level zerolog.Level, data error) {
+func (l Zerolog) logWithLevel(level zerolog.Level, data error) {
 	data = model.HandleError(data)
 	jsonData, marshalError := json.Marshal(data)
 	if validator.IsError(marshalError) {
@@ -52,30 +52,30 @@ func (l *Zerolog) logWithLevel(level zerolog.Level, data error) {
 	}
 }
 
-func (l *Zerolog) Trace(data error) {
+func (l Zerolog) Trace(data error) {
 	l.logWithLevel(zerolog.TraceLevel, data)
 }
 
-func (l *Zerolog) Debug(data error) {
+func (l Zerolog) Debug(data error) {
 	l.logWithLevel(zerolog.DebugLevel, data)
 }
 
-func (l *Zerolog) Info(data error) {
+func (l Zerolog) Info(data error) {
 	l.logWithLevel(zerolog.InfoLevel, data)
 }
 
-func (l *Zerolog) Warn(data error) {
+func (l Zerolog) Warn(data error) {
 	l.logWithLevel(zerolog.WarnLevel, data)
 }
 
-func (l *Zerolog) Error(data error) {
+func (l Zerolog) Error(data error) {
 	l.logWithLevel(zerolog.ErrorLevel, data)
 }
 
-func (l *Zerolog) Fatal(data error) {
+func (l Zerolog) Fatal(data error) {
 	l.logWithLevel(zerolog.FatalLevel, data)
 }
 
-func (l *Zerolog) Panic(data error) {
+func (l Zerolog) Panic(data error) {
 	l.logWithLevel(zerolog.PanicLevel, data)
 }

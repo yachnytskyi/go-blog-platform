@@ -13,8 +13,8 @@ type UseCaseV1 struct {
 	Logger model.Logger
 }
 
-func NewUseCaseV1(config model.Config, logger model.Logger) *UseCaseV1 {
-	return &UseCaseV1{
+func NewUseCaseV1(config model.Config, logger model.Logger) UseCaseV1 {
+	return UseCaseV1{
 		Config: config,
 		Logger: logger,
 	}

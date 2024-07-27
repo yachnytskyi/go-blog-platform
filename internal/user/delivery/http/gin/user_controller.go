@@ -26,7 +26,7 @@ type UserController struct {
 	UserUseCase user.UserUseCase
 }
 
-func NewUserController(config model.Config, logger model.Logger, userUseCase user.UserUseCase) user.UserController {
+func NewUserController(config model.Config, logger model.Logger, userUseCase user.UserUseCase) UserController {
 	return UserController{
 		Config:      config,
 		Logger:      logger,

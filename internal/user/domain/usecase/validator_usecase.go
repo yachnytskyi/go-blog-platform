@@ -80,7 +80,7 @@ func validateUserCreate(logger model.Logger, userCreate user.UserCreate) common.
 	validationErrors = validateEmail(logger, location+"validateUserCreate", userCreate.Email, validationErrors)
 	validationErrors = domainValidator.ValidateField(logger, location+"validateUserCreate", userCreate.Name, usernameValidator, validationErrors)
 	validationErrors = validatePassword(logger, location+"validateUserCreate", userCreate.Password, userCreate.PasswordConfirm, validationErrors)
-	if validator.IsSliceNotEmpty(validationErrors) {
+	if len(validationErrors) > 0 {
 		return common.NewResultOnFailure[user.UserCreate](domainError.NewValidationErrors(validationErrors))
 	}
 
@@ -92,7 +92,7 @@ func validateUserUpdate(logger model.Logger, userUpdate user.UserUpdate) common.
 	userUpdate.Name = utility.SanitizeString(userUpdate.Name)
 
 	validationErrors = domainValidator.ValidateField(logger, location+"validateUserUpdate", userUpdate.Name, usernameValidator, validationErrors)
-	if validator.IsSliceNotEmpty(validationErrors) {
+	if len(validationErrors) > 0 {
 		return common.NewResultOnFailure[user.UserUpdate](domainError.NewValidationErrors(validationErrors))
 	}
 
@@ -107,7 +107,7 @@ func validateUserLogin(logger model.Logger, userLogin user.UserLogin) common.Res
 	validationErrors = validateEmail(logger, location+"validateUserLogin", userLogin.Email, validationErrors)
 	validationErrors = domainValidator.ValidateField(logger, location+"validateUserLogin", userLogin.Password, usernameValidator, validationErrors)
 
-	if validator.IsSliceNotEmpty(validationErrors) {
+	if len(validationErrors) > 0 {
 		return common.NewResultOnFailure[user.UserLogin](domainError.NewValidationErrors(validationErrors))
 	}
 
@@ -119,7 +119,7 @@ func validateUserForgottenPassword(logger model.Logger, userForgottenPassword us
 	userForgottenPassword.Email = utility.SanitizeAndToLowerString(userForgottenPassword.Email)
 
 	validationErrors = validateEmail(logger, location+"validateUserForgottenPassword", userForgottenPassword.Email, validationErrors)
-	if validator.IsSliceNotEmpty(validationErrors) {
+	if len(validationErrors) > 0 {
 		return common.NewResultOnFailure[user.UserForgottenPassword](domainError.NewValidationErrors(validationErrors))
 	}
 
@@ -135,7 +135,7 @@ func validateUserResetPassword(logger model.Logger, userResetPassword user.UserR
 	validationErrors = validatePassword(logger, location+"validateUserResetPassword", userResetPassword.Password, userResetPassword.PasswordConfirm, validationErrors)
 	validationErrors = domainValidator.ValidateField(logger, location+"validateUserResetPassword", userResetPassword.ResetToken, tokenValidator, validationErrors)
 
-	if validator.IsSliceNotEmpty(validationErrors) {
+	if len(validationErrors) > 0 {
 		return common.NewResultOnFailure[user.UserResetPassword](domainError.NewValidationErrors(validationErrors))
 	}
 
@@ -175,7 +175,7 @@ func validatePassword(logger model.Logger, location, password, passwordConfirm s
 			passwordsDoNotMatch,
 		)
 
-		logger.Warn(validationError)
+		logger.Info(validationError)
 		errors = append(errors, validationError)
 	}
 
@@ -194,7 +194,7 @@ func checkEmailDomain(logger model.Logger, location, emailString string) error {
 			invalidEmailDomain,
 		)
 
-		logger.Warn(validationError)
+		logger.Info(validationError)
 		return validationError
 	}
 
@@ -210,7 +210,7 @@ func checkPasswords(logger model.Logger, location, hashedPassword string, checke
 			passwordsDoNotMatch,
 		)
 
-		logger.Warn(validationError)
+		logger.Info(validationError)
 		validationError.Notification = invalidEmailOrPassword
 		return validationError
 	}
@@ -237,7 +237,7 @@ func validateField(logger model.Logger, location, fieldValue string, commonValid
 			notification,
 		)
 
-		logger.Warn(validationError)
+		logger.Info(validationError)
 		return validationError
 	}
 	if domainValidator.AreStringCharactersInvalid(fieldValue, commonValidator.FieldRegex) {
@@ -248,7 +248,7 @@ func validateField(logger model.Logger, location, fieldValue string, commonValid
 			commonValidator.Notification,
 		)
 
-		logger.Warn(validationError)
+		logger.Info(validationError)
 		return validationError
 	}
 

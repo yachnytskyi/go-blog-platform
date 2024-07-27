@@ -84,14 +84,14 @@ func ValidateJWTToken(logger model.Logger, location, token, publicKey string) co
 
 // decodeBase64String decodes a base64-encoded string into a byte slice.
 func decodeBase64String(logger model.Logger, location, base64String string) common.Result[[]byte] {
-	decodedPrivateKey, decodeStringError := base64.StdEncoding.DecodeString(base64String)
-	if validator.IsError(decodeStringError) {
-		internalError := domainError.NewInternalError(location+".decodeBase64String.StdEncoding.DecodeString", decodeStringError.Error())
+	decodedString, decodedStringError := base64.StdEncoding.DecodeString(base64String)
+	if validator.IsError(decodedStringError) {
+		internalError := domainError.NewInternalError(location+".decodeBase64String.StdEncoding.DecodeString", decodedStringError.Error())
 		logger.Error(internalError)
 		return common.NewResultOnFailure[[]byte](internalError)
 	}
 
-	return common.NewResultOnSuccess[[]byte](decodedPrivateKey)
+	return common.NewResultOnSuccess[[]byte](decodedString)
 }
 
 // generateClaims generates JWT claims with the specified token lifetime and UserTokenPayload.
@@ -107,9 +107,9 @@ func generateClaims(tokenLifeTime time.Duration, now time.Time, userTokenPayload
 
 // createSignedToken creates a signed JWT token using the provided private key and claims.
 func createSignedToken(logger model.Logger, location string, key *rsa.PrivateKey, claims jwt.MapClaims) common.Result[string] {
-	token, createSignedTokenError := jwt.NewWithClaims(jwt.GetSigningMethod(signingMethod), claims).SignedString(key)
-	if validator.IsError(createSignedTokenError) {
-		internalError := domainError.NewInternalError(location+".createSignedToken.NewWithClaims", createSignedTokenError.Error())
+	token, tokenError := jwt.NewWithClaims(jwt.GetSigningMethod(signingMethod), claims).SignedString(key)
+	if validator.IsError(tokenError) {
+		internalError := domainError.NewInternalError(location+".createSignedToken.NewWithClaims.SignedString", tokenError.Error())
 		logger.Error(internalError)
 		return common.NewResultOnFailure[string](internalError)
 	}
@@ -119,9 +119,9 @@ func createSignedToken(logger model.Logger, location string, key *rsa.PrivateKey
 
 // parsePublicKey parses the RSA public key from the provided byte slice.
 func parsePublicKey(logger model.Logger, location string, decodedPublicKey []byte) common.Result[*rsa.PublicKey] {
-	key, parsePublicKeyError := jwt.ParseRSAPublicKeyFromPEM(decodedPublicKey)
-	if validator.IsError(parsePublicKeyError) {
-		internalError := domainError.NewInternalError(location+".parsePublicKey.ParseRSAPublicKeyFromPEM", parsePublicKeyError.Error())
+	key, keyError := jwt.ParseRSAPublicKeyFromPEM(decodedPublicKey)
+	if validator.IsError(keyError) {
+		internalError := domainError.NewInternalError(location+".parsePublicKey.ParseRSAPublicKeyFromPEM", keyError.Error())
 		logger.Error(internalError)
 		return common.NewResultOnFailure[*rsa.PublicKey](internalError)
 	}
@@ -131,9 +131,9 @@ func parsePublicKey(logger model.Logger, location string, decodedPublicKey []byt
 
 // parsePrivateKey parses the RSA private key from the provided byte slice.
 func parsePrivateKey(logger model.Logger, location string, decodedPrivateKey []byte) common.Result[*rsa.PrivateKey] {
-	key, parsePrivateKeyError := jwt.ParseRSAPrivateKeyFromPEM(decodedPrivateKey)
-	if validator.IsError(parsePrivateKeyError) {
-		internalError := domainError.NewInternalError(location+".parsePrivateKey.ParseRSAPrivateKeyFromPEM", parsePrivateKeyError.Error())
+	key, keyError := jwt.ParseRSAPrivateKeyFromPEM(decodedPrivateKey)
+	if validator.IsError(keyError) {
+		internalError := domainError.NewInternalError(location+".parsePrivateKey.ParseRSAPrivateKeyFromPEM", keyError.Error())
 		logger.Error(internalError)
 		return common.NewResultOnFailure[*rsa.PrivateKey](internalError)
 	}

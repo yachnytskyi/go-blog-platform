@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
-	httpGinCookie "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin/utility/cookie"
+	utility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin/utility/cookie"
 	userView "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
@@ -27,14 +27,14 @@ type UserController struct {
 }
 
 func NewUserController(config model.Config, logger model.Logger, userUseCase user.UserUseCase) user.UserController {
-	return &UserController{
+	return UserController{
 		Config:      config,
 		Logger:      logger,
 		UserUseCase: userUseCase,
 	}
 }
 
-func (userController *UserController) GetAllUsers(controllerContext any) {
+func (userController UserController) GetAllUsers(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
@@ -47,12 +47,10 @@ func (userController *UserController) GetAllUsers(controllerContext any) {
 	}
 
 	ginContext.JSON(
-		constants.StatusOk,
-		httpModel.NewJSONResponseOnSuccess(userView.UsersToUsersViewMapper(fetchedUsers.Data)),
-	)
+		constants.StatusOk, httpModel.NewJSONResponseOnSuccess(userView.UsersToUsersViewMapper(fetchedUsers.Data)))
 }
 
-func (userController *UserController) GetCurrentUser(controllerContext any) {
+func (userController UserController) GetCurrentUser(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
@@ -64,13 +62,10 @@ func (userController *UserController) GetCurrentUser(controllerContext any) {
 		return
 	}
 
-	ginContext.JSON(
-		constants.StatusOk,
-		httpModel.NewJSONResponseOnSuccess(userView.UserToUserViewMapper(currentUser.Data)),
-	)
+	ginContext.JSON(constants.StatusOk, httpModel.NewJSONResponseOnSuccess(userView.UserToUserViewMapper(currentUser.Data)))
 }
 
-func (userController *UserController) GetUserById(controllerContext any) {
+func (userController UserController) GetUserById(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
@@ -82,13 +77,10 @@ func (userController *UserController) GetUserById(controllerContext any) {
 		return
 	}
 
-	ginContext.JSON(
-		constants.StatusOk,
-		httpModel.NewJSONResponseOnSuccess(userView.UserToUserViewMapper(fetchedUser.Data)),
-	)
+	ginContext.JSON(constants.StatusOk, httpModel.NewJSONResponseOnSuccess(userView.UserToUserViewMapper(fetchedUser.Data)))
 }
 
-func (userController *UserController) Register(controllerContext any) {
+func (userController UserController) Register(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
@@ -107,13 +99,10 @@ func (userController *UserController) Register(controllerContext any) {
 		return
 	}
 
-	ginContext.JSON(
-		constants.StatusCreated,
-		httpModel.NewJSONResponseOnSuccess(userView.NewWelcomeMessageView(constants.SendingEmailNotification+createdUser.Data.Email)),
-	)
+	ginContext.JSON(constants.StatusCreated, httpModel.NewJSONResponseOnSuccess(userView.NewWelcomeMessageView(constants.SendingEmailNotification+createdUser.Data.Email)))
 }
 
-func (userController *UserController) UpdateCurrentUser(controllerContext any) {
+func (userController UserController) UpdateCurrentUser(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
@@ -134,13 +123,10 @@ func (userController *UserController) UpdateCurrentUser(controllerContext any) {
 		return
 	}
 
-	ginContext.JSON(
-		constants.StatusOk,
-		httpModel.NewJSONResponseOnSuccess(userView.UserToUserViewMapper(updatedUser.Data)),
-	)
+	ginContext.JSON(constants.StatusOk, httpModel.NewJSONResponseOnSuccess(userView.UserToUserViewMapper(updatedUser.Data)))
 }
 
-func (userController *UserController) DeleteCurrentUser(controllerContext any) {
+func (userController UserController) DeleteCurrentUser(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
@@ -152,11 +138,11 @@ func (userController *UserController) DeleteCurrentUser(controllerContext any) {
 		return
 	}
 
-	httpGinCookie.CleanCookies(ginContext, userController.Config, path)
+	utility.CleanCookies(ginContext, userController.Config, path)
 	ginContext.JSON(constants.StatusNoContent, nil)
 }
 
-func (userController *UserController) Login(controllerContext any) {
+func (userController UserController) Login(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
@@ -177,14 +163,10 @@ func (userController *UserController) Login(controllerContext any) {
 
 	userTokenView := userView.UserTokenToUserTokenViewMapper(userToken.Data)
 	setAccessLoginCookies(ginContext, userController.Config, userTokenView.AccessToken, userTokenView.RefreshToken)
-
-	ginContext.JSON(
-		constants.StatusOk,
-		httpModel.NewJSONResponseOnSuccess(userTokenView),
-	)
+	ginContext.JSON(constants.StatusOk, httpModel.NewJSONResponseOnSuccess(userTokenView))
 }
 
-func (userController *UserController) RefreshAccessToken(controllerContext any) {
+func (userController UserController) RefreshAccessToken(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
@@ -204,24 +186,16 @@ func (userController *UserController) RefreshAccessToken(controllerContext any) 
 
 	userTokenView := userView.UserTokenToUserTokenViewMapper(userToken.Data)
 	setRefreshTokenCookies(ginContext, userController.Config, userTokenView.AccessToken, userTokenView.RefreshToken)
-
-	ginContext.JSON(
-		constants.StatusOk,
-		httpModel.NewJSONResponseOnSuccess(userTokenView),
-	)
+	ginContext.JSON(constants.StatusOk, httpModel.NewJSONResponseOnSuccess(userTokenView))
 }
 
-func (userController *UserController) Logout(controllerContext any) {
+func (userController UserController) Logout(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
-	httpGinCookie.CleanCookies(ginContext, userController.Config, path)
-
-	ginContext.JSON(
-		constants.StatusOk,
-		httpModel.NewJSONResponseOnSuccess(userView.NewWelcomeMessageView(constants.LogoutNotificationMessage)),
-	)
+	utility.CleanCookies(ginContext, userController.Config, path)
+	ginContext.JSON(constants.StatusOk, httpModel.NewJSONResponseOnSuccess(userView.NewWelcomeMessageView(constants.LogoutNotificationMessage)))
 }
 
-func (userController *UserController) ForgottenPassword(controllerContext any) {
+func (userController UserController) ForgottenPassword(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
@@ -242,11 +216,10 @@ func (userController *UserController) ForgottenPassword(controllerContext any) {
 
 	ginContext.JSON(
 		constants.StatusCreated,
-		httpModel.NewJSONResponseOnSuccess(userView.NewWelcomeMessageView(constants.SendingEmailWithInstructionsNotification+" "+userForgottenPassword.Email)),
-	)
+		httpModel.NewJSONResponseOnSuccess(userView.NewWelcomeMessageView(constants.SendingEmailWithInstructionsNotification+" "+userForgottenPassword.Email)))
 }
 
-func (userController *UserController) ResetUserPassword(controllerContext any) {
+func (userController UserController) ResetUserPassword(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
@@ -261,18 +234,14 @@ func (userController *UserController) ResetUserPassword(controllerContext any) {
 	resetToken := ginContext.Param(constants.ItemIdParam)
 	userResetPasswordView.ResetToken = resetToken
 	userResetPassword := userView.UserResetPasswordViewToUserResetPassword(userResetPasswordView)
-
 	resetUserPasswordError := userController.UserUseCase.ResetUserPassword(ctx, userResetPassword)
 	if validator.IsError(resetUserPasswordError) {
 		ginContext.JSON(constants.StatusBadRequest, httpModel.NewJSONResponseOnFailure(httpError.HandleError(resetUserPasswordError)))
 		return
 	}
 
-	httpGinCookie.CleanCookies(ginContext, userController.Config, path)
-	ginContext.JSON(
-		constants.StatusCreated,
-		httpModel.NewJSONResponseOnSuccess(userView.NewWelcomeMessageView(constants.PasswordResetSuccessNotification)),
-	)
+	utility.CleanCookies(ginContext, userController.Config, path)
+	ginContext.JSON(constants.StatusCreated, httpModel.NewJSONResponseOnSuccess(userView.NewWelcomeMessageView(constants.PasswordResetSuccessNotification)))
 }
 
 func setAccessLoginCookies(ginContext *gin.Context, configInstance model.Config, accessToken, refreshToken string) {

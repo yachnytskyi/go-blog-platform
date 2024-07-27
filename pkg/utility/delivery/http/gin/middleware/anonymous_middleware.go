@@ -7,7 +7,6 @@ import (
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
-	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
 // AnonymousMiddleware is a Gin middleware to check if the user is anonymous based on the presence of an access token.
@@ -32,7 +31,7 @@ func isUserAnonymous(ginContext *gin.Context) bool {
 	fields := strings.Fields(authorizationHeader)
 
 	// Check if the Authorization header contains a Bearer token.
-	if validator.IsSliceNotEmpty(fields) && fields[0] == constants.Bearer {
+	if len(fields) > 0 && fields[0] == constants.Bearer {
 		return true
 	}
 

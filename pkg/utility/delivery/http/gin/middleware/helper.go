@@ -23,7 +23,7 @@ func extractAccessToken(ginContext *gin.Context, location string) common.Result[
 	fields := strings.Fields(authorizationHeader)
 
 	// Check if the Authorization header contains a Bearer token.
-	if validator.IsSliceNotEmpty(fields) && fields[0] == constants.Bearer {
+	if len(fields) > 0 && fields[0] == constants.Bearer {
 		// If a Bearer token is present, set the access token.
 		return common.NewResultOnSuccess[string](fields[1])
 	} else if cookieError == nil {

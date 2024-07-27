@@ -70,7 +70,7 @@ func loadDefaultConfig(viper *viper.Viper) {
 	log.Println(domainError.NewInfoMessage(location+"loadDefaultConfig", defaultEnvironmentPathNotification))
 }
 
-func (viper *Viper) GetConfig() *config.ApplicationConfig {
+func (viper Viper) GetConfig() *config.ApplicationConfig {
 	return viper.ApplicationConfig
 }
 

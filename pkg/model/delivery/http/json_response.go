@@ -43,11 +43,13 @@ func NewJSONResponseOnFailure(err error) JSONResponse {
 	return jsonResponse
 }
 
-func SetStatus(jsonResponse *JSONResponse) {
+func SetStatus(jsonResponse JSONResponse) JSONResponse {
 	switch {
 	case validator.IsValueNotEmpty(jsonResponse.Data):
 		jsonResponse.Status = success
 	case validator.IsError(jsonResponse.Error) || validator.IsError(jsonResponse.Errors):
 		jsonResponse.Status = fail
 	}
+
+	return jsonResponse
 }

@@ -42,7 +42,7 @@ type Logger interface {
 // Repository is an interface that defines methods for creating and managing repository instances.
 type Repository interface {
 	NewRepository(ctx context.Context) any
-	CloseRepository(ctx context.Context)
+	Closer
 	NewUserRepository(repository any) user.UserRepository
 	NewPostRepository(repository any) post.PostRepository
 }
@@ -57,15 +57,20 @@ type UseCase interface {
 type Delivery interface {
 	NewDelivery(serverRouters ServerRouters)
 	LaunchServer(ctx context.Context, repository Repository)
-	CloseServer(ctx context.Context)
+	Closer
 	NewUserController(useCase any) user.UserController
 	NewPostController(userUseCase, postUseCase any) post.PostController
 	NewUserRouter(controller any) user.UserRouter
 	NewPostRouter(controller any) post.PostRouter
 }
 
-func NewContainer(logger Logger, repository Repository, useCase UseCase, delivery Delivery) *Container {
-	return &Container{
+// Closer is an interface that defines a method for closing resources or services.
+type Closer interface {
+	Close(ctx context.Context) // Closes resources or services.
+}
+
+func NewContainer(logger Logger, repository Repository, useCase UseCase, delivery Delivery) Container {
+	return Container{
 		Logger:     logger,
 		Repository: repository,
 		UseCase:    useCase,

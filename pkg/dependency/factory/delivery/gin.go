@@ -50,8 +50,8 @@ func (ginDelivery *GinDelivery) NewDelivery(serverRouters model.ServerRouters) {
 	serverRouters.UserRouter.UserRouter(router)
 	serverRouters.PostRouter.PostRouter(router, serverRouters.UserUseCase)
 
-	setNoRouteHandler(ginDelivery.Router, ginDelivery.Logger)
-	setNoMethodHandler(ginDelivery.Router, ginDelivery.Logger)
+	setNoRouteHandler(ginDelivery.Router, location+"NewDelivery", ginDelivery.Logger)
+	setNoMethodHandler(ginDelivery.Router, location+"NewDelivery", ginDelivery.Logger)
 	ginDelivery.Router.HandleMethodNotAllowed = true
 
 	ginDelivery.Server = &http.Server{
@@ -66,7 +66,7 @@ func (ginDelivery GinDelivery) LaunchServer(ctx context.Context, repository mode
 	go func() {
 		runError := ginDelivery.Router.Run(":" + config.Gin.Port)
 		if validator.IsError(runError) {
-			repository.CloseRepository(ctx)
+			repository.Close(ctx)
 			ginDelivery.Logger.Panic(domainError.NewInternalError(location+"LaunchServer.Router.Run", runError.Error()))
 		}
 	}()
@@ -74,13 +74,13 @@ func (ginDelivery GinDelivery) LaunchServer(ctx context.Context, repository mode
 	ginDelivery.Logger.Info(domainError.NewInfoMessage(location+"LaunchServer", constants.ServerConnectionSuccess))
 }
 
-func (ginDelivery GinDelivery) CloseServer(ctx context.Context) {
+func (ginDelivery GinDelivery) Close(ctx context.Context) {
 	shutDownError := ginDelivery.Server.Shutdown(ctx)
 	if validator.IsError(shutDownError) {
-		ginDelivery.Logger.Panic(domainError.NewInternalError(location+"CloseServer.Server.Shutdown", shutDownError.Error()))
+		ginDelivery.Logger.Panic(domainError.NewInternalError(location+"Close.Server.Shutdown", shutDownError.Error()))
 	}
 
-	ginDelivery.Logger.Info(domainError.NewInfoMessage(location+"CloseServer", constants.ServerConnectionClosed))
+	ginDelivery.Logger.Info(domainError.NewInfoMessage(location+"Close", constants.ServerConnectionClosed))
 }
 
 func (ginDelivery GinDelivery) NewUserController(useCase any) user.UserController {
@@ -121,21 +121,21 @@ func configureCORS(router *gin.Engine, config *config.ApplicationConfig) {
 	router.Use(cors.New(corsConfig))
 }
 
-func setNoRouteHandler(router *gin.Engine, logger model.Logger) {
+func setNoRouteHandler(router *gin.Engine, location string, logger model.Logger) {
 	router.NoRoute(func(ginContext *gin.Context) {
 		requestedPath := ginContext.Request.URL.Path
 		errorMessage := fmt.Sprintf(constants.RouteNotFoundNotification, requestedPath)
-		httpRequestError := httpError.NewHTTPRequestError(location+"NewDelivery.setNoRouteHandler.ginDelivery.Router.NoRoute", requestedPath, errorMessage)
+		httpRequestError := httpError.NewHTTPRequestError(location+".setNoRouteHandler.NoRoute", requestedPath, errorMessage)
 		logger.Error(httpRequestError)
 		ginContext.JSON(constants.StatusNotFound, httpModel.NewJSONResponseOnFailure(httpError.HandleError(httpRequestError)))
 	})
 }
 
-func setNoMethodHandler(router *gin.Engine, logger model.Logger) {
+func setNoMethodHandler(router *gin.Engine, location string, logger model.Logger) {
 	router.NoMethod(func(ginContext *gin.Context) {
 		forbiddenMethod := ginContext.Request.Method
 		errorMessage := fmt.Sprintf(constants.MethodNotAllowedNotification, forbiddenMethod)
-		httpRequestError := httpError.NewHTTPRequestError(location+"NewDelivery.setNoMethodHandler.ginDelivery.Router.NoMethod", forbiddenMethod, errorMessage)
+		httpRequestError := httpError.NewHTTPRequestError(location+"setNoMethodHandler.NoMethod", forbiddenMethod, errorMessage)
 		logger.Error(httpRequestError)
 		ginContext.JSON(constants.StatusMethodNotAllowed, httpModel.NewJSONResponseOnFailure(httpError.HandleError(httpRequestError)))
 	})

@@ -10,16 +10,16 @@ import (
 )
 
 type PaginationQuery struct {
-	Page       int    // Page number to retrieve.
-	Limit      int    // Maximum number of items per page.
+	Page       uint64 // Page number to retrieve.
+	Limit      uint64 // Maximum number of items per page.
 	OrderBy    string // Field to order by.
 	SortOrder  string // Sorting direction ("asc" for ascending, "desc" for descending).
-	Skip       int    // Number of items to skip for pagination.
+	Skip       uint64 // Number of items to skip for pagination.
 	BaseURL    string // Base URL for pagination.
-	TotalItems int    // Total number of items.
+	TotalItems uint64 // Total number of items.
 }
 
-func NewPaginationQuery(page, limit int, orderBy, sortOrder, baseURL string) PaginationQuery {
+func NewPaginationQuery(page, limit uint64, orderBy, sortOrder, baseURL string) PaginationQuery {
 	return PaginationQuery{
 		Page:      page,
 		Limit:     limit,
@@ -30,40 +30,37 @@ func NewPaginationQuery(page, limit int, orderBy, sortOrder, baseURL string) Pag
 	}
 }
 
-func GetPage(page string) int {
-	intPage, stringConversionError := strconv.Atoi(page)
+func GetPage(page string) uint64 {
+	uintPage, stringConversionError := strconv.ParseUint(page, 0, 0)
 	if validator.IsError(stringConversionError) {
-		intPage, _ = strconv.Atoi(constants.DefaultPage)
+		uintPage, _ = strconv.ParseUint(constants.DefaultPage, 0, 0)
 	}
-	if intPage <= 0 {
-		intPage, _ = strconv.Atoi(constants.DefaultPage)
+	if uintPage == 0 {
+		uintPage, _ = strconv.ParseUint(constants.DefaultPage, 0, 0)
 	}
 
-	return intPage
+	return uint64(uintPage)
 }
 
-func GetLimit(limit string) int {
-	intLimit, stringConversionError := strconv.Atoi(limit)
+func GetLimit(limit string) uint64 {
+	uintLimit, stringConversionError := strconv.ParseUint(limit, 0, 0)
 	if validator.IsError(stringConversionError) {
-		intLimit, _ = strconv.Atoi(constants.DefaultLimit)
+		uintLimit, _ = strconv.ParseUint(constants.DefaultLimit, 0, 0)
 	}
-	if isLimitInvalid(intLimit) {
-		intLimit, _ = strconv.Atoi(constants.DefaultLimit)
+	if isLimitInvalid(uintLimit) {
+		uintLimit, _ = strconv.ParseUint(constants.DefaultLimit, 0, 0)
 	}
 
-	return intLimit
+	return uintLimit
 }
 
-func calculateSkip(page, limit int) int {
-	if page == 0 {
-		return page
-	}
-
+// calculateSkip calculates the number of items to skip for pagination.
+func calculateSkip(page, limit uint64) uint64 {
 	return (page - 1) * limit
 }
 
-func isLimitInvalid(data int) bool {
-	if data <= 0 || data > constants.MaxItemsPerPage {
+func isLimitInvalid(data uint64) bool {
+	if data > constants.MaxItemsPerPage {
 		return true
 	}
 
@@ -80,12 +77,12 @@ func SetCorrectPage(paginationQuery PaginationQuery) PaginationQuery {
 }
 
 type PaginationResponse struct {
-	Page       int      // Current page number.
-	TotalPages int      // Total number of pages.
-	PagesLeft  int      // Number of pages remaining.
-	TotalItems int      // Total number of items.
-	ItemsLeft  int      // Number of items remaining on the current page.
-	Limit      int      // Maximum items per page.
+	Page       uint64   // Current page number.
+	TotalPages uint64   // Total number of pages.
+	PagesLeft  uint64   // Number of pages remaining.
+	TotalItems uint64   // Total number of items.
+	ItemsLeft  uint64   // Number of items remaining on the current page.
+	Limit      uint64   // Maximum items per page.
 	OrderBy    string   // Field used for ordering.
 	SortOrder  string   // Sorting direction ("asc" for ascending, "desc" for descending).
 	PageLinks  []string // Array of page links.
@@ -110,20 +107,17 @@ func NewPaginationResponse(paginationQuery PaginationQuery) PaginationResponse {
 	return paginationResponse
 }
 
-func calculateTotalPages(totalItems, limit int) int {
+func calculateTotalPages(totalItems, limit uint64) uint64 {
 	totalPages := float64(totalItems) / float64(limit)
-	return int(math.Ceil(totalPages))
+	return uint64(math.Ceil(totalPages))
 }
 
-func calculateItemsLeft(page, totalItems, limit int) int {
-	if (totalItems - (page * limit)) < 0 {
-		return 0
-	}
-
+func calculateItemsLeft(page, totalItems, limit uint64) uint64 {
 	return totalItems - (page * limit)
 }
 
-func generatePageLinks(paginationResponse PaginationResponse, amountOfPages int) []string {
+// generatePageLinks generates the page links for the pagination response.
+func generatePageLinks(paginationResponse PaginationResponse, amountOfPages uint64) []string {
 	// Preallocate memory for the pageLinks slice based on amountOfPages, adding space for potential first and last page links.
 	pageLinks := make([]string, 0, amountOfPages+2)
 
@@ -163,9 +157,7 @@ func generatePageLinks(paginationResponse PaginationResponse, amountOfPages int)
 }
 
 // buildPageLink builds the page link with given page number.
-func buildPageLink(paginationResponse PaginationResponse, pageNumber int) string {
-	baseURL := paginationResponse.BaseURL
-
+func buildPageLink(paginationResponse PaginationResponse, pageNumber uint64) string {
 	queryParams := fmt.Sprintf(
 		"%s=%d&%s=%d&%s=%s&%s=%s",
 		constants.Page,
@@ -179,5 +171,6 @@ func buildPageLink(paginationResponse PaginationResponse, pageNumber int) string
 	)
 
 	// Combine the base URL and query parameters.
+	baseURL := paginationResponse.BaseURL
 	return fmt.Sprintf("%s?%s", baseURL, queryParams)
 }

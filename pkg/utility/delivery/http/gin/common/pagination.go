@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
+	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
 // ParsePaginationQuery parses and extracts pagination parameters from the provided Gin context.
@@ -15,7 +16,7 @@ func ParsePaginationQuery(ginContext *gin.Context) common.PaginationQuery {
 	orderBy := ginContext.DefaultQuery(constants.OrderBy, constants.DefaultOrderBy)
 	sortOrder := ginContext.DefaultQuery(constants.SortOrder, constants.DefaultSortOrder)
 	scheme := constants.HTTP
-	if ginContext.Request.TLS != nil {
+	if validator.IsValueNotEmpty(ginContext.Request.TLS) {
 		scheme = constants.HTTPS
 	}
 

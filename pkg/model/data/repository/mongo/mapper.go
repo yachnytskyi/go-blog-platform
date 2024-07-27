@@ -23,7 +23,7 @@ func DataToMongoDocumentMapper(logger model.Logger, location string, incomingDat
 
 	var document bson.D
 	err = bson.Unmarshal(data, &document)
-	if err != nil {
+	if validator.IsError(err) {
 		internalError := domainError.NewInternalError(location+".DataToMongoDocumentMapper.bson.Unmarshal", err.Error())
 		logger.Error(internalError)
 		return common.NewResultOnFailure[*bson.D](internalError)
@@ -33,7 +33,7 @@ func DataToMongoDocumentMapper(logger model.Logger, location string, incomingDat
 }
 
 func HexToObjectIDMapper(logger model.Logger, location, id string) common.Result[primitive.ObjectID] {
-	if len(id) == 0 {
+	if id == "" {
 		internalError := domainError.NewInternalError(location+".HexToObjectIDMapper", emptyID)
 		logger.Error(internalError)
 		return common.NewResultOnFailure[primitive.ObjectID](internalError)

@@ -17,3 +17,7 @@ func NewResultOnFailure[T any](err error) Result[T] {
 		Error: err,
 	}
 }
+
+func (r Result[T]) IsError() bool {
+	return r.Error != nil
+}

@@ -17,7 +17,7 @@ func main() {
 	defer cancel() // Ensure the context is canceled to release resources.
 
 	// Initialize the application and get the container with all dependencies.
-	container := dependency.CreateApplication(ctx)
+	container := dependency.NewApplication(ctx)
 
 	// Launch the server in a separate goroutine.
 	go func() {

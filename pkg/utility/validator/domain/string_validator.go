@@ -51,7 +51,7 @@ func ValidateField(logger model.Logger, location, field string, commonValidator 
 
 // ValidateOptionalField validates an optional field based on the provided commonValidator.
 func ValidateOptionalField(logger model.Logger, location, field string, commonValidator domainModel.CommonValidator, validationErrors []error) []error {
-	if len(field) == 0 {
+	if field != "" {
 		return validationErrors
 	}
 

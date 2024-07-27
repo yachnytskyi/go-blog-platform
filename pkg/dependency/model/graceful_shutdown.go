@@ -11,12 +11,9 @@ const (
 	completed = "Graceful shutdown of the app"
 )
 
-func GracefulShutdown(ctx context.Context, logger Logger, repository Repository, delivery Delivery) {
-	if delivery != nil {
-		delivery.CloseServer(ctx)
-	}
-	if repository != nil {
-		repository.CloseRepository(ctx)
+func GracefulShutdown(ctx context.Context, logger Logger, closers ...Closer) {
+	for _, closer := range closers {
+		closer.Close(ctx)
 	}
 
 	logger.Info(domainError.NewInfoMessage(location+"GracefulShutdown", completed))

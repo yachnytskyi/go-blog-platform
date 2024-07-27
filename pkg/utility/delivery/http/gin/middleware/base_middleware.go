@@ -26,7 +26,7 @@ const (
 func CorrelationIDMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		correlationID := c.GetHeader(correlationIDHeader)
-		if len(correlationID) == 0 {
+		if correlationID == "" {
 			correlationID = uuid.New().String()
 		}
 
@@ -86,7 +86,7 @@ func ValidateInputMiddleware(config *config.ApplicationConfig, logger model.Logg
 		}
 
 		// Check if the content type is in the list of allowed content types.
-		if len(contentType) > 0 && validator.IsSliceNotContains(config.Security.AllowedContentTypes, contentType) {
+		if contentType != "" && validator.IsSliceNotContains(config.Security.AllowedContentTypes, contentType) {
 			allowedContentTypes := strings.Join(config.Security.AllowedContentTypes, ", ")
 			notification := constants.InvalidHTTPMethodNotification + allowedContentTypes
 			httpRequestError := httpError.NewHTTPRequestError(location+"ValidateInputMiddleware.AllowedContentTypes", contentType, notification)

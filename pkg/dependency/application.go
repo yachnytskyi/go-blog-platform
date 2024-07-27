@@ -3,14 +3,15 @@ package dependency
 import (
 	"context"
 
+	"github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	factory "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory"
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 )
 
-// CreateApplication initializes the application by setting up the container,
+// NewApplication initializes the application by setting up the container,
 // injecting dependencies, and configuring the server.
-func CreateApplication(ctx context.Context) *model.Container {
-	config := factory.NewConfig()
+func NewApplication(ctx context.Context) model.Container {
+	config := factory.NewConfig(constants.Config)
 	logger := factory.NewLogger(ctx, config)
 
 	// Create repositories

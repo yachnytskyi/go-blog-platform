@@ -51,7 +51,7 @@ func UserContextMiddleware(logger model.Logger, userUseCase user.UserUseCase) gi
 		defer cancel()
 
 		userID, _ := ctx.Value(constants.ID).(string)
-		if len(userID) == 0 {
+		if userID == "" {
 			httpInternalError := httpError.NewHTTPInternalError(location+"UserContextMiddleware.ctx.Value", constants.IDContextMissing)
 			abortWithStatusJSON(ginContext, logger, httpInternalError, constants.StatusUnauthorized)
 			return

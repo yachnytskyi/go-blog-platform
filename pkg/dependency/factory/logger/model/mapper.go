@@ -44,7 +44,7 @@ func ValidationErrorToJSONValidationErrorMapper(validationError domainError.Vali
 }
 
 func ValidationErrorsToJSONValidationErrorsMapper(validationErrors domainError.ValidationErrors) JSONValidationErrors {
-	JSONValidationErrors := make([]error, 0, validationErrors.Len())
+	JSONValidationErrors := make([]error, 0, len(validationErrors.Errors))
 	for _, validationError := range validationErrors.Errors {
 		validationError, ok := validationError.(domainError.ValidationError)
 		if ok {

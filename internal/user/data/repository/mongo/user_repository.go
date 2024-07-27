@@ -65,7 +65,7 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 	}
 
 	// Set up pagination and sorting options using provided parameters.
-	paginationQuery.TotalItems = int(totalUsers)
+	paginationQuery.TotalItems = uint64(totalUsers)
 	paginationQuery = common.SetCorrectPage(paginationQuery)
 	option := options.FindOptions{}
 	option.SetLimit(int64(paginationQuery.Limit))

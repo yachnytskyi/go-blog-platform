@@ -23,9 +23,8 @@ const (
 
 // Configuration libraries used in the application.
 const (
+	Config = Viper   // Configuration library to use.
 	Viper  = "Viper" // Viper configuration library.
-	Config = Viper   // Default configuration library.
-
 )
 
 // Logger libraries used in the application.

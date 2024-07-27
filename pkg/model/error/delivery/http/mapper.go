@@ -13,7 +13,7 @@ func ValidationErrorToHTTPValidationErrorMapper(validationError domainError.Vali
 }
 
 func ValidationErrorsToHTTPValidationErrorsMapper(validationErrors domainError.ValidationErrors) HTTPValidationErrors {
-	httpValidationErrors := make([]error, 0, validationErrors.Len())
+	httpValidationErrors := make([]error, 0, len(validationErrors.Errors))
 	for _, validationError := range validationErrors.Errors {
 		validationError, ok := validationError.(domainError.ValidationError)
 		if ok {

@@ -18,7 +18,7 @@ func BSONToString(query bson.M) string {
 			result += fmt.Sprintf("%s: %s, ", key, value)
 		}
 	}
-	if len(result) > 0 {
+	if result != "" {
 		result = result[:len(result)-2] // Remove trailing comma and space
 	}
 

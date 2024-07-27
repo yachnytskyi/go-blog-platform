@@ -291,7 +291,7 @@ func setRefreshTokenCookies(ginContext *gin.Context, configInstance model.Config
 		config.Security.HTTPOnly,
 	)
 
-	if len(refreshToken) > 0 {
+	if refreshToken != "" {
 		ginContext.SetCookie(
 			constants.RefreshTokenValue,
 			refreshToken,

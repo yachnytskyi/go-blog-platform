@@ -1,6 +1,7 @@
 package http
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 )
@@ -197,4 +198,12 @@ type HTTPInternalErrors struct {
 
 func NewHTTPInternalErrors(errors []error) HTTPInternalErrors {
 	return HTTPInternalErrors{NewHTTPBaseErrors(errors)}
+}
+
+func (HTTPValidationErrors HTTPValidationErrors) MarshalJSON() ([]byte, error) {
+	return json.Marshal(HTTPValidationErrors.Errors)
+}
+
+func (HTTPInternalErrors HTTPInternalErrors) MarshalJSON() ([]byte, error) {
+	return json.Marshal(HTTPInternalErrors.Errors)
 }

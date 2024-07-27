@@ -57,13 +57,13 @@ func (mongoDBRepository *MongoDBRepository) NewRepository(ctx context.Context) a
 	return mongoDBRepository.MongoClient.Database(config.MongoDB.Name)
 }
 
-func (mongoDBRepository MongoDBRepository) CloseRepository(ctx context.Context) {
+func (mongoDBRepository MongoDBRepository) Close(ctx context.Context) {
 	disconnectError := mongoDBRepository.MongoClient.Disconnect(ctx)
 	if validator.IsError(disconnectError) {
-		mongoDBRepository.Logger.Panic(domainError.NewInternalError(location+"CloseRepository.Disconnect", disconnectError.Error()))
+		mongoDBRepository.Logger.Panic(domainError.NewInternalError(location+"Close.Disconnect", disconnectError.Error()))
 	}
 
-	mongoDBRepository.Logger.Info(domainError.NewInfoMessage(location+"CloseRepository", constants.DatabaseConnectionSuccess))
+	mongoDBRepository.Logger.Info(domainError.NewInfoMessage(location+"Close", constants.DatabaseConnectionClosed))
 }
 
 func (mongoDBRepository MongoDBRepository) NewUserRepository(database any) user.UserRepository {

@@ -6,12 +6,12 @@ import (
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/usecase"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
+	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
 
 const (
-	location            = "pkg.dependency.factory.data.usecase.v1."
-	usecaseDoesNotExist = "This use case type does not exist: %s"
+	location = "pkg.dependency.factory.data.usecase.v1."
 )
 
 type UseCaseV1 struct {
@@ -33,7 +33,7 @@ func (useCaseV1 UseCaseV1) NewUseCase(repository any) any {
 	case interfaces.PostRepository:
 		return post.NewPostUseCaseV1(useCaseV1.Logger, repositoryType)
 	default:
-		useCaseV1.Logger.Panic(domainError.NewInternalError(location+"NewUseCase.default", fmt.Sprintf(usecaseDoesNotExist, repositoryType)))
+		useCaseV1.Logger.Panic(domainError.NewInternalError(location+"NewUseCase.default", fmt.Sprintf(model.UnsupportedUseCase, repositoryType)))
 	}
 
 	return nil

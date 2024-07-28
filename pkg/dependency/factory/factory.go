@@ -16,12 +16,7 @@ import (
 )
 
 const (
-	location              = "pkg.dependency.factory."
-	unsupportedConfig     = "Unsupported Config type: %s"
-	unsupportedLogger     = "Unsupported logger type: %s"
-	unsupportedRepository = "Unsupported repository type: %s"
-	unsupportedUseCase    = "Unsupported use case type: %s"
-	unsupportedDelivery   = "Unsupported delivery type: %s"
+	location = "pkg.dependency.factory."
 )
 
 func NewConfig(configType string) interfaces.Config {
@@ -30,7 +25,7 @@ func NewConfig(configType string) interfaces.Config {
 		return config.NewViper()
 	// Add other logger options here as needed.
 	default:
-		notification := fmt.Sprintf(unsupportedConfig, configType)
+		notification := fmt.Sprintf(model.UnsupportedConfig, configType)
 		panic(domainError.NewInternalError(location+"NewLogger", notification))
 	}
 }
@@ -43,7 +38,7 @@ func NewLogger(ctx context.Context, configInstance interfaces.Config) interfaces
 		return logger.NewZerolog()
 	// Add other logger options here as needed.
 	default:
-		notification := fmt.Sprintf(unsupportedLogger, config.Core.Logger)
+		notification := fmt.Sprintf(model.UnsupportedLogger, config.Core.Logger)
 		panic(domainError.NewInternalError(location+"NewLogger", notification))
 	}
 }
@@ -56,7 +51,7 @@ func NewRepositoryFactory(ctx context.Context, configInstance interfaces.Config,
 		return repository.NewMongoDBRepository(configInstance, logger)
 	// Add other repository options here as needed.
 	default:
-		notification := fmt.Sprintf(unsupportedRepository, config.Core.Database)
+		notification := fmt.Sprintf(model.UnsupportedRepository, config.Core.Database)
 		logger.Panic(domainError.NewInternalError(location+"NewRepositoryFactory", notification))
 		return nil
 	}
@@ -71,7 +66,7 @@ func NewUseCaseFactory(ctx context.Context, configInstance interfaces.Config, lo
 		return useCaseV1.NewUseCaseV1(configInstance, logger)
 	// Add other domain options here as needed.
 	default:
-		notification := fmt.Sprintf(unsupportedUseCase, config.Core.UseCase)
+		notification := fmt.Sprintf(model.UnsupportedUseCase, config.Core.UseCase)
 		model.GracefulShutdown(ctx, logger, repository)
 		logger.Panic(domainError.NewInternalError(location+"NewUseCaseFactory", notification))
 		return nil
@@ -86,7 +81,7 @@ func NewDeliveryFactory(ctx context.Context, configInstance interfaces.Config, l
 		return delivery.NewGinDelivery(configInstance, logger)
 	// Add other delivery options here as needed.
 	default:
-		notification := fmt.Sprintf(unsupportedDelivery, config.Core.Delivery)
+		notification := fmt.Sprintf(model.UnsupportedDelivery, config.Core.Delivery)
 		model.GracefulShutdown(ctx, logger, repository)
 		logger.Panic(domainError.NewInternalError(location+"NewUseCaseFactory", notification))
 		return nil

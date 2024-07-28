@@ -12,6 +12,7 @@ import (
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/http/gin"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin"
 	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
+	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
@@ -20,8 +21,7 @@ import (
 )
 
 const (
-	location             = "pkg.dependency.delivery.gin."
-	deliveryDoesNotExist = "This delivery type does not exist: %s"
+	location = "pkg.dependency.delivery.gin."
 )
 
 type GinDelivery struct {
@@ -82,7 +82,7 @@ func (ginDelivery GinDelivery) NewController(userUseCase interfaces.UserUseCase,
 	case interfaces.PostUseCase:
 		return post.NewPostController(userUseCase, usecaseType)
 	default:
-		ginDelivery.Logger.Panic(domainError.NewInternalError(location+"NewController.default", fmt.Sprintf(deliveryDoesNotExist, usecaseType)))
+		ginDelivery.Logger.Panic(domainError.NewInternalError(location+"NewController.default", fmt.Sprintf(model.UnsupportedDelivery, usecaseType)))
 		return nil
 	}
 }

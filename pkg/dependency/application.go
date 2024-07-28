@@ -3,7 +3,7 @@ package dependency
 import (
 	"context"
 
-	"github.com/yachnytskyi/golang-mongo-grpc/config/constants"
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	factory "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory"
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"

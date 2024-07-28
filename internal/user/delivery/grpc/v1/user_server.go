@@ -2,7 +2,6 @@ package v1
 
 import (
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
-	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	pb "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1/model/pb"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -12,7 +11,7 @@ type UserGrpcServer struct {
 	Logger interfaces.Logger
 	pb.UnimplementedUserUseCaseServer
 	// applicationConfig config.ApplicationConfig
-	userUseCase    user.UserUseCase
+	userUseCase    interfaces.UserUseCase
 	userCollection *mongo.Collection
 }
 

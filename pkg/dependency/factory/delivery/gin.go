@@ -9,16 +9,14 @@ import (
 	"github.com/gin-gonic/gin"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
-	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
-	postDelivery "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/http/gin"
-	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
-	userDelivery "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin"
+	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/http/gin"
+	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin"
 	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-	httpGinMiddleware "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/middleware"
+	middleware "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/middleware"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
@@ -84,35 +82,35 @@ func (ginDelivery GinDelivery) Close(ctx context.Context) {
 	ginDelivery.Logger.Info(domainError.NewInfoMessage(location+"Close", constants.ServerConnectionClosed))
 }
 
-func (ginDelivery GinDelivery) NewUserController(useCase any) user.UserController {
-	userUseCase := useCase.(user.UserUseCase)
-	return userDelivery.NewUserController(ginDelivery.Config, ginDelivery.Logger, userUseCase)
+func (ginDelivery GinDelivery) NewUserController(useCase any) interfaces.UserController {
+	userUseCase := useCase.(interfaces.UserUseCase)
+	return user.NewUserController(ginDelivery.Config, ginDelivery.Logger, userUseCase)
 }
 
-func (ginDelivery GinDelivery) NewUserRouter(controller any) user.UserRouter {
-	userController := controller.(user.UserController)
-	return userDelivery.NewUserRouter(ginDelivery.Config, ginDelivery.Logger, userController)
+func (ginDelivery GinDelivery) NewUserRouter(controller any) interfaces.UserRouter {
+	userController := controller.(interfaces.UserController)
+	return user.NewUserRouter(ginDelivery.Config, ginDelivery.Logger, userController)
 }
 
-func (ginDelivery GinDelivery) NewPostController(userUseCaseInterface, postUseCaseInterface any) post.PostController {
-	userUseCase := userUseCaseInterface.(user.UserUseCase)
-	postUseCase := postUseCaseInterface.(post.PostUseCase)
-	return postDelivery.NewPostController(userUseCase, postUseCase)
+func (ginDelivery GinDelivery) NewPostController(userUseCaseInterface, postUseCaseInterface any) interfaces.PostController {
+	userUseCase := userUseCaseInterface.(interfaces.UserUseCase)
+	postUseCase := postUseCaseInterface.(interfaces.PostUseCase)
+	return post.NewPostController(userUseCase, postUseCase)
 }
 
-func (ginDelivery GinDelivery) NewPostRouter(controller any) post.PostRouter {
-	postController := controller.(post.PostController)
-	return postDelivery.NewPostRouter(ginDelivery.Config, ginDelivery.Logger, postController)
+func (ginDelivery GinDelivery) NewPostRouter(controller any) interfaces.PostRouter {
+	postController := controller.(interfaces.PostController)
+	return post.NewPostRouter(ginDelivery.Config, ginDelivery.Logger, postController)
 }
 
 func applyMiddleware(router *gin.Engine, config *config.ApplicationConfig, logger interfaces.Logger) {
-	router.Use(httpGinMiddleware.CorrelationIDMiddleware())
-	router.Use(httpGinMiddleware.SecureHeadersMiddleware(config))
-	router.Use(httpGinMiddleware.CSPMiddleware(config))
-	router.Use(httpGinMiddleware.RateLimitMiddleware(config))
-	router.Use(httpGinMiddleware.ValidateInputMiddleware(config, logger))
-	router.Use(httpGinMiddleware.TimeoutMiddleware(logger))
-	router.Use(httpGinMiddleware.LoggerMiddleware(logger))
+	router.Use(middleware.CorrelationIDMiddleware())
+	router.Use(middleware.SecureHeadersMiddleware(config))
+	router.Use(middleware.CSPMiddleware(config))
+	router.Use(middleware.RateLimitMiddleware(config))
+	router.Use(middleware.ValidateInputMiddleware(config, logger))
+	router.Use(middleware.TimeoutMiddleware(logger))
+	router.Use(middleware.LoggerMiddleware(logger))
 }
 
 func configureCORS(router *gin.Engine, config *config.ApplicationConfig) {

@@ -1,4 +1,4 @@
-package user
+package interfaces
 
 type UserController interface {
 	GetAllUsers(controllerContext any)
@@ -12,4 +12,12 @@ type UserController interface {
 	Logout(controllerContext any)
 	ForgottenPassword(controllerContext any)
 	ResetUserPassword(controllerContext any)
+}
+
+type PostController interface {
+	GetAllPosts(controllerContext any)
+	GetPostById(controllerContext any)
+	CreatePost(controllerContext any)
+	UpdatePostById(controllerContext any)
+	DeletePostByID(controllerContext any)
 }

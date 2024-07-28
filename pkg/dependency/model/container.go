@@ -4,8 +4,6 @@ import (
 	"context"
 
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
-	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
-	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 )
 
 // Container holds the factory interfaces required to initialize and manage dependencies.
@@ -17,9 +15,9 @@ type Container struct {
 
 // ServerRouters holds the routers for different modules of the application.
 type ServerRouters struct {
-	UserUseCase user.UserUseCase // UserUseCase handles user-related logic and operations.
-	UserRouter  user.UserRouter
-	PostRouter  post.PostRouter
+	UserUseCase interfaces.UserUseCase // UserUseCase handles user-related logic and operations.
+	UserRouter  interfaces.UserRouter
+	PostRouter  interfaces.PostRouter
 } // Add other routers as needed
 
 func NewContainer(logger interfaces.Logger, repository Repository, delivery Delivery) Container {
@@ -30,7 +28,7 @@ func NewContainer(logger interfaces.Logger, repository Repository, delivery Deli
 	} // Add other dependencies as needed
 }
 
-func NewServerRouters(userUseCase user.UserUseCase, userRouter user.UserRouter, postRouter post.PostRouter) ServerRouters {
+func NewServerRouters(userUseCase interfaces.UserUseCase, userRouter interfaces.UserRouter, postRouter interfaces.PostRouter) ServerRouters {
 	return ServerRouters{
 		UserUseCase: userUseCase,
 		UserRouter:  userRouter,
@@ -42,14 +40,14 @@ func NewServerRouters(userUseCase user.UserUseCase, userRouter user.UserRouter, 
 type Repository interface {
 	NewRepository(ctx context.Context) any
 	Closer
-	NewUserRepository(repository any) user.UserRepository
-	NewPostRepository(repository any) post.PostRepository
+	NewUserRepository(repository any) interfaces.UserRepository
+	NewPostRepository(repository any) interfaces.PostRepository
 }
 
 // UseCase is an interface that defines methods for creating use case instances.
 type UseCase interface {
-	NewUserUseCase(repository any) user.UserUseCase
-	NewPostUseCase(repository any) post.PostUseCase
+	NewUserUseCase(repository any) interfaces.UserUseCase
+	NewPostUseCase(repository any) interfaces.PostUseCase
 }
 
 // Delivery is an interface that defines methods for creating delivery components and managing the server.
@@ -57,10 +55,10 @@ type Delivery interface {
 	NewDelivery(serverRouters ServerRouters)
 	LaunchServer(ctx context.Context, repository Repository)
 	Closer
-	NewUserController(useCase any) user.UserController
-	NewPostController(userUseCase, postUseCase any) post.PostController
-	NewUserRouter(controller any) user.UserRouter
-	NewPostRouter(controller any) post.PostRouter
+	NewUserController(useCase any) interfaces.UserController
+	NewPostController(userUseCase, postUseCase any) interfaces.PostController
+	NewUserRouter(controller any) interfaces.UserRouter
+	NewPostRouter(controller any) interfaces.PostRouter
 }
 
 // Closer is an interface that defines a method for closing resources or services.

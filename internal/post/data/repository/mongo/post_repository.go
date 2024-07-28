@@ -6,9 +6,8 @@ import (
 	"time"
 
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
-	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
-	repositoryModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/data/repository/mongo/model"
-	postModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
+	repository "github.com/yachnytskyi/golang-mongo-grpc/internal/post/data/repository/mongo/model"
+	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	"go.mongodb.org/mongo-driver/bson"
@@ -25,14 +24,14 @@ type PostRepository struct {
 	collection *mongo.Collection
 }
 
-func NewPostRepository(logger interfaces.Logger, db *mongo.Database) post.PostRepository {
+func NewPostRepository(logger interfaces.Logger, db *mongo.Database) interfaces.PostRepository {
 	return &PostRepository{
 		Logger:     logger,
 		collection: db.Collection("posts"),
 	}
 }
 
-func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int, limit int) (*postModel.Posts, error) {
+func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int, limit int) (*post.Posts, error) {
 	if page == 0 {
 		page = 1
 	}
@@ -56,10 +55,10 @@ func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int,
 
 	defer cursor.Close(ctx)
 
-	var fetchedPosts []*repositoryModel.PostRepository
+	var fetchedPosts []*repository.PostRepository
 
 	for cursor.Next(ctx) {
-		post := &repositoryModel.PostRepository{}
+		post := &repository.PostRepository{}
 		err := cursor.Decode(post)
 
 		if validator.IsError(err) {
@@ -75,24 +74,24 @@ func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int,
 	}
 
 	if len(fetchedPosts) == 0 {
-		return &postModel.Posts{
-			Posts: make([]*postModel.Post, 0),
+		return &post.Posts{
+			Posts: make([]*post.Post, 0),
 		}, nil
 	}
 
-	return &postModel.Posts{
-		Posts: repositoryModel.PostsRepositoryToPostsMapper(fetchedPosts),
+	return &post.Posts{
+		Posts: repository.PostsRepositoryToPostsMapper(fetchedPosts),
 	}, nil
 }
 
-func (postRepository *PostRepository) GetPostById(ctx context.Context, postID string) (*postModel.Post, error) {
+func (postRepository *PostRepository) GetPostById(ctx context.Context, postID string) (*post.Post, error) {
 	postObjectID := model.HexToObjectIDMapper(postRepository.Logger, location+"GetPostById", postID)
 	if validator.IsError(postObjectID.Error) {
 		return nil, postObjectID.Error
 	}
 
 	query := bson.M{"_id": postObjectID.Data}
-	var fetchedPost *repositoryModel.PostRepository
+	var fetchedPost *repository.PostRepository
 	err := postRepository.collection.FindOne(ctx, query).Decode(&fetchedPost)
 	if validator.IsError(err) {
 		if err == mongo.ErrNoDocuments {
@@ -102,11 +101,11 @@ func (postRepository *PostRepository) GetPostById(ctx context.Context, postID st
 		return nil, err
 	}
 
-	return repositoryModel.PostRepositoryToPostMapper(fetchedPost), nil
+	return repository.PostRepositoryToPostMapper(fetchedPost), nil
 }
 
-func (postRepository *PostRepository) CreatePost(ctx context.Context, post *postModel.PostCreate) (*postModel.Post, error) {
-	postMappedToRepository, postCreateToPostCreateRepositoryMapperError := repositoryModel.PostCreateToPostCreateRepositoryMapper(postRepository.Logger, post)
+func (postRepository *PostRepository) CreatePost(ctx context.Context, post *post.PostCreate) (*post.Post, error) {
+	postMappedToRepository, postCreateToPostCreateRepositoryMapperError := repository.PostCreateToPostCreateRepositoryMapper(postRepository.Logger, post)
 	if validator.IsError(postCreateToPostCreateRepositoryMapperError) {
 		return nil, postCreateToPostCreateRepositoryMapperError
 	}
@@ -131,18 +130,18 @@ func (postRepository *PostRepository) CreatePost(ctx context.Context, post *post
 		return nil, errors.New("could not create an index for a title")
 	}
 
-	var createdPost *repositoryModel.PostRepository
+	var createdPost *repository.PostRepository
 	query := bson.M{"_id": result.InsertedID}
 	err = postRepository.collection.FindOne(ctx, query).Decode(&createdPost)
 	if validator.IsError(err) {
 		return nil, err
 	}
 
-	return repositoryModel.PostRepositoryToPostMapper(createdPost), nil
+	return repository.PostRepositoryToPostMapper(createdPost), nil
 }
 
-func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID string, postUpdate *postModel.PostUpdate) (*postModel.Post, error) {
-	postUpdateRepository, postUpdateToPostUpdateRepositoryMapper := repositoryModel.PostUpdateToPostUpdateRepositoryMapper(postRepository.Logger, postUpdate)
+func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID string, postUpdate *post.PostUpdate) (*post.Post, error) {
+	postUpdateRepository, postUpdateToPostUpdateRepositoryMapper := repository.PostUpdateToPostUpdateRepositoryMapper(postRepository.Logger, postUpdate)
 	if validator.IsError(postUpdateToPostUpdateRepositoryMapper) {
 		return nil, postUpdateToPostUpdateRepositoryMapper
 	}
@@ -164,7 +163,7 @@ func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID
 	update := bson.D{{Key: "$set", Value: postUpdateBson.Data}}
 	result := postRepository.collection.FindOneAndUpdate(ctx, query, update, options.FindOneAndUpdate().SetReturnDocument(1))
 
-	var updatedPost *postModel.Post
+	var updatedPost *post.Post
 	err := result.Decode(&updatedPost)
 	if validator.IsError(err) {
 		return nil, errors.New("sorry, but this title already exists. Please choose another one")

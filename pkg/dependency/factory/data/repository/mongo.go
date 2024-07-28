@@ -6,10 +6,8 @@ import (
 
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
-	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
-	postRepository "github.com/yachnytskyi/golang-mongo-grpc/internal/post/data/repository/mongo"
-	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
-	userRepository "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/mongo"
+	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post/data/repository/mongo"
+	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/mongo"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -66,14 +64,14 @@ func (mongoDBRepository MongoDBRepository) Close(ctx context.Context) {
 	mongoDBRepository.Logger.Info(domainError.NewInfoMessage(location+"Close", constants.DatabaseConnectionClosed))
 }
 
-func (mongoDBRepository MongoDBRepository) NewUserRepository(database any) user.UserRepository {
+func (mongoDBRepository MongoDBRepository) NewUserRepository(database any) interfaces.UserRepository {
 	mongoDB := database.(*mongo.Database)
-	return userRepository.NewUserRepository(mongoDBRepository.Config, mongoDBRepository.Logger, mongoDB)
+	return user.NewUserRepository(mongoDBRepository.Config, mongoDBRepository.Logger, mongoDB)
 }
 
-func (mongoDBRepository MongoDBRepository) NewPostRepository(database any) post.PostRepository {
+func (mongoDBRepository MongoDBRepository) NewPostRepository(database any) interfaces.PostRepository {
 	mongoDB := database.(*mongo.Database)
-	return postRepository.NewPostRepository(mongoDBRepository.Logger, mongoDB)
+	return post.NewPostRepository(mongoDBRepository.Logger, mongoDB)
 }
 
 // connectToMongo attempts to connect to MongoDB server with retries.

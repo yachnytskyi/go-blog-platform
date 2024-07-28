@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
-	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	userView "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
 	utility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
@@ -45,7 +44,7 @@ func AuthenticationMiddleware(configInstance interfaces.Config, logger interface
 // UserContextMiddleware is a middleware for retrieving user information based on the user ID from the context.
 // This middleware extracts the user ID, fetches the corresponding user details, and stores them in the request context.
 // Note: This middleware should be placed after the AuthenticationMiddleware in the middleware chain to ensure the user ID is available.
-func UserContextMiddleware(logger interfaces.Logger, userUseCase user.UserUseCase) gin.HandlerFunc {
+func UserContextMiddleware(logger interfaces.Logger, userUseCase interfaces.UserUseCase) gin.HandlerFunc {
 	return func(ginContext *gin.Context) {
 		ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 		defer cancel()

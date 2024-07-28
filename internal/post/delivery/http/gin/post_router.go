@@ -2,8 +2,6 @@ package gin
 
 import (
 	"github.com/gin-gonic/gin"
-	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
-	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	middleware "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/middleware"
@@ -12,10 +10,10 @@ import (
 type PostRouter struct {
 	Config         interfaces.Config
 	Logger         interfaces.Logger
-	PostController post.PostController
+	PostController interfaces.PostController
 }
 
-func NewPostRouter(config interfaces.Config, logger interfaces.Logger, postController post.PostController) PostRouter {
+func NewPostRouter(config interfaces.Config, logger interfaces.Logger, postController interfaces.PostController) interfaces.PostRouter {
 	return PostRouter{
 		Config:         config,
 		Logger:         logger,
@@ -23,7 +21,7 @@ func NewPostRouter(config interfaces.Config, logger interfaces.Logger, postContr
 	}
 }
 
-func (postRouter PostRouter) PostRouter(routerGroup any, userUseCase user.UserUseCase) {
+func (postRouter PostRouter) PostRouter(routerGroup any, userUseCase interfaces.UserUseCase) {
 	ginRouterGroup := routerGroup.(*gin.RouterGroup)
 	router := ginRouterGroup.Group("/posts")
 	router.GET("/", func(ginContext *gin.Context) {

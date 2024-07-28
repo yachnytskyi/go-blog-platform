@@ -32,16 +32,14 @@ func extractAccessToken(ginContext *gin.Context, location string) common.Result[
 	}
 
 	// If access token is still empty, create and log an HTTP authorization error.
-	httpAuthorizationError := httpError.NewHTTPAuthorizationError(location+".extractAccessToken.accessToken", constants.LoggingErrorNotification)
-	return common.NewResultOnFailure[string](httpAuthorizationError)
+	return common.NewResultOnFailure[string](httpError.NewHTTPAuthorizationError(location+".extractAccessToken.accessToken", constants.LoggingErrorNotification))
 }
 
 // extractRefreshToken extracts the refresh token from the request cookies.
 func extractRefreshToken(ginContext *gin.Context, location string) common.Result[string] {
 	refreshToken, refreshTokenError := ginContext.Cookie(constants.RefreshTokenValue)
 	if validator.IsError(refreshTokenError) {
-		httpAuthorizationError := httpError.NewHTTPAuthorizationError(location+".extractRefreshToken.refreshToken", constants.LoggingErrorNotification)
-		return common.NewResultOnFailure[string](httpAuthorizationError)
+		return common.NewResultOnFailure[string](httpError.NewHTTPAuthorizationError(location+".extractRefreshToken.refreshToken", constants.LoggingErrorNotification))
 	}
 
 	return common.NewResultOnSuccess[string](refreshToken)

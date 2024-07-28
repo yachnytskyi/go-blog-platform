@@ -5,7 +5,7 @@ import (
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
-	httpGinMiddleware "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/middleware"
+	middleware "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/middleware"
 )
 
 type UserRouter struct {
@@ -49,7 +49,7 @@ func (userRouter UserRouter) UserRouter(routerGroup any) {
 
 	// Public routes with anonymous middleware.
 	publicAnonymousRoutes := router.Group("")
-	publicAnonymousRoutes.Use(httpGinMiddleware.AnonymousMiddleware(userRouter.Logger))
+	publicAnonymousRoutes.Use(middleware.AnonymousMiddleware(userRouter.Logger))
 	{
 		publicAnonymousRoutes.POST(constants.LoginPath, func(ginContext *gin.Context) {
 			userRouter.UserController.Login(ginContext)
@@ -62,7 +62,7 @@ func (userRouter UserRouter) UserRouter(routerGroup any) {
 
 	// Authenticated routes with authentication middleware.
 	authenticatedRoutes := router.Group("")
-	authenticatedRoutes.Use(httpGinMiddleware.AuthenticationMiddleware(userRouter.Config, userRouter.Logger))
+	authenticatedRoutes.Use(middleware.AuthenticationMiddleware(userRouter.Config, userRouter.Logger))
 	{
 		authenticatedRoutes.GET(constants.GetCurrentUserPath, func(ginContext *gin.Context) {
 			userRouter.UserController.GetCurrentUser(ginContext)
@@ -79,7 +79,7 @@ func (userRouter UserRouter) UserRouter(routerGroup any) {
 
 	// Token-related routes with refresh token authentication middleware.
 	tokenRoutes := router.Group("")
-	tokenRoutes.Use(httpGinMiddleware.RefreshTokenAuthenticationMiddleware(userRouter.Config, userRouter.Logger))
+	tokenRoutes.Use(middleware.RefreshTokenAuthenticationMiddleware(userRouter.Config, userRouter.Logger))
 	{
 		tokenRoutes.GET(constants.RefreshTokenPath, func(ginContext *gin.Context) {
 			userRouter.UserController.RefreshAccessToken(ginContext)

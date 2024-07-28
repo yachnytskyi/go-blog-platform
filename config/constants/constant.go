@@ -86,9 +86,10 @@ const (
 
 // HTTP Headers used in the application.
 const (
-	ContentType   = "Content-Type"  // Content-Type header.
-	Authorization = "Authorization" // Authorization header.
-	Bearer        = "Bearer"        // Bearer token prefix.
+	CorrelationIDHeader = "X-Correlation-ID" // Correlation-ID header for tracking requests across systems.
+	ContentType         = "Content-Type"     // Content-Type header.
+	Authorization       = "Authorization"    // Authorization header.
+	Bearer              = "Bearer"           // Bearer token prefix.
 )
 
 // Pagination constants.

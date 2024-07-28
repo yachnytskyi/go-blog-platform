@@ -6,7 +6,7 @@ import (
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
-	httpGinMiddleware "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/middleware"
+	middleware "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/middleware"
 )
 
 type PostRouter struct {
@@ -33,8 +33,8 @@ func (postRouter PostRouter) PostRouter(routerGroup any, userUseCase user.UserUs
 		postRouter.PostController.GetPostById(ginContext)
 	})
 
-	router.Use(httpGinMiddleware.AuthenticationMiddleware(postRouter.Config, postRouter.Logger))
-	router.POST("/", httpGinMiddleware.UserContextMiddleware(postRouter.Logger, userUseCase), func(ginContext *gin.Context) {
+	router.Use(middleware.AuthenticationMiddleware(postRouter.Config, postRouter.Logger))
+	router.POST("/", middleware.UserContextMiddleware(postRouter.Logger, userUseCase), func(ginContext *gin.Context) {
 		postRouter.PostController.CreatePost(ginContext)
 	})
 	router.PUT("/:postID", func(ginContext *gin.Context) {

@@ -26,7 +26,12 @@ func RefreshTokenAuthenticationMiddleware(config model.Config, logger model.Logg
 
 		// Extract the refresh token from the request headers or cookies.
 		refreshTokenConfig := config.GetConfig()
-		userTokenPayload := utility.ValidateJWTToken(logger, location+"RefreshTokenAuthenticationMiddleware", refreshToken.Data, refreshTokenConfig.RefreshToken.PublicKey)
+		userTokenPayload := utility.ValidateJWTToken(
+			logger,
+			location+"RefreshTokenAuthenticationMiddleware",
+			refreshToken.Data,
+			refreshTokenConfig.RefreshToken.PublicKey,
+		)
 		if validator.IsError(userTokenPayload.Error) {
 			httpAuthorizationError := httpError.NewHTTPAuthorizationError(location+"RefreshTokenAuthenticationMiddleware.ValidateJWTToken", constants.LoggingErrorNotification)
 			abortWithStatusJSON(ginContext, logger, httpAuthorizationError, constants.StatusUnauthorized)

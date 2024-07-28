@@ -2,7 +2,6 @@ package common
 
 import (
 	"encoding/base64"
-	"fmt"
 
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
@@ -25,8 +24,4 @@ func Decode(logger model.Logger, location, encodedString string) common.Result[s
 	}
 
 	return common.NewResultOnSuccess[string](string(decodedBytes))
-}
-
-func ConvertQueryToString(query any) string {
-	return fmt.Sprintf("%v", query)
 }

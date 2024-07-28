@@ -24,8 +24,6 @@ func HandleError(err error) error {
 	case HTTPInternalError:
 		errorType.Notification = constants.InternalErrorNotification
 		return errorType
-	case HTTPInternalErrors:
-		return errorType
 	default:
 		return errorType
 	}

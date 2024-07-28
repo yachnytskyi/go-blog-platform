@@ -13,7 +13,6 @@ import (
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	mongoModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -76,8 +75,7 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 	// Query the database to fetch users.
 	cursor, findError := userRepository.Collection.Find(ctx, query, &option)
 	if validator.IsError(findError) {
-		queryString := utility.ConvertQueryToString(query)
-		itemNotFoundError := domainError.NewItemNotFoundError(location+"GetAllUsers.Find", queryString, findError.Error())
+		itemNotFoundError := domainError.NewItemNotFoundError(location+"GetAllUsers.Find", mongoModel.BSONToStringMapper(query), findError.Error())
 		userRepository.Logger.Error(itemNotFoundError)
 		return common.NewResultOnFailure[user.Users](itemNotFoundError)
 	}
@@ -342,8 +340,7 @@ func (userRepository UserRepository) getUserByQuery(location string, ctx context
 	fetchedUser := userRepositoryModel.UserRepository{}
 	userFindOneError := userRepository.Collection.FindOne(ctx, query).Decode(&fetchedUser)
 	if validator.IsError(userFindOneError) {
-		queryString := mongoModel.BSONToString(query)
-		itemNotFoundError := domainError.NewItemNotFoundError(location+".getUserByQuery.Decode", queryString, userFindOneError.Error())
+		itemNotFoundError := domainError.NewItemNotFoundError(location+".getUserByQuery.Decode", mongoModel.BSONToStringMapper(query), userFindOneError.Error())
 		userRepository.Logger.Error(itemNotFoundError)
 		return common.NewResultOnFailure[user.User](itemNotFoundError)
 	}

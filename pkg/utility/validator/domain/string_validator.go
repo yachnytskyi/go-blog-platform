@@ -10,10 +10,6 @@ import (
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
 
-const (
-	location = "pkg.utility.validator.domain."
-)
-
 // ValidateField validates a required field based on the provided commonValidator.
 func ValidateField(logger model.Logger, location, field string, commonValidator domainModel.CommonValidator, validationErrors []error) []error {
 	errors := validationErrors
@@ -27,7 +23,7 @@ func ValidateField(logger model.Logger, location, field string, commonValidator 
 			commonValidator.Notification,
 		)
 
-		logger.Warn(validationError)
+		logger.Info(validationError)
 		errors = append(errors, validationError)
 		return errors
 	}
@@ -41,7 +37,7 @@ func ValidateField(logger model.Logger, location, field string, commonValidator 
 			commonValidator.Notification,
 		)
 
-		logger.Warn(validationError)
+		logger.Info(validationError)
 		errors = append(errors, validationError)
 		return errors
 	}
@@ -65,7 +61,7 @@ func ValidateOptionalField(logger model.Logger, location, field string, commonVa
 			commonValidator.Notification,
 		)
 
-		logger.Warn(validationError)
+		logger.Info(validationError)
 		errors = append(errors, validationError)
 		return errors
 	}
@@ -79,7 +75,7 @@ func ValidateOptionalField(logger model.Logger, location, field string, commonVa
 			commonValidator.Notification,
 		)
 
-		logger.Warn(validationError)
+		logger.Info(validationError)
 		errors = append(errors, validationError)
 		return errors
 	}

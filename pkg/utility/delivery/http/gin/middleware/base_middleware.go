@@ -18,20 +18,18 @@ import (
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
-const (
-	correlationIDHeader = "X-Correlation-ID"
-)
+const ()
 
 // CorrelationIDMiddleware adds a correlation ID to requests and responses.
 func CorrelationIDMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		correlationID := c.GetHeader(correlationIDHeader)
+		correlationID := c.GetHeader(constants.CorrelationIDHeader)
 		if correlationID == "" {
 			correlationID = uuid.New().String()
 		}
 
-		c.Set(correlationIDHeader, correlationID)
-		c.Writer.Header().Set(correlationIDHeader, correlationID)
+		c.Set(constants.CorrelationIDHeader, correlationID)
+		c.Writer.Header().Set(constants.CorrelationIDHeader, correlationID)
 		c.Next()
 	}
 }
@@ -124,7 +122,7 @@ func TimeoutMiddleware(logger model.Logger) gin.HandlerFunc {
 func LoggerMiddleware(logger model.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
-		correlationID := c.GetString("X-Correlation-ID")
+		correlationID := c.GetString(constants.CorrelationIDHeader)
 
 		httpIncomingLog := commonModel.NewHTTPIncomingLog(
 			location+"LoggerMiddleware",

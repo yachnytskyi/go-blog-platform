@@ -11,8 +11,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
-	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/common"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -70,7 +70,7 @@ func RateLimitMiddleware(config *config.ApplicationConfig) gin.HandlerFunc {
 }
 
 // ValidateInputMiddleware allows specific HTTP methods and checks for the content type.
-func ValidateInputMiddleware(config *config.ApplicationConfig, logger model.Logger) gin.HandlerFunc {
+func ValidateInputMiddleware(config *config.ApplicationConfig, logger interfaces.Logger) gin.HandlerFunc {
 	return func(ginContext *gin.Context) {
 		contentType := ginContext.GetHeader(constants.ContentType)
 
@@ -97,7 +97,7 @@ func ValidateInputMiddleware(config *config.ApplicationConfig, logger model.Logg
 }
 
 // TimeoutMiddleware sets a timeout for each request.
-func TimeoutMiddleware(logger model.Logger) gin.HandlerFunc {
+func TimeoutMiddleware(logger interfaces.Logger) gin.HandlerFunc {
 	return func(ginContext *gin.Context) {
 		ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 		defer cancel()
@@ -119,7 +119,7 @@ func TimeoutMiddleware(logger model.Logger) gin.HandlerFunc {
 }
 
 // LoggerMiddleware logs incoming requests and outgoing responses with additional context.
-func LoggerMiddleware(logger model.Logger) gin.HandlerFunc {
+func LoggerMiddleware(logger interfaces.Logger) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 		correlationID := c.GetString(constants.CorrelationIDHeader)

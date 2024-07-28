@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
@@ -46,7 +46,7 @@ func extractRefreshToken(ginContext *gin.Context, location string) common.Result
 }
 
 // abortWithStatusJSON aborts the request, logs the error, and responds with a JSON error.
-func abortWithStatusJSON(ginContext *gin.Context, logger model.Logger, err error, httpCode int) {
+func abortWithStatusJSON(ginContext *gin.Context, logger interfaces.Logger, err error, httpCode int) {
 	logger.Error(err)
 	jsonResponse := httpModel.NewJSONResponseOnFailure(httpError.HandleError(err))
 	ginContext.AbortWithStatusJSON(httpCode, jsonResponse)

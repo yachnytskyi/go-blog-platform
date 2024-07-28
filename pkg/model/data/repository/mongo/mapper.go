@@ -1,7 +1,7 @@
 package mongo
 
 import (
-	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -13,7 +13,7 @@ const (
 	emptyID = "Id is empty"
 )
 
-func DataToMongoDocumentMapper(logger model.Logger, location string, incomingData any) common.Result[*bson.D] {
+func DataToMongoDocumentMapper(logger interfaces.Logger, location string, incomingData any) common.Result[*bson.D] {
 	data, err := bson.Marshal(incomingData)
 	if validator.IsError(err) {
 		internalError := domainError.NewInternalError(location+".DataToMongoDocumentMapper.bson.Marshal", err.Error())
@@ -32,7 +32,7 @@ func DataToMongoDocumentMapper(logger model.Logger, location string, incomingDat
 	return common.NewResultOnSuccess[*bson.D](&document)
 }
 
-func HexToObjectIDMapper(logger model.Logger, location, id string) common.Result[primitive.ObjectID] {
+func HexToObjectIDMapper(logger interfaces.Logger, location, id string) common.Result[primitive.ObjectID] {
 	if id == "" {
 		internalError := domainError.NewInternalError(location+".HexToObjectIDMapper", emptyID)
 		logger.Error(internalError)

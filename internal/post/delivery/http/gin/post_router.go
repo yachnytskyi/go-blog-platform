@@ -5,17 +5,17 @@ import (
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 
-	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	middleware "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/middleware"
 )
 
 type PostRouter struct {
-	Config         model.Config
-	Logger         model.Logger
+	Config         interfaces.Config
+	Logger         interfaces.Logger
 	PostController post.PostController
 }
 
-func NewPostRouter(config model.Config, logger model.Logger, postController post.PostController) PostRouter {
+func NewPostRouter(config interfaces.Config, logger interfaces.Logger, postController post.PostController) PostRouter {
 	return PostRouter{
 		Config:         config,
 		Logger:         logger,

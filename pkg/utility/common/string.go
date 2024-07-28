@@ -3,7 +3,7 @@ package common
 import (
 	"encoding/base64"
 
-	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -15,7 +15,7 @@ func Encode(data string) string {
 }
 
 // Decode decodes a base64 encoded string and returns the original data.
-func Decode(logger model.Logger, location, encodedString string) common.Result[string] {
+func Decode(logger interfaces.Logger, location, encodedString string) common.Result[string] {
 	decodedBytes, decodeStringError := base64.StdEncoding.DecodeString(encodedString)
 	if validator.IsError(decodeStringError) {
 		internalError := domainError.NewInternalError(location+".Decode.DecodeString", decodeStringError.Error())

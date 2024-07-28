@@ -3,18 +3,18 @@ package gin
 import (
 	"github.com/gin-gonic/gin"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
-	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	middleware "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/middleware"
 )
 
 type UserRouter struct {
-	model.Config
-	Logger         model.Logger
+	interfaces.Config
+	Logger         interfaces.Logger
 	UserController user.UserController
 }
 
-func NewUserRouter(config model.Config, logger model.Logger, userController user.UserController) UserRouter {
+func NewUserRouter(config interfaces.Config, logger interfaces.Logger, userController user.UserController) UserRouter {
 	return UserRouter{
 		Config:         config,
 		Logger:         logger,

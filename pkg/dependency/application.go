@@ -30,7 +30,7 @@ func NewApplication(ctx context.Context) model.Container {
 	userController := deliveryFactory.NewUserController(userUseCase)
 	postController := deliveryFactory.NewPostController(userUseCase, postUseCase)
 
-	container := model.NewContainer(logger, repositoryFactory, usecaseFactory, deliveryFactory)
+	container := model.NewContainer(logger, repositoryFactory, deliveryFactory)
 	serverRouters := model.NewServerRouters(
 		userUseCase,
 		deliveryFactory.NewUserRouter(userController),

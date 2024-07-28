@@ -5,14 +5,14 @@ import (
 
 	"github.com/gin-gonic/gin"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	utility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
-	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
 // RefreshTokenAuthenticationMiddleware is a Gin middleware for handling user authentication using refresh tokens.
-func RefreshTokenAuthenticationMiddleware(config model.Config, logger model.Logger) gin.HandlerFunc {
+func RefreshTokenAuthenticationMiddleware(config interfaces.Config, logger interfaces.Logger) gin.HandlerFunc {
 	return func(ginContext *gin.Context) {
 		ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 		defer cancel()

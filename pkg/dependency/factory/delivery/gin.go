@@ -8,6 +8,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
 	postDelivery "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/http/gin"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
@@ -26,13 +27,13 @@ const (
 )
 
 type GinDelivery struct {
-	Config model.Config
-	Logger model.Logger
+	Config interfaces.Config
+	Logger interfaces.Logger
 	Server *http.Server
 	Router *gin.Engine
 }
 
-func NewGinDelivery(config model.Config, logger model.Logger) *GinDelivery {
+func NewGinDelivery(config interfaces.Config, logger interfaces.Logger) *GinDelivery {
 	return &GinDelivery{
 		Config: config,
 		Logger: logger,
@@ -104,7 +105,7 @@ func (ginDelivery GinDelivery) NewPostRouter(controller any) post.PostRouter {
 	return postDelivery.NewPostRouter(ginDelivery.Config, ginDelivery.Logger, postController)
 }
 
-func applyMiddleware(router *gin.Engine, config *config.ApplicationConfig, logger model.Logger) {
+func applyMiddleware(router *gin.Engine, config *config.ApplicationConfig, logger interfaces.Logger) {
 	router.Use(httpGinMiddleware.CorrelationIDMiddleware())
 	router.Use(httpGinMiddleware.SecureHeadersMiddleware(config))
 	router.Use(httpGinMiddleware.CSPMiddleware(config))
@@ -121,7 +122,7 @@ func configureCORS(router *gin.Engine, config *config.ApplicationConfig) {
 	router.Use(cors.New(corsConfig))
 }
 
-func setNoRouteHandler(router *gin.Engine, location string, logger model.Logger) {
+func setNoRouteHandler(router *gin.Engine, location string, logger interfaces.Logger) {
 	router.NoRoute(func(ginContext *gin.Context) {
 		requestedPath := ginContext.Request.URL.Path
 		errorMessage := fmt.Sprintf(constants.RouteNotFoundNotification, requestedPath)
@@ -131,7 +132,7 @@ func setNoRouteHandler(router *gin.Engine, location string, logger model.Logger)
 	})
 }
 
-func setNoMethodHandler(router *gin.Engine, location string, logger model.Logger) {
+func setNoMethodHandler(router *gin.Engine, location string, logger interfaces.Logger) {
 	router.NoMethod(func(ginContext *gin.Context) {
 		forbiddenMethod := ginContext.Request.Method
 		errorMessage := fmt.Sprintf(constants.MethodNotAllowedNotification, forbiddenMethod)

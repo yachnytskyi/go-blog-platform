@@ -1,19 +1,19 @@
 package domain
 
 import (
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
 	postUseCase "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/usecase"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	userUseCase "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
-	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 )
 
 type UseCaseV1 struct {
-	Config model.Config
-	Logger model.Logger
+	Config interfaces.Config
+	Logger interfaces.Logger
 }
 
-func NewUseCaseV1(config model.Config, logger model.Logger) UseCaseV1 {
+func NewUseCaseV1(config interfaces.Config, logger interfaces.Logger) UseCaseV1 {
 	return UseCaseV1{
 		Config: config,
 		Logger: logger,

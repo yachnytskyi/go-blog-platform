@@ -5,11 +5,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	utility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin/utility/cookie"
 	userView "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
-	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
-	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
+	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/common"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -21,12 +21,12 @@ const (
 )
 
 type UserController struct {
-	Config      model.Config
-	Logger      model.Logger
+	Config      interfaces.Config
+	Logger      interfaces.Logger
 	UserUseCase user.UserUseCase
 }
 
-func NewUserController(config model.Config, logger model.Logger, userUseCase user.UserUseCase) UserController {
+func NewUserController(config interfaces.Config, logger interfaces.Logger, userUseCase user.UserUseCase) UserController {
 	return UserController{
 		Config:      config,
 		Logger:      logger,
@@ -42,12 +42,12 @@ func (userController UserController) GetAllUsers(controllerContext any) {
 	paginationQuery := common.ParsePaginationQuery(ginContext)
 	fetchedUsers := userController.UserUseCase.GetAllUsers(ctx, paginationQuery)
 	if validator.IsError(fetchedUsers.Error) {
-		ginContext.JSON(constants.StatusBadRequest, httpModel.NewJSONResponseOnFailure(httpError.HandleError(fetchedUsers.Error)))
+		ginContext.JSON(constants.StatusBadRequest, model.NewJSONResponseOnFailure(httpError.HandleError(fetchedUsers.Error)))
 		return
 	}
 
 	ginContext.JSON(
-		constants.StatusOk, httpModel.NewJSONResponseOnSuccess(userView.UsersToUsersViewMapper(fetchedUsers.Data)))
+		constants.StatusOk, model.NewJSONResponseOnSuccess(userView.UsersToUsersViewMapper(fetchedUsers.Data)))
 }
 
 func (userController UserController) GetCurrentUser(controllerContext any) {
@@ -58,11 +58,11 @@ func (userController UserController) GetCurrentUser(controllerContext any) {
 	currentUserID := ctx.Value(constants.ID).(string)
 	currentUser := userController.UserUseCase.GetUserById(ctx, currentUserID)
 	if validator.IsError(currentUser.Error) {
-		ginContext.JSON(constants.StatusBadRequest, httpModel.NewJSONResponseOnFailure(httpError.HandleError(currentUser.Error)))
+		ginContext.JSON(constants.StatusBadRequest, model.NewJSONResponseOnFailure(httpError.HandleError(currentUser.Error)))
 		return
 	}
 
-	ginContext.JSON(constants.StatusOk, httpModel.NewJSONResponseOnSuccess(userView.UserToUserViewMapper(currentUser.Data)))
+	ginContext.JSON(constants.StatusOk, model.NewJSONResponseOnSuccess(userView.UserToUserViewMapper(currentUser.Data)))
 }
 
 func (userController UserController) GetUserById(controllerContext any) {
@@ -73,11 +73,11 @@ func (userController UserController) GetUserById(controllerContext any) {
 	userID := ginContext.Param(constants.ItemIdParam)
 	fetchedUser := userController.UserUseCase.GetUserById(ctx, userID)
 	if validator.IsError(fetchedUser.Error) {
-		ginContext.JSON(constants.StatusBadRequest, httpModel.NewJSONResponseOnFailure(httpError.HandleError(fetchedUser.Error)))
+		ginContext.JSON(constants.StatusBadRequest, model.NewJSONResponseOnFailure(httpError.HandleError(fetchedUser.Error)))
 		return
 	}
 
-	ginContext.JSON(constants.StatusOk, httpModel.NewJSONResponseOnSuccess(userView.UserToUserViewMapper(fetchedUser.Data)))
+	ginContext.JSON(constants.StatusOk, model.NewJSONResponseOnSuccess(userView.UserToUserViewMapper(fetchedUser.Data)))
 }
 
 func (userController UserController) Register(controllerContext any) {
@@ -95,11 +95,11 @@ func (userController UserController) Register(controllerContext any) {
 	userCreateData := userView.UserCreateViewToUserCreateMapper(userCreateViewData)
 	createdUser := userController.UserUseCase.Register(ctx, userCreateData)
 	if validator.IsError(createdUser.Error) {
-		ginContext.JSON(constants.StatusBadRequest, httpModel.NewJSONResponseOnFailure(httpError.HandleError(createdUser.Error)))
+		ginContext.JSON(constants.StatusBadRequest, model.NewJSONResponseOnFailure(httpError.HandleError(createdUser.Error)))
 		return
 	}
 
-	ginContext.JSON(constants.StatusCreated, httpModel.NewJSONResponseOnSuccess(userView.NewWelcomeMessageView(constants.SendingEmailNotification+createdUser.Data.Email)))
+	ginContext.JSON(constants.StatusCreated, model.NewJSONResponseOnSuccess(userView.NewWelcomeMessageView(constants.SendingEmailNotification+createdUser.Data.Email)))
 }
 
 func (userController UserController) UpdateCurrentUser(controllerContext any) {
@@ -119,11 +119,11 @@ func (userController UserController) UpdateCurrentUser(controllerContext any) {
 	userUpdateData.ID = currentUserID
 	updatedUser := userController.UserUseCase.UpdateCurrentUser(ctx, userUpdateData)
 	if validator.IsError(updatedUser.Error) {
-		ginContext.JSON(constants.StatusBadRequest, httpModel.NewJSONResponseOnFailure(httpError.HandleError(updatedUser.Error)))
+		ginContext.JSON(constants.StatusBadRequest, model.NewJSONResponseOnFailure(httpError.HandleError(updatedUser.Error)))
 		return
 	}
 
-	ginContext.JSON(constants.StatusOk, httpModel.NewJSONResponseOnSuccess(userView.UserToUserViewMapper(updatedUser.Data)))
+	ginContext.JSON(constants.StatusOk, model.NewJSONResponseOnSuccess(userView.UserToUserViewMapper(updatedUser.Data)))
 }
 
 func (userController UserController) DeleteCurrentUser(controllerContext any) {
@@ -134,7 +134,7 @@ func (userController UserController) DeleteCurrentUser(controllerContext any) {
 	currentUserID := ctx.Value(constants.ID).(string)
 	deletedUserError := userController.UserUseCase.DeleteUserById(ctx, currentUserID)
 	if validator.IsError(deletedUserError) {
-		ginContext.JSON(constants.StatusBadRequest, httpModel.NewJSONResponseOnFailure(httpError.HandleError(deletedUserError)))
+		ginContext.JSON(constants.StatusBadRequest, model.NewJSONResponseOnFailure(httpError.HandleError(deletedUserError)))
 		return
 	}
 
@@ -157,13 +157,13 @@ func (userController UserController) Login(controllerContext any) {
 	userLoginData := userView.UserLoginViewToUserLoginMapper(userLoginViewData)
 	userToken := userController.UserUseCase.Login(ctx, userLoginData)
 	if validator.IsError(userToken.Error) {
-		ginContext.JSON(constants.StatusBadRequest, httpModel.NewJSONResponseOnFailure(httpError.HandleError(userToken.Error)))
+		ginContext.JSON(constants.StatusBadRequest, model.NewJSONResponseOnFailure(httpError.HandleError(userToken.Error)))
 		return
 	}
 
 	userTokenView := userView.UserTokenToUserTokenViewMapper(userToken.Data)
 	setAccessLoginCookies(ginContext, userController.Config, userTokenView.AccessToken, userTokenView.RefreshToken)
-	ginContext.JSON(constants.StatusOk, httpModel.NewJSONResponseOnSuccess(userTokenView))
+	ginContext.JSON(constants.StatusOk, model.NewJSONResponseOnSuccess(userTokenView))
 }
 
 func (userController UserController) RefreshAccessToken(controllerContext any) {
@@ -174,25 +174,25 @@ func (userController UserController) RefreshAccessToken(controllerContext any) {
 	currentUserID := ctx.Value(constants.ID).(string)
 	currentUser := userController.UserUseCase.GetUserById(ctx, currentUserID)
 	if validator.IsError(currentUser.Error) {
-		ginContext.JSON(constants.StatusBadRequest, httpModel.NewJSONResponseOnFailure(httpError.HandleError(currentUser.Error)))
+		ginContext.JSON(constants.StatusBadRequest, model.NewJSONResponseOnFailure(httpError.HandleError(currentUser.Error)))
 		return
 	}
 
 	userToken := userController.UserUseCase.RefreshAccessToken(ctx, currentUser.Data)
 	if validator.IsError(userToken.Error) {
-		ginContext.JSON(constants.StatusBadRequest, httpModel.NewJSONResponseOnFailure(httpError.HandleError(userToken.Error)))
+		ginContext.JSON(constants.StatusBadRequest, model.NewJSONResponseOnFailure(httpError.HandleError(userToken.Error)))
 		return
 	}
 
 	userTokenView := userView.UserTokenToUserTokenViewMapper(userToken.Data)
 	setRefreshTokenCookies(ginContext, userController.Config, userTokenView.AccessToken, userTokenView.RefreshToken)
-	ginContext.JSON(constants.StatusOk, httpModel.NewJSONResponseOnSuccess(userTokenView))
+	ginContext.JSON(constants.StatusOk, model.NewJSONResponseOnSuccess(userTokenView))
 }
 
 func (userController UserController) Logout(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	utility.CleanCookies(ginContext, userController.Config, path)
-	ginContext.JSON(constants.StatusOk, httpModel.NewJSONResponseOnSuccess(userView.NewWelcomeMessageView(constants.LogoutNotificationMessage)))
+	ginContext.JSON(constants.StatusOk, model.NewJSONResponseOnSuccess(userView.NewWelcomeMessageView(constants.LogoutNotificationMessage)))
 }
 
 func (userController UserController) ForgottenPassword(controllerContext any) {
@@ -210,13 +210,13 @@ func (userController UserController) ForgottenPassword(controllerContext any) {
 	userForgottenPassword := userView.UserForgottenPasswordViewToUserForgottenPassword(userForgottenPasswordView)
 	updatedUserError := userController.UserUseCase.ForgottenPassword(ctx, userForgottenPassword)
 	if validator.IsError(updatedUserError) {
-		ginContext.JSON(constants.StatusBadRequest, httpModel.NewJSONResponseOnFailure(httpError.HandleError(updatedUserError)))
+		ginContext.JSON(constants.StatusBadRequest, model.NewJSONResponseOnFailure(httpError.HandleError(updatedUserError)))
 		return
 	}
 
 	ginContext.JSON(
 		constants.StatusCreated,
-		httpModel.NewJSONResponseOnSuccess(userView.NewWelcomeMessageView(constants.SendingEmailWithInstructionsNotification+" "+userForgottenPassword.Email)))
+		model.NewJSONResponseOnSuccess(userView.NewWelcomeMessageView(constants.SendingEmailWithInstructionsNotification+" "+userForgottenPassword.Email)))
 }
 
 func (userController UserController) ResetUserPassword(controllerContext any) {
@@ -236,15 +236,15 @@ func (userController UserController) ResetUserPassword(controllerContext any) {
 	userResetPassword := userView.UserResetPasswordViewToUserResetPassword(userResetPasswordView)
 	resetUserPasswordError := userController.UserUseCase.ResetUserPassword(ctx, userResetPassword)
 	if validator.IsError(resetUserPasswordError) {
-		ginContext.JSON(constants.StatusBadRequest, httpModel.NewJSONResponseOnFailure(httpError.HandleError(resetUserPasswordError)))
+		ginContext.JSON(constants.StatusBadRequest, model.NewJSONResponseOnFailure(httpError.HandleError(resetUserPasswordError)))
 		return
 	}
 
 	utility.CleanCookies(ginContext, userController.Config, path)
-	ginContext.JSON(constants.StatusCreated, httpModel.NewJSONResponseOnSuccess(userView.NewWelcomeMessageView(constants.PasswordResetSuccessNotification)))
+	ginContext.JSON(constants.StatusCreated, model.NewJSONResponseOnSuccess(userView.NewWelcomeMessageView(constants.PasswordResetSuccessNotification)))
 }
 
-func setAccessLoginCookies(ginContext *gin.Context, configInstance model.Config, accessToken, refreshToken string) {
+func setAccessLoginCookies(ginContext *gin.Context, configInstance interfaces.Config, accessToken, refreshToken string) {
 	config := configInstance.GetConfig()
 
 	ginContext.SetCookie(
@@ -278,7 +278,7 @@ func setAccessLoginCookies(ginContext *gin.Context, configInstance model.Config,
 	)
 }
 
-func setRefreshTokenCookies(ginContext *gin.Context, configInstance model.Config, accessToken, refreshToken string) {
+func setRefreshTokenCookies(ginContext *gin.Context, configInstance interfaces.Config, accessToken, refreshToken string) {
 	config := configInstance.GetConfig()
 
 	ginContext.SetCookie(

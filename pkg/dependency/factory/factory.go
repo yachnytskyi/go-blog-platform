@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config"
 	repository "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/data/repository"
 	delivery "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/delivery"
@@ -23,7 +24,7 @@ const (
 	unsupportedDelivery = "Unsupported delivery type: %s"
 )
 
-func NewConfig(configType string) model.Config {
+func NewConfig(configType string) interfaces.Config {
 	switch configType {
 	case constants.Viper:
 		return config.NewViper()
@@ -34,7 +35,7 @@ func NewConfig(configType string) model.Config {
 	}
 }
 
-func NewLogger(ctx context.Context, configInstance model.Config) model.Logger {
+func NewLogger(ctx context.Context, configInstance interfaces.Config) interfaces.Logger {
 	config := configInstance.GetConfig()
 
 	switch config.Core.Logger {
@@ -47,7 +48,7 @@ func NewLogger(ctx context.Context, configInstance model.Config) model.Logger {
 	}
 }
 
-func NewRepositoryFactory(ctx context.Context, configInstance model.Config, logger model.Logger) model.Repository {
+func NewRepositoryFactory(ctx context.Context, configInstance interfaces.Config, logger interfaces.Logger) model.Repository {
 	config := configInstance.GetConfig()
 
 	switch config.Core.Database {
@@ -62,7 +63,7 @@ func NewRepositoryFactory(ctx context.Context, configInstance model.Config, logg
 
 }
 
-func NewUseCaseFactory(ctx context.Context, configInstance model.Config, logger model.Logger, repository model.Repository) model.UseCase {
+func NewUseCaseFactory(ctx context.Context, configInstance interfaces.Config, logger interfaces.Logger, repository model.Repository) model.UseCase {
 	config := configInstance.GetConfig()
 
 	switch config.Core.UseCase {
@@ -77,7 +78,7 @@ func NewUseCaseFactory(ctx context.Context, configInstance model.Config, logger 
 	}
 }
 
-func NewDeliveryFactory(ctx context.Context, configInstance model.Config, logger model.Logger, repository model.Repository) model.Delivery {
+func NewDeliveryFactory(ctx context.Context, configInstance interfaces.Config, logger interfaces.Logger, repository model.Repository) model.Delivery {
 	config := configInstance.GetConfig()
 
 	switch config.Core.Delivery {

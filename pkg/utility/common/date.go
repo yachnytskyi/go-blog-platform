@@ -4,7 +4,7 @@ import (
 	"time"
 
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -16,7 +16,7 @@ func FormatDate(data time.Time) string {
 }
 
 // ParseDate parses a string into a time.Time instance.
-func ParseDate(logger model.Logger, location, data string) common.Result[time.Time] {
+func ParseDate(logger interfaces.Logger, location, data string) common.Result[time.Time] {
 	parsedTime, parseError := time.Parse(constants.DateTimeFormat, data)
 	if validator.IsError(parseError) {
 		internalError := domainError.NewInternalError(location+".ParseDate.time.Parse", parseError.Error())

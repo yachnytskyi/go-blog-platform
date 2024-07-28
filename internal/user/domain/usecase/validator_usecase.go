@@ -6,8 +6,8 @@ import (
 	"strings"
 
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
-	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domainModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
@@ -70,7 +70,7 @@ var (
 	// Add more validators for other fields as needed.
 )
 
-func validateUserCreate(logger model.Logger, userCreate user.UserCreate) common.Result[user.UserCreate] {
+func validateUserCreate(logger interfaces.Logger, userCreate user.UserCreate) common.Result[user.UserCreate] {
 	validationErrors := make([]error, 0, 4)
 	userCreate.Email = utility.SanitizeAndToLowerString(userCreate.Email)
 	userCreate.Name = utility.SanitizeString(userCreate.Name)
@@ -87,7 +87,7 @@ func validateUserCreate(logger model.Logger, userCreate user.UserCreate) common.
 	return common.NewResultOnSuccess[user.UserCreate](userCreate)
 }
 
-func validateUserUpdate(logger model.Logger, userUpdate user.UserUpdate) common.Result[user.UserUpdate] {
+func validateUserUpdate(logger interfaces.Logger, userUpdate user.UserUpdate) common.Result[user.UserUpdate] {
 	validationErrors := make([]error, 0, 1)
 	userUpdate.Name = utility.SanitizeString(userUpdate.Name)
 
@@ -99,7 +99,7 @@ func validateUserUpdate(logger model.Logger, userUpdate user.UserUpdate) common.
 	return common.NewResultOnSuccess[user.UserUpdate](userUpdate)
 }
 
-func validateUserLogin(logger model.Logger, userLogin user.UserLogin) common.Result[user.UserLogin] {
+func validateUserLogin(logger interfaces.Logger, userLogin user.UserLogin) common.Result[user.UserLogin] {
 	validationErrors := make([]error, 0, 2)
 	userLogin.Email = utility.SanitizeAndToLowerString(userLogin.Email)
 	userLogin.Password = utility.SanitizeString(userLogin.Password)
@@ -114,7 +114,7 @@ func validateUserLogin(logger model.Logger, userLogin user.UserLogin) common.Res
 	return common.NewResultOnSuccess[user.UserLogin](userLogin)
 }
 
-func validateUserForgottenPassword(logger model.Logger, userForgottenPassword user.UserForgottenPassword) common.Result[user.UserForgottenPassword] {
+func validateUserForgottenPassword(logger interfaces.Logger, userForgottenPassword user.UserForgottenPassword) common.Result[user.UserForgottenPassword] {
 	validationErrors := make([]error, 0, 2)
 	userForgottenPassword.Email = utility.SanitizeAndToLowerString(userForgottenPassword.Email)
 
@@ -126,7 +126,7 @@ func validateUserForgottenPassword(logger model.Logger, userForgottenPassword us
 	return common.NewResultOnSuccess[user.UserForgottenPassword](userForgottenPassword)
 }
 
-func validateUserResetPassword(logger model.Logger, userResetPassword user.UserResetPassword) common.Result[user.UserResetPassword] {
+func validateUserResetPassword(logger interfaces.Logger, userResetPassword user.UserResetPassword) common.Result[user.UserResetPassword] {
 	validationErrors := make([]error, 0, 2)
 	userResetPassword.ResetToken = utility.SanitizeString(userResetPassword.ResetToken)
 	userResetPassword.Password = utility.SanitizeString(userResetPassword.Password)
@@ -142,7 +142,7 @@ func validateUserResetPassword(logger model.Logger, userResetPassword user.UserR
 	return common.NewResultOnSuccess[user.UserResetPassword](userResetPassword)
 }
 
-func validateEmail(logger model.Logger, location, email string, validationErrors []error) []error {
+func validateEmail(logger interfaces.Logger, location, email string, validationErrors []error) []error {
 	errors := validationErrors
 
 	validateFieldError := validateField(logger, location+".validateEmail", email, emailValidator)
@@ -159,7 +159,7 @@ func validateEmail(logger model.Logger, location, email string, validationErrors
 	return errors
 }
 
-func validatePassword(logger model.Logger, location, password, passwordConfirm string, validationErrors []error) []error {
+func validatePassword(logger interfaces.Logger, location, password, passwordConfirm string, validationErrors []error) []error {
 	errors := validationErrors
 
 	validateFieldError := validateField(logger, location+".validatePassword", password, passwordValidator)
@@ -183,7 +183,7 @@ func validatePassword(logger model.Logger, location, password, passwordConfirm s
 }
 
 // checkEmailDomain checks if the email domain exists by resolving DNS records.
-func checkEmailDomain(logger model.Logger, location, emailString string) error {
+func checkEmailDomain(logger interfaces.Logger, location, emailString string) error {
 	host := strings.Split(emailString, "@")[1]
 	_, lookupMXError := net.LookupMX(host)
 	if validator.IsError(lookupMXError) {
@@ -201,7 +201,7 @@ func checkEmailDomain(logger model.Logger, location, emailString string) error {
 	return nil
 }
 
-func checkPasswords(logger model.Logger, location, hashedPassword string, checkedPassword string) error {
+func checkPasswords(logger interfaces.Logger, location, hashedPassword string, checkedPassword string) error {
 	if validator.IsError(bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(checkedPassword))) {
 		validationError := domainError.NewValidationError(
 			location+".checkPasswords.CompareHashAndPassword",
@@ -218,7 +218,7 @@ func checkPasswords(logger model.Logger, location, hashedPassword string, checke
 	return nil
 }
 
-func checkEmail(logger model.Logger, location, email string) error {
+func checkEmail(logger interfaces.Logger, location, email string) error {
 	validateFieldError := validateField(logger, location+".checkEmail", email, emailValidator)
 	if validator.IsError(validateFieldError) {
 		return validateFieldError
@@ -227,7 +227,7 @@ func checkEmail(logger model.Logger, location, email string) error {
 	return checkEmailDomain(logger, location+".checkEmail", email)
 }
 
-func validateField(logger model.Logger, location, fieldValue string, commonValidator domainModel.CommonValidator) error {
+func validateField(logger interfaces.Logger, location, fieldValue string, commonValidator domainModel.CommonValidator) error {
 	if domainValidator.IsStringLengthInvalid(fieldValue, commonValidator.MinLength, commonValidator.MaxLength) {
 		notification := fmt.Sprintf(constants.StringAllowedLength, commonValidator.MinLength, commonValidator.MaxLength)
 		validationError := domainError.NewValidationError(

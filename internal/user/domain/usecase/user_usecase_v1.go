@@ -6,11 +6,11 @@ import (
 
 	"github.com/thanhpk/randstr"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
 	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
-	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domainModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
@@ -26,12 +26,12 @@ const (
 )
 
 type UserUseCaseV1 struct {
-	Config         model.Config
-	Logger         model.Logger
+	Config         interfaces.Config
+	Logger         interfaces.Logger
 	UserRepository user.UserRepository
 }
 
-func NewUserUseCaseV1(config model.Config, logger model.Logger, userRepository user.UserRepository) UserUseCaseV1 {
+func NewUserUseCaseV1(config interfaces.Config, logger interfaces.Logger, userRepository user.UserRepository) UserUseCaseV1 {
 	return UserUseCaseV1{
 		Config:         config,
 		Logger:         logger,
@@ -234,7 +234,7 @@ func prepareEmailData(config *config.ApplicationConfig, userName, tokenValue, su
 	return emailData
 }
 
-func prepareEmailDataForRegistration(configInstance model.Config, userName, tokenValue string) userModel.EmailData {
+func prepareEmailDataForRegistration(configInstance interfaces.Config, userName, tokenValue string) userModel.EmailData {
 	config := configInstance.GetConfig()
 	return prepareEmailData(
 		config,
@@ -247,7 +247,7 @@ func prepareEmailDataForRegistration(configInstance model.Config, userName, toke
 	)
 }
 
-func prepareEmailDataForForgottenPassword(configInstance model.Config, userName, tokenValue string) userModel.EmailData {
+func prepareEmailDataForForgottenPassword(configInstance interfaces.Config, userName, tokenValue string) userModel.EmailData {
 	config := configInstance.GetConfig()
 	return prepareEmailData(
 		config,
@@ -260,7 +260,7 @@ func prepareEmailDataForForgottenPassword(configInstance model.Config, userName,
 	)
 }
 
-func generateToken(config model.Config, logger model.Logger, userTokenPayload domainModel.UserTokenPayload) common.Result[userModel.UserToken] {
+func generateToken(config interfaces.Config, logger interfaces.Logger, userTokenPayload domainModel.UserTokenPayload) common.Result[userModel.UserToken] {
 	configInstance := config.GetConfig()
 
 	accessToken := domainUtility.GenerateJWTToken(

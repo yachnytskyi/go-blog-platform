@@ -5,11 +5,11 @@ import (
 	"errors"
 	"time"
 
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
-	postRepositoryModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/data/repository/mongo/model"
+	repositoryModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/data/repository/mongo/model"
 	postModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
-	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
-	mongoModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
+	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -21,11 +21,11 @@ const (
 )
 
 type PostRepository struct {
-	Logger     model.Logger
+	Logger     interfaces.Logger
 	collection *mongo.Collection
 }
 
-func NewPostRepository(logger model.Logger, db *mongo.Database) post.PostRepository {
+func NewPostRepository(logger interfaces.Logger, db *mongo.Database) post.PostRepository {
 	return &PostRepository{
 		Logger:     logger,
 		collection: db.Collection("posts"),
@@ -56,10 +56,10 @@ func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int,
 
 	defer cursor.Close(ctx)
 
-	var fetchedPosts []*postRepositoryModel.PostRepository
+	var fetchedPosts []*repositoryModel.PostRepository
 
 	for cursor.Next(ctx) {
-		post := &postRepositoryModel.PostRepository{}
+		post := &repositoryModel.PostRepository{}
 		err := cursor.Decode(post)
 
 		if validator.IsError(err) {
@@ -81,18 +81,18 @@ func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int,
 	}
 
 	return &postModel.Posts{
-		Posts: postRepositoryModel.PostsRepositoryToPostsMapper(fetchedPosts),
+		Posts: repositoryModel.PostsRepositoryToPostsMapper(fetchedPosts),
 	}, nil
 }
 
 func (postRepository *PostRepository) GetPostById(ctx context.Context, postID string) (*postModel.Post, error) {
-	postObjectID := mongoModel.HexToObjectIDMapper(postRepository.Logger, location+"GetPostById", postID)
+	postObjectID := model.HexToObjectIDMapper(postRepository.Logger, location+"GetPostById", postID)
 	if validator.IsError(postObjectID.Error) {
 		return nil, postObjectID.Error
 	}
 
 	query := bson.M{"_id": postObjectID.Data}
-	var fetchedPost *postRepositoryModel.PostRepository
+	var fetchedPost *repositoryModel.PostRepository
 	err := postRepository.collection.FindOne(ctx, query).Decode(&fetchedPost)
 	if validator.IsError(err) {
 		if err == mongo.ErrNoDocuments {
@@ -102,11 +102,11 @@ func (postRepository *PostRepository) GetPostById(ctx context.Context, postID st
 		return nil, err
 	}
 
-	return postRepositoryModel.PostRepositoryToPostMapper(fetchedPost), nil
+	return repositoryModel.PostRepositoryToPostMapper(fetchedPost), nil
 }
 
 func (postRepository *PostRepository) CreatePost(ctx context.Context, post *postModel.PostCreate) (*postModel.Post, error) {
-	postMappedToRepository, postCreateToPostCreateRepositoryMapperError := postRepositoryModel.PostCreateToPostCreateRepositoryMapper(postRepository.Logger, post)
+	postMappedToRepository, postCreateToPostCreateRepositoryMapperError := repositoryModel.PostCreateToPostCreateRepositoryMapper(postRepository.Logger, post)
 	if validator.IsError(postCreateToPostCreateRepositoryMapperError) {
 		return nil, postCreateToPostCreateRepositoryMapperError
 	}
@@ -131,18 +131,18 @@ func (postRepository *PostRepository) CreatePost(ctx context.Context, post *post
 		return nil, errors.New("could not create an index for a title")
 	}
 
-	var createdPost *postRepositoryModel.PostRepository
+	var createdPost *repositoryModel.PostRepository
 	query := bson.M{"_id": result.InsertedID}
 	err = postRepository.collection.FindOne(ctx, query).Decode(&createdPost)
 	if validator.IsError(err) {
 		return nil, err
 	}
 
-	return postRepositoryModel.PostRepositoryToPostMapper(createdPost), nil
+	return repositoryModel.PostRepositoryToPostMapper(createdPost), nil
 }
 
 func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID string, postUpdate *postModel.PostUpdate) (*postModel.Post, error) {
-	postUpdateRepository, postUpdateToPostUpdateRepositoryMapper := postRepositoryModel.PostUpdateToPostUpdateRepositoryMapper(postRepository.Logger, postUpdate)
+	postUpdateRepository, postUpdateToPostUpdateRepositoryMapper := repositoryModel.PostUpdateToPostUpdateRepositoryMapper(postRepository.Logger, postUpdate)
 	if validator.IsError(postUpdateToPostUpdateRepositoryMapper) {
 		return nil, postUpdateToPostUpdateRepositoryMapper
 	}
@@ -150,12 +150,12 @@ func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID
 	postUpdateRepository.UpdatedAt = time.Now()
 
 	// Map the user update repository to a BSON document for MongoDB update.
-	postUpdateBson := mongoModel.DataToMongoDocumentMapper(postRepository.Logger, location+"UpdatePostById", postUpdateRepository)
+	postUpdateBson := model.DataToMongoDocumentMapper(postRepository.Logger, location+"UpdatePostById", postUpdateRepository)
 	if validator.IsError(postUpdateBson.Error) {
 		return nil, postUpdateBson.Error
 	}
 
-	postObjectID := mongoModel.HexToObjectIDMapper(postRepository.Logger, location+"UpdatePostById", postID)
+	postObjectID := model.HexToObjectIDMapper(postRepository.Logger, location+"UpdatePostById", postID)
 	if validator.IsError(postObjectID.Error) {
 		return nil, postObjectID.Error
 	}
@@ -174,7 +174,7 @@ func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID
 }
 
 func (postRepository *PostRepository) DeletePostByID(ctx context.Context, postID string) error {
-	postObjectID := mongoModel.HexToObjectIDMapper(postRepository.Logger, location+"GetPostById", postID)
+	postObjectID := model.HexToObjectIDMapper(postRepository.Logger, location+"GetPostById", postID)
 	if validator.IsError(postObjectID.Error) {
 		return postObjectID.Error
 	}

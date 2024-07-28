@@ -1,10 +1,10 @@
 package model
 
 import (
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
-	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
-	mongoModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
+	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
@@ -58,8 +58,8 @@ func UserCreateToUserCreateRepositoryMapper(userCreate userModel.UserCreate) Use
 	)
 }
 
-func UserUpdateToUserUpdateRepositoryMapper(logger model.Logger, location string, userUpdate userModel.UserUpdate) common.Result[UserUpdateRepository] {
-	userObjectID := mongoModel.HexToObjectIDMapper(logger, location+".UserUpdateToUserUpdateRepositoryMapper", userUpdate.ID)
+func UserUpdateToUserUpdateRepositoryMapper(logger interfaces.Logger, location string, userUpdate userModel.UserUpdate) common.Result[UserUpdateRepository] {
+	userObjectID := model.HexToObjectIDMapper(logger, location+".UserUpdateToUserUpdateRepositoryMapper", userUpdate.ID)
 	if validator.IsError(userObjectID.Error) {
 		return common.NewResultOnFailure[UserUpdateRepository](userObjectID.Error)
 	}

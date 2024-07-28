@@ -5,11 +5,11 @@ import (
 	"time"
 
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
 	postRepository "github.com/yachnytskyi/golang-mongo-grpc/internal/post/data/repository/mongo"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
 	userRepository "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/mongo"
-	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -25,12 +25,12 @@ const (
 )
 
 type MongoDBRepository struct {
-	Config      model.Config
-	Logger      model.Logger
+	Config      interfaces.Config
+	Logger      interfaces.Logger
 	MongoClient *mongo.Client
 }
 
-func NewMongoDBRepository(config model.Config, logger model.Logger) *MongoDBRepository {
+func NewMongoDBRepository(config interfaces.Config, logger interfaces.Logger) *MongoDBRepository {
 	return &MongoDBRepository{
 		Config: config,
 		Logger: logger,
@@ -77,7 +77,7 @@ func (mongoDBRepository MongoDBRepository) NewPostRepository(database any) post.
 }
 
 // connectToMongo attempts to connect to MongoDB server with retries.
-func connectToMongo(ctx context.Context, location string, logger model.Logger, mongoConnection *options.ClientOptions) common.Result[*mongo.Client] {
+func connectToMongo(ctx context.Context, location string, logger interfaces.Logger, mongoConnection *options.ClientOptions) common.Result[*mongo.Client] {
 	var client *mongo.Client
 	var connectError error
 	var delay = time.Second
@@ -99,7 +99,7 @@ func connectToMongo(ctx context.Context, location string, logger model.Logger, m
 }
 
 // pingMongo attempts to ping the MongoDB server with retries.
-func pingMongo(ctx context.Context, location string, logger model.Logger, client *mongo.Client) error {
+func pingMongo(ctx context.Context, location string, logger interfaces.Logger, client *mongo.Client) error {
 	var connectError error
 	var delay = time.Second
 

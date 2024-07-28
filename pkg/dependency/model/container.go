@@ -3,17 +3,16 @@ package model
 import (
 	"context"
 
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
-	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
 )
 
 // Container holds the factory interfaces required to initialize and manage dependencies.
 type Container struct {
-	Logger     Logger     // Interface for creating a logger instance.
-	Repository Repository // Interface for creating repository instances.
-	UseCase    UseCase    // Interface for creating use cases.
-	Delivery   Delivery   // Interface for creating delivery components and initializing the server.
+	Logger     interfaces.Logger // Interface for creating a logger instance.
+	Repository Repository        // Interface for creating repository instances.
+	Delivery   Delivery          // Interface for creating delivery components and initializing the server.
 } // Add other dependencies as needed
 
 // ServerRouters holds the routers for different modules of the application.
@@ -23,20 +22,20 @@ type ServerRouters struct {
 	PostRouter  post.PostRouter
 } // Add other routers as needed
 
-// Config is an interface that defines a method for retrieving the application's configuration.
-type Config interface {
-	GetConfig() *config.ApplicationConfig
+func NewContainer(logger interfaces.Logger, repository Repository, delivery Delivery) Container {
+	return Container{
+		Logger:     logger,
+		Repository: repository,
+		Delivery:   delivery,
+	} // Add other dependencies as needed
 }
 
-// Logger is an interface that defines methods for logging at different levels.
-type Logger interface {
-	Trace(data error)
-	Debug(data error)
-	Info(data error)
-	Warn(data error)
-	Error(data error)
-	Fatal(data error)
-	Panic(data error)
+func NewServerRouters(userUseCase user.UserUseCase, userRouter user.UserRouter, postRouter post.PostRouter) ServerRouters {
+	return ServerRouters{
+		UserUseCase: userUseCase,
+		UserRouter:  userRouter,
+		PostRouter:  postRouter,
+	} // Add other routers as needed
 }
 
 // Repository is an interface that defines methods for creating and managing repository instances.
@@ -67,21 +66,4 @@ type Delivery interface {
 // Closer is an interface that defines a method for closing resources or services.
 type Closer interface {
 	Close(ctx context.Context) // Closes resources or services.
-}
-
-func NewContainer(logger Logger, repository Repository, useCase UseCase, delivery Delivery) Container {
-	return Container{
-		Logger:     logger,
-		Repository: repository,
-		UseCase:    useCase,
-		Delivery:   delivery,
-	} // Add other dependencies as needed
-}
-
-func NewServerRouters(userUseCase user.UserUseCase, userRouter user.UserRouter, postRouter post.PostRouter) ServerRouters {
-	return ServerRouters{
-		UserUseCase: userUseCase,
-		UserRouter:  userRouter,
-		PostRouter:  postRouter,
-	} // Add other routers as needed
 }

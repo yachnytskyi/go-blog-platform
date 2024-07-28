@@ -10,77 +10,55 @@ import (
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
 
-// ValidateField validates a required field based on the provided commonValidator.
+// ValidateField validates a field based on the provided commonValidator.
 func ValidateField(logger interfaces.Logger, location, field string, commonValidator domainModel.CommonValidator, validationErrors []error) []error {
 	errors := validationErrors
 
-	if IsStringLengthInvalid(field, commonValidator.MinLength, commonValidator.MaxLength) {
-		commonValidator.Notification = fmt.Sprintf(constants.StringAllowedLength, commonValidator.MinLength, commonValidator.MaxLength)
-		validationError := domainError.NewValidationError(
-			location+".ValidateField.IsStringLengthInvalid",
-			commonValidator.FieldName,
-			constants.FieldRequired,
-			commonValidator.Notification,
-		)
-
-		logger.Info(validationError)
-		errors = append(errors, validationError)
+	// Skip validation if the field is optional and empty.
+	if commonValidator.IsOptional && field == "" {
 		return errors
 	}
 
-	// Check if the string characters are invalid based on the regex pattern.
+	// Validate field length.
+	if IsStringLengthInvalid(field, commonValidator.MinLength, commonValidator.MaxLength) {
+		notification := fmt.Sprintf(constants.StringAllowedLength, commonValidator.MinLength, commonValidator.MaxLength)
+		if commonValidator.IsOptional {
+			notification = fmt.Sprintf(constants.StringOptionalAllowedLength, commonValidator.MinLength, commonValidator.MaxLength)
+		}
+
+		commonValidator.Notification = notification
+		validationError := domainError.NewValidationError(
+			location+".ValidateField.IsStringLengthInvalid",
+			commonValidator.FieldName,
+			fieldRequirement(commonValidator.IsOptional),
+			commonValidator.Notification,
+		)
+		logger.Info(validationError)
+		errors = append(errors, validationError)
+	}
+
+	// Validate field characters.
 	if AreStringCharactersInvalid(field, commonValidator.FieldRegex) {
 		validationError := domainError.NewValidationError(
 			location+".ValidateField.AreStringCharactersInvalid",
 			commonValidator.FieldName,
-			constants.FieldRequired,
+			fieldRequirement(commonValidator.IsOptional),
 			commonValidator.Notification,
 		)
-
 		logger.Info(validationError)
 		errors = append(errors, validationError)
-		return errors
 	}
 
 	return errors
 }
 
-// ValidateOptionalField validates an optional field based on the provided commonValidator.
-func ValidateOptionalField(logger interfaces.Logger, location, field string, commonValidator domainModel.CommonValidator, validationErrors []error) []error {
-	if field != "" {
-		return validationErrors
+// fieldRequirement returns the field requirement string based on whether the field is optional.
+func fieldRequirement(isOptional bool) string {
+	if isOptional {
+		return constants.FieldOptional
 	}
 
-	errors := validationErrors
-	if IsStringLengthInvalid(field, commonValidator.MinLength, commonValidator.MaxLength) {
-		commonValidator.Notification = fmt.Sprintf(constants.StringOptionalAllowedLength, commonValidator.MinLength, commonValidator.MaxLength)
-		validationError := domainError.NewValidationError(
-			location+".ValidateOptionalField.IsStringLengthInvalid",
-			commonValidator.FieldName,
-			constants.FieldOptional,
-			commonValidator.Notification,
-		)
-
-		logger.Info(validationError)
-		errors = append(errors, validationError)
-		return errors
-	}
-
-	// Check if the string characters are invalid based on the regex pattern.
-	if AreStringCharactersInvalid(field, commonValidator.FieldRegex) {
-		validationError := domainError.NewValidationError(
-			location+".ValidateOptionalField.AreStringCharactersInvalid",
-			commonValidator.FieldName,
-			constants.FieldOptional,
-			commonValidator.Notification,
-		)
-
-		logger.Info(validationError)
-		errors = append(errors, validationError)
-		return errors
-	}
-
-	return errors
+	return constants.FieldRequired
 }
 
 // IsStringLengthInvalid checks if the length of the input string is outside the specified range.

@@ -12,7 +12,6 @@ import (
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/http/gin"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin"
 	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
-	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
@@ -21,7 +20,8 @@ import (
 )
 
 const (
-	location = "pkg.dependency.delivery.gin."
+	location             = "pkg.dependency.delivery.gin."
+	deliveryDoesNotExist = "This delivery type does not exist: %s"
 )
 
 type GinDelivery struct {
@@ -38,7 +38,7 @@ func NewGinDelivery(config interfaces.Config, logger interfaces.Logger) *GinDeli
 	}
 }
 
-func (ginDelivery *GinDelivery) NewDelivery(serverRouters model.ServerRouters) {
+func (ginDelivery *GinDelivery) CreateDelivery(serverRouters interfaces.ServerRouters) {
 	config := ginDelivery.Config.GetConfig()
 	ginDelivery.Router = gin.Default()
 	applyMiddleware(ginDelivery.Router, config, ginDelivery.Logger)
@@ -49,8 +49,8 @@ func (ginDelivery *GinDelivery) NewDelivery(serverRouters model.ServerRouters) {
 	serverRouters.UserRouter.UserRouter(router)
 	serverRouters.PostRouter.PostRouter(router, serverRouters.UserUseCase)
 
-	setNoRouteHandler(ginDelivery.Router, location+"NewDelivery", ginDelivery.Logger)
-	setNoMethodHandler(ginDelivery.Router, location+"NewDelivery", ginDelivery.Logger)
+	setNoRouteHandler(ginDelivery.Router, location+"CreateDelivery", ginDelivery.Logger)
+	setNoMethodHandler(ginDelivery.Router, location+"CreateDelivery", ginDelivery.Logger)
 	ginDelivery.Router.HandleMethodNotAllowed = true
 
 	ginDelivery.Server = &http.Server{
@@ -59,7 +59,7 @@ func (ginDelivery *GinDelivery) NewDelivery(serverRouters model.ServerRouters) {
 	}
 }
 
-func (ginDelivery GinDelivery) LaunchServer(ctx context.Context, repository model.Repository) {
+func (ginDelivery GinDelivery) LaunchServer(ctx context.Context, repository interfaces.Repository) {
 	config := ginDelivery.Config.GetConfig()
 
 	go func() {
@@ -73,34 +73,39 @@ func (ginDelivery GinDelivery) LaunchServer(ctx context.Context, repository mode
 	ginDelivery.Logger.Info(domainError.NewInfoMessage(location+"LaunchServer", constants.ServerConnectionSuccess))
 }
 
-func (ginDelivery GinDelivery) Close(ctx context.Context) {
-	shutDownError := ginDelivery.Server.Shutdown(ctx)
-	if validator.IsError(shutDownError) {
-		ginDelivery.Logger.Panic(domainError.NewInternalError(location+"Close.Server.Shutdown", shutDownError.Error()))
+func (ginDelivery GinDelivery) NewController(userUseCase interfaces.UserUseCase, usecase any) any {
+	if usecase == nil {
+		return user.NewUserController(ginDelivery.Config, ginDelivery.Logger, userUseCase)
 	}
 
-	ginDelivery.Logger.Info(domainError.NewInfoMessage(location+"Close", constants.ServerConnectionClosed))
+	switch usecaseType := usecase.(type) {
+	case interfaces.PostUseCase:
+		return post.NewPostController(userUseCase, usecaseType)
+	default:
+		ginDelivery.Logger.Panic(domainError.NewInternalError(location+"NewController.default", fmt.Sprintf(deliveryDoesNotExist, usecaseType)))
+		return nil
+	}
 }
 
-func (ginDelivery GinDelivery) NewUserController(useCase any) interfaces.UserController {
-	userUseCase := useCase.(interfaces.UserUseCase)
-	return user.NewUserController(ginDelivery.Config, ginDelivery.Logger, userUseCase)
-}
+func (ginDelivery GinDelivery) NewRouter(controller any) any {
+	switch controllerType := controller.(type) {
+	case interfaces.UserController:
+		return user.NewUserRouter(ginDelivery.Config, ginDelivery.Logger, controllerType)
+	case interfaces.PostController:
+		return post.NewPostRouter(ginDelivery.Config, ginDelivery.Logger, controllerType)
+	}
 
-func (ginDelivery GinDelivery) NewUserRouter(controller any) interfaces.UserRouter {
 	userController := controller.(interfaces.UserController)
 	return user.NewUserRouter(ginDelivery.Config, ginDelivery.Logger, userController)
 }
 
-func (ginDelivery GinDelivery) NewPostController(userUseCaseInterface, postUseCaseInterface any) interfaces.PostController {
-	userUseCase := userUseCaseInterface.(interfaces.UserUseCase)
-	postUseCase := postUseCaseInterface.(interfaces.PostUseCase)
-	return post.NewPostController(userUseCase, postUseCase)
-}
+func (ginDelivery GinDelivery) Close(ctx context.Context) {
+	closeError := ginDelivery.Server.Shutdown(ctx)
+	if validator.IsError(closeError) {
+		ginDelivery.Logger.Panic(domainError.NewInternalError(location+"Close.Server.Close", closeError.Error()))
+	}
 
-func (ginDelivery GinDelivery) NewPostRouter(controller any) interfaces.PostRouter {
-	postController := controller.(interfaces.PostController)
-	return post.NewPostRouter(ginDelivery.Config, ginDelivery.Logger, postController)
+	ginDelivery.Logger.Info(domainError.NewInfoMessage(location+"Close", constants.ServerConnectionClosed))
 }
 
 func applyMiddleware(router *gin.Engine, config *config.ApplicationConfig, logger interfaces.Logger) {

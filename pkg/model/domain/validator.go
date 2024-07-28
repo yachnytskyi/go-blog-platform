@@ -7,6 +7,7 @@ type CommonValidator struct {
 	MinLength    int    // The minimum allowed length for the field.
 	MaxLength    int    // The maximum allowed length for the field.
 	Notification string // The notification message for validation errors.
+	IsOptional   bool   // Indicates if the field is optional.
 }
 
 func NewCommonValidator(fieldName, fieldRegex string, minLength, maxLength int, notification string) *CommonValidator {

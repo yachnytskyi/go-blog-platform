@@ -46,6 +46,7 @@ var (
 		MinLength:    constants.MinStringLength,
 		MaxLength:    constants.MaxStringLength,
 		Notification: emailAllowedCharacters,
+		IsOptional:   false,
 	}
 	usernameValidator = domainModel.CommonValidator{
 		FieldName:    usernameField,
@@ -53,6 +54,7 @@ var (
 		MinLength:    constants.MinStringLength,
 		MaxLength:    constants.MaxStringLength,
 		Notification: constants.StringAllowedCharacters,
+		IsOptional:   false,
 	}
 	passwordValidator = domainModel.CommonValidator{
 		FieldName:    passwordField,
@@ -60,12 +62,14 @@ var (
 		MinLength:    constants.MinStringLength,
 		MaxLength:    constants.MaxStringLength,
 		Notification: passwordAllowedCharacters,
+		IsOptional:   false,
 	}
 	tokenValidator = domainModel.CommonValidator{
 		FieldName:  resetTokenField,
 		FieldRegex: usernameRegex,
 		MinLength:  resetTokenLength,
 		MaxLength:  resetTokenLength,
+		IsOptional: false,
 	}
 	// Add more validators for other fields as needed.
 )
@@ -175,7 +179,7 @@ func validatePassword(logger interfaces.Logger, location, password, passwordConf
 			passwordsDoNotMatch,
 		)
 
-		logger.Info(validationError)
+		logger.Debug(validationError)
 		errors = append(errors, validationError)
 	}
 
@@ -194,7 +198,7 @@ func checkEmailDomain(logger interfaces.Logger, location, emailString string) er
 			invalidEmailDomain,
 		)
 
-		logger.Info(validationError)
+		logger.Debug(validationError)
 		return validationError
 	}
 
@@ -210,7 +214,7 @@ func checkPasswords(logger interfaces.Logger, location, hashedPassword string, c
 			passwordsDoNotMatch,
 		)
 
-		logger.Info(validationError)
+		logger.Debug(validationError)
 		validationError.Notification = invalidEmailOrPassword
 		return validationError
 	}
@@ -237,7 +241,7 @@ func validateField(logger interfaces.Logger, location, fieldValue string, common
 			notification,
 		)
 
-		logger.Info(validationError)
+		logger.Debug(validationError)
 		return validationError
 	}
 	if domainValidator.AreStringCharactersInvalid(fieldValue, commonValidator.FieldRegex) {
@@ -248,7 +252,7 @@ func validateField(logger interfaces.Logger, location, fieldValue string, common
 			commonValidator.Notification,
 		)
 
-		logger.Info(validationError)
+		logger.Debug(validationError)
 		return validationError
 	}
 

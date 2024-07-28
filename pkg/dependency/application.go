@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/yachnytskyi/golang-mongo-grpc/config/constants"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	factory "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory"
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 )
@@ -14,29 +15,31 @@ func NewApplication(ctx context.Context) model.Container {
 	config := factory.NewConfig(constants.Config)
 	logger := factory.NewLogger(ctx, config)
 
-	// Create repositories
+	// Create repository factory and repositories
 	repositoryFactory := factory.NewRepositoryFactory(ctx, config, logger)
-	repository := repositoryFactory.NewRepository(ctx)
-	userRepository := repositoryFactory.NewUserRepository(repository)
-	postRepository := repositoryFactory.NewPostRepository(repository)
+	createRepository := repositoryFactory.CreateRepository(ctx)
+	userRepository := repositoryFactory.NewRepository(createRepository, (*interfaces.UserRepository)(nil))
+	postRepository := repositoryFactory.NewRepository(createRepository, (*interfaces.PostRepository)(nil))
 
-	// Create use cases
+	// Create use case factory and use cases.
 	usecaseFactory := factory.NewUseCaseFactory(ctx, config, logger, repositoryFactory)
-	userUseCase := usecaseFactory.NewUserUseCase(userRepository)
-	postUseCase := usecaseFactory.NewPostUseCase(postRepository)
+	userUseCase := usecaseFactory.NewUseCase(userRepository).(interfaces.UserUseCase)
+	postUseCase := usecaseFactory.NewUseCase(postRepository)
 
-	// Create controllers
+	// Create delivery factory and controllers.
 	deliveryFactory := factory.NewDeliveryFactory(ctx, config, logger, repositoryFactory)
-	userController := deliveryFactory.NewUserController(userUseCase)
-	postController := deliveryFactory.NewPostController(userUseCase, postUseCase)
+	userController := deliveryFactory.NewController(userUseCase, nil)
+	postController := deliveryFactory.NewController(userUseCase, postUseCase)
 
-	container := model.NewContainer(logger, repositoryFactory, deliveryFactory)
-	serverRouters := model.NewServerRouters(
+	// Set up server routers with the user use case and controllers.
+	serverRouters := interfaces.NewServerRouters(
 		userUseCase,
-		deliveryFactory.NewUserRouter(userController),
-		deliveryFactory.NewPostRouter(postController),
+		deliveryFactory.NewRouter(userController).(interfaces.UserRouter),
+		deliveryFactory.NewRouter(postController).(interfaces.PostRouter),
+		// Add other routers as needed.
 	)
 
-	container.Delivery.NewDelivery(serverRouters)
+	deliveryFactory.CreateDelivery(serverRouters)
+	container := model.NewContainer(logger, repositoryFactory, deliveryFactory)
 	return container
 }

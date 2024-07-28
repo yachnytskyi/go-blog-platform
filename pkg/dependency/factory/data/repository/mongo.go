@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
@@ -17,9 +18,10 @@ import (
 )
 
 const (
-	location           = "pkg.dependency.data.repository.mongo."
-	retryDelayInterval = 30 * time.Second
-	maxRetryAttempts   = 5
+	location               = "pkg.dependency.factory.data.repository.mongo."
+	retryDelayInterval     = 30 * time.Second
+	maxRetryAttempts       = 5
+	repositoryDoesNotExist = "This repository type does not exist: %s"
 )
 
 type MongoDBRepository struct {
@@ -35,24 +37,37 @@ func NewMongoDBRepository(config interfaces.Config, logger interfaces.Logger) *M
 	}
 }
 
-func (mongoDBRepository *MongoDBRepository) NewRepository(ctx context.Context) any {
+func (mongoDBRepository *MongoDBRepository) CreateRepository(ctx context.Context) any {
 	config := mongoDBRepository.Config.GetConfig()
 	var connectError error
 
 	mongoConnection := options.Client().ApplyURI(config.MongoDB.URI)
-	mongoClient := connectToMongo(ctx, location+"NewRepository", mongoDBRepository.Logger, mongoConnection)
+	mongoClient := connectToMongo(ctx, location+"CreateRepository", mongoDBRepository.Logger, mongoConnection)
 	if validator.IsError(mongoClient.Error) {
-		mongoDBRepository.Logger.Panic(domainError.NewInternalError(location+"NewRepository.mongoClient", constants.DatabaseConnectionFailure))
+		mongoDBRepository.Logger.Panic(domainError.NewInternalError(location+"CreateRepository.mongoClient", constants.DatabaseConnectionFailure))
 	}
 
 	mongoDBRepository.MongoClient = mongoClient.Data
-	connectError = pingMongo(ctx, location+"NewRepository", mongoDBRepository.Logger, mongoDBRepository.MongoClient)
+	connectError = pingMongo(ctx, location+"CreateRepository", mongoDBRepository.Logger, mongoDBRepository.MongoClient)
 	if validator.IsError(connectError) {
-		mongoDBRepository.Logger.Panic(domainError.NewInternalError(location+"NewRepository.pingMongo", constants.DatabaseConnectionFailure))
+		mongoDBRepository.Logger.Panic(domainError.NewInternalError(location+"CreateRepository.pingMongo", constants.DatabaseConnectionFailure))
 	}
 
-	mongoDBRepository.Logger.Info(domainError.NewInfoMessage(location+"NewRepository", constants.DatabaseConnectionSuccess))
+	mongoDBRepository.Logger.Info(domainError.NewInfoMessage(location+"CreateRepository", constants.DatabaseConnectionSuccess))
 	return mongoDBRepository.MongoClient.Database(config.MongoDB.Name)
+}
+
+func (mongoDBRepository MongoDBRepository) NewRepository(createRepository any, repository any) any {
+	mongoDB := createRepository.(*mongo.Database)
+	switch repository.(type) {
+	case *interfaces.UserRepository:
+		return user.NewUserRepository(mongoDBRepository.Config, mongoDBRepository.Logger, mongoDB)
+	case *interfaces.PostRepository:
+		return post.NewPostRepository(mongoDBRepository.Logger, mongoDB)
+	default:
+		mongoDBRepository.Logger.Panic(domainError.NewInternalError(location+"NewRepository.default", fmt.Sprintf(repositoryDoesNotExist, repository)))
+		return nil
+	}
 }
 
 func (mongoDBRepository MongoDBRepository) Close(ctx context.Context) {
@@ -62,16 +77,6 @@ func (mongoDBRepository MongoDBRepository) Close(ctx context.Context) {
 	}
 
 	mongoDBRepository.Logger.Info(domainError.NewInfoMessage(location+"Close", constants.DatabaseConnectionClosed))
-}
-
-func (mongoDBRepository MongoDBRepository) NewUserRepository(database any) interfaces.UserRepository {
-	mongoDB := database.(*mongo.Database)
-	return user.NewUserRepository(mongoDBRepository.Config, mongoDBRepository.Logger, mongoDB)
-}
-
-func (mongoDBRepository MongoDBRepository) NewPostRepository(database any) interfaces.PostRepository {
-	mongoDB := database.(*mongo.Database)
-	return post.NewPostRepository(mongoDBRepository.Logger, mongoDB)
 }
 
 // connectToMongo attempts to connect to MongoDB server with retries.

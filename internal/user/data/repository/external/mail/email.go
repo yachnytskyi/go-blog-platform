@@ -47,7 +47,7 @@ func parseTemplateDirectory(logger interfaces.Logger, location, templatePath str
 		return nil
 	})
 
-	logger.Info(domainError.NewInfoMessage(location+".parseTemplateDirectory", parsingMessage))
+	logger.Debug(domainError.NewInfoMessage(location+".parseTemplateDirectory", parsingMessage))
 	if validator.IsError(filePathWalkError) {
 		internalError := domainError.NewInternalError(location+".parseTemplateDirectory."+parsingMessage, filePathWalkError.Error())
 		logger.Error(internalError)

@@ -10,18 +10,18 @@ import (
 	repository "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/data/repository"
 	delivery "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/delivery"
 	logger "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/logger"
-	useCase "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/usecase"
+	useCaseV1 "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/usecase/v1"
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
 
 const (
-	location            = "pkg.dependency.factory."
-	unsupportedConfig   = "Unsupported Config type: %s"
-	unsupportedLogger   = "Unsupported logger type: %s"
-	unsupportedDatabase = "Unsupported database type: %s"
-	unsupportedUseCase  = "Unsupported use case type: %s"
-	unsupportedDelivery = "Unsupported delivery type: %s"
+	location              = "pkg.dependency.factory."
+	unsupportedConfig     = "Unsupported Config type: %s"
+	unsupportedLogger     = "Unsupported logger type: %s"
+	unsupportedRepository = "Unsupported repository type: %s"
+	unsupportedUseCase    = "Unsupported use case type: %s"
+	unsupportedDelivery   = "Unsupported delivery type: %s"
 )
 
 func NewConfig(configType string) interfaces.Config {
@@ -48,7 +48,7 @@ func NewLogger(ctx context.Context, configInstance interfaces.Config) interfaces
 	}
 }
 
-func NewRepositoryFactory(ctx context.Context, configInstance interfaces.Config, logger interfaces.Logger) model.Repository {
+func NewRepositoryFactory(ctx context.Context, configInstance interfaces.Config, logger interfaces.Logger) interfaces.Repository {
 	config := configInstance.GetConfig()
 
 	switch config.Core.Database {
@@ -56,19 +56,19 @@ func NewRepositoryFactory(ctx context.Context, configInstance interfaces.Config,
 		return repository.NewMongoDBRepository(configInstance, logger)
 	// Add other repository options here as needed.
 	default:
-		notification := fmt.Sprintf(unsupportedDatabase, config.Core.Database)
+		notification := fmt.Sprintf(unsupportedRepository, config.Core.Database)
 		logger.Panic(domainError.NewInternalError(location+"NewRepositoryFactory", notification))
 		return nil
 	}
 
 }
 
-func NewUseCaseFactory(ctx context.Context, configInstance interfaces.Config, logger interfaces.Logger, repository model.Repository) model.UseCase {
+func NewUseCaseFactory(ctx context.Context, configInstance interfaces.Config, logger interfaces.Logger, repository interfaces.Repository) interfaces.UseCase {
 	config := configInstance.GetConfig()
 
 	switch config.Core.UseCase {
-	case constants.UseCase:
-		return useCase.NewUseCaseV1(configInstance, logger)
+	case constants.UseCaseV1:
+		return useCaseV1.NewUseCaseV1(configInstance, logger)
 	// Add other domain options here as needed.
 	default:
 		notification := fmt.Sprintf(unsupportedUseCase, config.Core.UseCase)
@@ -78,7 +78,7 @@ func NewUseCaseFactory(ctx context.Context, configInstance interfaces.Config, lo
 	}
 }
 
-func NewDeliveryFactory(ctx context.Context, configInstance interfaces.Config, logger interfaces.Logger, repository model.Repository) model.Delivery {
+func NewDeliveryFactory(ctx context.Context, configInstance interfaces.Config, logger interfaces.Logger, repository interfaces.Repository) interfaces.Delivery {
 	config := configInstance.GetConfig()
 
 	switch config.Core.Delivery {

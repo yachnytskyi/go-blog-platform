@@ -39,7 +39,7 @@ const (
 
 // Domains used in the application.
 const (
-	UseCase = "UseCaseV1" // UseCase domain name.
+	UseCaseV1 = "UseCaseV1" // UseCaseV1 domain name.
 )
 
 // Deliveries used in the application.
@@ -162,7 +162,7 @@ const (
 	DatabaseConnectionClosed  = "Database connection has been successfully closed..."
 	DatabaseConnectionFailure = "Failed to establish database connection"
 	ServerConnectionSuccess   = "Server is successfully launched..."
-	ServerConnectionClosed    = "Server has been successfully shutdown..."
+	ServerConnectionClosed    = "Server has been successfully shut down..."
 )
 
 // User Notifications.

@@ -48,7 +48,7 @@ func NewViper() Viper {
 
 	applicationConfig := viperConfigToApplicationConfigMapper(&viperConfig)
 	return Viper{
-		ApplicationConfig: applicationConfig,
+		ApplicationConfig: &applicationConfig,
 	}
 }
 

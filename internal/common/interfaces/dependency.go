@@ -22,6 +22,11 @@ type Logger interface {
 	Panic(data error)
 }
 
+// Email is an interface that defines methods for sending emails.
+type Email interface {
+	SendEmail(configInstance Config, logger Logger, location string, data any, emailData EmailData) error
+}
+
 // Repository is an interface that defines methods for creating and managing repository instances.
 type Repository interface {
 	CreateRepository(ctx context.Context) any
@@ -31,7 +36,7 @@ type Repository interface {
 
 // UseCase is an interface that defines methods for creating use case instances.
 type UseCase interface {
-	NewUseCase(repository any) any
+	NewUseCase(email Email, repository any) any
 }
 
 // Delivery is an interface that defines methods for creating delivery components and managing the server.
@@ -53,12 +58,36 @@ type ServerRouters struct {
 	UserUseCase UserUseCase // UserUseCase handles user-related logic and operations.
 	UserRouter  UserRouter
 	PostRouter  PostRouter
-} // Add other routers as needed.
+	// Add other routers as needed.
+}
 
+// NewServerRouters creates a new instance of ServerRouters with the given routers.
 func NewServerRouters(userUseCase UserUseCase, userRouter UserRouter, postRouter PostRouter) ServerRouters {
 	return ServerRouters{
 		UserUseCase: userUseCase,
 		UserRouter:  userRouter,
 		PostRouter:  postRouter,
-	} // Add other routers as needed.
+		// Add other routers as needed.
+	}
+}
+
+// EmailData holds the data required for sending an email.
+type EmailData struct {
+	Recipient    string // Recipient's email address.
+	URL          string // URL to be included in the email.
+	TemplateName string // Name of the email template.
+	TemplatePath string // Path to the email template.
+	FirstName    string // Recipient's first name.
+	Subject      string // Subject of the email.
+}
+
+func NewEmailData(recipient, url, templateName, templatePath, firstName, subject string) EmailData {
+	return EmailData{
+		Recipient:    recipient,
+		URL:          url,
+		TemplateName: templateName,
+		TemplatePath: templatePath,
+		FirstName:    firstName,
+		Subject:      subject,
+	}
 }

@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
-	userView "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
+	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
 	utility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -56,14 +56,14 @@ func UserContextMiddleware(logger interfaces.Logger, userUseCase interfaces.User
 			return
 		}
 
-		user := userUseCase.GetUserById(ctx, userID)
-		if validator.IsError(user.Error) {
-			abortWithStatusJSON(ginContext, logger, user.Error, constants.StatusUnauthorized)
+		fetchedUser := userUseCase.GetUserById(ctx, userID)
+		if validator.IsError(fetchedUser.Error) {
+			abortWithStatusJSON(ginContext, logger, fetchedUser.Error, constants.StatusUnauthorized)
 			return
 		}
 
-		userView := userView.UserToUserViewMapper(user.Data)
-		ctx = context.WithValue(ctx, constants.User, userView)
+		user := user.UserToUserViewMapper(fetchedUser.Data)
+		ctx = context.WithValue(ctx, constants.User, user)
 		ginContext.Request = ginContext.Request.WithContext(ctx)
 		ginContext.Next()
 	}

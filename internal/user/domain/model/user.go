@@ -65,14 +65,6 @@ type UserResetExpiry struct {
 	ResetExpiry time.Time
 }
 
-type EmailData struct {
-	URL          string
-	TemplateName string
-	TemplatePath string
-	FirstName    string
-	Subject      string
-}
-
 func NewUsers(users []User, paginationResponse common.PaginationResponse) Users {
 	return Users{
 		Users:              users,
@@ -138,15 +130,5 @@ func NewUserResetPassword(resetToken, password, passwordConfirm string) UserRese
 func NewUserResetExpiry(resetExpiry time.Time) UserResetExpiry {
 	return UserResetExpiry{
 		ResetExpiry: resetExpiry,
-	}
-}
-
-func NewEmailData(url, templateName, templatePath, firstName, subject string) EmailData {
-	return EmailData{
-		URL:          url,
-		TemplateName: templateName,
-		TemplatePath: templatePath,
-		FirstName:    firstName,
-		Subject:      subject,
 	}
 }

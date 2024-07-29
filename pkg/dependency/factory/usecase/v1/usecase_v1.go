@@ -3,10 +3,10 @@ package v1
 import (
 	"fmt"
 
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/usecase"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
-	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
 
@@ -26,14 +26,14 @@ func NewUseCaseV1(config interfaces.Config, logger interfaces.Logger) UseCaseV1 
 	}
 }
 
-func (useCaseV1 UseCaseV1) NewUseCase(repository any) any {
+func (useCaseV1 UseCaseV1) NewUseCase(email interfaces.Email, repository any) any {
 	switch repositoryType := repository.(type) {
 	case interfaces.UserRepository:
-		return user.NewUserUseCaseV1(useCaseV1.Config, useCaseV1.Logger, repositoryType)
+		return user.NewUserUseCaseV1(useCaseV1.Config, useCaseV1.Logger, email, repositoryType)
 	case interfaces.PostRepository:
 		return post.NewPostUseCaseV1(useCaseV1.Logger, repositoryType)
 	default:
-		useCaseV1.Logger.Panic(domainError.NewInternalError(location+"NewUseCase.default", fmt.Sprintf(model.UnsupportedUseCase, repositoryType)))
+		useCaseV1.Logger.Panic(domainError.NewInternalError(location+"NewUseCase.default", fmt.Sprintf(constants.UnsupportedUseCase, repositoryType)))
 	}
 
 	return nil

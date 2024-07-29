@@ -27,13 +27,15 @@ const (
 type UserUseCaseV1 struct {
 	Config         interfaces.Config
 	Logger         interfaces.Logger
+	Email          interfaces.Email
 	UserRepository interfaces.UserRepository
 }
 
-func NewUserUseCaseV1(config interfaces.Config, logger interfaces.Logger, userRepository interfaces.UserRepository) UserUseCaseV1 {
+func NewUserUseCaseV1(config interfaces.Config, logger interfaces.Logger, email interfaces.Email, userRepository interfaces.UserRepository) UserUseCaseV1 {
 	return UserUseCaseV1{
 		Config:         config,
 		Logger:         logger,
+		Email:          email,
 		UserRepository: userRepository,
 	}
 }
@@ -95,8 +97,8 @@ func (userUseCaseV1 UserUseCaseV1) Register(ctx context.Context, userCreateData 
 		return common.NewResultOnFailure[user.User](domainError.HandleError(createdUser.Error))
 	}
 
-	emailData := prepareEmailDataForRegistration(userUseCaseV1.Config, createdUser.Data.Name, encodedToken)
-	sendEmailError := userUseCaseV1.UserRepository.SendEmail(createdUser.Data, emailData)
+	emailData := prepareEmailDataForRegistration(userUseCaseV1.Config, createdUser.Data, encodedToken)
+	sendEmailError := userUseCaseV1.Email.SendEmail(userUseCaseV1.Config, userUseCaseV1.Logger, location+"Register", createdUser.Data, emailData)
 	if validator.IsError(sendEmailError) {
 		return common.NewResultOnFailure[user.User](domainError.HandleError(sendEmailError))
 	}
@@ -181,8 +183,8 @@ func (userUseCaseV1 UserUseCaseV1) ForgottenPassword(ctx context.Context, userFo
 		return domainError.HandleError(updatedUserPasswordError)
 	}
 
-	emailData := prepareEmailDataForForgottenPassword(userUseCaseV1.Config, fetchedUser.Data.Name, encodedToken)
-	sendEmailError := userUseCaseV1.UserRepository.SendEmail(fetchedUser.Data, emailData)
+	emailData := prepareEmailDataForForgottenPassword(userUseCaseV1.Config, fetchedUser.Data, encodedToken)
+	sendEmailError := userUseCaseV1.Email.SendEmail(userUseCaseV1.Config, userUseCaseV1.Logger, location+"ForgottenPassword", fetchedUser.Data, emailData)
 	if validator.IsError(sendEmailError) {
 		return domainError.HandleError(sendEmailError)
 	}
@@ -220,9 +222,10 @@ func (userUseCaseV1 UserUseCaseV1) ResetUserPassword(ctx context.Context, userRe
 	return nil
 }
 
-func prepareEmailData(config *config.ApplicationConfig, userName, tokenValue, subject, url, templateName, templatePath string) user.EmailData {
-	userFirstName := domainUtility.UserFirstName(userName)
-	emailData := user.NewEmailData(
+func prepareEmailData(config *config.ApplicationConfig, user user.User, tokenValue, subject, url, templateName, templatePath string) interfaces.EmailData {
+	userFirstName := domainUtility.UserFirstName(user.Name)
+	emailData := interfaces.NewEmailData(
+		user.Email,
 		config.Email.ClientOriginUrl+url+tokenValue,
 		templateName,
 		templatePath,
@@ -233,11 +236,11 @@ func prepareEmailData(config *config.ApplicationConfig, userName, tokenValue, su
 	return emailData
 }
 
-func prepareEmailDataForRegistration(configInstance interfaces.Config, userName, tokenValue string) user.EmailData {
+func prepareEmailDataForRegistration(configInstance interfaces.Config, user user.User, tokenValue string) interfaces.EmailData {
 	config := configInstance.GetConfig()
 	return prepareEmailData(
 		config,
-		userName,
+		user,
 		tokenValue,
 		constants.EmailConfirmationSubject,
 		constants.EmailConfirmationUrl,
@@ -246,11 +249,11 @@ func prepareEmailDataForRegistration(configInstance interfaces.Config, userName,
 	)
 }
 
-func prepareEmailDataForForgottenPassword(configInstance interfaces.Config, userName, tokenValue string) user.EmailData {
+func prepareEmailDataForForgottenPassword(configInstance interfaces.Config, user user.User, tokenValue string) interfaces.EmailData {
 	config := configInstance.GetConfig()
 	return prepareEmailData(
 		config,
-		userName,
+		user,
 		tokenValue,
 		constants.ForgottenPasswordSubject,
 		constants.ForgottenPasswordUrl,

@@ -9,11 +9,11 @@ import (
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
-	domainModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
+	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
+	domainValidator "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain/validator"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/domain"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
-	domainValidator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator/domain"
 	bcrypt "golang.org/x/crypto/bcrypt"
 )
 
@@ -40,7 +40,7 @@ const (
 )
 
 var (
-	emailValidator = domainModel.CommonValidator{
+	emailValidator = domain.CommonValidator{
 		FieldName:    EmailField,
 		FieldRegex:   emailRegex,
 		MinLength:    constants.MinStringLength,
@@ -48,7 +48,7 @@ var (
 		Notification: emailAllowedCharacters,
 		IsOptional:   false,
 	}
-	usernameValidator = domainModel.CommonValidator{
+	usernameValidator = domain.CommonValidator{
 		FieldName:    usernameField,
 		FieldRegex:   usernameRegex,
 		MinLength:    constants.MinStringLength,
@@ -56,7 +56,7 @@ var (
 		Notification: constants.StringAllowedCharacters,
 		IsOptional:   false,
 	}
-	passwordValidator = domainModel.CommonValidator{
+	passwordValidator = domain.CommonValidator{
 		FieldName:    passwordField,
 		FieldRegex:   usernameRegex,
 		MinLength:    constants.MinStringLength,
@@ -64,7 +64,7 @@ var (
 		Notification: passwordAllowedCharacters,
 		IsOptional:   false,
 	}
-	tokenValidator = domainModel.CommonValidator{
+	tokenValidator = domain.CommonValidator{
 		FieldName:  resetTokenField,
 		FieldRegex: usernameRegex,
 		MinLength:  resetTokenLength,
@@ -231,7 +231,7 @@ func checkEmail(logger interfaces.Logger, location, email string) error {
 	return checkEmailDomain(logger, location+".checkEmail", email)
 }
 
-func validateField(logger interfaces.Logger, location, fieldValue string, commonValidator domainModel.CommonValidator) error {
+func validateField(logger interfaces.Logger, location, fieldValue string, commonValidator domain.CommonValidator) error {
 	if domainValidator.IsStringLengthInvalid(fieldValue, commonValidator.MinLength, commonValidator.MaxLength) {
 		notification := fmt.Sprintf(constants.StringAllowedLength, commonValidator.MinLength, commonValidator.MaxLength)
 		validationError := domainError.NewValidationError(

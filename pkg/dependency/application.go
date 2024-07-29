@@ -13,18 +13,19 @@ import (
 // injecting dependencies, and configuring the server.
 func NewApplication(ctx context.Context) model.Container {
 	config := factory.NewConfig(constants.Config)
-	logger := factory.NewLogger(ctx, config)
+	logger := factory.NewLogger(config)
+	email := factory.NewEmail(config, logger)
 
 	// Create repository factory and repositories
-	repositoryFactory := factory.NewRepositoryFactory(ctx, config, logger)
+	repositoryFactory := factory.NewRepositoryFactory(config, logger)
 	createRepository := repositoryFactory.CreateRepository(ctx)
 	userRepository := repositoryFactory.NewRepository(createRepository, (*interfaces.UserRepository)(nil))
 	postRepository := repositoryFactory.NewRepository(createRepository, (*interfaces.PostRepository)(nil))
 
 	// Create use case factory and use cases.
-	usecaseFactory := factory.NewUseCaseFactory(ctx, config, logger, repositoryFactory)
-	userUseCase := usecaseFactory.NewUseCase(userRepository).(interfaces.UserUseCase)
-	postUseCase := usecaseFactory.NewUseCase(postRepository)
+	usecaseFactory := factory.NewUseCaseFactory(ctx, config, logger, email, repositoryFactory)
+	userUseCase := usecaseFactory.NewUseCase(email, userRepository).(interfaces.UserUseCase)
+	postUseCase := usecaseFactory.NewUseCase(email, postRepository)
 
 	// Create delivery factory and controllers.
 	deliveryFactory := factory.NewDeliveryFactory(ctx, config, logger, repositoryFactory)

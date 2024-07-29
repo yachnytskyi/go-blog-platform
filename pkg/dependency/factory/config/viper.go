@@ -73,8 +73,8 @@ func (viper Viper) GetConfig() *config.ApplicationConfig {
 	return viper.ApplicationConfig
 }
 
-func viperConfigToApplicationConfigMapper(viperConfig *config.ViperConfig) *config.ApplicationConfig {
-	return &config.ApplicationConfig{
+func viperConfigToApplicationConfigMapper(viperConfig *config.ViperConfig) config.ApplicationConfig {
+	return config.ApplicationConfig{
 		Core:         convertCore(&viperConfig.Core),
 		MongoDB:      convertMongoDB(&viperConfig.MongoDB),
 		Security:     convertSecurity(&viperConfig.Security),
@@ -89,6 +89,7 @@ func viperConfigToApplicationConfigMapper(viperConfig *config.ViperConfig) *conf
 func convertCore(core *config.ViperCore) config.Core {
 	return config.Core{
 		Logger:   core.Logger,
+		Email:    core.Email,
 		Database: core.Database,
 		UseCase:  core.UseCase,
 		Delivery: core.Delivery,

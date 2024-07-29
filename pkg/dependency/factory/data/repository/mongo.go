@@ -9,7 +9,6 @@ import (
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post/data/repository/mongo"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/mongo"
-	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -65,7 +64,7 @@ func (mongoDBRepository MongoDBRepository) NewRepository(createRepository any, r
 	case *interfaces.PostRepository:
 		return post.NewPostRepository(mongoDBRepository.Logger, mongoDB)
 	default:
-		mongoDBRepository.Logger.Panic(domainError.NewInternalError(location+"NewRepository.default", fmt.Sprintf(model.UnsupportedRepository, repository)))
+		mongoDBRepository.Logger.Panic(domainError.NewInternalError(location+"NewRepository.default", fmt.Sprintf(constants.UnsupportedRepository, repository)))
 		return nil
 	}
 }

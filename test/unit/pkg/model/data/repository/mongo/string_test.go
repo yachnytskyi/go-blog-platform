@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	mongo "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
+	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/data/repository/mongo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -37,7 +37,7 @@ func TestBSONToStringMapperStandardObjectIDAndString(t *testing.T) {
 		"field3": "123",
 	}
 
-	result := mongo.BSONToStringMapper(query)
+	result := utility.BSONToStringMapper(query)
 	parsedResult := parseResult(result)
 	assert.Equal(t, expected, parsedResult)
 }
@@ -46,7 +46,7 @@ func TestBSONToStringMapperEmptyQuery(t *testing.T) {
 	query := bson.M{}
 	expected := map[string]string{}
 
-	result := mongo.BSONToStringMapper(query)
+	result := utility.BSONToStringMapper(query)
 	parsedResult := parseResult(result)
 	assert.Equal(t, expected, parsedResult)
 }
@@ -69,7 +69,7 @@ func TestBSONToStringMapperDifferentBSONTypes(t *testing.T) {
 		"field5": "true",
 	}
 
-	result := mongo.BSONToStringMapper(query)
+	result := utility.BSONToStringMapper(query)
 	parsedResult := parseResult(result)
 	assert.Equal(t, expected, parsedResult)
 }
@@ -86,7 +86,7 @@ func TestBSONToStringMapperArrayValue(t *testing.T) {
 		"field2": "[1 2 3]",
 	}
 
-	result := mongo.BSONToStringMapper(query)
+	result := utility.BSONToStringMapper(query)
 	parsedResult := parseResult(result)
 	assert.Equal(t, expected, parsedResult)
 }
@@ -104,7 +104,7 @@ func TestBSONToStringMapperEmbeddedDocument(t *testing.T) {
 		"field2": "map[subfield1:subvalue1]",
 	}
 
-	result := mongo.BSONToStringMapper(query)
+	result := utility.BSONToStringMapper(query)
 	parsedResult := parseResult(result)
 	assert.Equal(t, expected, parsedResult)
 }
@@ -123,7 +123,7 @@ func TestBSONToStringMapperUnsupportedType(t *testing.T) {
 		"field3": "<unsupported>",
 	}
 
-	result := mongo.BSONToStringMapper(query)
+	result := utility.BSONToStringMapper(query)
 	parsedResult := parseResult(result)
 	parsedResult["field3"] = "<unsupported>" // Handle function type as unsupported
 	assert.Equal(t, expected, parsedResult)
@@ -141,7 +141,7 @@ func TestBSONToStringMapperNilValue(t *testing.T) {
 		"field2": "<nil>",
 	}
 
-	result := mongo.BSONToStringMapper(query)
+	result := utility.BSONToStringMapper(query)
 	parsedResult := parseResult(result)
 	assert.Equal(t, expected, parsedResult)
 }
@@ -163,7 +163,7 @@ func TestBSONToStringMapperNestedDocumentsAndArrays(t *testing.T) {
 		"field2": "map[nestedField1:[map[subfield1:subvalue1] stringValue 42] nestedField2:3.14]",
 	}
 
-	result := mongo.BSONToStringMapper(query)
+	result := utility.BSONToStringMapper(query)
 	parsedResult := parseResult(result)
 	assert.Equal(t, expected, parsedResult)
 }
@@ -181,7 +181,7 @@ func TestBSONToStringMapperNestedArrays(t *testing.T) {
 		"field2": "[[1 2] [a b] 42]",
 	}
 
-	result := mongo.BSONToStringMapper(query)
+	result := utility.BSONToStringMapper(query)
 	parsedResult := parseResult(result)
 	assert.Equal(t, expected, parsedResult)
 }
@@ -193,7 +193,7 @@ func TestBSONToStringMapperEmptyString(t *testing.T) {
 	expected := map[string]string{
 		"field1": "",
 	}
-	result := mongo.BSONToStringMapper(query)
+	result := utility.BSONToStringMapper(query)
 	parsedResult := parseResult(result)
 	assert.Equal(t, expected, parsedResult)
 }
@@ -205,7 +205,7 @@ func TestBSONToStringMapperBooleanFalse(t *testing.T) {
 	expected := map[string]string{
 		"field1": "false",
 	}
-	result := mongo.BSONToStringMapper(query)
+	result := utility.BSONToStringMapper(query)
 	parsedResult := parseResult(result)
 	assert.Equal(t, expected, parsedResult)
 }
@@ -219,7 +219,7 @@ func TestBSONToStringMapperVeryLargeNumbers(t *testing.T) {
 		"field1": "1e+18",
 		"field2": "-1e+18",
 	}
-	result := mongo.BSONToStringMapper(query)
+	result := utility.BSONToStringMapper(query)
 	parsedResult := parseResult(result)
 	assert.Equal(t, expected, parsedResult)
 }

@@ -13,8 +13,8 @@ import (
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
-	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/common"
-	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
+	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/common"
+	http "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
@@ -78,7 +78,7 @@ func ValidateInputMiddleware(config *config.ApplicationConfig, logger interfaces
 		if validator.IsSliceNotContains(config.Security.AllowedHTTPMethods, ginContext.Request.Method) {
 			allowedMethods := strings.Join(config.Security.AllowedHTTPMethods, ", ")
 			notification := constants.InvalidHTTPMethodNotification + allowedMethods
-			httpRequestError := httpError.NewHTTPRequestError(location+"ValidateInputMiddleware.AllowedHTTPMethods", ginContext.Request.Method, notification)
+			httpRequestError := http.NewHTTPRequestError(location+"ValidateInputMiddleware.AllowedHTTPMethods", ginContext.Request.Method, notification)
 			abortWithStatusJSON(ginContext, logger, httpRequestError, constants.StatusBadRequest)
 			return
 		}
@@ -87,7 +87,7 @@ func ValidateInputMiddleware(config *config.ApplicationConfig, logger interfaces
 		if contentType != "" && validator.IsSliceNotContains(config.Security.AllowedContentTypes, contentType) {
 			allowedContentTypes := strings.Join(config.Security.AllowedContentTypes, ", ")
 			notification := constants.InvalidHTTPMethodNotification + allowedContentTypes
-			httpRequestError := httpError.NewHTTPRequestError(location+"ValidateInputMiddleware.AllowedContentTypes", contentType, notification)
+			httpRequestError := http.NewHTTPRequestError(location+"ValidateInputMiddleware.AllowedContentTypes", contentType, notification)
 			abortWithStatusJSON(ginContext, logger, httpRequestError, constants.StatusBadRequest)
 			return
 		}
@@ -112,7 +112,7 @@ func TimeoutMiddleware(logger interfaces.Logger) gin.HandlerFunc {
 		select {
 		case <-ch:
 		case <-ctx.Done():
-			httpInternalError := httpError.NewHTTPInternalError(location+"TimeOutMiddleware", ctx.Err().Error())
+			httpInternalError := http.NewHTTPInternalError(location+"TimeOutMiddleware", ctx.Err().Error())
 			abortWithStatusJSON(ginContext, logger, httpInternalError, constants.StatusBadGateway)
 		}
 	}
@@ -124,7 +124,7 @@ func LoggerMiddleware(logger interfaces.Logger) gin.HandlerFunc {
 		start := time.Now()
 		correlationID := c.GetString(constants.CorrelationIDHeader)
 
-		httpIncomingLog := commonModel.NewHTTPIncomingLog(
+		httpIncomingLog := common.NewHTTPIncomingLog(
 			location+"LoggerMiddleware",
 			correlationID,
 			c.Request.Method,
@@ -135,7 +135,7 @@ func LoggerMiddleware(logger interfaces.Logger) gin.HandlerFunc {
 
 		c.Next()
 
-		httpOutgoingLog := commonModel.NewHTTPOutgoingLog(
+		httpOutgoingLog := common.NewHTTPOutgoingLog(
 			location+"LoggerMiddleware",
 			correlationID,
 			c.Request.Method,

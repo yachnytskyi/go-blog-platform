@@ -26,8 +26,7 @@ func NewConfig(configType string) interfaces.Config {
 		return config.NewViper()
 	// Add other logger options here as needed.
 	default:
-		notification := fmt.Sprintf(constants.UnsupportedConfig, configType)
-		panic(domainError.NewInternalError(location+"NewLogger", notification))
+		panic(domainError.NewInternalError(location+"NewLogger", fmt.Sprintf(constants.UnsupportedConfig, configType)))
 	}
 }
 
@@ -39,8 +38,7 @@ func NewLogger(configInstance interfaces.Config) interfaces.Logger {
 		return logger.NewZerolog()
 	// Add other logger options here as needed.
 	default:
-		notification := fmt.Sprintf(constants.UnsupportedLogger, config.Core.Logger)
-		panic(domainError.NewInternalError(location+"NewLogger", notification))
+		panic(domainError.NewInternalError(location+"NewLogger", fmt.Sprintf(constants.UnsupportedLogger, config.Core.Logger)))
 	}
 }
 
@@ -52,8 +50,7 @@ func NewEmail(configInstance interfaces.Config, logger interfaces.Logger) interf
 		return email.NewGoMail(configInstance, logger)
 	// Add other logger options here as needed.
 	default:
-		notification := fmt.Sprintf(constants.UnsupportedLogger, config.Core.Logger)
-		panic(domainError.NewInternalError(location+"NewLogger", notification))
+		panic(domainError.NewInternalError(location+"NewLogger", fmt.Sprintf(constants.UnsupportedLogger, config.Core.Logger)))
 	}
 }
 
@@ -65,8 +62,7 @@ func NewRepositoryFactory(configInstance interfaces.Config, logger interfaces.Lo
 		return repository.NewMongoDBRepository(configInstance, logger)
 	// Add other repository options here as needed.
 	default:
-		notification := fmt.Sprintf(constants.UnsupportedRepository, config.Core.Database)
-		logger.Panic(domainError.NewInternalError(location+"NewRepositoryFactory", notification))
+		logger.Panic(domainError.NewInternalError(location+"NewRepositoryFactory", fmt.Sprintf(constants.UnsupportedRepository, config.Core.Database)))
 		return nil
 	}
 
@@ -85,9 +81,8 @@ func NewUseCaseFactory(
 		return useCaseV1.NewUseCaseV1(configInstance, logger)
 	// Add other domain options here as needed.
 	default:
-		notification := fmt.Sprintf(constants.UnsupportedUseCase, config.Core.UseCase)
 		model.GracefulShutdown(ctx, logger, repository)
-		logger.Panic(domainError.NewInternalError(location+"NewUseCaseFactory", notification))
+		logger.Panic(domainError.NewInternalError(location+"NewUseCaseFactory", fmt.Sprintf(constants.UnsupportedUseCase, config.Core.UseCase)))
 		return nil
 	}
 }
@@ -104,9 +99,8 @@ func NewDeliveryFactory(
 		return delivery.NewGinDelivery(configInstance, logger)
 	// Add other delivery options here as needed.
 	default:
-		notification := fmt.Sprintf(constants.UnsupportedDelivery, config.Core.Delivery)
 		model.GracefulShutdown(ctx, logger, repository)
-		logger.Panic(domainError.NewInternalError(location+"NewUseCaseFactory", notification))
+		logger.Panic(domainError.NewInternalError(location+"NewUseCaseFactory", fmt.Sprintf(constants.UnsupportedDelivery, config.Core.Delivery)))
 		return nil
 	}
 }

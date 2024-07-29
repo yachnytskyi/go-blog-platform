@@ -127,8 +127,11 @@ func configureCORS(router *gin.Engine, config *config.ApplicationConfig) {
 func setNoRouteHandler(router *gin.Engine, location string, logger interfaces.Logger) {
 	router.NoRoute(func(ginContext *gin.Context) {
 		requestedPath := ginContext.Request.URL.Path
-		errorMessage := fmt.Sprintf(constants.RouteNotFoundNotification, requestedPath)
-		httpRequestError := httpError.NewHTTPRequestError(location+".setNoRouteHandler.NoRoute", requestedPath, errorMessage)
+		httpRequestError := httpError.NewHTTPRequestError(
+			location+".setNoRouteHandler.NoRoute",
+			requestedPath,
+			fmt.Sprintf(constants.RouteNotFoundNotification, requestedPath),
+		)
 		logger.Error(httpRequestError)
 		ginContext.JSON(constants.StatusNotFound, httpModel.NewJSONResponseOnFailure(httpError.HandleError(httpRequestError)))
 	})
@@ -137,8 +140,11 @@ func setNoRouteHandler(router *gin.Engine, location string, logger interfaces.Lo
 func setNoMethodHandler(router *gin.Engine, location string, logger interfaces.Logger) {
 	router.NoMethod(func(ginContext *gin.Context) {
 		forbiddenMethod := ginContext.Request.Method
-		errorMessage := fmt.Sprintf(constants.MethodNotAllowedNotification, forbiddenMethod)
-		httpRequestError := httpError.NewHTTPRequestError(location+"setNoMethodHandler.NoMethod", forbiddenMethod, errorMessage)
+		httpRequestError := httpError.NewHTTPRequestError(
+			location+"setNoMethodHandler.NoMethod",
+			forbiddenMethod,
+			fmt.Sprintf(constants.MethodNotAllowedNotification, forbiddenMethod),
+		)
 		logger.Error(httpRequestError)
 		ginContext.JSON(constants.StatusMethodNotAllowed, httpModel.NewJSONResponseOnFailure(httpError.HandleError(httpRequestError)))
 	})

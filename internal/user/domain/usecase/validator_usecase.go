@@ -233,14 +233,12 @@ func checkEmail(logger interfaces.Logger, location, email string) error {
 
 func validateField(logger interfaces.Logger, location, fieldValue string, commonValidator domain.CommonValidator) error {
 	if domainValidator.IsStringLengthInvalid(fieldValue, commonValidator.MinLength, commonValidator.MaxLength) {
-		notification := fmt.Sprintf(constants.StringAllowedLength, commonValidator.MinLength, commonValidator.MaxLength)
 		validationError := domainError.NewValidationError(
 			location+".validateField.IsStringLengthInvalid",
 			commonValidator.FieldName,
 			constants.FieldRequired,
-			notification,
+			fmt.Sprintf(constants.StringAllowedLength, commonValidator.MinLength, commonValidator.MaxLength),
 		)
-
 		logger.Debug(validationError)
 		return validationError
 	}

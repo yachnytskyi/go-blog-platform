@@ -1,5 +1,6 @@
 Core:
-  Logger: Zerolog 
+  Logger: Zerolog
+  Email: GoMail
   Database: MongoDB
   UseCase: UseCaseV1
   Delivery: Gin
@@ -65,6 +66,6 @@ Email:
   SMTP_Port: your port
   Client_Origin_Url: "http://localhost:8080/api/" # put your own client URL
   User_Confirmation_Template_Name: verificationCode.html
-  User_Confirmation_Template_Path: internal/user/data/repository/external/mail/template  
+  User_Confirmation_Template_Path: pkg/dependency/factory/email/template  
   Forgotten_Password_Template_Name: resetPassword.html
-  Forgotten_Password_Template_Path: internal/user/data/repository/external/mail/template
+  Forgotten_Password_Template_Path: pkg/dependency/factory/email/template

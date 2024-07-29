@@ -33,7 +33,7 @@ func ValidateField(logger interfaces.Logger, location, field string, commonValid
 			fieldRequirement(commonValidator.IsOptional),
 			commonValidator.Notification,
 		)
-		logger.Info(validationError)
+		logger.Debug(validationError)
 		errors = append(errors, validationError)
 	}
 
@@ -45,7 +45,7 @@ func ValidateField(logger interfaces.Logger, location, field string, commonValid
 			fieldRequirement(commonValidator.IsOptional),
 			commonValidator.Notification,
 		)
-		logger.Info(validationError)
+		logger.Debug(validationError)
 		errors = append(errors, validationError)
 	}
 

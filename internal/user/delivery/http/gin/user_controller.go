@@ -2,6 +2,7 @@ package gin
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
@@ -98,7 +99,10 @@ func (userController UserController) Register(controllerContext any) {
 		return
 	}
 
-	ginContext.JSON(constants.StatusCreated, model.NewJSONResponseOnSuccess(view.NewWelcomeMessageView(constants.SendingEmailNotification+createdUser.Data.Email)))
+	ginContext.JSON(
+		constants.StatusCreated,
+		model.NewJSONResponseOnSuccess(view.NewWelcomeMessageView(fmt.Sprintf(constants.SendingEmailNotification, createdUser.Data.Email))),
+	)
 }
 
 func (userController UserController) UpdateCurrentUser(controllerContext any) {

@@ -1,15 +1,24 @@
 up:
 	docker-compose up 
 
+stop:
+	docker-compose stop
+
 down:
 	docker-compose down
 
-local:
+run:
+	go run cmd/server/main.go
+
+reflex:
+	reflex -s go run cmd/server/main.go 
+
+mongo local:
 	docker-compose up mongodb -d 
 	reflex -s go run cmd/server/main.go 
 
-run:
-	go run cmd/server/main.go
+mongo docker:
+	docker compose up mongodb app -d
 
 reflex:
 	reflex -s go run cmd/server/main.go 
@@ -20,7 +29,7 @@ unit tests:
 unit tests pkg:
 	go test ./test/unit/pkg/...
 
-# unit tests internal:
+# unit-tests-internal:
 # 	go test ./test/unit/internal...
 
 

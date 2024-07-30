@@ -55,18 +55,16 @@ type Close interface {
 
 // ServerRouters holds the routers for different modules of the application.
 type ServerRouters struct {
-	UserUseCase UserUseCase // UserUseCase handles user-related logic and operations.
-	UserRouter  UserRouter
-	PostRouter  PostRouter
+	UserRouter UserRouter
+	PostRouter PostRouter
 	// Add other routers as needed.
 }
 
 // NewServerRouters creates a new instance of ServerRouters with the given routers.
-func NewServerRouters(userUseCase UserUseCase, userRouter UserRouter, postRouter PostRouter) ServerRouters {
+func NewServerRouters(userRouter UserRouter, postRouter PostRouter) ServerRouters {
 	return ServerRouters{
-		UserUseCase: userUseCase,
-		UserRouter:  userRouter,
-		PostRouter:  postRouter,
+		UserRouter: userRouter,
+		PostRouter: postRouter,
 		// Add other routers as needed.
 	}
 }

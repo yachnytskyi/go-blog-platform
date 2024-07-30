@@ -1,4 +1,4 @@
-package v1
+package usecase
 
 import (
 	"fmt"
@@ -8,10 +8,6 @@ import (
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/usecase"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-)
-
-const (
-	location = "pkg.dependency.factory.data.usecase.v1."
 )
 
 type UseCaseV1 struct {
@@ -33,7 +29,7 @@ func (useCaseV1 UseCaseV1) NewUseCase(email interfaces.Email, repository any) an
 	case interfaces.PostRepository:
 		return post.NewPostUseCaseV1(useCaseV1.Logger, repositoryType)
 	default:
-		useCaseV1.Logger.Panic(domainError.NewInternalError(location+"NewUseCase.default", fmt.Sprintf(constants.UnsupportedUseCase, repositoryType)))
+		useCaseV1.Logger.Panic(domainError.NewInternalError(location+"v1.NewUseCase.default", fmt.Sprintf(constants.UnsupportedUseCase, repositoryType)))
 	}
 
 	return nil

@@ -21,4 +21,5 @@ secret.md
 /temp
 temp/
 config/yaml/v1/docker.dev.application.yaml
-config/yaml/v1/local.dev.application.yaml
+config/yaml/v1/local.application.yaml
+config/yaml/v1/test.application.yaml

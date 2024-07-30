@@ -22,7 +22,7 @@ func NewPostRouter(config interfaces.Config, logger interfaces.Logger, postContr
 	}
 }
 
-func (postRouter PostRouter) PostRouter(routerGroup any, userUseCase interfaces.UserUseCase) {
+func (postRouter PostRouter) PostRouter(routerGroup any) {
 	ginRouterGroup := routerGroup.(*gin.RouterGroup)
 	router := ginRouterGroup.Group(constants.PostsGroupPath)
 	router.GET("/", func(ginContext *gin.Context) {
@@ -33,7 +33,7 @@ func (postRouter PostRouter) PostRouter(routerGroup any, userUseCase interfaces.
 	})
 
 	router.Use(middleware.AuthenticationMiddleware(postRouter.Config, postRouter.Logger))
-	router.POST("/", middleware.UserContextMiddleware(postRouter.Logger, userUseCase), func(ginContext *gin.Context) {
+	router.POST("/", func(ginContext *gin.Context) {
 		postRouter.PostController.CreatePost(ginContext)
 	})
 	router.PUT("/:postID", func(ginContext *gin.Context) {

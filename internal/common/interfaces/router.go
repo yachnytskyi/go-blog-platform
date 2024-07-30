@@ -5,5 +5,5 @@ type UserRouter interface {
 }
 
 type PostRouter interface {
-	PostRouter(routerGroup any, userUseCase UserUseCase)
+	PostRouter(routerGroup any)
 }

@@ -19,10 +19,6 @@ import (
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
-const (
-	location = "pkg.dependency.delivery.gin."
-)
-
 type GinDelivery struct {
 	Config interfaces.Config
 	Logger interfaces.Logger
@@ -46,10 +42,10 @@ func (ginDelivery *GinDelivery) CreateDelivery(serverRouters interfaces.ServerRo
 
 	// Initialize entity-specific routers.
 	serverRouters.UserRouter.UserRouter(router)
-	serverRouters.PostRouter.PostRouter(router, serverRouters.UserUseCase)
+	serverRouters.PostRouter.PostRouter(router)
 
-	setNoRouteHandler(ginDelivery.Router, location+"CreateDelivery", ginDelivery.Logger)
-	setNoMethodHandler(ginDelivery.Router, location+"CreateDelivery", ginDelivery.Logger)
+	setNoRouteHandler(ginDelivery.Router, location+"gin.CreateDelivery", ginDelivery.Logger)
+	setNoMethodHandler(ginDelivery.Router, location+"gin.CreateDelivery", ginDelivery.Logger)
 	ginDelivery.Router.HandleMethodNotAllowed = true
 
 	ginDelivery.Server = &http.Server{
@@ -65,11 +61,11 @@ func (ginDelivery GinDelivery) LaunchServer(ctx context.Context, repository inte
 		runError := ginDelivery.Router.Run(":" + config.Gin.Port)
 		if validator.IsError(runError) {
 			repository.Close(ctx)
-			ginDelivery.Logger.Panic(domainError.NewInternalError(location+"LaunchServer.Router.Run", runError.Error()))
+			ginDelivery.Logger.Panic(domainError.NewInternalError(location+"gin.LaunchServer.Router.Run", runError.Error()))
 		}
 	}()
 
-	ginDelivery.Logger.Info(domainError.NewInfoMessage(location+"LaunchServer", constants.ServerConnectionSuccess))
+	ginDelivery.Logger.Info(domainError.NewInfoMessage(location+"gin.LaunchServer", constants.ServerConnectionSuccess))
 }
 
 func (ginDelivery GinDelivery) NewController(userUseCase interfaces.UserUseCase, usecase any) any {
@@ -81,7 +77,7 @@ func (ginDelivery GinDelivery) NewController(userUseCase interfaces.UserUseCase,
 	case interfaces.PostUseCase:
 		return post.NewPostController(userUseCase, usecaseType)
 	default:
-		ginDelivery.Logger.Panic(domainError.NewInternalError(location+"NewController.default", fmt.Sprintf(constants.UnsupportedDelivery, usecaseType)))
+		ginDelivery.Logger.Panic(domainError.NewInternalError(location+"gin.NewController.default", fmt.Sprintf(constants.UnsupportedDelivery, usecaseType)))
 		return nil
 	}
 }
@@ -101,10 +97,10 @@ func (ginDelivery GinDelivery) NewRouter(controller any) any {
 func (ginDelivery GinDelivery) Close(ctx context.Context) {
 	closeError := ginDelivery.Server.Shutdown(ctx)
 	if validator.IsError(closeError) {
-		ginDelivery.Logger.Panic(domainError.NewInternalError(location+"Close.Server.Close", closeError.Error()))
+		ginDelivery.Logger.Panic(domainError.NewInternalError(location+"gin.Close.Server.Close", closeError.Error()))
 	}
 
-	ginDelivery.Logger.Info(domainError.NewInfoMessage(location+"Close", constants.ServerConnectionClosed))
+	ginDelivery.Logger.Info(domainError.NewInfoMessage(location+"gin.Close", constants.ServerConnectionClosed))
 }
 
 func applyMiddleware(router *gin.Engine, config *config.ApplicationConfig, logger interfaces.Logger) {
@@ -128,7 +124,7 @@ func setNoRouteHandler(router *gin.Engine, location string, logger interfaces.Lo
 	router.NoRoute(func(ginContext *gin.Context) {
 		requestedPath := ginContext.Request.URL.Path
 		httpRequestError := httpError.NewHTTPRequestError(
-			location+".setNoRouteHandler.NoRoute",
+			location+"gin.setNoRouteHandler.NoRoute",
 			requestedPath,
 			fmt.Sprintf(constants.RouteNotFoundNotification, requestedPath),
 		)
@@ -141,7 +137,7 @@ func setNoMethodHandler(router *gin.Engine, location string, logger interfaces.L
 	router.NoMethod(func(ginContext *gin.Context) {
 		forbiddenMethod := ginContext.Request.Method
 		httpRequestError := httpError.NewHTTPRequestError(
-			location+"setNoMethodHandler.NoMethod",
+			location+"gin.setNoMethodHandler.NoMethod",
 			forbiddenMethod,
 			fmt.Sprintf(constants.MethodNotAllowedNotification, forbiddenMethod),
 		)

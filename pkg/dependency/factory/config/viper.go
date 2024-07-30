@@ -1,4 +1,4 @@
-package viper
+package config
 
 import (
 	"log"
@@ -12,18 +12,14 @@ import (
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
-const (
-	location = "pkg.dependency.factory.config."
-)
-
 type Viper struct {
 	ApplicationConfig *config.ApplicationConfig
 }
 
 func NewViper() Viper {
-	loadEnvironmentsError := godotenv.Load(constants.EnvironmentsPath + constants.LocalDevEnvironment)
+	loadEnvironmentsError := godotenv.Load(constants.EnvironmentsPath + constants.LocalEnvironment)
 	if validator.IsError(loadEnvironmentsError) {
-		loadEnvironmentsInternalError := domainError.NewInternalError(location+"Load", loadEnvironmentsError.Error())
+		loadEnvironmentsInternalError := domainError.NewInternalError(location+"viper.Load", loadEnvironmentsError.Error())
 		log.Println(loadEnvironmentsInternalError)
 		loadDefaultEnvironment()
 	}
@@ -35,7 +31,7 @@ func NewViper() Viper {
 
 	readInConfigError := viperInstance.ReadInConfig()
 	if validator.IsError(readInConfigError) {
-		readInInternalError := domainError.NewInternalError(location+"ReadInConfig", readInConfigError.Error())
+		readInInternalError := domainError.NewInternalError(location+"viper.ReadInConfig", readInConfigError.Error())
 		log.Println(readInInternalError)
 		loadDefaultConfig(viperInstance)
 	}
@@ -43,7 +39,7 @@ func NewViper() Viper {
 	var viperConfig config.ViperConfig
 	unmarshalError := viperInstance.Unmarshal(&viperConfig)
 	if validator.IsError(unmarshalError) {
-		panic(domainError.NewInternalError(location+"Unmarshal", unmarshalError.Error()))
+		panic(domainError.NewInternalError(location+"viper.Unmarshal", unmarshalError.Error()))
 	}
 
 	applicationConfig := viperConfigToApplicationConfigMapper(&viperConfig)
@@ -53,20 +49,20 @@ func NewViper() Viper {
 }
 
 func loadDefaultEnvironment() {
-	defaultEnvironmentError := godotenv.Load(constants.DefaultEnvironmentsPath + constants.DockerDevEnvironment)
+	defaultEnvironmentError := godotenv.Load(constants.DefaultEnvironmentsPath + constants.LocalEnvironment)
 	if validator.IsError(defaultEnvironmentError) {
-		panic(domainError.NewInternalError(location+"loadDefaultEnvironment", defaultEnvironmentError.Error()))
+		panic(domainError.NewInternalError(location+"viper.loadDefaultEnvironment", defaultEnvironmentError.Error()))
 	}
-	log.Println(domainError.NewInfoMessage(location+"loadDefaultEnvironment", constants.DefaultConfigPathNotification))
+	log.Println(domainError.NewInfoMessage(location+"viper.loadDefaultEnvironment", constants.DefaultConfigPathNotification))
 }
 
 func loadDefaultConfig(viper *viper.Viper) {
 	viper.SetConfigFile(constants.DefaultConfigPath)
 	readInConfigError := viper.ReadInConfig()
 	if validator.IsError(readInConfigError) {
-		panic(domainError.NewInternalError(location+"loadDefaultConfig", readInConfigError.Error()))
+		panic(domainError.NewInternalError(location+"viper.loadDefaultConfig", readInConfigError.Error()))
 	}
-	log.Println(domainError.NewInfoMessage(location+"loadDefaultConfig", constants.DefaultConfigPathNotification))
+	log.Println(domainError.NewInfoMessage(location+"viper.loadDefaultConfig", constants.DefaultConfigPathNotification))
 }
 
 func (viper Viper) GetConfig() *config.ApplicationConfig {

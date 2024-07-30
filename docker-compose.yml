@@ -28,6 +28,24 @@ services:
       - application-network
     command: reflex -r '\.go$' -s -- go run ./cmd/server/main.go
 
+  app-production:
+    build:
+      context: ./
+      dockerfile: infrastructure/Docker/Dockerfile.prod
+    image: app-production
+    ports:
+      - "8080:8080"
+    environment:
+      - ENV=dev
+    volumes:
+      - ./:/app-production
+    working_dir: /app-production
+    depends_on:
+      - mongodb
+    networks:
+      - application-network
+    command: go run ./cmd/server/main.go 
+
 networks:
   application-network:
     driver: bridge

@@ -11,7 +11,7 @@ import (
 	delivery "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/delivery"
 	email "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/email"
 	logger "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/logger"
-	useCaseV1 "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/usecase/v1"
+	useCase "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/usecase"
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
@@ -26,7 +26,7 @@ func NewConfig(configType string) interfaces.Config {
 		return config.NewViper()
 	// Add other logger options here as needed.
 	default:
-		panic(domainError.NewInternalError(location+"NewLogger", fmt.Sprintf(constants.UnsupportedConfig, configType)))
+		panic(domainError.NewInternalError(location+"NewConfig", fmt.Sprintf(constants.UnsupportedConfig, configType)))
 	}
 }
 
@@ -50,7 +50,7 @@ func NewEmail(configInstance interfaces.Config, logger interfaces.Logger) interf
 		return email.NewGoMail(configInstance, logger)
 	// Add other logger options here as needed.
 	default:
-		panic(domainError.NewInternalError(location+"NewLogger", fmt.Sprintf(constants.UnsupportedLogger, config.Core.Logger)))
+		panic(domainError.NewInternalError(location+"NewEmail", fmt.Sprintf(constants.UnsupportedLogger, config.Core.Logger)))
 	}
 }
 
@@ -74,11 +74,11 @@ func NewUseCaseFactory(
 	logger interfaces.Logger,
 	email interfaces.Email,
 	repository interfaces.Repository) interfaces.UseCase {
-	config := configInstance.GetConfig()
 
+	config := configInstance.GetConfig()
 	switch config.Core.UseCase {
 	case constants.UseCaseV1:
-		return useCaseV1.NewUseCaseV1(configInstance, logger)
+		return useCase.NewUseCaseV1(configInstance, logger)
 	// Add other domain options here as needed.
 	default:
 		model.GracefulShutdown(ctx, logger, repository)
@@ -92,15 +92,15 @@ func NewDeliveryFactory(
 	configInstance interfaces.Config,
 	logger interfaces.Logger,
 	repository interfaces.Repository) interfaces.Delivery {
-	config := configInstance.GetConfig()
 
+	config := configInstance.GetConfig()
 	switch config.Core.Delivery {
 	case constants.Gin:
 		return delivery.NewGinDelivery(configInstance, logger)
 	// Add other delivery options here as needed.
 	default:
 		model.GracefulShutdown(ctx, logger, repository)
-		logger.Panic(domainError.NewInternalError(location+"NewUseCaseFactory", fmt.Sprintf(constants.UnsupportedDelivery, config.Core.Delivery)))
+		logger.Panic(domainError.NewInternalError(location+"NewDeliveryFactory", fmt.Sprintf(constants.UnsupportedDelivery, config.Core.Delivery)))
 		return nil
 	}
 }

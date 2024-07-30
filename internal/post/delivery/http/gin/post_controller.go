@@ -11,16 +11,18 @@ import (
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	view "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/model"
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
-	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
 )
 
 type PostController struct {
+	userUseCase interfaces.UserUseCase
 	postUseCase interfaces.PostUseCase
 }
 
 func NewPostController(userUseCase interfaces.UserUseCase, postUseCase interfaces.PostUseCase) PostController {
 	return PostController{
-		postUseCase: postUseCase}
+		userUseCase: userUseCase,
+		postUseCase: postUseCase,
+	}
 }
 
 func (postController PostController) GetAllPosts(controllerContext any) {
@@ -76,10 +78,12 @@ func (postController PostController) CreatePost(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
+
 	var createdPostData *post.PostCreate = new(post.PostCreate)
-	user := ctx.Value(constants.User).(user.UserView)
-	createdPostData.UserID = user.ID
-	createdPostData.User = user.Name
+	currentUserID := ctx.Value(constants.ID).(string)
+	user := postController.userUseCase.GetUserById(ctx, currentUserID)
+	createdPostData.UserID = user.Data.ID
+	createdPostData.User = user.Data.Name
 	err := ginContext.ShouldBindJSON(&createdPostData)
 	if err != nil {
 		ginContext.JSON(http.StatusBadRequest, err.Error())

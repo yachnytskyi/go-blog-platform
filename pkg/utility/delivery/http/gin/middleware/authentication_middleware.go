@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
-	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
 	utility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -36,34 +35,6 @@ func AuthenticationMiddleware(configInstance interfaces.Config, logger interface
 
 		ctx = context.WithValue(ctx, constants.ID, userTokenPayload.Data.UserID)
 		ctx = context.WithValue(ctx, constants.UserRole, userTokenPayload.Data.Role)
-		ginContext.Request = ginContext.Request.WithContext(ctx)
-		ginContext.Next()
-	}
-}
-
-// UserContextMiddleware is a middleware for retrieving user information based on the user ID from the context.
-// This middleware extracts the user ID, fetches the corresponding user details, and stores them in the request context.
-// Note: This middleware should be placed after the AuthenticationMiddleware in the middleware chain to ensure the user ID is available.
-func UserContextMiddleware(logger interfaces.Logger, userUseCase interfaces.UserUseCase) gin.HandlerFunc {
-	return func(ginContext *gin.Context) {
-		ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
-		defer cancel()
-
-		userID, _ := ctx.Value(constants.ID).(string)
-		if userID == "" {
-			httpInternalError := httpError.NewHTTPInternalError(location+"UserContextMiddleware.ctx.Value", constants.IDContextMissing)
-			abortWithStatusJSON(ginContext, logger, httpInternalError, constants.StatusUnauthorized)
-			return
-		}
-
-		fetchedUser := userUseCase.GetUserById(ctx, userID)
-		if validator.IsError(fetchedUser.Error) {
-			abortWithStatusJSON(ginContext, logger, fetchedUser.Error, constants.StatusUnauthorized)
-			return
-		}
-
-		user := user.UserToUserViewMapper(fetchedUser.Data)
-		ctx = context.WithValue(ctx, constants.User, user)
 		ginContext.Request = ginContext.Request.WithContext(ctx)
 		ginContext.Next()
 	}

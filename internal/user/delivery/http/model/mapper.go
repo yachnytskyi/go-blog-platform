@@ -1,73 +1,93 @@
 package model
 
 import (
-	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
+	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
+	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 )
 
-func UsersToUsersViewMapper(users userModel.Users) UsersView {
+func UserCreateViewToUserCreateMapper(userCreateView UserCreateView) user.UserCreate {
+	return user.NewUserCreate(
+		userCreateView.Name,
+		userCreateView.Email,
+		userCreateView.Password,
+		userCreateView.PasswordConfirm,
+	)
+}
+
+func UserUpdateViewToUserUpdateMapper(userUpdateView UserUpdateView) user.UserUpdate {
+	return user.NewUserUpdate(
+		userUpdateView.ID,
+		userUpdateView.Name,
+	)
+}
+
+func UserLoginViewToUserLoginMapper(userLoginView UserLoginView) user.UserLogin {
+	return user.NewUserLogin(
+		userLoginView.Email,
+		userLoginView.Password,
+	)
+}
+
+func UserForgottenPasswordViewToUserForgottenPassword(userForgottenPasswordView UserForgottenPasswordView) user.UserForgottenPassword {
+	return user.NewUserForgottenPassword(
+		userForgottenPasswordView.Email,
+	)
+}
+
+func UserResetPasswordViewToUserResetPassword(userResetPasswordView UserResetPasswordView) user.UserResetPassword {
+	return user.NewUserResetPassword(
+		userResetPasswordView.ResetToken,
+		userResetPasswordView.Password,
+		userResetPasswordView.PasswordConfirm,
+	)
+}
+
+func UsersToUsersViewMapper(users user.Users) UsersView {
 	usersView := make([]UserView, len(users.Users))
 	for index, user := range users.Users {
 		usersView[index] = UserToUserViewMapper(user)
 	}
 
-	return UsersView{
-		PaginationResponse: http.PaginationResponse{
-			CurrentPage: users.PaginationResponse.Page,
-			TotalPages:  users.PaginationResponse.TotalPages,
-			PagesLeft:   users.PaginationResponse.PagesLeft,
-			TotalItems:  users.PaginationResponse.TotalItems,
-			ItemsLeft:   users.PaginationResponse.ItemsLeft,
-			Limit:       users.PaginationResponse.Limit,
-			OrderBy:     users.PaginationResponse.OrderBy,
-		},
-		UsersView: usersView,
-	}
+	return NewUsersView(usersView, model.NewHTTPPaginationResponse(
+		users.PaginationResponse.Page,
+		users.PaginationResponse.TotalPages,
+		users.PaginationResponse.PagesLeft,
+		users.PaginationResponse.ItemsLeft,
+		users.PaginationResponse.TotalItems,
+		users.PaginationResponse.Limit,
+		users.PaginationResponse.OrderBy,
+		users.PaginationResponse.SortOrder,
+		users.PaginationResponse.PageLinks,
+	))
 }
 
-func UserToUserViewMapper(user userModel.User) UserView {
-	return UserView{
-		UserID:    user.UserID,
-		Name:      user.Name,
-		Email:     user.Email,
-		Role:      user.Role,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
-	}
+func UserToUserViewMapper(user user.User) UserView {
+	return NewUserView(
+		user.ID,
+		user.CreatedAt,
+		user.UpdatedAt,
+		user.Name,
+		user.Email,
+		user.Role,
+	)
 }
 
-func UserCreateViewToUserCreateMapper(user UserCreateView) userModel.UserCreate {
-	return userModel.UserCreate{
-		Name:            user.Name,
-		Email:           user.Email,
-		Password:        user.Password,
-		PasswordConfirm: user.PasswordConfirm,
-	}
+func UserLoginToUserLoginViewMapper(userLogin user.UserLogin) UserLoginView {
+	return NewUserLoginView(
+		userLogin.Email,
+		userLogin.Password,
+	)
 }
 
-func UserUpdateViewToUserUpdateMapper(user UserUpdateView) userModel.UserUpdate {
-	return userModel.UserUpdate{
-		Name:      user.Name,
-		UpdatedAt: user.UpdatedAt,
-	}
+func UserTokenToUserTokenViewMapper(userToken user.UserToken) UserTokenView {
+	return NewUserTokenView(
+		userToken.AccessToken,
+		userToken.RefreshToken,
+	)
 }
 
-func UserLoginViewToUserLoginMapper(user UserLoginView) userModel.UserLogin {
-	return userModel.UserLogin{
-		Email:    user.Email,
-		Password: user.Password,
-	}
-}
-
-func UserForgottenPasswordViewToUserForgottenPassword(user UserForgottenPasswordView) userModel.UserForgottenPassword {
-	return userModel.UserForgottenPassword{
-		Email: user.Email,
-	}
-}
-
-func UserResetPasswordViewToUserResetPassword(user UserResetPasswordView) userModel.UserResetPassword {
-	return userModel.UserResetPassword{
-		Password:        user.Password,
-		PasswordConfirm: user.PasswordConfirm,
-	}
+func UserForgottenPasswordToUserForgottenPasswordViewMapper(userForgottenPassword user.UserForgottenPassword) UserForgottenPasswordView {
+	return NewUserForgottenPasswordView(
+		userForgottenPassword.Email,
+	)
 }

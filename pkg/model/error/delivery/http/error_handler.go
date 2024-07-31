@@ -1,23 +1,30 @@
 package http
 
 import (
-	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
-	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
 
-func HandleError(err error) httpModel.JsonResponse {
+func HandleError(err error) error {
 	switch errorType := err.(type) {
 	case domainError.ValidationError:
-		return httpModel.NewJsonResponseOnFailure(ValidationErrorToHttpValidationErrorViewMapper(errorType))
+		return ValidationErrorToHTTPValidationErrorMapper(errorType)
 	case domainError.ValidationErrors:
-		httpValidationErrors := ValidationErrorsToHttpValidationErrorsViewMapper(errorType)
-		return httpModel.NewJsonResponseOnFailure(httpValidationErrors.HttpValidationErrorsView)
-	case domainError.ErrorMessage:
-		return httpModel.NewJsonResponseOnFailure(ErrorMessageToHttpErrorMessageViewMapper(errorType))
+		return ValidationErrorsToHTTPValidationErrorsMapper(errorType)
+	case domainError.AuthorizationError:
+		return AuthorizationErrorToHTTPAuthorizationErrorMapper(errorType)
+	case domainError.ItemNotFoundError:
+		return ItemNotFoundErrorToHTTPItemNotFoundErrorMapper(errorType)
+	case domainError.InvalidTokenError:
+		return InvalidTokenErrorToHTTPIvalidTokenErrorMapper(errorType)
+	case domainError.TimeExpiredError:
+		return TimeExpiredErrorToHTTPTimeExpiredErrorMapper(errorType)
 	case domainError.PaginationError:
-		return httpModel.NewJsonResponseOnFailure(PaginationErrorToHttpPaginationErrorView(errorType))
+		return PaginationErrorToHTTPPaginationErrorMapper(errorType)
+	case HTTPInternalError:
+		errorType.Notification = constants.InternalErrorNotification
+		return errorType
 	default:
-		return httpModel.NewJsonResponseOnFailure(NewHttpErrorMessage(constant.InternalErrorNotification))
+		return errorType
 	}
 }

@@ -2,287 +2,317 @@ package gin
 
 import (
 	"context"
-	"net/http"
-	"strings"
-	"time"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
-	"github.com/thanhpk/randstr"
-	config "github.com/yachnytskyi/golang-mongo-grpc/config"
-	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
-	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
-
-	httpGinCookie "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin/utility/cookie"
-	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
-	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
-	commonModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
-	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
+	utility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin/utility/cookie"
+	view "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
+	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
-	commonUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
+	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/common"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
+const (
+	location = "internal.user.delivery.http.gin."
+	path     = "/"
+)
+
 type UserController struct {
-	userUseCase user.UserUseCase
+	Config      interfaces.Config
+	Logger      interfaces.Logger
+	UserUseCase interfaces.UserUseCase
 }
 
-func NewUserController(userUseCase user.UserUseCase) UserController {
-	return UserController{userUseCase: userUseCase}
+func NewUserController(config interfaces.Config, logger interfaces.Logger, userUseCase interfaces.UserUseCase) UserController {
+	return UserController{
+		Config:      config,
+		Logger:      logger,
+		UserUseCase: userUseCase,
+	}
 }
 
-func (userController UserController) GetAllUsers(controllerContext interface{}) {
+func (userController UserController) GetAllUsers(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
-	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
-	page := ginContext.DefaultQuery("page", constant.DefaultPage)
-	limit := ginContext.DefaultQuery("limit", constant.DefaultLimit)
-	orderBy := ginContext.DefaultQuery("order-by", "")
-	convertedPage := commonModel.GetPage(page)
-	convertedLimit := commonModel.GetLimit(limit)
-	paginationQuery := commonModel.NewPaginationQuery(convertedPage, convertedLimit, orderBy)
-	fetchedUsers := userController.userUseCase.GetAllUsers(ctx, paginationQuery)
-	if validator.IsErrorNotNil(fetchedUsers.Error) {
-		jsonResponse := httpError.HandleError(fetchedUsers.Error)
-		httpModel.SetStatus(&jsonResponse)
-		ginContext.JSON(http.StatusBadRequest, jsonResponse)
+
+	paginationQuery := common.ParsePaginationQuery(ginContext)
+	fetchedUsers := userController.UserUseCase.GetAllUsers(ctx, paginationQuery)
+	if validator.IsError(fetchedUsers.Error) {
+		ginContext.JSON(constants.StatusBadRequest, model.NewJSONResponseOnFailure(httpError.HandleError(fetchedUsers.Error)))
 		return
 	}
 
-	jsonResponse := httpModel.NewJsonResponseOnSuccess(userViewModel.UsersToUsersViewMapper(fetchedUsers.Data))
-	httpModel.SetStatus(&jsonResponse)
-	ginContext.JSON(http.StatusOK, jsonResponse)
+	ginContext.JSON(
+		constants.StatusOk, model.NewJSONResponseOnSuccess(view.UsersToUsersViewMapper(fetchedUsers.Data)))
 }
 
-func (userController UserController) GetCurrentUser(controllerContext interface{}) {
+func (userController UserController) GetCurrentUser(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
-	currentUser := ginContext.MustGet("user").(userViewModel.UserView)
-	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": currentUser}})
-}
-
-func (userController UserController) GetUserById(controllerContext interface{}) {
-	ginContext := controllerContext.(*gin.Context)
-	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
-	userID := ginContext.Param("userID")
-	fetchedUser, err := userController.userUseCase.GetUserById(ctx, userID)
-	if validator.IsErrorNotNil(err) {
-		if strings.Contains(err.Error(), "Id exists") {
-			ginContext.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": err.Error()})
-			return
-		}
-		ginContext.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
+
+	currentUserID := ctx.Value(constants.ID).(string)
+	currentUser := userController.UserUseCase.GetUserById(ctx, currentUserID)
+	if validator.IsError(currentUser.Error) {
+		ginContext.JSON(constants.StatusBadRequest, model.NewJSONResponseOnFailure(httpError.HandleError(currentUser.Error)))
 		return
 	}
 
-	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": userViewModel.UserToUserViewMapper(fetchedUser)}})
+	ginContext.JSON(constants.StatusOk, model.NewJSONResponseOnSuccess(view.UserToUserViewMapper(currentUser.Data)))
 }
 
-func (userController UserController) Register(controllerContext interface{}) {
+func (userController UserController) GetUserById(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
-	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
-	var createdUserViewData userViewModel.UserCreateView
-	err := ginContext.ShouldBindJSON(&createdUserViewData)
-	if validator.IsErrorNotNil(err) {
-		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+
+	userID := ginContext.Param(constants.ItemIdParam)
+	fetchedUser := userController.UserUseCase.GetUserById(ctx, userID)
+	if validator.IsError(fetchedUser.Error) {
+		ginContext.JSON(constants.StatusBadRequest, model.NewJSONResponseOnFailure(httpError.HandleError(fetchedUser.Error)))
 		return
 	}
 
-	userCreate := userViewModel.UserCreateViewToUserCreateMapper(createdUserViewData)
-	createdUser := userController.userUseCase.Register(ctx, userCreate)
-	if validator.IsErrorNotNil(createdUser.Error) {
-		jsonResponse := httpError.HandleError(createdUser.Error)
-		httpModel.SetStatus(&jsonResponse)
-		ginContext.JSON(http.StatusBadRequest, jsonResponse)
-		return
-	}
-
-	welcomeMessage := userViewModel.NewWelcomeMessageView(constant.SendingEmailNotification + createdUser.Data.Email)
-	jsonResponse := httpModel.NewJsonResponseOnSuccess(welcomeMessage)
-	httpModel.SetStatus(&jsonResponse)
-	ginContext.JSON(http.StatusCreated, jsonResponse)
+	ginContext.JSON(constants.StatusOk, model.NewJSONResponseOnSuccess(view.UserToUserViewMapper(fetchedUser.Data)))
 }
 
-func (userController UserController) UpdateUserById(controllerContext interface{}) {
+func (userController UserController) Register(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
-	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
-	currentUserID := ginContext.MustGet("userID").(string)
 
-	var updatedUserViewData userViewModel.UserUpdateView
-	err := ginContext.ShouldBindJSON(&updatedUserViewData)
-	if validator.IsErrorNotNil(err) {
-		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+	var userCreateViewData view.UserCreateView
+	shouldBindJSON := ginContext.ShouldBindJSON(&userCreateViewData)
+	if validator.IsError(shouldBindJSON) {
+		common.HandleJSONBindingError(ginContext, userController.Logger, location+"Register", shouldBindJSON)
 		return
 	}
 
-	updatedUserData := userViewModel.UserUpdateViewToUserUpdateMapper(updatedUserViewData)
-	updatedUser, updatedUserError := userController.userUseCase.UpdateUserById(ctx, currentUserID, updatedUserData)
-	if validator.IsErrorNotNil(updatedUserError) {
-		jsonResponse := httpError.HandleError(updatedUserError)
-		httpModel.SetStatus(&jsonResponse)
-		ginContext.JSON(http.StatusBadRequest, jsonResponse)
+	userCreateData := view.UserCreateViewToUserCreateMapper(userCreateViewData)
+	createdUser := userController.UserUseCase.Register(ctx, userCreateData)
+	if validator.IsError(createdUser.Error) {
+		ginContext.JSON(constants.StatusBadRequest, model.NewJSONResponseOnFailure(httpError.HandleError(createdUser.Error)))
 		return
 	}
-	jsonResponse := httpModel.NewJsonResponseOnSuccess(userViewModel.UserToUserViewMapper(updatedUser))
-	httpModel.SetStatus(&jsonResponse)
-	ginContext.JSON(http.StatusCreated, jsonResponse)
+
+	ginContext.JSON(
+		constants.StatusCreated,
+		model.NewJSONResponseOnSuccess(view.NewWelcomeMessageView(fmt.Sprintf(constants.SendingEmailNotification, createdUser.Data.Email))),
+	)
 }
 
-func (userController UserController) Delete(controllerContext interface{}) {
+func (userController UserController) UpdateCurrentUser(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
-	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
-	currentUserID := ginContext.MustGet("userID").(string)
-	err := userController.userUseCase.DeleteUser(ctx, currentUserID)
-	if validator.IsErrorNotNil(err) {
-		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+
+	currentUserID := ctx.Value(constants.ID).(string)
+	var userUpdateViewData view.UserUpdateView
+	shouldBindJSON := ginContext.ShouldBindJSON(&userUpdateViewData)
+	if validator.IsError(shouldBindJSON) {
+		common.HandleJSONBindingError(ginContext, userController.Logger, location+"UpdateCurrentUser", shouldBindJSON)
+		return
 	}
-	ginContext.JSON(http.StatusNoContent, nil)
+
+	userUpdateData := view.UserUpdateViewToUserUpdateMapper(userUpdateViewData)
+	userUpdateData.ID = currentUserID
+	updatedUser := userController.UserUseCase.UpdateCurrentUser(ctx, userUpdateData)
+	if validator.IsError(updatedUser.Error) {
+		ginContext.JSON(constants.StatusBadRequest, model.NewJSONResponseOnFailure(httpError.HandleError(updatedUser.Error)))
+		return
+	}
+
+	ginContext.JSON(constants.StatusOk, model.NewJSONResponseOnSuccess(view.UserToUserViewMapper(updatedUser.Data)))
 }
 
-func (userController UserController) Login(controllerContext interface{}) {
+func (userController UserController) DeleteCurrentUser(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
-	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
-	var userLoginViewData userViewModel.UserLoginView
-	err := ginContext.ShouldBindJSON(&userLoginViewData)
-	if validator.IsErrorNotNil(err) {
-		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+
+	currentUserID := ctx.Value(constants.ID).(string)
+	deletedUserError := userController.UserUseCase.DeleteUserById(ctx, currentUserID)
+	if validator.IsError(deletedUserError) {
+		ginContext.JSON(constants.StatusBadRequest, model.NewJSONResponseOnFailure(httpError.HandleError(deletedUserError)))
 		return
 	}
 
-	userLoginData := userViewModel.UserLoginViewToUserLoginMapper(userLoginViewData)
-	userID, loginError := userController.userUseCase.Login(ctx, userLoginData)
-	if validator.IsErrorNotNil(loginError) {
-		jsonResponse := httpError.HandleError(loginError)
-		httpModel.SetStatus(&jsonResponse)
-		ginContext.JSON(http.StatusBadRequest, jsonResponse)
-		return
-	}
-
-	applicationConfig := config.AppConfig
-	accessToken, createTokenError := httpUtility.CreateToken(applicationConfig.AccessToken.ExpiredIn, userID, applicationConfig.AccessToken.PrivateKey)
-	if validator.IsErrorNotNil(createTokenError) {
-		jsonResponse := httpError.HandleError(createTokenError)
-		httpModel.SetStatus(&jsonResponse)
-		ginContext.JSON(http.StatusBadRequest, jsonResponse)
-		return
-	}
-	refreshToken, createTokenError := httpUtility.CreateToken(applicationConfig.RefreshToken.ExpiredIn, userID, applicationConfig.RefreshToken.PrivateKey)
-	if validator.IsErrorNotNil(createTokenError) {
-		jsonResponse := httpError.HandleError(createTokenError)
-		httpModel.SetStatus(&jsonResponse)
-		ginContext.JSON(http.StatusBadRequest, jsonResponse)
-		return
-	}
-	ginContext.SetCookie(constant.AccessTokenValue, accessToken, applicationConfig.AccessToken.MaxAge, "/", constant.TokenDomainValue, false, true)
-	ginContext.SetCookie(constant.RefreshTokenValue, refreshToken, applicationConfig.RefreshToken.MaxAge, "/", constant.TokenDomainValue, false, true)
-	ginContext.SetCookie(constant.LoggedInValue, "true", applicationConfig.AccessToken.MaxAge, "/", constant.TokenDomainValue, false, false)
-	ginContext.JSON(http.StatusOK, gin.H{"status": "success", constant.AccessTokenValue: accessToken})
+	utility.CleanCookies(ginContext, userController.Config, path)
+	ginContext.JSON(constants.StatusNoContent, nil)
 }
 
-func (userController UserController) RefreshAccessToken(controllerContext interface{}) {
+func (userController UserController) Login(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
-	message := "could not refresh access token"
-	currentUser := ginContext.MustGet("user").(userViewModel.UserView)
-
-	if validator.IsValueNil(currentUser) {
-		ginContext.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": message})
-		return
-	}
-	cookie, err := ginContext.Cookie(constant.RefreshTokenValue)
-
-	if validator.IsErrorNotNil(err) {
-		ginContext.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": message})
-		return
-	}
-
-	applicationConfig := config.AppConfig
-	userID, err := httpUtility.ValidateToken(cookie, applicationConfig.RefreshToken.PublicKey)
-	if validator.IsErrorNotNil(err) {
-		ginContext.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": err.Error()})
-		return
-	}
-
-	if validator.IsErrorNotNil(err) {
-		ginContext.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": "the user is belonged to this token no longer exists "})
-	}
-
-	accessToken, err := httpUtility.CreateToken(applicationConfig.AccessToken.ExpiredIn, userID, applicationConfig.AccessToken.PrivateKey)
-
-	if validator.IsErrorNotNil(err) {
-		ginContext.AbortWithStatusJSON(http.StatusForbidden, gin.H{"status": "fail", "message": err.Error()})
-		return
-	}
-
-	ginContext.SetCookie(constant.AccessTokenValue, accessToken, applicationConfig.AccessToken.MaxAge, "/", constant.TokenDomainValue, false, true)
-	ginContext.SetCookie(constant.LoggedInValue, "true", applicationConfig.AccessToken.MaxAge, "/", constant.TokenDomainValue, false, false)
-	ginContext.JSON(http.StatusOK, gin.H{"status": "success", constant.AccessTokenValue: accessToken})
-}
-
-func (userController UserController) ForgottenPassword(controllerContext interface{}) {
-	ginContext := controllerContext.(*gin.Context)
-	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
-	var userViewEmail userViewModel.UserForgottenPasswordView
 
-	err := ginContext.ShouldBindJSON(&userViewEmail)
-	if validator.IsErrorNotNil(err) {
-		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+	var userLoginViewData view.UserLoginView
+	shouldBindJSON := ginContext.ShouldBindJSON(&userLoginViewData)
+	if validator.IsError(shouldBindJSON) {
+		common.HandleJSONBindingError(ginContext, userController.Logger, location+"Login", shouldBindJSON)
 		return
 	}
 
-	message := constant.SendingEmailWithIntstructionsNotifications
-	fetchedUser, err := userController.userUseCase.GetUserByEmail(ctx, userViewEmail.Email)
-	if validator.IsErrorNotNil(err) {
-		ginContext.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": err.Error()})
+	userLoginData := view.UserLoginViewToUserLoginMapper(userLoginViewData)
+	userToken := userController.UserUseCase.Login(ctx, userLoginData)
+	if validator.IsError(userToken.Error) {
+		ginContext.JSON(constants.StatusBadRequest, model.NewJSONResponseOnFailure(httpError.HandleError(userToken.Error)))
 		return
 	}
 
-	// Generate verification code.
-	resetToken := randstr.String(20)
-	passwordResetToken := commonUtility.Encode(resetToken)
-	passwordResetAt := time.Now().Add(time.Minute * 15)
-
-	// Update the user.
-	err = userController.userUseCase.UpdatePasswordResetTokenUserByEmail(ctx, fetchedUser.Email, "passwordResetToken", passwordResetToken, "passwordResetAt", passwordResetAt)
-	if validator.IsErrorNotNil(err) {
-		ginContext.JSON(http.StatusBadGateway, gin.H{"status": "success", "message": err.Error()})
-		return
-	}
-	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
+	userTokenView := view.UserTokenToUserTokenViewMapper(userToken.Data)
+	setAccessLoginCookies(ginContext, userController.Config, userTokenView.AccessToken, userTokenView.RefreshToken)
+	ginContext.JSON(constants.StatusOk, model.NewJSONResponseOnSuccess(userTokenView))
 }
 
-func (userController UserController) ResetUserPassword(controllerContext interface{}) {
+func (userController UserController) RefreshAccessToken(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
-	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
-	resetToken := ginContext.Params.ByName("resetToken")
-	var userResetPasswordView userViewModel.UserResetPasswordView
 
-	err := ginContext.ShouldBindJSON(&userResetPasswordView)
-	if validator.IsErrorNotNil(err) {
-		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+	currentUserID := ctx.Value(constants.ID).(string)
+	currentUser := userController.UserUseCase.GetUserById(ctx, currentUserID)
+	if validator.IsError(currentUser.Error) {
+		ginContext.JSON(constants.StatusBadRequest, model.NewJSONResponseOnFailure(httpError.HandleError(currentUser.Error)))
 		return
 	}
 
-	passwordResetToken := commonUtility.Encode(resetToken)
-
-	// Update the user.
-	err = userController.userUseCase.ResetUserPassword(ctx, "passwordResetToken", passwordResetToken, "passwordResetAt", "password", userResetPasswordView.Password)
-
-	if validator.IsErrorNotNil(err) {
-		ginContext.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+	userToken := userController.UserUseCase.RefreshAccessToken(ctx, currentUser.Data)
+	if validator.IsError(userToken.Error) {
+		ginContext.JSON(constants.StatusBadRequest, model.NewJSONResponseOnFailure(httpError.HandleError(userToken.Error)))
+		return
 	}
 
-	httpGinCookie.CleanCookies(ginContext)
-	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "message": "Congratulations! Your password was updated successfully! Please sign in again."})
-
+	userTokenView := view.UserTokenToUserTokenViewMapper(userToken.Data)
+	setRefreshTokenCookies(ginContext, userController.Config, userTokenView.AccessToken, userTokenView.RefreshToken)
+	ginContext.JSON(constants.StatusOk, model.NewJSONResponseOnSuccess(userTokenView))
 }
 
-func (userController UserController) Logout(controllerContext interface{}) {
+func (userController UserController) Logout(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
-	httpGinCookie.CleanCookies(ginContext)
-	ginContext.JSON(http.StatusOK, gin.H{"status": "success"})
+	utility.CleanCookies(ginContext, userController.Config, path)
+	ginContext.JSON(constants.StatusOk, model.NewJSONResponseOnSuccess(view.NewWelcomeMessageView(constants.LogoutNotificationMessage)))
+}
+
+func (userController UserController) ForgottenPassword(controllerContext any) {
+	ginContext := controllerContext.(*gin.Context)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
+	defer cancel()
+
+	var userForgottenPasswordView view.UserForgottenPasswordView
+	shouldBindJSON := ginContext.ShouldBindJSON(&userForgottenPasswordView)
+	if validator.IsError(shouldBindJSON) {
+		common.HandleJSONBindingError(ginContext, userController.Logger, location+"ForgottenPassword", shouldBindJSON)
+		return
+	}
+
+	userForgottenPassword := view.UserForgottenPasswordViewToUserForgottenPassword(userForgottenPasswordView)
+	updatedUserError := userController.UserUseCase.ForgottenPassword(ctx, userForgottenPassword)
+	if validator.IsError(updatedUserError) {
+		ginContext.JSON(constants.StatusBadRequest, model.NewJSONResponseOnFailure(httpError.HandleError(updatedUserError)))
+		return
+	}
+
+	ginContext.JSON(
+		constants.StatusCreated,
+		model.NewJSONResponseOnSuccess(view.NewWelcomeMessageView(constants.SendingEmailWithInstructionsNotification+" "+userForgottenPassword.Email)))
+}
+
+func (userController UserController) ResetUserPassword(controllerContext any) {
+	ginContext := controllerContext.(*gin.Context)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
+	defer cancel()
+
+	var userResetPasswordView view.UserResetPasswordView
+	shouldBindJSON := ginContext.ShouldBindJSON(&userResetPasswordView)
+	if validator.IsError(shouldBindJSON) {
+		common.HandleJSONBindingError(ginContext, userController.Logger, location+"ResetUserPassword", shouldBindJSON)
+		return
+	}
+
+	resetToken := ginContext.Param(constants.ItemIdParam)
+	userResetPasswordView.ResetToken = resetToken
+	userResetPassword := view.UserResetPasswordViewToUserResetPassword(userResetPasswordView)
+	resetUserPasswordError := userController.UserUseCase.ResetUserPassword(ctx, userResetPassword)
+	if validator.IsError(resetUserPasswordError) {
+		ginContext.JSON(constants.StatusBadRequest, model.NewJSONResponseOnFailure(httpError.HandleError(resetUserPasswordError)))
+		return
+	}
+
+	utility.CleanCookies(ginContext, userController.Config, path)
+	ginContext.JSON(constants.StatusCreated, model.NewJSONResponseOnSuccess(view.NewWelcomeMessageView(constants.PasswordResetSuccessNotification)))
+}
+
+func setAccessLoginCookies(ginContext *gin.Context, configInstance interfaces.Config, accessToken, refreshToken string) {
+	config := configInstance.GetConfig()
+
+	ginContext.SetCookie(
+		constants.AccessTokenValue,
+		accessToken,
+		config.AccessToken.MaxAge,
+		path,
+		constants.TokenDomainValue,
+		config.Security.CookieSecure,
+		config.Security.HTTPOnly,
+	)
+
+	ginContext.SetCookie(
+		constants.RefreshTokenValue,
+		refreshToken,
+		config.RefreshToken.MaxAge,
+		path,
+		constants.TokenDomainValue,
+		config.Security.CookieSecure,
+		config.Security.HTTPOnly,
+	)
+
+	ginContext.SetCookie(
+		constants.LoggedInValue,
+		constants.True,
+		config.AccessToken.MaxAge,
+		path,
+		constants.TokenDomainValue,
+		config.Security.CookieSecure,
+		config.Security.HTTPOnly,
+	)
+}
+
+func setRefreshTokenCookies(ginContext *gin.Context, configInstance interfaces.Config, accessToken, refreshToken string) {
+	config := configInstance.GetConfig()
+
+	ginContext.SetCookie(
+		constants.AccessTokenValue,
+		accessToken,
+		config.AccessToken.MaxAge,
+		path,
+		constants.TokenDomainValue,
+		config.Security.CookieSecure,
+		config.Security.HTTPOnly,
+	)
+
+	if refreshToken != "" {
+		ginContext.SetCookie(
+			constants.RefreshTokenValue,
+			refreshToken,
+			config.RefreshToken.MaxAge,
+			path,
+			constants.TokenDomainValue,
+			config.Security.CookieSecure,
+			config.Security.HTTPOnly,
+		)
+	}
+
+	ginContext.SetCookie(
+		constants.LoggedInValue,
+		constants.True,
+		config.AccessToken.MaxAge,
+		path,
+		constants.TokenDomainValue,
+		config.Security.CookieSecure,
+		config.Security.HTTPOnly,
+	)
 }

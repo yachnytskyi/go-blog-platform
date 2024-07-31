@@ -6,27 +6,32 @@ import (
 	"os/signal"
 	"syscall"
 
-	config "github.com/yachnytskyi/golang-mongo-grpc/config"
-	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	dependency "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency"
-	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
+	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 )
 
-func init() {
-	config.LoadConfig()
-}
-
 func main() {
-	ctx, cancel := context.WithTimeout(context.Background(), constant.DefaultContextTimer)
-	defer cancel()
-	container := dependency.CreateApplication(ctx)
+	// Create a context with a timeout for the entire application lifecycle.
+	ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultContextTimer)
+	defer cancel() // Ensure the context is canceled to release resources.
+
+	// Initialize the application and get the container with all dependencies.
+	container := dependency.NewApplication(ctx)
+
+	// Launch the server in a separate goroutine.
 	go func() {
-		container.DeliveryFactory.LaunchServer(ctx, container)
+		// Launch the server using the delivery from the container.
+		container.Delivery.LaunchServer(ctx, container.Repository)
 	}()
+
+	// Set up a channel to listen for OS signals (e.g., SIGINT, SIGTERM).
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+
+	// Block until a signal is received.
 	<-quit
 
-	// Perform Graceful Shutdown
-	applicationModel.GracefulShutdown(ctx, container)
+	// Perform a graceful shutdown when a signal is received.
+	model.GracefulShutdown(ctx, container.Logger, container.Repository, container.Delivery)
 }

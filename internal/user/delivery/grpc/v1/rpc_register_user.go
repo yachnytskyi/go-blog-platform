@@ -4,13 +4,12 @@ import (
 	"context"
 
 	pb "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1/model/pb"
-	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
-
+	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
 
 func (userGrpcServer *UserGrpcServer) Register(ctx context.Context, request *pb.UserCreate) (*pb.GenericResponse, error) {
-	user := userModel.UserCreate{
+	user := user.UserCreate{
 		Name:            request.GetName(),
 		Email:           request.GetEmail(),
 		Password:        request.GetPassword(),
@@ -23,10 +22,10 @@ func (userGrpcServer *UserGrpcServer) Register(ctx context.Context, request *pb.
 		switch errorType := createdUser.Error.(type) {
 		case *domainError.ValidationError:
 			return nil, errorType
-		case *domainError.ErrorMessage:
+		case *domainError.InternalError:
 			return nil, errorType
 		default:
-			var defaultError *domainError.ErrorMessage = new(domainError.ErrorMessage)
+			var defaultError *domainError.InternalError = new(domainError.InternalError)
 			defaultError.Notification = "reason:" + " something went wrong, please repeat later"
 			return nil, errorType
 		}
@@ -38,5 +37,6 @@ func (userGrpcServer *UserGrpcServer) Register(ctx context.Context, request *pb.
 		Status:  "success",
 		Message: message,
 	}
+
 	return response, nil
 }

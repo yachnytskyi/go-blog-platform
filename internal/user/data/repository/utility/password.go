@@ -1,15 +1,21 @@
 package utility
 
 import (
-	"fmt"
-
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
+	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
+	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func HashPassword(password string) (string, error) {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return "", fmt.Errorf("could not hash the password %w", err)
+// HashPassword generates a hashed password from a plain text password.
+func HashPassword(logger interfaces.Logger, location, password string) common.Result[string] {
+	hashedPassword, generateFromPasswordError := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if validator.IsError(generateFromPasswordError) {
+		internalError := domainError.NewInternalError(location+".HashPassword.GenerateFromPassword", generateFromPasswordError.Error())
+		logger.Error(internalError)
+		return common.NewResultOnFailure[string](internalError)
 	}
-	return string(hashedPassword), nil
+
+	return common.NewResultOnSuccess(string(hashedPassword))
 }

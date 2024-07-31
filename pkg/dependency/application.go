@@ -3,33 +3,43 @@ package dependency
 import (
 	"context"
 
-	repository "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/data/repository"
-	delivery "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/delivery"
-	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/domain"
-	applicationModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
+	factory "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory"
+	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 )
 
-func CreateApplication(ctx context.Context) *applicationModel.Container {
-	container := &applicationModel.Container{}
-	serverRouters := applicationModel.ServerRouters{}
+// NewApplication initializes the application by setting up the container,
+// injecting dependencies, and configuring the server.
+func NewApplication(ctx context.Context) model.Container {
+	config := factory.NewConfig(constants.Config)
+	logger := factory.NewLogger(config)
+	email := factory.NewEmail(config, logger)
 
-	// Repositories.
-	repository.InjectRepository(ctx, container)
-	db := container.RepositoryFactory.NewRepository(ctx)
-	userRepository := container.RepositoryFactory.NewUserRepository(db)
-	postRepository := container.RepositoryFactory.NewPostRepository(db)
+	// Create repository factory and repositories
+	repositoryFactory := factory.NewRepositoryFactory(config, logger)
+	createRepository := repositoryFactory.CreateRepository(ctx)
+	userRepository := repositoryFactory.NewRepository(createRepository, (*interfaces.UserRepository)(nil))
+	postRepository := repositoryFactory.NewRepository(createRepository, (*interfaces.PostRepository)(nil))
 
-	// Domains.
-	domain.InjectDomain(ctx, container)
-	serverRouters.UserUseCase = container.DomainFactory.NewUserUseCase(userRepository)
-	postDomain := container.DomainFactory.NewPostUseCase(postRepository)
+	// Create use case factory and use cases.
+	usecaseFactory := factory.NewUseCaseFactory(ctx, config, logger, email, repositoryFactory)
+	userUseCase := usecaseFactory.NewUseCase(email, userRepository).(interfaces.UserUseCase)
+	postUseCase := usecaseFactory.NewUseCase(email, postRepository)
 
-	// Deliveries.
-	delivery.InjectDelivery(ctx, container)
-	userController := container.DeliveryFactory.NewUserController(serverRouters.UserUseCase)
-	postController := container.DeliveryFactory.NewPostController(postDomain)
-	serverRouters.UserRouter = container.DeliveryFactory.NewUserRouter(userController)
-	serverRouters.PostRouter = container.DeliveryFactory.NewPostRouter(postController)
-	container.DeliveryFactory.InitializeServer(serverRouters)
+	// Create delivery factory and controllers.
+	deliveryFactory := factory.NewDeliveryFactory(ctx, config, logger, repositoryFactory)
+	userController := deliveryFactory.NewController(userUseCase, nil)
+	postController := deliveryFactory.NewController(userUseCase, postUseCase)
+
+	// Create routers.
+	serverRouters := interfaces.NewServerRouters(
+		deliveryFactory.NewRouter(userController),
+		deliveryFactory.NewRouter(postController),
+		// Add other routers as needed.
+	)
+
+	deliveryFactory.CreateDelivery(serverRouters)
+	container := model.NewContainer(logger, repositoryFactory, deliveryFactory)
 	return container
 }

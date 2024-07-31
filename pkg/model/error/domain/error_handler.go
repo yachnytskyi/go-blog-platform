@@ -1,22 +1,26 @@
 package domain
 
 import (
-	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
+	"github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 )
 
 func HandleError(err error) error {
 	switch errorType := err.(type) {
-	case ValidationError:
-		return errorType
 	case ValidationErrors:
 		return errorType
-	case ErrorMessage:
+	case AuthorizationError:
+		errorType.Notification = constants.AuthorizationErrorNotification
 		return errorType
-	case EntityNotFoundError:
-		return NewErrorMessage(constant.EntityNotFoundErrorNotification)
+	case ItemNotFoundError:
+		errorType.Notification = constants.ItemNotFoundErrorNotification
+		return errorType
 	case PaginationError:
+		errorType.Notification = constants.PaginationErrorNotification
+		return errorType
+	case InternalError:
+		errorType.Notification = constants.InternalErrorNotification
 		return errorType
 	default:
-		return NewErrorMessage(constant.InternalErrorNotification)
+		return errorType
 	}
 }

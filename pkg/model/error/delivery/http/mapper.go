@@ -4,36 +4,67 @@ import (
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
 
-func ValidationErrorToHttpValidationErrorViewMapper(validationError domainError.ValidationError) HttpValidationErrorView {
-	return HttpValidationErrorView{
-		Field:        validationError.Field,
-		FieldType:    validationError.FieldType,
-		Notification: validationError.Notification,
-	}
+func ValidationErrorToHTTPValidationErrorMapper(validationError domainError.ValidationError) HTTPValidationError {
+	return NewHTTPValidationError(
+		validationError.Field,
+		validationError.FieldType,
+		validationError.Notification,
+	)
 }
 
-func ValidationErrorsToHttpValidationErrorsViewMapper(validationErrors domainError.ValidationErrors) HttpValidationErrorsView {
-	httpValidationErrorsView := make([]HttpValidationErrorView, 0, len(validationErrors.ValidationErrors))
-	for _, validationError := range validationErrors.ValidationErrors {
-		httpValidationErrorView := HttpValidationErrorView{}
-		httpValidationErrorView.Field = validationError.Field
-		httpValidationErrorView.FieldType = validationError.FieldType
-		httpValidationErrorView.Notification = validationError.Notification
-		httpValidationErrorsView = append(httpValidationErrorsView, httpValidationErrorView)
+func ValidationErrorsToHTTPValidationErrorsMapper(validationErrors domainError.ValidationErrors) HTTPValidationErrors {
+	httpValidationErrors := make([]error, 0, len(validationErrors.Errors))
+	for _, validationError := range validationErrors.Errors {
+		validationError, ok := validationError.(domainError.ValidationError)
+		if ok {
+			httpValidationError := NewHTTPValidationError(
+				validationError.Field,
+				validationError.FieldType,
+				validationError.Notification,
+			)
+			httpValidationErrors = append(httpValidationErrors, httpValidationError)
+		}
 	}
-	return HttpValidationErrorsView{HttpValidationErrorsView: httpValidationErrorsView}
+
+	return NewHTTPValidationErrors(httpValidationErrors)
 }
 
-func ErrorMessageToHttpErrorMessageViewMapper(errorMessage domainError.ErrorMessage) HttpErrorMessageView {
-	return HttpErrorMessageView{
-		Notification: errorMessage.Notification,
-	}
+func AuthorizationErrorToHTTPAuthorizationErrorMapper(authorizationError domainError.AuthorizationError) HTTPAuthorizationError {
+	return NewHTTPAuthorizationError(
+		authorizationError.Location,
+		authorizationError.Notification,
+	)
 }
 
-func PaginationErrorToHttpPaginationErrorView(errorMessage domainError.PaginationError) HttpPaginationErrorView {
-	return HttpPaginationErrorView{
-		CurrentPage:  errorMessage.CurrentPage,
-		TotalPages:   errorMessage.TotalPages,
-		Notification: errorMessage.Notification,
-	}
+func ItemNotFoundErrorToHTTPItemNotFoundErrorMapper(itemNotFoundError domainError.ItemNotFoundError) HTTPItemNotFoundError {
+	return NewHTTPItemNotFoundError(
+		itemNotFoundError.Notification,
+	)
+}
+
+func InvalidTokenErrorToHTTPIvalidTokenErrorMapper(invalidTokenError domainError.InvalidTokenError) HTTPInvalidTokenError {
+	return NewHTTPInvalidTokenError(
+		invalidTokenError.Notification,
+	)
+}
+
+func TimeExpiredErrorToHTTPTimeExpiredErrorMapper(timeExpiredError domainError.TimeExpiredError) HTTPTimeExpiredError {
+	return NewHTTPTimeExpiredError(
+		timeExpiredError.Notification,
+	)
+}
+
+func PaginationErrorToHTTPPaginationErrorMapper(paginationError domainError.PaginationError) HTTPPaginationError {
+	return NewHTTPPaginationError(
+		paginationError.CurrentPage,
+		paginationError.TotalPages,
+		paginationError.Notification,
+	)
+}
+
+func InternalErrorToHTTPInternalErrorMapper(internalError domainError.InternalError) HTTPInternalError {
+	return NewHTTPInternalError(
+		internalError.Location,
+		internalError.Notification,
+	)
 }

@@ -3,25 +3,25 @@ package common
 import (
 	"encoding/base64"
 
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
+	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/logging"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
-const (
-	location string = "common.string."
-)
-
+// Encode encodes the input data to a base64 string.
 func Encode(data string) string {
 	return base64.StdEncoding.EncodeToString([]byte(data))
 }
 
-func Decode(encodedString string) (string, error) {
-	data, decodeStringError := base64.StdEncoding.DecodeString(encodedString)
-	if validator.IsErrorNotNil(decodeStringError) {
-		decodeStringInternalError := domainError.NewInternalError(location+"Decode.DecodeString", decodeStringError.Error())
-		logging.Logger(decodeStringInternalError)
-		return "", decodeStringInternalError
+// Decode decodes a base64 encoded string and returns the original data.
+func Decode(logger interfaces.Logger, location, encodedString string) common.Result[string] {
+	decodedBytes, decodeStringError := base64.StdEncoding.DecodeString(encodedString)
+	if validator.IsError(decodeStringError) {
+		internalError := domainError.NewInternalError(location+".Decode.DecodeString", decodeStringError.Error())
+		logger.Error(internalError)
+		return common.NewResultOnFailure[string](internalError)
 	}
-	return string(data), nil
+
+	return common.NewResultOnSuccess[string](string(decodedBytes))
 }

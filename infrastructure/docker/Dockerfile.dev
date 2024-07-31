@@ -1,0 +1,38 @@
+# Stage 1: Build the Go application.
+FROM golang:alpine AS builder
+
+# Set the Current Working Directory inside the container.
+WORKDIR /app
+
+# Copy go.mod and go.sum files.
+COPY go.mod go.sum ./
+
+# Download all dependencies.
+RUN go mod download
+
+# Copy the source code into the container.
+COPY . .
+
+# Build the Go application.
+RUN go build -o main ./cmd/server/main.go
+
+# Stage 2: Run the Go application.
+FROM golang:alpine
+
+# Set the Current Working Directory inside the container.
+WORKDIR /app
+
+# Install reflex for live reloading.
+RUN go install github.com/cespare/reflex@latest
+
+# Copy the source code from the builder stage.
+COPY --from=builder /app/main .
+
+# Also copy the source code for live reloading.
+COPY . .
+
+# Expose port 8080 to the outside world.
+EXPOSE 8080
+
+# Command to run the executable with reflex.
+CMD ["reflex", "-r", '\\.go$', "-s", "--", "go", "run", "./cmd/server/main.go"]

@@ -2,37 +2,44 @@ package gin
 
 import (
 	"github.com/gin-gonic/gin"
-	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
-	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user"
-	httpGinMiddleware "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/middleware"
+
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
+	middleware "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/middleware"
 )
 
 type PostRouter struct {
-	postController post.PostController
+	Config         interfaces.Config
+	Logger         interfaces.Logger
+	PostController interfaces.PostController
 }
 
-func NewPostRouter(postController post.PostController) PostRouter {
-	return PostRouter{postController: postController}
+func NewPostRouter(config interfaces.Config, logger interfaces.Logger, postController interfaces.PostController) interfaces.Router {
+	return PostRouter{
+		Config:         config,
+		Logger:         logger,
+		PostController: postController,
+	}
 }
 
-func (postRouter PostRouter) PostRouter(routerGroup interface{}, userUseCase user.UserUseCase) {
+func (postRouter PostRouter) Router(routerGroup any) {
 	ginRouterGroup := routerGroup.(*gin.RouterGroup)
-	router := ginRouterGroup.Group("/posts")
+	router := ginRouterGroup.Group(constants.PostsGroupPath)
 	router.GET("/", func(ginContext *gin.Context) {
-		postRouter.postController.GetAllPosts(ginContext)
+		postRouter.PostController.GetAllPosts(ginContext)
 	})
 	router.GET("/:postID", func(ginContext *gin.Context) {
-		postRouter.postController.GetPostById(ginContext)
+		postRouter.PostController.GetPostById(ginContext)
 	})
 
-	router.Use(httpGinMiddleware.DeserializeUser(userUseCase))
+	router.Use(middleware.AuthenticationMiddleware(postRouter.Config, postRouter.Logger))
 	router.POST("/", func(ginContext *gin.Context) {
-		postRouter.postController.CreatePost(ginContext)
+		postRouter.PostController.CreatePost(ginContext)
 	})
 	router.PUT("/:postID", func(ginContext *gin.Context) {
-		postRouter.postController.UpdatePostById(ginContext)
+		postRouter.PostController.UpdatePostById(ginContext)
 	})
 	router.DELETE("/:postID", func(ginContext *gin.Context) {
-		postRouter.postController.DeletePostByID(ginContext)
+		postRouter.PostController.DeletePostByID(ginContext)
 	})
 }

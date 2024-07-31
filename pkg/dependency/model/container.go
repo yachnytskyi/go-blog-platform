@@ -1,53 +1,20 @@
 package model
 
 import (
-	"context"
-
-	"github.com/yachnytskyi/golang-mongo-grpc/internal/post"
-	"github.com/yachnytskyi/golang-mongo-grpc/internal/user"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 )
 
+// Container holds the factory interfaces required to initialize and manage dependencies.
 type Container struct {
-	RepositoryFactory RepositoryFactory
-	DomainFactory     DomainFactory
-	DeliveryFactory   DeliveryFactory
-}
+	Logger     interfaces.Logger     // Interface for creating a logger instance.
+	Repository interfaces.Repository // Interface for creating repository instances.
+	Delivery   interfaces.Delivery   // Interface for creating delivery components and initializing the server.
+} // Add other dependencies as needed.
 
-type ServerRouters struct {
-	UserUseCase user.UserUseCase
-	UserRouter  user.UserRouter
-	PostRouter  post.PostRouter
-}
-
-func NewContainer(repositoryFactory RepositoryFactory, domainFactory DomainFactory, deliveryFactory DeliveryFactory) *Container {
-	return &Container{
-		RepositoryFactory: repositoryFactory,
-		DomainFactory:     domainFactory,
-		DeliveryFactory:   deliveryFactory,
-	}
-}
-
-// Define a DatabaseFactory interface to create different database instances.
-type RepositoryFactory interface {
-	NewRepository(ctx context.Context) interface{}
-	CloseRepository(ctx context.Context)
-	NewUserRepository(db interface{}) user.UserRepository
-	NewPostRepository(db interface{}) post.PostRepository
-}
-
-// Define a DomainFactory interface to create different domain instances.
-type DomainFactory interface {
-	NewUserUseCase(repository interface{}) user.UserUseCase
-	NewPostUseCase(repository interface{}) post.PostUseCase
-}
-
-// Define a DatabaseFactory interface to create different database instances.
-type DeliveryFactory interface {
-	InitializeServer(serverConfig ServerRouters)
-	LaunchServer(ctx context.Context, container *Container)
-	CloseServer(ctx context.Context)
-	NewUserController(domain interface{}) user.UserController
-	NewPostController(domain interface{}) post.PostController
-	NewUserRouter(controller interface{}) user.UserRouter
-	NewPostRouter(controller interface{}) post.PostRouter
+func NewContainer(logger interfaces.Logger, repository interfaces.Repository, delivery interfaces.Delivery) Container {
+	return Container{
+		Logger:     logger,
+		Repository: repository,
+		Delivery:   delivery,
+	} // Add other dependencies as needed.
 }

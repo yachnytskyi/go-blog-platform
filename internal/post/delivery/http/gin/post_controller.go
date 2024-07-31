@@ -7,24 +7,27 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
-	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post"
-	postViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/model"
-	postModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
-	userViewModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
+	view "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/model"
+	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
 )
 
 type PostController struct {
-	postUseCase post.PostUseCase
+	userUseCase interfaces.UserUseCase
+	postUseCase interfaces.PostUseCase
 }
 
-func NewPostController(postUseCase post.PostUseCase) PostController {
-	return PostController{postUseCase: postUseCase}
+func NewPostController(userUseCase interfaces.UserUseCase, postUseCase interfaces.PostUseCase) PostController {
+	return PostController{
+		userUseCase: userUseCase,
+		postUseCase: postUseCase,
+	}
 }
 
-func (postController PostController) GetAllPosts(controllerContext interface{}) {
+func (postController PostController) GetAllPosts(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
-	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
 	page := ginContext.DefaultQuery("page", "1")
 	limit := ginContext.DefaultQuery("limit", "10")
@@ -48,12 +51,12 @@ func (postController PostController) GetAllPosts(controllerContext interface{}) 
 		ginContext.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
-	ginContext.JSON(http.StatusOK, postViewModel.PostsToPostsViewMapper(fetchedPosts))
+	ginContext.JSON(http.StatusOK, view.PostsToPostsViewMapper(fetchedPosts))
 }
 
-func (postController PostController) GetPostById(controllerContext interface{}) {
+func (postController PostController) GetPostById(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
-	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
 	postID := ginContext.Param("postID")
 
@@ -68,18 +71,19 @@ func (postController PostController) GetPostById(controllerContext interface{}) 
 		return
 	}
 
-	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "data": postViewModel.PostToPostViewMapper(fetchedPost)})
+	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "data": view.PostToPostViewMapper(fetchedPost)})
 }
 
-func (postController PostController) CreatePost(controllerContext interface{}) {
+func (postController PostController) CreatePost(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
-	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
-	var createdPostData *postModel.PostCreate = new(postModel.PostCreate)
-	currentUser := ginContext.MustGet("user").(userViewModel.UserView)
-	createdPostData.User = currentUser.Name
-	createdPostData.UserID = currentUser.UserID
 
+	var createdPostData *post.PostCreate = new(post.PostCreate)
+	currentUserID := ctx.Value(constants.ID).(string)
+	user := postController.userUseCase.GetUserById(ctx, currentUserID)
+	createdPostData.UserID = user.Data.ID
+	createdPostData.User = user.Data.Name
 	err := ginContext.ShouldBindJSON(&createdPostData)
 	if err != nil {
 		ginContext.JSON(http.StatusBadRequest, err.Error())
@@ -99,14 +103,14 @@ func (postController PostController) CreatePost(controllerContext interface{}) {
 	ginContext.JSON(http.StatusCreated, gin.H{"status": "success", "data": createdPost})
 }
 
-func (postController PostController) UpdatePostById(controllerContext interface{}) {
+func (postController PostController) UpdatePostById(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
-	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
 	postID := ginContext.Param("postID")
-	currentUserID := ginContext.MustGet("userID").(string)
+	currentUserID := ctx.Value(constants.ID).(string)
 
-	var updatedPostData *postModel.PostUpdate = new(postModel.PostUpdate)
+	var updatedPostData *post.PostUpdate = new(post.PostUpdate)
 	updatedPostData.PostID = ginContext.Param("postID")
 	updatedPostData.UserID = currentUserID
 	err := ginContext.ShouldBindJSON(&updatedPostData)
@@ -131,12 +135,12 @@ func (postController PostController) UpdatePostById(controllerContext interface{
 	ginContext.JSON(http.StatusOK, gin.H{"status": "success", "data": updatedPost})
 }
 
-func (postController PostController) DeletePostByID(controllerContext interface{}) {
+func (postController PostController) DeletePostByID(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
-	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constant.DefaultContextTimer)
+	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
 	postID := ginContext.Param("postID")
-	currentUserID := ginContext.MustGet("userID").(string)
+	currentUserID := ctx.Value(constants.ID).(string)
 	err := postController.postUseCase.DeletePostByID(ctx, postID, currentUserID)
 
 	if err != nil {

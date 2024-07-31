@@ -3,71 +3,71 @@ package usecase
 import (
 	"context"
 
-	"github.com/yachnytskyi/golang-mongo-grpc/internal/post"
-	postModel "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
-	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator/domain"
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
+	model "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
+	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
 
-type PostUseCase struct {
-	postRepository post.PostRepository
+const (
+	location = "internal.post.domain.usecase."
+)
+
+type PostUseCaseV1 struct {
+	Logger         interfaces.Logger
+	PostRepository interfaces.PostRepository
 }
 
-func NewPostUseCase(postRepository post.PostRepository) post.PostUseCase {
-	return &PostUseCase{postRepository: postRepository}
+func NewPostUseCaseV1(logger interfaces.Logger, postRepository interfaces.PostRepository) interfaces.PostUseCase {
+	return &PostUseCaseV1{
+		Logger:         logger,
+		PostRepository: postRepository,
+	}
 }
 
-func (postUseCase *PostUseCase) GetAllPosts(ctx context.Context, page int, limit int) (*postModel.Posts, error) {
-	fetchedPosts, err := postUseCase.postRepository.GetAllPosts(ctx, page, limit)
-
+func (postUseCaseV1 *PostUseCaseV1) GetAllPosts(ctx context.Context, page int, limit int) (*model.Posts, error) {
+	fetchedPosts, err := postUseCaseV1.PostRepository.GetAllPosts(ctx, page, limit)
 	return fetchedPosts, err
 }
 
-func (postUseCase *PostUseCase) GetPostById(ctx context.Context, postID string) (*postModel.Post, error) {
-	fetchedPost, err := postUseCase.postRepository.GetPostById(ctx, postID)
-
+func (postUseCaseV1 *PostUseCaseV1) GetPostById(ctx context.Context, postID string) (*model.Post, error) {
+	fetchedPost, err := postUseCaseV1.PostRepository.GetPostById(ctx, postID)
 	return fetchedPost, err
 }
 
-func (postUseCase *PostUseCase) CreatePost(ctx context.Context, post *postModel.PostCreate) (*postModel.Post, error) {
-	createdPost, err := postUseCase.postRepository.CreatePost(ctx, post)
-
+func (postUseCaseV1 *PostUseCaseV1) CreatePost(ctx context.Context, post *model.PostCreate) (*model.Post, error) {
+	createdPost, err := postUseCaseV1.PostRepository.CreatePost(ctx, post)
 	return createdPost, err
 }
 
-func (postUseCase *PostUseCase) UpdatePostById(ctx context.Context, postID string, post *postModel.PostUpdate, currentUserID string) (*postModel.Post, error) {
-	fetchedPost, err := postUseCase.GetPostById(ctx, postID)
+func (postUseCaseV1 *PostUseCaseV1) UpdatePostById(ctx context.Context, postID string, post *model.PostUpdate, currentUserID string) (*model.Post, error) {
+	fetchedPost, err := postUseCaseV1.GetPostById(ctx, postID)
 
 	if err != nil {
 		return nil, err
 	}
 
 	userID := fetchedPost.UserID
-
-	err = domainUtility.IsUserOwner(currentUserID, userID)
-	if err != nil {
-		return nil, err
+	if currentUserID != userID {
+		return nil, domainError.NewAuthorizationError(location, constants.AuthorizationErrorNotification)
 	}
 
-	updatedPost, err := postUseCase.postRepository.UpdatePostById(ctx, postID, post)
-
+	updatedPost, err := postUseCaseV1.PostRepository.UpdatePostById(ctx, postID, post)
 	return updatedPost, err
 }
 
-func (postUseCase *PostUseCase) DeletePostByID(ctx context.Context, postID string, currentUserID string) error {
-	fetchedPost, err := postUseCase.GetPostById(ctx, postID)
+func (postUseCaseV1 *PostUseCaseV1) DeletePostByID(ctx context.Context, postID string, currentUserID string) error {
+	fetchedPost, err := postUseCaseV1.GetPostById(ctx, postID)
 
 	if err != nil {
 		return err
 	}
 
 	userID := fetchedPost.UserID
-
-	err = domainUtility.IsUserOwner(currentUserID, userID)
-	if err != nil {
-		return err
+	if currentUserID != userID {
+		return domainError.NewAuthorizationError(location, constants.AuthorizationErrorNotification)
 	}
 
-	deletedPost := postUseCase.postRepository.DeletePostByID(ctx, postID)
-
+	deletedPost := postUseCaseV1.PostRepository.DeletePostByID(ctx, postID)
 	return deletedPost
 }

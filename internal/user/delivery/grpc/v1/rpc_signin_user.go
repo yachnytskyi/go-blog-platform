@@ -2,21 +2,28 @@ package v1
 
 import (
 	"context"
+	"time"
 
 	pb "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1/model/pb"
-	httpUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/utility"
+	utility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
+	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
+	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-func (userGrpcServer *UserGrpcServer) Login(ctx context.Context, request *pb.LoginUser) (*pb.LoginUserView, error) {
-	user, err := userGrpcServer.userUseCase.GetUserByEmail(ctx, request.GetEmail())
+const (
+	location = "internal.user.delivery.grpc.v1."
+)
 
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, err.Error())
+func (userGrpcServer *UserGrpcServer) Login(ctx context.Context, request *pb.LoginUser) (*pb.LoginUserView, error) {
+	user := userGrpcServer.userUseCase.GetUserByEmail(ctx, request.GetEmail())
+
+	if user.Error != nil {
+		return nil, status.Errorf(codes.Internal, user.Error.Error())
 	}
 
-	if !user.Verified {
+	if !user.Data.Verified {
 
 		return nil, status.Errorf(codes.PermissionDenied, "You are not verified, please verify your email to login")
 	}
@@ -25,20 +32,41 @@ func (userGrpcServer *UserGrpcServer) Login(ctx context.Context, request *pb.Log
 	// 	return nil, status.Errorf(codes.InvalidArgument, "Invalid email or Password")
 	// }
 
-	// Generate tokens
-	accessToken, err := httpUtility.CreateToken(userGrpcServer.applicationConfig.AccessToken.ExpiredIn, user.UserID, userGrpcServer.applicationConfig.AccessToken.PrivateKey)
-	if err != nil {
-		return nil, status.Errorf(codes.PermissionDenied, err.Error())
+	// Generate the UserTokenPayload.
+	userTokenPayload := model.NewUserTokenPayload(user.Data.ID, user.Data.Role)
+
+	// Generate tokens.
+	accessToken := utility.GenerateJWTToken(
+		userGrpcServer.Logger,
+		location+"Login",
+		"",
+		time.Duration(2),
+		// userGrpcServer.applicationConfig.AccessToken.PrivateKey,
+		// userGrpcServer.applicationConfig.AccessToken.ExpiredIn,
+		userTokenPayload,
+	)
+	if validator.IsError(accessToken.Error) {
+		return nil, status.Errorf(codes.PermissionDenied, accessToken.Error.Error())
 	}
-	refreshToken, err := httpUtility.CreateToken(userGrpcServer.applicationConfig.RefreshToken.ExpiredIn, user.UserID, userGrpcServer.applicationConfig.RefreshToken.PrivateKey)
-	if err != nil {
-		return nil, status.Errorf(codes.PermissionDenied, err.Error())
+
+	refreshToken := utility.GenerateJWTToken(
+		userGrpcServer.Logger,
+		location+"Login",
+		"",
+		time.Duration(2),
+		// userGrpcServer.applicationConfig.RefreshToken.PrivateKey,
+		// userGrpcServer.applicationConfig.RefreshToken.ExpiredIn,
+		userTokenPayload,
+	)
+	if validator.IsError(refreshToken.Error) {
+		return nil, status.Errorf(codes.PermissionDenied, refreshToken.Error.Error())
 	}
 
 	response := &pb.LoginUserView{
 		Status:       "success",
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
+		AccessToken:  accessToken.Data,
+		RefreshToken: refreshToken.Data,
 	}
+
 	return response, nil
 }

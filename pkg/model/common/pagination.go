@@ -1,111 +1,173 @@
 package common
 
 import (
+	"fmt"
 	"math"
 	"strconv"
 
-	constant "github.com/yachnytskyi/golang-mongo-grpc/config/constant"
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
-const (
-	zero = 0
-)
-
 type PaginationQuery struct {
-	Page    int
-	Limit   int
-	OrderBy string
-	Skip    int
+	Page       uint64 // Page number to retrieve.
+	Limit      uint64 // Maximum number of items per page.
+	OrderBy    string // Field to order by.
+	SortOrder  string // Sorting direction ("asc" for ascending, "desc" for descending).
+	Skip       uint64 // Number of items to skip for pagination.
+	BaseURL    string // Base URL for pagination.
+	TotalItems uint64 // Total number of items.
 }
 
-func NewPaginationQuery(page, limit int, orderBy string) PaginationQuery {
+func NewPaginationQuery(page, limit uint64, orderBy, sortOrder, baseURL string) PaginationQuery {
 	return PaginationQuery{
-		Page:    page,
-		Limit:   limit,
-		OrderBy: orderBy,
-		Skip:    getSkip(page, limit),
+		Page:      page,
+		Limit:     limit,
+		OrderBy:   orderBy,
+		SortOrder: sortOrder,
+		Skip:      calculateSkip(page, limit),
+		BaseURL:   baseURL,
 	}
 }
 
-func GetPage(page string) int {
-	intPage, stringConversionError := strconv.Atoi(page)
-	if validator.IsErrorNotNil(stringConversionError) {
-		intPage, _ = strconv.Atoi(constant.DefaultPage)
+func GetPage(page string) uint64 {
+	uintPage, stringConversionError := strconv.ParseUint(page, 0, 0)
+	if validator.IsError(stringConversionError) || uintPage == 0 {
+		uintPage, _ = strconv.ParseUint(constants.DefaultPage, 0, 0)
 	}
-	if validator.IsIntegerZeroOrNegative(intPage) {
-		intPage, _ = strconv.Atoi(constant.DefaultPage)
-	}
-	return intPage
+
+	return uint64(uintPage)
 }
 
-func GetLimit(limit string) int {
-	intLimit, stringConversionError := strconv.Atoi(limit)
-	if validator.IsErrorNotNil(stringConversionError) {
-		intLimit, _ = strconv.Atoi(constant.DefaultLimit)
+func GetLimit(limit string) uint64 {
+	uintLimit, stringConversionError := strconv.ParseUint(limit, 0, 0)
+	if validator.IsError(stringConversionError) {
+		uintLimit, _ = strconv.ParseUint(constants.DefaultLimit, 0, 0)
 	}
-	if isLimitNotValid(intLimit) {
-		intLimit, _ = strconv.Atoi(constant.DefaultLimit)
+	if isLimitInvalid(uintLimit) {
+		uintLimit, _ = strconv.ParseUint(constants.DefaultLimit, 0, 0)
 	}
-	return intLimit
+
+	return uintLimit
 }
 
-func getSkip(page, limit int) int {
-	if validator.IsIntegerZero(page) {
-		return page
-	}
+// calculateSkip calculates the number of items to skip for pagination.
+func calculateSkip(page, limit uint64) uint64 {
 	return (page - 1) * limit
 }
 
-func isLimitNotValid(data int) bool {
-	if data == zero || data < zero || data > constant.MaxItemsPerPage {
+func isLimitInvalid(data uint64) bool {
+	if data > constants.MaxItemsPerPage {
 		return true
 	}
+
 	return false
 }
 
-func SetCorrectPage(totalItems int, paginationQuery PaginationQuery) PaginationQuery {
-	if totalItems <= paginationQuery.Skip {
-		paginationQuery.Page = getTotalPages(totalItems, paginationQuery.Limit)
-		paginationQuery.Skip = getSkip(paginationQuery.Page, paginationQuery.Limit)
+func SetCorrectPage(paginationQuery PaginationQuery) PaginationQuery {
+	if paginationQuery.TotalItems <= paginationQuery.Skip {
+		paginationQuery.Page = calculateTotalPages(paginationQuery.TotalItems, paginationQuery.Limit)
+		paginationQuery.Skip = calculateSkip(paginationQuery.Page, paginationQuery.Limit)
 	}
+
 	return paginationQuery
 }
 
 type PaginationResponse struct {
-	Page       int
-	TotalPages int
-	PagesLeft  int
-	TotalItems int
-	ItemsLeft  int
-	Limit      int
-	OrderBy    string
+	Page       uint64   // Current page number.
+	TotalPages uint64   // Total number of pages.
+	PagesLeft  uint64   // Number of pages remaining.
+	TotalItems uint64   // Total number of items.
+	ItemsLeft  uint64   // Number of items remaining on the current page.
+	Limit      uint64   // Maximum items per page.
+	OrderBy    string   // Field used for ordering.
+	SortOrder  string   // Sorting direction ("asc" for ascending, "desc" for descending).
+	PageLinks  []string // Array of page links.
+	BaseURL    string   // Base URL for pagination.
 }
 
-func NewPaginationResponse(page, totalItems, limit int, orderBy string) PaginationResponse {
-	return PaginationResponse{
-		Page:       page,
-		TotalPages: getTotalPages(totalItems, limit),
-		PagesLeft:  getPagesLeft(page, totalItems, limit),
-		TotalItems: totalItems,
-		ItemsLeft:  getItemsLeft(page, totalItems, limit),
-		Limit:      limit,
-		OrderBy:    orderBy,
+func NewPaginationResponse(paginationQuery PaginationQuery) PaginationResponse {
+	totalPages := calculateTotalPages(paginationQuery.TotalItems, paginationQuery.Limit)
+	paginationResponse := PaginationResponse{
+		Page:       paginationQuery.Page,
+		TotalPages: totalPages,
+		PagesLeft:  totalPages - paginationQuery.Page,
+		TotalItems: paginationQuery.TotalItems,
+		ItemsLeft:  calculateItemsLeft(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit),
+		Limit:      paginationQuery.Limit,
+		OrderBy:    paginationQuery.OrderBy,
+		SortOrder:  paginationQuery.SortOrder,
+		BaseURL:    paginationQuery.BaseURL,
 	}
+
+	paginationResponse.PageLinks = generatePageLinks(paginationResponse, constants.DefaultAmountOfPages) // You can specify the number of pages to show here.
+	return paginationResponse
 }
 
-func getTotalPages(totalItems, limit int) int {
+func calculateTotalPages(totalItems, limit uint64) uint64 {
 	totalPages := float64(totalItems) / float64(limit)
-	return int(math.Ceil(totalPages))
+	return uint64(math.Ceil(totalPages))
 }
 
-func getPagesLeft(page, totalItems, limit int) int {
-	return getTotalPages(totalItems, limit) - page
-}
-
-func getItemsLeft(page, totalItems, limit int) int {
-	if validator.IsIntegerNegative(totalItems - (page * limit)) {
-		return zero
-	}
+func calculateItemsLeft(page, totalItems, limit uint64) uint64 {
 	return totalItems - (page * limit)
+}
+
+// generatePageLinks generates the page links for the pagination response.
+func generatePageLinks(paginationResponse PaginationResponse, amountOfPages uint64) []string {
+	// Preallocate memory for the pageLinks slice based on amountOfPages, adding space for potential first and last page links.
+	pageLinks := make([]string, 0, amountOfPages+2)
+
+	// Calculate the range of pages to show before and after the current page.
+	startPage := paginationResponse.Page - (amountOfPages / 2)
+	if startPage < 1 {
+		startPage = 1
+	}
+	if startPage != 1 {
+		pageLinks = append(pageLinks, buildPageLink(paginationResponse, 1))
+	}
+
+	// Calculate the end page based on the adjusted start page and amountOfPages.
+	endPage := startPage + amountOfPages
+	if endPage > paginationResponse.TotalPages {
+		// Adjust the end page if it exceeds the total number of pages.
+		endPage = paginationResponse.TotalPages
+		startPage = endPage - amountOfPages
+		if startPage < 1 {
+			startPage = 1
+		}
+	}
+
+	// Append the page links to the list, excluding the current page link.
+	for index := startPage; index <= endPage; index++ {
+		if index != paginationResponse.Page {
+			pageLinks = append(pageLinks, buildPageLink(paginationResponse, index))
+		}
+	}
+
+	// If the last page is not included in the page links, add the last page link to the pageLinks slice.
+	if endPage != paginationResponse.TotalPages {
+		pageLinks = append(pageLinks, buildPageLink(paginationResponse, paginationResponse.TotalPages))
+	}
+
+	return pageLinks
+}
+
+// buildPageLink builds the page link with given page number.
+func buildPageLink(paginationResponse PaginationResponse, pageNumber uint64) string {
+	queryParams := fmt.Sprintf(
+		"%s=%d&%s=%d&%s=%s&%s=%s",
+		constants.Page,
+		pageNumber,
+		constants.Limit,
+		paginationResponse.Limit,
+		constants.OrderBy,
+		paginationResponse.OrderBy,
+		constants.SortOrder,
+		paginationResponse.SortOrder,
+	)
+
+	// Combine the base URL and query parameters.
+	baseURL := paginationResponse.BaseURL
+	return fmt.Sprintf("%s?%s", baseURL, queryParams)
 }

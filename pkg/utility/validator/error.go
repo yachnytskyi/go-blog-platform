@@ -1,9 +1,6 @@
 package validator
 
-func IsErrorNil(err error) bool {
-	return err == nil
-}
-
-func IsErrorNotNil(err error) bool {
+// IsError checks if the provided error is not nil.
+func IsError(err error) bool {
 	return err != nil
 }

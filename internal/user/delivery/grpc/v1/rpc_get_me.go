@@ -11,20 +11,20 @@ import (
 
 func (userGrpcServer *UserGrpcServer) GetMe(ctx context.Context, request *pb.GetMeRequest) (*pb.UserView, error) {
 	userID := request.GetId()
-	user, err := userGrpcServer.userUseCase.GetUserById(ctx, userID)
+	user := userGrpcServer.userUseCase.GetUserById(ctx, userID)
 
-	if err != nil {
-		return nil, status.Errorf(codes.Unimplemented, err.Error())
+	if user.Error != nil {
+		return nil, status.Errorf(codes.Unimplemented, user.Error.Error())
 	}
 
 	response := &pb.UserView{
 		User: &pb.User{
-			Id:        user.UserID,
-			Name:      user.Name,
-			Email:     user.Email,
-			Role:      user.Role,
-			CreatedAt: timestamppb.New(user.CreatedAt),
-			UpdatedAt: timestamppb.New(user.UpdatedAt),
+			Id:        user.Data.ID,
+			Name:      user.Data.Name,
+			Email:     user.Data.Email,
+			Role:      user.Data.Role,
+			CreatedAt: timestamppb.New(user.Data.CreatedAt),
+			UpdatedAt: timestamppb.New(user.Data.UpdatedAt),
 		},
 	}
 

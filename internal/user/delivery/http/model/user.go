@@ -3,26 +3,25 @@ package model
 import (
 	"time"
 
-	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
+	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 )
 
-// [GET].
+type TokenView struct {
+	Token string `json:"token"`
+}
+
 type UsersView struct {
-	UsersView          []UserView                   `json:"users"`
-	PaginationResponse httpModel.PaginationResponse `json:"pagination_response"`
+	UsersView              []UserView                   `json:"users"`
+	HTTPPaginationResponse model.HTTPPaginationResponse `json:"pagination_response"`
 }
 
-// [GET].
 type UserView struct {
-	UserID    string    `json:"user_id"`
-	Name      string    `json:"name"`
-	Email     string    `json:"email"`
-	Role      string    `json:"role"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	model.BaseEntity
+	Name  string `json:"name"`
+	Email string `json:"email"`
+	Role  string `json:"role"`
 }
 
-// [POST].
 type UserCreateView struct {
 	Name            string `json:"name"`
 	Email           string `json:"email"`
@@ -30,36 +29,97 @@ type UserCreateView struct {
 	PasswordConfirm string `json:"password_confirm"`
 }
 
-// [PUT].
 type UserUpdateView struct {
-	Name      string    `json:"name"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
 
-// [POST].
 type UserLoginView struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
-// [POST].
+type UserTokenView struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+}
+
 type UserForgottenPasswordView struct {
 	Email string `json:"email"`
 }
 
-// [POST].
 type UserResetPasswordView struct {
+	ResetToken      string `json:"reset_token"`
 	Password        string `json:"password"`
 	PasswordConfirm string `json:"password_confirm"`
 }
 
-// [GET].
 type UserWelcomeMessageView struct {
-	Message string `json:"message"`
+	Notification string `json:"notification"`
 }
 
-func NewWelcomeMessageView(message string) UserWelcomeMessageView {
+func NewWelcomeMessageView(notification string) UserWelcomeMessageView {
 	return UserWelcomeMessageView{
-		Message: message,
+		Notification: notification,
+	}
+}
+
+func NewUsersView(users []UserView, paginationResponse model.HTTPPaginationResponse) UsersView {
+	return UsersView{
+		UsersView:              users,
+		HTTPPaginationResponse: paginationResponse,
+	}
+}
+
+func NewUserView(id string, createdAt, updatedAt time.Time, name, email, role string) UserView {
+	return UserView{
+		BaseEntity: model.NewBaseEntity(id, createdAt, updatedAt),
+		Name:       name,
+		Email:      email,
+		Role:       role,
+	}
+}
+
+func NewUserCreateView(name, email, password, passwordConfirm string) UserCreateView {
+	return UserCreateView{
+		Name:            name,
+		Email:           email,
+		Password:        password,
+		PasswordConfirm: passwordConfirm,
+	}
+}
+
+func NewUserUpdateView(id, name string) UserUpdateView {
+	return UserUpdateView{
+		ID:   id,
+		Name: name,
+	}
+}
+
+func NewUserLoginView(email, password string) UserLoginView {
+	return UserLoginView{
+		Email:    email,
+		Password: password,
+	}
+}
+
+func NewUserForgottenPasswordView(email string) UserForgottenPasswordView {
+	return UserForgottenPasswordView{
+		Email: email,
+	}
+}
+
+func NewUserResetPasswordView(resetToken, password, passwordConfirm string) UserResetPasswordView {
+	return UserResetPasswordView{
+		ResetToken:      resetToken,
+		Password:        password,
+		PasswordConfirm: passwordConfirm,
+	}
+}
+
+func NewUserTokenView(accessToken, refreshToken string) UserTokenView {
+	return UserTokenView{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
 	}
 }

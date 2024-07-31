@@ -43,7 +43,7 @@ type UseCase interface {
 type Delivery interface {
 	CreateDelivery(serverRouters ServerRouters)
 	NewController(userUseCase UserUseCase, usecase any) any
-	NewRouter(router any) any
+	NewRouter(router any) Router
 	LaunchServer(ctx context.Context, repository Repository)
 	Close
 }
@@ -55,13 +55,13 @@ type Close interface {
 
 // ServerRouters holds the routers for different modules of the application.
 type ServerRouters struct {
-	UserRouter UserRouter
-	PostRouter PostRouter
+	UserRouter Router
+	PostRouter Router
 	// Add other routers as needed.
 }
 
 // NewServerRouters creates a new instance of ServerRouters with the given routers.
-func NewServerRouters(userRouter UserRouter, postRouter PostRouter) ServerRouters {
+func NewServerRouters(userRouter Router, postRouter Router) ServerRouters {
 	return ServerRouters{
 		UserRouter: userRouter,
 		PostRouter: postRouter,

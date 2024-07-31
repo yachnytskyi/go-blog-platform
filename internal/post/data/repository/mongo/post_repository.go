@@ -37,7 +37,7 @@ func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int,
 	}
 
 	if limit == 0 {
-		limit = 10
+		limit = 100
 	}
 
 	skip := (page - 1) * limit

@@ -32,10 +32,10 @@ func NewApplication(ctx context.Context) model.Container {
 	userController := deliveryFactory.NewController(userUseCase, nil)
 	postController := deliveryFactory.NewController(userUseCase, postUseCase)
 
-	// Set up server routers with the user use case and controllers.
+	// Create routers.
 	serverRouters := interfaces.NewServerRouters(
-		deliveryFactory.NewRouter(userController).(interfaces.UserRouter),
-		deliveryFactory.NewRouter(postController).(interfaces.PostRouter),
+		deliveryFactory.NewRouter(userController),
+		deliveryFactory.NewRouter(postController),
 		// Add other routers as needed.
 	)
 

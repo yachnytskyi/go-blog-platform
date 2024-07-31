@@ -46,12 +46,56 @@ const (
 	PasswordResetTokenExpirationTime            = time.Hour * 24                          // PasswordResetTokenExpirationTime represents the duration after which a password reset token expires.
 )
 
+// Common routes used in the application.
+const (
+	GetAllItemsURL = ""     // Endpoint for fetching all items.
+	GetItemByIdURL = "/:id" // Endpoint for fetching an item by its ID.
+	ItemIdParam    = "id"   // Parameter name for item ID.
+)
+
+// Domain-specific routes.
+const (
+	UsersGroupPath = "/users" // Users domain route.
+	PostsGroupPath = "/posts" // Posts domain route.
+	// Initialize other routes here.
+)
+
 // Email subjects and URLs.
 const (
-	EmailConfirmationUrl     = "users/verifyemail/"                                     // Email confirmation URL.
-	ForgottenPasswordUrl     = "users/reset-password/"                                  // Forgotten password URL.
-	EmailConfirmationSubject = "Your account verification code"                         // Email confirmation subject.
-	ForgottenPasswordSubject = "Your password reset token (it is valid for 15 minutes)" // Forgotten password subject.
+	EmailConfirmationUrl = "users/verifyemail/"    // Email confirmation URL.
+	ForgottenPasswordUrl = "users/reset-password/" // Forgotten password URL.
+)
+
+// User route paths.
+const (
+	RegisterPath          = "/register"           // Registration route path.
+	ForgottenPasswordPath = "/forgotten-password" // Forgotten password route path.
+	ResetPasswordPath     = "/reset-password/:id" // Reset password route path with token.
+	LoginPath             = "/login"              // Login route path.
+	GetCurrentUserPath    = "/current_user"       // Get current user route path.
+	UpdateCurrentUserPath = "/update"             // Update current user route path.
+	DeleteCurrentUserPath = "/delete"             // Delete current user route path.
+	RefreshTokenPath      = "/refresh"            // Refresh token route path.
+	LogoutPath            = "/logout"             // Logout route path.
+)
+
+// Database table names.
+const (
+	UsersTable = "users" // Users table name in the database.
+)
+
+// Schemes used in the application.
+const (
+	HTTP  = "http"  // HTTP scheme.
+	HTTPS = "https" // HTTPS scheme.
+)
+
+// HTTP Headers used in the application.
+const (
+	CorrelationIDHeader = "X-Correlation-ID" // Correlation-ID header for tracking requests across systems.
+	ContentType         = "Content-Type"     // Content-Type header.
+	Authorization       = "Authorization"    // Authorization header.
+	Bearer              = "Bearer"           // Bearer token prefix.
 )
 
 // HTTP status codes.

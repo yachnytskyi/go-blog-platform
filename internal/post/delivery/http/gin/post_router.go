@@ -14,7 +14,7 @@ type PostRouter struct {
 	PostController interfaces.PostController
 }
 
-func NewPostRouter(config interfaces.Config, logger interfaces.Logger, postController interfaces.PostController) interfaces.PostRouter {
+func NewPostRouter(config interfaces.Config, logger interfaces.Logger, postController interfaces.PostController) interfaces.Router {
 	return PostRouter{
 		Config:         config,
 		Logger:         logger,
@@ -22,7 +22,7 @@ func NewPostRouter(config interfaces.Config, logger interfaces.Logger, postContr
 	}
 }
 
-func (postRouter PostRouter) PostRouter(routerGroup any) {
+func (postRouter PostRouter) Router(routerGroup any) {
 	ginRouterGroup := routerGroup.(*gin.RouterGroup)
 	router := ginRouterGroup.Group(constants.PostsGroupPath)
 	router.GET("/", func(ginContext *gin.Context) {

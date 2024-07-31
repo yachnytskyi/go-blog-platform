@@ -23,6 +23,8 @@ const (
 	LogoutNotificationMessage                = "You are successfully logged out."                                               // Logout success message.
 	SendingEmailNotification                 = "We have sent an email with a verification code to the provided address: %s."    // Email sent notification.
 	SendingEmailWithInstructionsNotification = "You will receive an email with detailed instructions shortly."                  // Email with instructions sent notification.
+	EmailConfirmationSubject                 = "Your account verification code"                                                 // Email confirmation subject.
+	ForgottenPasswordSubject                 = "Your password reset token (it is valid for 24 hours)"                           // Forgotten password subject.
 	PasswordResetSuccessNotification         = "Congratulations! Your password was updated successfully! Please sign in again." // Password reset success message.
 )
 

@@ -36,7 +36,7 @@ func NewViper() Viper {
 		loadDefaultConfig(viperInstance)
 	}
 
-	var viperConfig config.ViperConfig
+	var viperConfig config.YamlConfig
 	unmarshalError := viperInstance.Unmarshal(&viperConfig)
 	if validator.IsError(unmarshalError) {
 		panic(domainError.NewInternalError(location+"viper.Unmarshal", unmarshalError.Error()))
@@ -69,20 +69,20 @@ func (viper Viper) GetConfig() *config.ApplicationConfig {
 	return viper.ApplicationConfig
 }
 
-func viperConfigToApplicationConfigMapper(viperConfig *config.ViperConfig) config.ApplicationConfig {
+func viperConfigToApplicationConfigMapper(yamlConfig *config.YamlConfig) config.ApplicationConfig {
 	return config.ApplicationConfig{
-		Core:         convertCore(&viperConfig.Core),
-		MongoDB:      convertMongoDB(&viperConfig.MongoDB),
-		Security:     convertSecurity(&viperConfig.Security),
-		Gin:          convertGin(&viperConfig.Gin),
-		GRPC:         convertGRPC(&viperConfig.GRPC),
-		AccessToken:  convertAccessToken(&viperConfig.AccessToken),
-		RefreshToken: convertRefreshToken(&viperConfig.RefreshToken),
-		Email:        convertEmail(&viperConfig.Email),
+		Core:         convertCore(&yamlConfig.Core),
+		MongoDB:      convertMongoDB(&yamlConfig.MongoDB),
+		Security:     convertSecurity(&yamlConfig.Security),
+		Gin:          convertGin(&yamlConfig.Gin),
+		GRPC:         convertGRPC(&yamlConfig.GRPC),
+		AccessToken:  convertAccessToken(&yamlConfig.AccessToken),
+		RefreshToken: convertRefreshToken(&yamlConfig.RefreshToken),
+		Email:        convertEmail(&yamlConfig.Email),
 	}
 }
 
-func convertCore(core *config.ViperCore) config.Core {
+func convertCore(core *config.YamlCore) config.Core {
 	return config.Core{
 		Logger:   core.Logger,
 		Email:    core.Email,
@@ -92,14 +92,14 @@ func convertCore(core *config.ViperCore) config.Core {
 	}
 }
 
-func convertMongoDB(mongoDB *config.ViperMongoDB) config.MongoDB {
+func convertMongoDB(mongoDB *config.YamlMongoDB) config.MongoDB {
 	return config.MongoDB{
 		Name: mongoDB.Name,
 		URI:  mongoDB.URI,
 	}
 }
 
-func convertSecurity(security *config.ViperSecurity) config.Security {
+func convertSecurity(security *config.YamlSecurity) config.Security {
 	return config.Security{
 		CookieSecure:                    security.CookieSecure,
 		HTTPOnly:                        security.HTTPOnly,
@@ -113,14 +113,14 @@ func convertSecurity(security *config.ViperSecurity) config.Security {
 	}
 }
 
-func convertHeader(header *config.ViperHeader) config.Header {
+func convertHeader(header *config.YamlHeader) config.Header {
 	return config.Header{
 		Key:   header.Key,
 		Value: header.Value,
 	}
 }
 
-func convertGin(gin *config.ViperGin) config.Gin {
+func convertGin(gin *config.YamlGin) config.Gin {
 	return config.Gin{
 		Port:             gin.Port,
 		AllowOrigins:     gin.AllowOrigins,
@@ -129,13 +129,13 @@ func convertGin(gin *config.ViperGin) config.Gin {
 	}
 }
 
-func convertGRPC(grpc *config.ViperGRPC) config.GRPC {
+func convertGRPC(grpc *config.YamlGRPC) config.GRPC {
 	return config.GRPC{
 		ServerUrl: grpc.ServerUrl,
 	}
 }
 
-func convertAccessToken(accessToken *config.ViperAccessToken) config.AccessToken {
+func convertAccessToken(accessToken *config.YamlAccessToken) config.AccessToken {
 	return config.AccessToken{
 		PrivateKey: accessToken.PrivateKey,
 		PublicKey:  accessToken.PublicKey,
@@ -144,7 +144,7 @@ func convertAccessToken(accessToken *config.ViperAccessToken) config.AccessToken
 	}
 }
 
-func convertRefreshToken(refreshToken *config.ViperRefreshToken) config.RefreshToken {
+func convertRefreshToken(refreshToken *config.YamlRefreshToken) config.RefreshToken {
 	return config.RefreshToken{
 		PrivateKey: refreshToken.PrivateKey,
 		PublicKey:  refreshToken.PublicKey,
@@ -153,7 +153,7 @@ func convertRefreshToken(refreshToken *config.ViperRefreshToken) config.RefreshT
 	}
 }
 
-func convertEmail(email *config.ViperEmail) config.Email {
+func convertEmail(email *config.YamlEmail) config.Email {
 	return config.Email{
 		ClientOriginUrl:               email.ClientOriginUrl,
 		EmailFrom:                     email.EmailFrom,

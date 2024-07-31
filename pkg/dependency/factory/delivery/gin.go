@@ -41,8 +41,8 @@ func (ginDelivery *GinDelivery) CreateDelivery(serverRouters interfaces.ServerRo
 	router := ginDelivery.Router.Group(config.Gin.ServerGroup)
 
 	// Initialize entity-specific routers.
-	serverRouters.UserRouter.UserRouter(router)
-	serverRouters.PostRouter.PostRouter(router)
+	serverRouters.UserRouter.Router(router)
+	serverRouters.PostRouter.Router(router)
 
 	setNoRouteHandler(ginDelivery.Router, location+"gin.CreateDelivery", ginDelivery.Logger)
 	setNoMethodHandler(ginDelivery.Router, location+"gin.CreateDelivery", ginDelivery.Logger)
@@ -82,7 +82,7 @@ func (ginDelivery GinDelivery) NewController(userUseCase interfaces.UserUseCase,
 	}
 }
 
-func (ginDelivery GinDelivery) NewRouter(controller any) any {
+func (ginDelivery GinDelivery) NewRouter(controller any) interfaces.Router {
 	switch controllerType := controller.(type) {
 	case interfaces.UserController:
 		return user.NewUserRouter(ginDelivery.Config, ginDelivery.Logger, controllerType)

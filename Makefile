@@ -13,20 +13,23 @@ run:
 reflex:
 	reflex -s go run cmd/server/main.go 
 
-mongo local:
+mongo-local:
 	docker-compose up mongodb -d 
 	reflex -s go run cmd/server/main.go 
 
-mongo docker:
-	docker compose up mongodb app -d
+mongo:
+	docker compose up mongodb app 
+
+mongo-prod:
+	docker compose up mongodb app-production 
 
 reflex:
 	reflex -s go run cmd/server/main.go 
 
-unit tests:
+unit-tests:
 	go test ./test/unit/...
 
-unit tests pkg:
+unit-tests-pkg:
 	go test ./test/unit/pkg/...
 
 # unit-tests-internal:

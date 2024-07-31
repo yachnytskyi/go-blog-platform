@@ -22,7 +22,7 @@ func NewUserRouter(config interfaces.Config, logger interfaces.Logger, userContr
 }
 
 // UserRouter defines the user-related routes and connects them to the corresponding controller methods.
-func (userRouter UserRouter) UserRouter(routerGroup any) {
+func (userRouter UserRouter) Router(routerGroup any) {
 	ginRouterGroup := routerGroup.(*gin.RouterGroup)
 	router := ginRouterGroup.Group(constants.UsersGroupPath)
 

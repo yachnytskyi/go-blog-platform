@@ -21,3 +21,7 @@ type PostController interface {
 	UpdatePostById(controllerContext any)
 	DeletePostByID(controllerContext any)
 }
+
+type Router interface {
+	Router(routerGroup any)
+}

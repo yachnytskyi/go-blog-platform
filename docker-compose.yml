@@ -13,7 +13,7 @@ services:
   app:
     build:
       context: ./
-      dockerfile: infrastructure/Docker/Dockerfile.dev
+      dockerfile: infrastructure/docker/Dockerfile.dev
     image: app
     ports:
       - "8080:8080"
@@ -31,7 +31,7 @@ services:
   app-production:
     build:
       context: ./
-      dockerfile: infrastructure/Docker/Dockerfile.prod
+      dockerfile: infrastructure/docker/Dockerfile.prod
     image: app-production
     ports:
       - "8080:8080"

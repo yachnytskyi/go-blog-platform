@@ -143,5 +143,3 @@ func TestDecodeOnlyPadding(t *testing.T) {
 	expectedErrorMessage := fmt.Sprintf(test.ExpectedErrorMessageFormat, expectedLocation, decodeErrorMessage+"0")
 	assert.Equal(t, expectedErrorMessage, result.Error.Error(), test.CorrectErrorMessage)
 }
-
-// TestDecodeNilLogger tests

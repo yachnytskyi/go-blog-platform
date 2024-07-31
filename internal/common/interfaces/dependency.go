@@ -42,7 +42,7 @@ type UseCase interface {
 // Delivery is an interface that defines methods for creating delivery components and managing the server.
 type Delivery interface {
 	CreateDelivery(serverRouters ServerRouters)
-	NewController(userUseCase UserUseCase, usecase any) any
+	NewController(userUseCase any, usecase any) any
 	NewRouter(router any) Router
 	LaunchServer(ctx context.Context, repository Repository)
 	Close

@@ -68,7 +68,8 @@ func (ginDelivery GinDelivery) LaunchServer(ctx context.Context, repository inte
 	ginDelivery.Logger.Info(domainError.NewInfoMessage(location+"gin.LaunchServer", constants.ServerConnectionSuccess))
 }
 
-func (ginDelivery GinDelivery) NewController(userUseCase interfaces.UserUseCase, usecase any) any {
+func (ginDelivery GinDelivery) NewController(userUseCaseAny any, usecase any) any {
+	userUseCase := userUseCaseAny.(interfaces.UserUseCase)
 	if usecase == nil {
 		return user.NewUserController(ginDelivery.Config, ginDelivery.Logger, userUseCase)
 	}

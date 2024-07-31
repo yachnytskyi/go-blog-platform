@@ -24,7 +24,7 @@ func NewApplication(ctx context.Context) model.Container {
 
 	// Create use case factory and use cases.
 	usecaseFactory := factory.NewUseCaseFactory(ctx, config, logger, email, repositoryFactory)
-	userUseCase := usecaseFactory.NewUseCase(email, userRepository).(interfaces.UserUseCase)
+	userUseCase := usecaseFactory.NewUseCase(email, userRepository)
 	postUseCase := usecaseFactory.NewUseCase(email, postRepository)
 
 	// Create delivery factory and controllers.

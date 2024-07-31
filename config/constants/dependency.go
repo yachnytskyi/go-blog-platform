@@ -13,10 +13,11 @@ const (
 	EnvironmentsPath = "config/environment/.env." // Base path for environment configuration files.
 
 	// Environment types
-	TestEnvironment          = "test"        // Test development environment.
-	LocalEnvironment         = "local"       // Local development environment.
-	DockerDevEnvironment     = "docker.dev"  // Docker development environment.
-	DockerProductEnvironment = "docker.prod" // Docker product environment.
+	TestEnvironment          = "test"           // Test development environment.
+	LocalEnvironment         = "local"          // Local development environment.
+	DockerDevEnvironment     = "docker.dev"     // Docker development environment.
+	DockerStagingEnvironment = "docker.staging" // Docker staging environment.
+	DockerProductEnvironment = "docker.prod"    // Docker product environment.
 
 	// Default configuration paths
 	DefaultEnvironmentsPath = "config/environment/.env."                  // Default path for environment configuration files.

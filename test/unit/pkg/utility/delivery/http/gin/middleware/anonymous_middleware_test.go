@@ -13,15 +13,8 @@ import (
 	mock "github.com/yachnytskyi/golang-mongo-grpc/test/unit/mock/common"
 )
 
-func setupRouter() *gin.Engine {
-	gin.SetMode(gin.TestMode)
-	router := gin.Default()
-
-	return router
-}
-
 func TestAnonymousMiddlewareNoToken(t *testing.T) {
-	router := setupRouter()
+	router := gin.Default()
 	mockLogger := mock.NewMockLogger()
 	router.Use(middleware.AnonymousMiddleware(mockLogger))
 
@@ -38,7 +31,7 @@ func TestAnonymousMiddlewareNoToken(t *testing.T) {
 }
 
 func TestAnonymousMiddlewareCookieEmptyTokenValue(t *testing.T) {
-	router := setupRouter()
+	router := gin.Default()
 	mockLogger := mock.NewMockLogger()
 	router.Use(middleware.AnonymousMiddleware(mockLogger))
 
@@ -52,7 +45,7 @@ func TestAnonymousMiddlewareCookieEmptyTokenValue(t *testing.T) {
 }
 
 func TestAnonymousMiddlewareCookieValidToken(t *testing.T) {
-	router := setupRouter()
+	router := gin.Default()
 	mockLogger := mock.NewMockLogger()
 	router.Use(middleware.AnonymousMiddleware(mockLogger))
 
@@ -66,7 +59,7 @@ func TestAnonymousMiddlewareCookieValidToken(t *testing.T) {
 }
 
 func TestAnonymousMiddlewareHeaderEmptyTokenValue(t *testing.T) {
-	router := setupRouter()
+	router := gin.Default()
 	mockLogger := mock.NewMockLogger()
 	router.Use(middleware.AnonymousMiddleware(mockLogger))
 
@@ -84,7 +77,7 @@ func TestAnonymousMiddlewareHeaderEmptyTokenValue(t *testing.T) {
 }
 
 func TestAnonymousMiddlewareHeaderValidToken(t *testing.T) {
-	router := setupRouter()
+	router := gin.Default()
 	mockLogger := mock.NewMockLogger()
 	router.Use(middleware.AnonymousMiddleware(mockLogger))
 
@@ -102,7 +95,7 @@ func TestAnonymousMiddlewareHeaderValidToken(t *testing.T) {
 }
 
 func TestAnonymousMiddlewareHeaderInvalidToken(t *testing.T) {
-	router := setupRouter()
+	router := gin.Default()
 	mockLogger := mock.NewMockLogger()
 	router.Use(middleware.AnonymousMiddleware(mockLogger))
 

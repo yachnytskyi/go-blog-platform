@@ -25,8 +25,8 @@ func TestAnonymousMiddlewareNoToken(t *testing.T) {
 	mockLogger := mock.NewMockLogger()
 	router.Use(middleware.AnonymousMiddleware(mockLogger))
 
-	router.GET(test.TestURL, func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{test.Message: constants.Success})
+	router.GET(test.TestURL, func(ginContext *gin.Context) {
+		ginContext.JSON(http.StatusOK, gin.H{test.Message: constants.Success})
 	})
 
 	request := httptest.NewRequest(http.MethodGet, test.TestURL, nil)
@@ -70,8 +70,8 @@ func TestAnonymousMiddlewareHeaderEmptyTokenValue(t *testing.T) {
 	mockLogger := mock.NewMockLogger()
 	router.Use(middleware.AnonymousMiddleware(mockLogger))
 
-	router.GET(test.TestURL, func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{test.Message: constants.Success})
+	router.GET(test.TestURL, func(ginContext *gin.Context) {
+		ginContext.JSON(http.StatusOK, gin.H{test.Message: constants.Success})
 	})
 
 	request := httptest.NewRequest(http.MethodGet, test.TestURL, nil)
@@ -88,8 +88,8 @@ func TestAnonymousMiddlewareHeaderValidToken(t *testing.T) {
 	mockLogger := mock.NewMockLogger()
 	router.Use(middleware.AnonymousMiddleware(mockLogger))
 
-	router.GET(test.TestURL, func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{test.Message: constants.Success})
+	router.GET(test.TestURL, func(ginContext *gin.Context) {
+		ginContext.JSON(http.StatusOK, gin.H{test.Message: constants.Success})
 	})
 
 	request := httptest.NewRequest(http.MethodGet, test.TestURL, nil)
@@ -106,8 +106,8 @@ func TestAnonymousMiddlewareHeaderInvalidToken(t *testing.T) {
 	mockLogger := mock.NewMockLogger()
 	router.Use(middleware.AnonymousMiddleware(mockLogger))
 
-	router.GET(test.TestURL, func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{test.Message: constants.Success})
+	router.GET(test.TestURL, func(ginContext *gin.Context) {
+		ginContext.JSON(http.StatusOK, gin.H{test.Message: constants.Success})
 	})
 
 	request := httptest.NewRequest(http.MethodGet, test.TestURL, nil)

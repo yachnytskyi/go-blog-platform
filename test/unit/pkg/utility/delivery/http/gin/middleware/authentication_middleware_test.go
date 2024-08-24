@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	utility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
+	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
 	middleware "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/middleware"
 	test "github.com/yachnytskyi/golang-mongo-grpc/test"
@@ -69,8 +69,8 @@ func TestAuthenticationMiddlewareCookieValidToken(t *testing.T) {
 	logger := mock.NewMockLogger()
 	config := setupAuthenticationMiddlewareConfig()
 
-	router.GET(test.TestURL, middleware.AuthenticationMiddleware(config, logger), func(c *gin.Context) {
-		c.String(http.StatusOK, constants.Success)
+	router.GET(test.TestURL, middleware.AuthenticationMiddleware(config, logger), func(ginContext *gin.Context) {
+		ginContext.String(http.StatusOK, constants.Success)
 	})
 
 	validToken := getValidToken(location + "TestAuthenticationMiddlewareCookieValidToken")
@@ -89,8 +89,8 @@ func TestAuthenticationMiddlewareCookieInvalidTokenValue(t *testing.T) {
 	logger := mock.NewMockLogger()
 	config := setupAuthenticationMiddlewareConfig()
 
-	router.GET(test.TestURL, middleware.AuthenticationMiddleware(config, logger), func(c *gin.Context) {
-		c.String(http.StatusOK, constants.Success)
+	router.GET(test.TestURL, middleware.AuthenticationMiddleware(config, logger), func(ginContext *gin.Context) {
+		ginContext.String(http.StatusOK, constants.Success)
 	})
 
 	request := httptest.NewRequest(http.MethodGet, test.TestURL, nil)
@@ -107,8 +107,8 @@ func TestAuthenticationMiddlewareCookieEmptyTokenValue(t *testing.T) {
 	logger := mock.NewMockLogger()
 	config := setupAuthenticationMiddlewareConfig()
 
-	router.GET(test.TestURL, middleware.AuthenticationMiddleware(config, logger), func(c *gin.Context) {
-		c.String(http.StatusOK, constants.Success)
+	router.GET(test.TestURL, middleware.AuthenticationMiddleware(config, logger), func(ginContext *gin.Context) {
+		ginContext.String(http.StatusOK, constants.Success)
 	})
 
 	request := httptest.NewRequest(http.MethodGet, test.TestURL, nil)
@@ -125,8 +125,8 @@ func TestAuthenticationMiddlewareCookieMultipleTokens(t *testing.T) {
 	logger := mock.NewMockLogger()
 	config := setupAuthenticationMiddlewareConfig()
 
-	router.GET(test.TestURL, middleware.AuthenticationMiddleware(config, logger), func(c *gin.Context) {
-		c.String(http.StatusOK, constants.Success)
+	router.GET(test.TestURL, middleware.AuthenticationMiddleware(config, logger), func(ginContext *gin.Context) {
+		ginContext.String(http.StatusOK, constants.Success)
 	})
 
 	validToken := getValidToken(location + "TestAuthenticationMiddlewareCookieMultipleTokens")
@@ -144,8 +144,8 @@ func TestAuthenticationMiddlewareCookieExpiredToken(t *testing.T) {
 	logger := mock.NewMockLogger()
 	config := setupAuthenticationMiddlewareConfig()
 
-	router.GET(test.TestURL, middleware.AuthenticationMiddleware(config, logger), func(c *gin.Context) {
-		c.String(http.StatusOK, constants.Success)
+	router.GET(test.TestURL, middleware.AuthenticationMiddleware(config, logger), func(ginContext *gin.Context) {
+		ginContext.String(http.StatusOK, constants.Success)
 	})
 
 	expiredToken := getExpiredTokenForAuthenticationMiddleware(location + "TestAuthenticationMiddlewareCookieExpiredToken")
@@ -163,8 +163,8 @@ func TestAuthenticationMiddlewareHeaderValidToken(t *testing.T) {
 	logger := mock.NewMockLogger()
 	config := setupAuthenticationMiddlewareConfig()
 
-	router.GET(test.TestURL, middleware.AuthenticationMiddleware(config, logger), func(c *gin.Context) {
-		c.String(http.StatusOK, constants.Success)
+	router.GET(test.TestURL, middleware.AuthenticationMiddleware(config, logger), func(ginContext *gin.Context) {
+		ginContext.String(http.StatusOK, constants.Success)
 	})
 
 	validToken := getValidToken(location + "TestAuthenticationMiddlewareHeaderValidToken")
@@ -183,8 +183,8 @@ func TestAuthenticationMiddlewareHeaderInvalidTokenValue(t *testing.T) {
 	logger := mock.NewMockLogger()
 	config := setupAuthenticationMiddlewareConfig()
 
-	router.GET(test.TestURL, middleware.AuthenticationMiddleware(config, logger), func(c *gin.Context) {
-		c.String(http.StatusOK, constants.Success)
+	router.GET(test.TestURL, middleware.AuthenticationMiddleware(config, logger), func(ginContext *gin.Context) {
+		ginContext.String(http.StatusOK, constants.Success)
 	})
 
 	request := httptest.NewRequest(http.MethodGet, test.TestURL, nil)
@@ -201,8 +201,8 @@ func TestAuthenticationMiddlewareHeaderEmptyTokenValue(t *testing.T) {
 	logger := mock.NewMockLogger()
 	config := setupAuthenticationMiddlewareConfig()
 
-	router.GET(test.TestURL, middleware.AuthenticationMiddleware(config, logger), func(c *gin.Context) {
-		c.String(http.StatusOK, constants.Success)
+	router.GET(test.TestURL, middleware.AuthenticationMiddleware(config, logger), func(ginContext *gin.Context) {
+		ginContext.String(http.StatusOK, constants.Success)
 	})
 
 	request := httptest.NewRequest(http.MethodGet, test.TestURL, nil)
@@ -219,8 +219,8 @@ func TestAuthenticationMiddlewareHeaderMultipleTokens(t *testing.T) {
 	logger := mock.NewMockLogger()
 	config := setupAuthenticationMiddlewareConfig()
 
-	router.GET(test.TestURL, middleware.AuthenticationMiddleware(config, logger), func(c *gin.Context) {
-		c.String(http.StatusOK, constants.Success)
+	router.GET(test.TestURL, middleware.AuthenticationMiddleware(config, logger), func(ginContext *gin.Context) {
+		ginContext.String(http.StatusOK, constants.Success)
 	})
 
 	validToken := getValidToken(location + "TestAuthenticationMiddlewareHeaderMultipleTokens")
@@ -238,8 +238,8 @@ func TestAuthenticationMiddlewareHeaderExpiredToken(t *testing.T) {
 	logger := mock.NewMockLogger()
 	config := setupAuthenticationMiddlewareConfig()
 
-	router.GET(test.TestURL, middleware.AuthenticationMiddleware(config, logger), func(c *gin.Context) {
-		c.String(http.StatusOK, constants.Success)
+	router.GET(test.TestURL, middleware.AuthenticationMiddleware(config, logger), func(ginContext *gin.Context) {
+		ginContext.String(http.StatusOK, constants.Success)
 	})
 
 	expiredToken := getExpiredTokenForAuthenticationMiddleware(location + "TestAuthenticationMiddlewareHeaderExpiredToken")
@@ -257,8 +257,8 @@ func TestAuthenticationMiddlewareNoToken(t *testing.T) {
 	logger := mock.NewMockLogger()
 	config := setupAuthenticationMiddlewareConfig()
 
-	router.GET(test.TestURL, middleware.AuthenticationMiddleware(config, logger), func(c *gin.Context) {
-		c.String(http.StatusOK, constants.Success)
+	router.GET(test.TestURL, middleware.AuthenticationMiddleware(config, logger), func(ginContext *gin.Context) {
+		ginContext.String(http.StatusOK, constants.Success)
 	})
 
 	request := httptest.NewRequest(http.MethodGet, test.TestURL, nil)

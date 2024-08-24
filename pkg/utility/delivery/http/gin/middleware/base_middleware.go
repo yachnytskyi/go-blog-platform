@@ -22,37 +22,37 @@ const ()
 
 // RequestIDMiddleware adds a correlation ID to requests and responses.
 func RequestIDMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		correlationID := c.GetHeader(constants.CorrelationIDHeader)
+	return func(ginContext *gin.Context) {
+		correlationID := ginContext.GetHeader(constants.CorrelationIDHeader)
 		if correlationID == "" {
 			correlationID = uuid.New().String()
 		}
 
-		c.Set(constants.CorrelationIDHeader, correlationID)
-		c.Writer.Header().Set(constants.CorrelationIDHeader, correlationID)
-		c.Next()
+		ginContext.Set(constants.CorrelationIDHeader, correlationID)
+		ginContext.Writer.Header().Set(constants.CorrelationIDHeader, correlationID)
+		ginContext.Next()
 	}
 }
 
 // SecureHeadersMiddleware adds secure headers to HTTP responses.
 func SecureHeadersMiddleware(config *config.ApplicationConfig) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Header(config.Security.ContentSecurityPolicyHeader.Key, config.Security.ContentSecurityPolicyHeader.Value)
-		c.Header(config.Security.StrictTransportSecurityHeader.Key, config.Security.StrictTransportSecurityHeader.Value)
-		c.Header(config.Security.XContentTypeOptionsHeader.Key, config.Security.XContentTypeOptionsHeader.Value)
-		c.Next()
+	return func(ginContext *gin.Context) {
+		ginContext.Header(config.Security.ContentSecurityPolicyHeader.Key, config.Security.ContentSecurityPolicyHeader.Value)
+		ginContext.Header(config.Security.StrictTransportSecurityHeader.Key, config.Security.StrictTransportSecurityHeader.Value)
+		ginContext.Header(config.Security.XContentTypeOptionsHeader.Key, config.Security.XContentTypeOptionsHeader.Value)
+		ginContext.Next()
 	}
 }
 
 // CSPMiddleware adds Content Security Policy (CSP) headers to HTTP responses.
 func CSPMiddleware(config *config.ApplicationConfig) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Writer.Header().Set(
+	return func(ginContext *gin.Context) {
+		ginContext.Writer.Header().Set(
 			config.Security.ContentSecurityPolicyHeaderFull.Key,
 			config.Security.ContentSecurityPolicyHeaderFull.Value,
 		)
 
-		c.Next()
+		ginContext.Next()
 	}
 }
 
@@ -63,9 +63,9 @@ func RateLimitMiddleware(config *config.ApplicationConfig) gin.HandlerFunc {
 	}
 
 	limiter := tollbooth.NewLimiter(config.Security.RateLimit, limiterOptions)
-	return func(c *gin.Context) {
-		tollbooth_gin.LimitHandler(limiter)(c)
-		c.Next()
+	return func(ginContext *gin.Context) {
+		tollbooth_gin.LimitHandler(limiter)(ginContext)
+		ginContext.Next()
 	}
 }
 
@@ -120,29 +120,29 @@ func TimeoutMiddleware(logger interfaces.Logger) gin.HandlerFunc {
 
 // LoggerMiddleware logs incoming requests and outgoing responses with additional context.
 func LoggerMiddleware(logger interfaces.Logger) gin.HandlerFunc {
-	return func(c *gin.Context) {
+	return func(ginContext *gin.Context) {
 		start := time.Now()
-		correlationID := c.GetString(constants.CorrelationIDHeader)
+		correlationID := ginContext.GetString(constants.CorrelationIDHeader)
 
 		httpIncomingLog := common.NewHTTPIncomingLog(
 			location+"LoggerMiddleware",
 			correlationID,
-			c.Request.Method,
-			c.Request.URL.Path,
-			c.ClientIP(),
-			c.Request.UserAgent(),
+			ginContext.Request.Method,
+			ginContext.Request.URL.Path,
+			ginContext.ClientIP(),
+			ginContext.Request.UserAgent(),
 		)
 
-		c.Next()
+		ginContext.Next()
 
 		httpOutgoingLog := common.NewHTTPOutgoingLog(
 			location+"LoggerMiddleware",
 			correlationID,
-			c.Request.Method,
-			c.Request.URL.Path,
-			c.ClientIP(),
-			c.Request.UserAgent(),
-			c.Writer.Status(),
+			ginContext.Request.Method,
+			ginContext.Request.URL.Path,
+			ginContext.ClientIP(),
+			ginContext.Request.UserAgent(),
+			ginContext.Writer.Status(),
 			time.Since(start),
 		)
 

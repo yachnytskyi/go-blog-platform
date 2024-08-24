@@ -43,8 +43,8 @@ func TestRefreshTokenMiddlewareCookieValidToken(t *testing.T) {
 	logger := mock.NewMockLogger()
 	config := setupRefreshTokenMiddlewareConfig()
 
-	router.GET(test.TestURL, middleware.RefreshTokenMiddleware(config, logger), func(c *gin.Context) {
-		c.String(http.StatusOK, constants.Success)
+	router.GET(test.TestURL, middleware.RefreshTokenMiddleware(config, logger), func(ginContext *gin.Context) {
+		ginContext.String(http.StatusOK, constants.Success)
 	})
 
 	validToken := getValidToken(location + "TestRefreshTokenMiddlewareCookieValidToken")
@@ -63,8 +63,8 @@ func TestRefreshTokenMiddlewareCookieInvalidTokenValue(t *testing.T) {
 	logger := mock.NewMockLogger()
 	config := setupRefreshTokenMiddlewareConfig()
 
-	router.GET(test.TestURL, middleware.RefreshTokenMiddleware(config, logger), func(c *gin.Context) {
-		c.String(http.StatusOK, constants.Success)
+	router.GET(test.TestURL, middleware.RefreshTokenMiddleware(config, logger), func(ginContext *gin.Context) {
+		ginContext.String(http.StatusOK, constants.Success)
 	})
 
 	request := httptest.NewRequest(http.MethodGet, test.TestURL, nil)
@@ -81,8 +81,8 @@ func TestRefreshTokenMiddlewareCookieEmptyTokenValue(t *testing.T) {
 	logger := mock.NewMockLogger()
 	config := setupRefreshTokenMiddlewareConfig()
 
-	router.GET(test.TestURL, middleware.RefreshTokenMiddleware(config, logger), func(c *gin.Context) {
-		c.String(http.StatusOK, constants.Success)
+	router.GET(test.TestURL, middleware.RefreshTokenMiddleware(config, logger), func(ginContext *gin.Context) {
+		ginContext.String(http.StatusOK, constants.Success)
 	})
 
 	request := httptest.NewRequest(http.MethodGet, test.TestURL, nil)
@@ -99,8 +99,8 @@ func TestRefreshTokenMiddlewareCookieMultipleTokens(t *testing.T) {
 	logger := mock.NewMockLogger()
 	config := setupRefreshTokenMiddlewareConfig()
 
-	router.GET(test.TestURL, middleware.RefreshTokenMiddleware(config, logger), func(c *gin.Context) {
-		c.String(http.StatusOK, constants.Success)
+	router.GET(test.TestURL, middleware.RefreshTokenMiddleware(config, logger), func(ginContext *gin.Context) {
+		ginContext.String(http.StatusOK, constants.Success)
 	})
 
 	validToken := getValidToken(location + "TestRefreshTokenMiddlewareMultipleTokens")
@@ -118,8 +118,8 @@ func TestRefreshTokenMiddlewareCookieExpiredToken(t *testing.T) {
 	logger := mock.NewMockLogger()
 	config := setupRefreshTokenMiddlewareConfig()
 
-	router.GET(test.TestURL, middleware.RefreshTokenMiddleware(config, logger), func(c *gin.Context) {
-		c.String(http.StatusOK, constants.Success)
+	router.GET(test.TestURL, middleware.RefreshTokenMiddleware(config, logger), func(ginContext *gin.Context) {
+		ginContext.String(http.StatusOK, constants.Success)
 	})
 
 	expiredToken := getExpiredTokenForRefreshTokenMiddleware(location + "TestRefreshTokenMiddlewareExpiredToken")
@@ -137,8 +137,8 @@ func TestRefreshTokenMiddlewareHeaderValidToken(t *testing.T) {
 	logger := mock.NewMockLogger()
 	config := setupRefreshTokenMiddlewareConfig()
 
-	router.GET(test.TestURL, middleware.RefreshTokenMiddleware(config, logger), func(c *gin.Context) {
-		c.String(http.StatusOK, constants.Success)
+	router.GET(test.TestURL, middleware.RefreshTokenMiddleware(config, logger), func(ginContext *gin.Context) {
+		ginContext.String(http.StatusOK, constants.Success)
 	})
 
 	validToken := getValidToken(location + "TestRefreshTokenMiddlewareHeaderValidToken")
@@ -157,8 +157,8 @@ func TestRefreshTokenMiddlewareHeaderInvalidTokenValue(t *testing.T) {
 	logger := mock.NewMockLogger()
 	config := setupRefreshTokenMiddlewareConfig()
 
-	router.GET(test.TestURL, middleware.RefreshTokenMiddleware(config, logger), func(c *gin.Context) {
-		c.String(http.StatusOK, constants.Success)
+	router.GET(test.TestURL, middleware.RefreshTokenMiddleware(config, logger), func(ginContext *gin.Context) {
+		ginContext.String(http.StatusOK, constants.Success)
 	})
 
 	request := httptest.NewRequest(http.MethodGet, test.TestURL, nil)
@@ -175,8 +175,8 @@ func TestRefreshTokenMiddlewareHeaderEmptyTokenValue(t *testing.T) {
 	logger := mock.NewMockLogger()
 	config := setupRefreshTokenMiddlewareConfig()
 
-	router.GET(test.TestURL, middleware.RefreshTokenMiddleware(config, logger), func(c *gin.Context) {
-		c.String(http.StatusOK, constants.Success)
+	router.GET(test.TestURL, middleware.RefreshTokenMiddleware(config, logger), func(ginContext *gin.Context) {
+		ginContext.String(http.StatusOK, constants.Success)
 	})
 
 	request := httptest.NewRequest(http.MethodGet, test.TestURL, nil)
@@ -193,8 +193,8 @@ func TestRefreshTokenMiddlewareHeaderMultipleTokens(t *testing.T) {
 	logger := mock.NewMockLogger()
 	config := setupRefreshTokenMiddlewareConfig()
 
-	router.GET(test.TestURL, middleware.RefreshTokenMiddleware(config, logger), func(c *gin.Context) {
-		c.String(http.StatusOK, constants.Success)
+	router.GET(test.TestURL, middleware.RefreshTokenMiddleware(config, logger), func(ginContext *gin.Context) {
+		ginContext.String(http.StatusOK, constants.Success)
 	})
 
 	validToken := getValidToken(location + "TestRefreshTokenMiddlewareHeaderMultipleTokens")
@@ -212,8 +212,8 @@ func TestRefreshTokenMiddlewareHeaderExpiredToken(t *testing.T) {
 	logger := mock.NewMockLogger()
 	config := setupRefreshTokenMiddlewareConfig()
 
-	router.GET(test.TestURL, middleware.RefreshTokenMiddleware(config, logger), func(c *gin.Context) {
-		c.String(http.StatusOK, constants.Success)
+	router.GET(test.TestURL, middleware.RefreshTokenMiddleware(config, logger), func(ginContext *gin.Context) {
+		ginContext.String(http.StatusOK, constants.Success)
 	})
 
 	expiredToken := getExpiredTokenForRefreshTokenMiddleware(location + "TestRefreshTokenMiddlewareHeaderExpiredToken")
@@ -231,8 +231,8 @@ func TestRefreshTokenMiddlewareHeaderNoToken(t *testing.T) {
 	logger := mock.NewMockLogger()
 	config := setupRefreshTokenMiddlewareConfig()
 
-	router.GET(test.TestURL, middleware.RefreshTokenMiddleware(config, logger), func(c *gin.Context) {
-		c.String(http.StatusOK, constants.Success)
+	router.GET(test.TestURL, middleware.RefreshTokenMiddleware(config, logger), func(ginContext *gin.Context) {
+		ginContext.String(http.StatusOK, constants.Success)
 	})
 
 	request := httptest.NewRequest(http.MethodGet, test.TestURL, nil)

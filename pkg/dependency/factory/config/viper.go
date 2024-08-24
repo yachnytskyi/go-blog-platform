@@ -12,6 +12,10 @@ import (
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
+const (
+	location = "pkg.dependency.factory.config."
+)
+
 type Viper struct {
 	ApplicationConfig *config.ApplicationConfig
 }

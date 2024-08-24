@@ -12,5 +12,5 @@ import (
 func HandleJSONBindingError(ginContext *gin.Context, logger interfaces.Logger, location string, err error) {
 	httpInternalError := httpError.NewHTTPInternalError(location+".ShouldBindJSON", err.Error())
 	logger.Error(httpInternalError)
-	ginContext.JSON(constants.StatusBadRequest, model.NewJSONResponseOnFailure(httpError.HandleError(err)))
+	ginContext.JSON(constants.StatusBadRequest, model.NewJSONResponseOnFailure(httpError.HandleError(httpInternalError)))
 }

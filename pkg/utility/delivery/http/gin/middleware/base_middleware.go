@@ -20,8 +20,8 @@ import (
 
 const ()
 
-// CorrelationIDMiddleware adds a correlation ID to requests and responses.
-func CorrelationIDMiddleware() gin.HandlerFunc {
+// RequestIDMiddleware adds a correlation ID to requests and responses.
+func RequestIDMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		correlationID := c.GetHeader(constants.CorrelationIDHeader)
 		if correlationID == "" {

@@ -30,39 +30,39 @@ func NewConfig(configType string) interfaces.Config {
 	}
 }
 
-func NewLogger(configInstance interfaces.Config) interfaces.Logger {
-	config := configInstance.GetConfig()
+func NewLogger(config interfaces.Config) interfaces.Logger {
+	configInstance := config.GetConfig()
 
-	switch config.Core.Logger {
+	switch configInstance.Core.Logger {
 	case constants.Zerolog:
 		return logger.NewZerolog()
 	// Add other logger options here as needed.
 	default:
-		panic(domainError.NewInternalError(location+"NewLogger", fmt.Sprintf(constants.UnsupportedLogger, config.Core.Logger)))
+		panic(domainError.NewInternalError(location+"NewLogger", fmt.Sprintf(constants.UnsupportedLogger, configInstance.Core.Logger)))
 	}
 }
 
-func NewEmail(configInstance interfaces.Config, logger interfaces.Logger) interfaces.Email {
-	config := configInstance.GetConfig()
+func NewEmail(config interfaces.Config, logger interfaces.Logger) interfaces.Email {
+	configInstance := config.GetConfig()
 
-	switch config.Core.Logger {
+	switch configInstance.Core.Logger {
 	case constants.Zerolog:
-		return email.NewGoMail(configInstance, logger)
+		return email.NewGoMail(config, logger)
 	// Add other logger options here as needed.
 	default:
-		panic(domainError.NewInternalError(location+"NewEmail", fmt.Sprintf(constants.UnsupportedLogger, config.Core.Logger)))
+		panic(domainError.NewInternalError(location+"NewEmail", fmt.Sprintf(constants.UnsupportedLogger, configInstance.Core.Logger)))
 	}
 }
 
-func NewRepositoryFactory(configInstance interfaces.Config, logger interfaces.Logger) interfaces.Repository {
-	config := configInstance.GetConfig()
+func NewRepositoryFactory(config interfaces.Config, logger interfaces.Logger) interfaces.Repository {
+	configInstance := config.GetConfig()
 
-	switch config.Core.Database {
+	switch configInstance.Core.Database {
 	case constants.MongoDB:
-		return repository.NewMongoDBRepository(configInstance, logger)
+		return repository.NewMongoDBRepository(config, logger)
 	// Add other repository options here as needed.
 	default:
-		logger.Panic(domainError.NewInternalError(location+"NewRepositoryFactory", fmt.Sprintf(constants.UnsupportedRepository, config.Core.Database)))
+		logger.Panic(domainError.NewInternalError(location+"NewRepositoryFactory", fmt.Sprintf(constants.UnsupportedRepository, configInstance.Core.Database)))
 		return nil
 	}
 
@@ -70,37 +70,37 @@ func NewRepositoryFactory(configInstance interfaces.Config, logger interfaces.Lo
 
 func NewUseCaseFactory(
 	ctx context.Context,
-	configInstance interfaces.Config,
+	config interfaces.Config,
 	logger interfaces.Logger,
 	email interfaces.Email,
 	repository interfaces.Repository) interfaces.UseCase {
 
-	config := configInstance.GetConfig()
-	switch config.Core.UseCase {
+	configInstance := config.GetConfig()
+	switch configInstance.Core.UseCase {
 	case constants.UseCaseV1:
-		return useCase.NewUseCaseV1(configInstance, logger)
+		return useCase.NewUseCaseV1(config, logger)
 	// Add other domain options here as needed.
 	default:
 		model.GracefulShutdown(ctx, logger, repository)
-		logger.Panic(domainError.NewInternalError(location+"NewUseCaseFactory", fmt.Sprintf(constants.UnsupportedUseCase, config.Core.UseCase)))
+		logger.Panic(domainError.NewInternalError(location+"NewUseCaseFactory", fmt.Sprintf(constants.UnsupportedUseCase, configInstance.Core.UseCase)))
 		return nil
 	}
 }
 
 func NewDeliveryFactory(
 	ctx context.Context,
-	configInstance interfaces.Config,
+	config interfaces.Config,
 	logger interfaces.Logger,
 	repository interfaces.Repository) interfaces.Delivery {
 
-	config := configInstance.GetConfig()
-	switch config.Core.Delivery {
+	configInstance := config.GetConfig()
+	switch configInstance.Core.Delivery {
 	case constants.Gin:
-		return delivery.NewGinDelivery(configInstance, logger)
+		return delivery.NewGinDelivery(config, logger)
 	// Add other delivery options here as needed.
 	default:
 		model.GracefulShutdown(ctx, logger, repository)
-		logger.Panic(domainError.NewInternalError(location+"NewDeliveryFactory", fmt.Sprintf(constants.UnsupportedDelivery, config.Core.Delivery)))
+		logger.Panic(domainError.NewInternalError(location+"NewDeliveryFactory", fmt.Sprintf(constants.UnsupportedDelivery, configInstance.Core.Delivery)))
 		return nil
 	}
 }

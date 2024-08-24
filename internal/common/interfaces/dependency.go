@@ -24,7 +24,7 @@ type Logger interface {
 
 // Email is an interface that defines methods for sending emails.
 type Email interface {
-	SendEmail(configInstance Config, logger Logger, location string, data any, emailData EmailData) error
+	SendEmail(config Config, logger Logger, location string, data any, emailData EmailData) error
 }
 
 // Repository is an interface that defines methods for creating and managing repository instances.

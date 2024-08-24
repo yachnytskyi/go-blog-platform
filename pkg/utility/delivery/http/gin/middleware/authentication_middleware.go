@@ -12,27 +12,33 @@ import (
 )
 
 // AuthenticationMiddleware is a Gin middleware for handling user authentication using JWT tokens.
-func AuthenticationMiddleware(configInstance interfaces.Config, logger interfaces.Logger) gin.HandlerFunc {
+func AuthenticationMiddleware(config interfaces.Config, logger interfaces.Logger) gin.HandlerFunc {
 	return func(ginContext *gin.Context) {
 		ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 		defer cancel()
 
 		// Extract the access token from the request headers or cookies.
-		accessToken := extractAccessToken(ginContext, location+"AuthenticationMiddleware")
+		accessToken := extractToken(ginContext, location+"AuthenticationMiddleware", constants.AccessTokenValue)
 		if validator.IsError(accessToken.Error) {
 			abortWithStatusJSON(ginContext, logger, accessToken.Error, constants.StatusUnauthorized)
 			return
 		}
 
-		// Extract the access token from the request headers or cookies.
-		config := configInstance.GetConfig()
-		userTokenPayload := utility.ValidateJWTToken(logger, location+"AuthenticationMiddleware", accessToken.Data, config.AccessToken.PublicKey)
+		// Validate the JWT token using the public key from the configuration.
+		configInstance := config.GetConfig()
+		userTokenPayload := utility.ValidateJWTToken(
+			logger,
+			location+"AuthenticationMiddleware",
+			accessToken.Data,
+			configInstance.AccessToken.PublicKey,
+		)
 		if validator.IsError(userTokenPayload.Error) {
 			httpAuthorizationError := httpError.NewHTTPAuthorizationError(location+"AuthenticationMiddleware.ValidateJWTToken", constants.LoggingErrorNotification)
 			abortWithStatusJSON(ginContext, logger, httpAuthorizationError, constants.StatusUnauthorized)
 			return
 		}
 
+		// Store the user's ID and role in the request context.
 		ctx = context.WithValue(ctx, constants.ID, userTokenPayload.Data.UserID)
 		ctx = context.WithValue(ctx, constants.UserRole, userTokenPayload.Data.Role)
 		ginContext.Request = ginContext.Request.WithContext(ctx)

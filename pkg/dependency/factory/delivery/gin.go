@@ -105,7 +105,7 @@ func (ginDelivery GinDelivery) Close(ctx context.Context) {
 }
 
 func applyMiddleware(router *gin.Engine, config *config.ApplicationConfig, logger interfaces.Logger) {
-	router.Use(middleware.CorrelationIDMiddleware())
+	router.Use(middleware.RequestIDMiddleware())
 	router.Use(middleware.SecureHeadersMiddleware(config))
 	router.Use(middleware.CSPMiddleware(config))
 	router.Use(middleware.RateLimitMiddleware(config))

@@ -18,6 +18,7 @@ import (
 )
 
 const (
+	location           = "pkg.dependency.factory.data.repository."
 	retryDelayInterval = 30 * time.Second
 	maxRetryAttempts   = 5
 )

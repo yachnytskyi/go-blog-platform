@@ -247,72 +247,72 @@ func (userController UserController) ResetUserPassword(controllerContext any) {
 	ginContext.JSON(constants.StatusCreated, model.NewJSONResponseOnSuccess(view.NewWelcomeMessageView(constants.PasswordResetSuccessNotification)))
 }
 
-func setAccessLoginCookies(ginContext *gin.Context, configInstance interfaces.Config, accessToken, refreshToken string) {
-	config := configInstance.GetConfig()
+func setAccessLoginCookies(ginContext *gin.Context, config interfaces.Config, accessToken, refreshToken string) {
+	configInstance := config.GetConfig()
 
 	ginContext.SetCookie(
 		constants.AccessTokenValue,
 		accessToken,
-		config.AccessToken.MaxAge,
+		configInstance.AccessToken.MaxAge,
 		path,
 		constants.TokenDomainValue,
-		config.Security.CookieSecure,
-		config.Security.HTTPOnly,
+		configInstance.Security.CookieSecure,
+		configInstance.Security.HTTPOnly,
 	)
 
 	ginContext.SetCookie(
 		constants.RefreshTokenValue,
 		refreshToken,
-		config.RefreshToken.MaxAge,
+		configInstance.RefreshToken.MaxAge,
 		path,
 		constants.TokenDomainValue,
-		config.Security.CookieSecure,
-		config.Security.HTTPOnly,
+		configInstance.Security.CookieSecure,
+		configInstance.Security.HTTPOnly,
 	)
 
 	ginContext.SetCookie(
 		constants.LoggedInValue,
 		constants.True,
-		config.AccessToken.MaxAge,
+		configInstance.AccessToken.MaxAge,
 		path,
 		constants.TokenDomainValue,
-		config.Security.CookieSecure,
-		config.Security.HTTPOnly,
+		configInstance.Security.CookieSecure,
+		configInstance.Security.HTTPOnly,
 	)
 }
 
-func setRefreshTokenCookies(ginContext *gin.Context, configInstance interfaces.Config, accessToken, refreshToken string) {
-	config := configInstance.GetConfig()
+func setRefreshTokenCookies(ginContext *gin.Context, config interfaces.Config, accessToken, refreshToken string) {
+	configInstance := config.GetConfig()
 
 	ginContext.SetCookie(
 		constants.AccessTokenValue,
 		accessToken,
-		config.AccessToken.MaxAge,
+		configInstance.AccessToken.MaxAge,
 		path,
 		constants.TokenDomainValue,
-		config.Security.CookieSecure,
-		config.Security.HTTPOnly,
+		configInstance.Security.CookieSecure,
+		configInstance.Security.HTTPOnly,
 	)
 
 	if refreshToken != "" {
 		ginContext.SetCookie(
 			constants.RefreshTokenValue,
 			refreshToken,
-			config.RefreshToken.MaxAge,
+			configInstance.RefreshToken.MaxAge,
 			path,
 			constants.TokenDomainValue,
-			config.Security.CookieSecure,
-			config.Security.HTTPOnly,
+			configInstance.Security.CookieSecure,
+			configInstance.Security.HTTPOnly,
 		)
 	}
 
 	ginContext.SetCookie(
 		constants.LoggedInValue,
 		constants.True,
-		config.AccessToken.MaxAge,
+		configInstance.AccessToken.MaxAge,
 		path,
 		constants.TokenDomainValue,
-		config.Security.CookieSecure,
-		config.Security.HTTPOnly,
+		configInstance.Security.CookieSecure,
+		configInstance.Security.HTTPOnly,
 	)
 }

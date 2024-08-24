@@ -95,7 +95,7 @@ const (
 	CorrelationIDHeader = "X-Correlation-ID" // Correlation-ID header for tracking requests across systems.
 	ContentType         = "Content-Type"     // Content-Type header.
 	Authorization       = "Authorization"    // Authorization header.
-	Bearer              = "Bearer"           // Bearer token prefix.
+	Bearer              = "Bearer "          // Bearer token prefix.
 )
 
 // HTTP status codes.
@@ -109,6 +109,12 @@ const (
 	StatusNotFound         = http.StatusNotFound         // HTTP 404 Not Found.
 	StatusMethodNotAllowed = http.StatusMethodNotAllowed // HTTP 405 Not Allowed.
 	StatusBadGateway       = http.StatusBadGateway       // HTTP 502 Bad Gateway.
+)
+
+// Operation status messages.
+const (
+	Success = "success" // Success message for successful operations.
+	Fail    = "fail"    // Failure message for unsuccessful operations.
 )
 
 // HTTP methods for RESTful operations.

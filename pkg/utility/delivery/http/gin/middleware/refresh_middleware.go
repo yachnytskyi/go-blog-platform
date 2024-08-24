@@ -11,29 +11,29 @@ import (
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
-// RefreshTokenAuthenticationMiddleware is a Gin middleware for handling user authentication using refresh tokens.
-func RefreshTokenAuthenticationMiddleware(config interfaces.Config, logger interfaces.Logger) gin.HandlerFunc {
+// RefreshTokenMiddleware is a Gin middleware for handling user authentication using refresh tokens.
+func RefreshTokenMiddleware(config interfaces.Config, logger interfaces.Logger) gin.HandlerFunc {
 	return func(ginContext *gin.Context) {
 		ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 		defer cancel()
 
 		// Extract the refresh token from the request headers or cookies.
-		refreshToken := extractRefreshToken(ginContext, location+"RefreshTokenAuthenticationMiddleware")
+		refreshToken := extractToken(ginContext, location+"RefreshTokenMiddleware", constants.RefreshTokenValue)
 		if validator.IsError(refreshToken.Error) {
 			abortWithStatusJSON(ginContext, logger, refreshToken.Error, constants.StatusUnauthorized)
 			return
 		}
 
-		// Extract the refresh token from the request headers or cookies.
+		// Validate the JWT token using the public key from the configuration.
 		refreshTokenConfig := config.GetConfig()
 		userTokenPayload := utility.ValidateJWTToken(
 			logger,
-			location+"RefreshTokenAuthenticationMiddleware",
+			location+"RefreshTokenMiddleware",
 			refreshToken.Data,
 			refreshTokenConfig.RefreshToken.PublicKey,
 		)
 		if validator.IsError(userTokenPayload.Error) {
-			httpAuthorizationError := http.NewHTTPAuthorizationError(location+"RefreshTokenAuthenticationMiddleware.ValidateJWTToken", constants.LoggingErrorNotification)
+			httpAuthorizationError := http.NewHTTPAuthorizationError(location+"RefreshTokenMiddleware.ValidateJWTToken", constants.LoggingErrorNotification)
 			abortWithStatusJSON(ginContext, logger, httpAuthorizationError, constants.StatusUnauthorized)
 			return
 		}

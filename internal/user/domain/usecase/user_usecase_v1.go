@@ -143,7 +143,7 @@ func (userUseCaseV1 UserUseCaseV1) Login(ctx context.Context, userLoginData user
 	}
 
 	userTokenPayload := domainModel.NewUserTokenPayload(fetchedUser.Data.ID, fetchedUser.Data.Role)
-	userToken := generateToken(userUseCaseV1.Config, userUseCaseV1.Logger, userTokenPayload)
+	userToken := generateToken(userUseCaseV1.Config, userUseCaseV1.Logger, location+"Login", userTokenPayload)
 	if validator.IsError(userToken.Error) {
 		return common.NewResultOnFailure[user.UserToken](domainError.HandleError(userToken.Error))
 	}
@@ -153,7 +153,7 @@ func (userUseCaseV1 UserUseCaseV1) Login(ctx context.Context, userLoginData user
 
 func (userUseCaseV1 UserUseCaseV1) RefreshAccessToken(ctx context.Context, userData user.User) common.Result[user.UserToken] {
 	userTokenPayload := domainModel.NewUserTokenPayload(userData.ID, userData.Role)
-	userToken := generateToken(userUseCaseV1.Config, userUseCaseV1.Logger, userTokenPayload)
+	userToken := generateToken(userUseCaseV1.Config, userUseCaseV1.Logger, location+"RefreshAccessToken", userTokenPayload)
 	if validator.IsError(userToken.Error) {
 		return common.NewResultOnFailure[user.UserToken](domainError.HandleError(userToken.Error))
 	}
@@ -236,33 +236,33 @@ func prepareEmailData(config *config.ApplicationConfig, user user.User, tokenVal
 	return emailData
 }
 
-func prepareEmailDataForRegistration(configInstance interfaces.Config, user user.User, tokenValue string) interfaces.EmailData {
-	config := configInstance.GetConfig()
+func prepareEmailDataForRegistration(config interfaces.Config, user user.User, tokenValue string) interfaces.EmailData {
+	configInstance := config.GetConfig()
 	return prepareEmailData(
-		config,
+		configInstance,
 		user,
 		tokenValue,
 		constants.EmailConfirmationSubject,
 		constants.EmailConfirmationUrl,
-		config.Email.UserConfirmationTemplateName,
-		config.Email.UserConfirmationTemplatePath,
+		configInstance.Email.UserConfirmationTemplateName,
+		configInstance.Email.UserConfirmationTemplatePath,
 	)
 }
 
-func prepareEmailDataForForgottenPassword(configInstance interfaces.Config, user user.User, tokenValue string) interfaces.EmailData {
-	config := configInstance.GetConfig()
+func prepareEmailDataForForgottenPassword(config interfaces.Config, user user.User, tokenValue string) interfaces.EmailData {
+	configInstance := config.GetConfig()
 	return prepareEmailData(
-		config,
+		configInstance,
 		user,
 		tokenValue,
 		constants.ForgottenPasswordSubject,
 		constants.ForgottenPasswordUrl,
-		config.Email.ForgottenPasswordTemplateName,
-		config.Email.ForgottenPasswordTemplatePath,
+		configInstance.Email.ForgottenPasswordTemplateName,
+		configInstance.Email.ForgottenPasswordTemplatePath,
 	)
 }
 
-func generateToken(config interfaces.Config, logger interfaces.Logger, userTokenPayload domainModel.UserTokenPayload) common.Result[user.UserToken] {
+func generateToken(config interfaces.Config, logger interfaces.Logger, location string, userTokenPayload domainModel.UserTokenPayload) common.Result[user.UserToken] {
 	configInstance := config.GetConfig()
 
 	accessToken := domainUtility.GenerateJWTToken(

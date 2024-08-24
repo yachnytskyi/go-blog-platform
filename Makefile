@@ -14,6 +14,9 @@ mongo-local:
 mongo-prod:
 	docker compose up mongodb app-production 
 
+make tests:
+	go test ./test/...
+
 unit-tests:
 	go test ./test/unit/...
 

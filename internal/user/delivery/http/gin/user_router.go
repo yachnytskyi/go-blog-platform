@@ -76,9 +76,9 @@ func (userRouter UserRouter) Router(routerGroup any) {
 		})
 	}
 
-	// Token-related routes with refresh token authentication middleware.
+	// Token-related routes with refresh token middleware.
 	tokenRoutes := router.Group("")
-	tokenRoutes.Use(middleware.RefreshTokenAuthenticationMiddleware(userRouter.Config, userRouter.Logger))
+	tokenRoutes.Use(middleware.RefreshTokenMiddleware(userRouter.Config, userRouter.Logger))
 	{
 		tokenRoutes.GET(constants.RefreshTokenPath, func(ginContext *gin.Context) {
 			userRouter.UserController.RefreshAccessToken(ginContext)

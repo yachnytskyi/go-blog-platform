@@ -25,19 +25,17 @@ func AnonymousMiddleware(logger interfaces.Logger) gin.HandlerFunc {
 	}
 }
 
-// isUserAnonymous checks if the user is anonymous based on the presence of an access token.
 func isUserAnonymous(ginContext *gin.Context) bool {
 	authorizationHeader := ginContext.Request.Header.Get(constants.Authorization)
-	fields := strings.Fields(authorizationHeader)
 
-	// Check if the Authorization header contains a Bearer token.
-	if len(fields) > 0 && fields[0] == constants.Bearer {
+	// Attempt to retrieve the access token from the cookie if no valid Bearer token is found in the Authorization header.
+	_, cookieError := ginContext.Cookie(constants.AccessTokenValue)
+	if cookieError == nil {
 		return true
 	}
 
-	// If no Bearer token in the Authorization header, try to get the token from the cookie.
-	_, cookieError := ginContext.Cookie(constants.AccessTokenValue)
-	if cookieError == nil {
+	// Verify that the Authorization header contains a Bearer token.
+	if strings.HasPrefix(authorizationHeader, constants.Bearer) && len(authorizationHeader) > len(constants.Bearer) {
 		return true
 	}
 

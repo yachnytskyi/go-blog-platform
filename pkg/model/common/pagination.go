@@ -24,7 +24,7 @@ func NewPaginationQuery(page, limit uint64, orderBy, sortOrder, baseURL string) 
 		Page:      page,
 		Limit:     limit,
 		OrderBy:   orderBy,
-		SortOrder: sortOrder,
+		SortOrder: getSortOrder(sortOrder),
 		Skip:      calculateSkip(page, limit),
 		BaseURL:   baseURL,
 	}
@@ -49,6 +49,14 @@ func GetLimit(limit string) uint64 {
 	}
 
 	return uintLimit
+}
+
+func getSortOrder(sortOrder string) string {
+	if sortOrder != constants.SortAscend && sortOrder != constants.SortDescend {
+		return constants.DefaultSortOrder
+	}
+
+	return sortOrder
 }
 
 // calculateSkip calculates the number of items to skip for pagination.

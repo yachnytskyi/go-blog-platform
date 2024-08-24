@@ -1,6 +1,5 @@
-package mock
+package common
 
-// MockLogger is a mock implementation of a logger for testing purposes.
 type MockLogger struct {
 	LastTrace error
 	LastDebug error
@@ -9,6 +8,10 @@ type MockLogger struct {
 	LastError error
 	LastFatal error
 	LastPanic error
+}
+
+func NewMockLogger() *MockLogger {
+	return &MockLogger{}
 }
 
 func (mock *MockLogger) Trace(data error) {

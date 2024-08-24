@@ -21,6 +21,8 @@ func HandleError(err error) error {
 		return TimeExpiredErrorToHTTPTimeExpiredErrorMapper(errorType)
 	case domainError.PaginationError:
 		return PaginationErrorToHTTPPaginationErrorMapper(errorType)
+	case domainError.InternalError:
+		return InternalErrorToHTTPInternalErrorMapper(errorType)
 	case HTTPInternalError:
 		errorType.Notification = constants.InternalErrorNotification
 		return errorType

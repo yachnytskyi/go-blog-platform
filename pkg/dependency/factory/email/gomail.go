@@ -76,14 +76,14 @@ func parseTemplateDirectory(logger interfaces.Logger, location, templatePath str
 }
 
 // SendEmail sends an email to the specified user using the provided email data.
-func (goMail GoMail) SendEmail(configInstance interfaces.Config, logger interfaces.Logger, location string, data any, emailData interfaces.EmailData) error {
-	config := configInstance.GetConfig()
-	smtpPass := config.Email.SMTPPassword
-	smtpUser := config.Email.SMTPUser
-	smtpHost := config.Email.SMTPHost
-	smtpPort := config.Email.SMTPPort
+func (goMail GoMail) SendEmail(config interfaces.Config, logger interfaces.Logger, location string, data any, emailData interfaces.EmailData) error {
+	configInstance := config.GetConfig()
+	smtpPass := configInstance.Email.SMTPPassword
+	smtpUser := configInstance.Email.SMTPUser
+	smtpHost := configInstance.Email.SMTPHost
+	smtpPort := configInstance.Email.SMTPPort
 
-	prepareSendMessage := prepareSendMessage(config, logger, location+".SendEmail", emailData)
+	prepareSendMessage := prepareSendMessage(configInstance, logger, location+".SendEmail", emailData)
 	if validator.IsError(prepareSendMessage.Error) {
 		return prepareSendMessage.Error
 	}

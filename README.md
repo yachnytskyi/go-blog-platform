@@ -22,26 +22,35 @@ Repeat this for the following files:
 - `docker.staging.application.yaml`
 - `docker.prod.application.yaml`
 
-## From the Project Root Directory, Run:     
-    
-The API will then be available at  **http://localhost:8080/api/posts  http://localhost:8080/api/users**  
-You can also find all possible API requests/urls when you launch the project in your server terminal. 
+## API Endpoints
 
-If you need to make rebuild, you can use these commands:  
-```make build``` if you prefer a shortcut command from Makefile.   
-```docker-compose build``` if you you prefer to enter a full command on your own.
-  
-After that repeat this command:
-```make up``` For docker environment.  ```make local ``` For local environment    
+The API will be available at the following URLs:
+- `http://localhost:8080/api/posts`
+- `http://localhost:8080/api/users`
 
-## Run server
-To run this code, you will need docker and docker-compose installed on your machine. From the root project directory, run:  
-```make up``` use default dockerized launch mode     
-```make local``` use local launch mode 
+You can find all possible API requests/URLs when you launch the project in your server terminal.
 
-## Stop Docker Compose services 
-```make down``` if you prefer a shortcut command from Makefile.  
-```docker-compose down``` if you you prefer to enter a full command on your own.
- 
-## Ways of possible improvements
-I am open for new ideas. At first add unit and integration tests. Secondly, refactoring of the system.
+## Build and Run
+
+To build the project, you can use one of the following commands:
+- `make build` (shortcut command from Makefile)
+- `docker-compose build` (full command)
+
+After building, run the project using:
+- `make up` (for Docker environment)
+- `make local` (for local environment)
+
+To run the server, ensure you have Docker and Docker Compose installed.
+
+## Stop Docker Compose Services
+
+To stop the services, use:
+- `make down` (shortcut command from Makefile)
+- `docker-compose down` (full command)
+
+## Ways to Improve
+
+- **Add Unit and Integration Tests**: Enhance testing coverage.
+- **Refactor the System**: Improve code structure and efficiency.
+
+Feel free to provide additional ideas or suggestions for further improvements.

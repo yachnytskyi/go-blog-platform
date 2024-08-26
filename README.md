@@ -1,20 +1,28 @@
 ## Golang Mongo gRPC     
-Source code for  Golang Mongo gRPC App.
+Source code for Golang Mongo gRPC App.
 
 The project uses:  
-**Golang    
-Gin  
-MongoDB  
-gRPC**
+**Golang**  
+**Gin**  
+**MongoDB**  
+**gRPC**
 
-Hexagonal architecture, manual dependency injection and abstract factory are implemented in the project.  
+Hexagonal architecture, manual dependency injection, and abstract factory are implemented in the project.
 
 ## Initializing
-`config/yaml/v1/local.application.example.yaml` and `config/yaml/v1/docker.dev.application.example.yaml` file are provided you as the examples of your own config settings, you need to put them in your `config/yaml/v1/local.application.yaml` and 
-`config/yaml/v1/docker.dev.application.yaml` (you should create them on your own). The same about `test.application.yaml`, `docker.staging.application.yaml` and `docker.prod.application.yaml`,
 
-## From the project root directory, run:  
-```make up``` For docker environment.  ```make local ``` For local environment     
+To set up the configuration files, rename the following files by removing "example" from their filenames:
+
+- Rename `config/yaml/v1/local.application.example.yaml` to `config/yaml/v1/local.application.yaml`.
+- Rename `config/yaml/v1/docker.dev.application.example.yaml` to `config/yaml/v1/docker.dev.application.yaml`.
+
+Repeat this for the following files:
+
+- `test.application.yaml`
+- `docker.staging.application.yaml`
+- `docker.prod.application.yaml`
+
+## From the Project Root Directory, Run:     
     
 The API will then be available at  **http://localhost:8080/api/posts  http://localhost:8080/api/users**  
 You can also find all possible API requests/urls when you launch the project in your server terminal. 

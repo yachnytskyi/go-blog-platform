@@ -19,9 +19,9 @@ To set up the configuration files, rename the following files by removing "examp
 
 - `config/yaml/v1/local.application.example.yaml` → `config/yaml/v1/local.application.yaml`
 - `config/yaml/v1/docker.dev.application.example.yaml` → `config/yaml/v1/docker.dev.application.yaml`
-- `test.application.yaml`
-- `docker.staging.application.yaml`
-- `docker.prod.application.yaml`
+- `config/yaml/v1/test.application.example.yaml` → `config/yaml/v1/test.application.yaml`
+- `config/yaml/v1/docker.staging.application.example.yaml` → `config/yaml/v1/docker.staging.application.yaml`
+- `config/yaml/v1/docker.prod.application.example.yaml` →  `config/yaml/v1/docker.prod.application.yaml`
 
 ## API Endpoints
 

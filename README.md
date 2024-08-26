@@ -1,5 +1,3 @@
-<div align="center">
-  
 ## Golang Mongo gRPC     
 Source code for  Golang Mongo gRPC App.
 
@@ -12,7 +10,8 @@ gRPC**
 Hexagonal architecture, manual dependency injection and abstract factory are implemented in the project.  
 
 ## Initializing
-`config/yaml/v1/local.application.example.yaml` and `config/yaml/v1/docker.dev.application.example.yaml` file are provided you as the examples on your own config settings, you need to put them in your `config/yaml/v1/local.application.yaml` and `config/yaml/v1/docker.dev.application.yaml` (you should create them on your own). The same with `test.application.yaml`, `docker.staging.application.yaml` and `docker.prod.application.yaml`.
+`config/yaml/v1/local.application.example.yaml` and `config/yaml/v1/docker.dev.application.example.yaml` file are provided you as the examples of your own config settings, you need to put them in your `config/yaml/v1/local.application.yaml` and 
+`config/yaml/v1/docker.dev.application.yaml` (you should create them on your own). The same about `test.application.yaml`, `docker.staging.application.yaml` and `docker.prod.application.yaml`,
 
 ## From the project root directory, run:  
 ```make up``` For docker environment.  ```make local ``` For local environment     
@@ -38,5 +37,3 @@ To run this code, you will need docker and docker-compose installed on your mach
  
 ## Ways of possible improvements
 I am open for new ideas. At first add unit and integration tests. Secondly, refactoring of the system.
-
-</div>

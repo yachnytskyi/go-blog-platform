@@ -1,52 +1,67 @@
-## Golang Mongo gRPC     
-Source code for Golang Mongo gRPC App.
+# Golang Mongo gRPC
 
-The project uses:  
-**Golang**  
-**Gin**  
-**MongoDB**  
-**gRPC**
+Source code for the Golang Mongo gRPC App.
 
-Hexagonal architecture, manual dependency injection, and abstract factory are implemented in the project.
+## Introduction
+
+This project is a Golang-based application that uses MongoDB, REST API, gRPC, following hexagonal architecture principles, manual dependency injection, and the abstract factory pattern.
+
+## Prerequisites
+
+Ensure you have the following installed:
+- Golang 
+- Docker
+- Docker Compose
 
 ## Initializing
 
 To set up the configuration files, rename the following files by removing "example" from their filenames:
 
-- Rename `config/yaml/v1/local.application.example.yaml` to `config/yaml/v1/local.application.yaml`.
-- Rename `config/yaml/v1/docker.dev.application.example.yaml` to `config/yaml/v1/docker.dev.application.yaml`.
-
-Repeat this for the following files:
-
+- `config/yaml/v1/local.application.example.yaml` → `config/yaml/v1/local.application.yaml`
+- `config/yaml/v1/docker.dev.application.example.yaml` → `config/yaml/v1/docker.dev.application.yaml`
 - `test.application.yaml`
 - `docker.staging.application.yaml`
 - `docker.prod.application.yaml`
 
 ## API Endpoints
 
-The API will be available at the following URLs:
+The API is available at the following URLs:
 - `http://localhost:8080/api/posts`
 - `http://localhost:8080/api/users`
 
-You can find all possible API requests/URLs when you launch the project in your server terminal.
+For a complete list of available API requests/URLs, check the server terminal upon launching the project.
 
 ## Build and Run
 
-To build the project, you can use one of the following commands:
+To build the project, use one of the following commands:
 - `make build` (shortcut command from Makefile)
 - `docker-compose build` (full command)
 
-After building, run the project using:
+To run the project, choose from:
 - `make up` (for Docker environment)
 - `make local` (for local environment)
 
-To run the server, ensure you have Docker and Docker Compose installed.
+Make sure Docker and Docker Compose are installed.
 
 ## Stop Docker Compose Services
 
 To stop the services, use:
 - `make down` (shortcut command from Makefile)
 - `docker-compose down` (full command)
+
+## License
+
+This project is licensed under the [Creative Commons Attribution-NonCommercial 4.0 International License](https://creativecommons.org/licenses/by-nc/4.0/).
+
+You are free to:
+- Share — copy and redistribute the material in any medium or format
+- Adapt — remix, transform, and build upon the material
+
+The above rights are granted under the following terms:
+- **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.
+- **NonCommercial** — You may not use the material for commercial purposes.
+
+**Note**: This license does not grant you the rights to use the work for commercial purposes. For more details, visit the [Creative Commons License Deed](https://creativecommons.org/licenses/by-nc/4.0/).
 
 ## Ways to Improve
 

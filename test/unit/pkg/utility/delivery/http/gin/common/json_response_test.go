@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
+	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/common"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	test "github.com/yachnytskyi/golang-mongo-grpc/test"
@@ -56,6 +57,7 @@ func TestHandleJSONBindingError(t *testing.T) {
 	expectedLocation := location + "TestHandleJSONBindingError.ShouldBindJSON"
 	expectedErrorMessage := fmt.Sprintf(test.ExpectedErrorMessageFormat, expectedLocation, invalidRequest)
 
+	assert.IsType(t, httpError.HTTPInternalError{}, mockLogger.LastError, test.EqualMessage)
 	assert.Equal(t, http.StatusBadRequest, recorder.Code, test.EqualMessage)
 	assert.JSONEq(t, expectedResponse, recorder.Body.String(), test.EqualMessage)
 	assert.Equal(t, expectedErrorMessage, mockLogger.LastError.Error(), test.EqualMessage)

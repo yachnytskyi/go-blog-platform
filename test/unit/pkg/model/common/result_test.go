@@ -6,7 +6,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
-	"github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
+	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	test "github.com/yachnytskyi/golang-mongo-grpc/test"
 )
 
@@ -44,8 +45,9 @@ func TestResultIsErrorNoError(t *testing.T) {
 
 func TestResultIsErrorWithError(t *testing.T) {
 	t.Parallel()
-	err := errors.New(testError)
+	err := domainError.InternalError{}
 	result := common.NewResultOnFailure[int](err)
 
 	assert.True(t, validator.IsError(result.Error), test.FailureMessage)
+	assert.IsType(t, domainError.InternalError{}, result.Error, test.EqualMessage)
 }

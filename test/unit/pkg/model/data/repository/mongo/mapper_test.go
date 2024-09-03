@@ -26,9 +26,10 @@ const (
 
 func TestHexToObjectIDMapperValidHex(t *testing.T) {
 	t.Parallel()
-	logger := mock.NewMockLogger()
+	mockLogger := mock.NewMockLogger()
+
 	validHex := "507f191e810c19729de860ea"
-	result := model.HexToObjectIDMapper(logger, location+"TestHexToObjectIDMapperValidHex", validHex)
+	result := model.HexToObjectIDMapper(mockLogger, location+"TestHexToObjectIDMapperValidHex", validHex)
 
 	assert.False(t, validator.IsError(result.Error), test.NotFailureMessage)
 	assert.Equal(t, validHex, result.Data.Hex(), test.EqualMessage)
@@ -36,9 +37,10 @@ func TestHexToObjectIDMapperValidHex(t *testing.T) {
 
 func TestHexToObjectIDMapperEmptyHex(t *testing.T) {
 	t.Parallel()
-	logger := mock.NewMockLogger()
+	mockLogger := mock.NewMockLogger()
+
 	emptyHex := ""
-	result := model.HexToObjectIDMapper(logger, location+"TestHexToObjectIDMapperEmptyHex", emptyHex)
+	result := model.HexToObjectIDMapper(mockLogger, location+"TestHexToObjectIDMapperEmptyHex", emptyHex)
 	expectedLocation := location + "TestHexToObjectIDMapperEmptyHex.HexToObjectIDMapper"
 	expectedErrorMessage := fmt.Sprintf(test.ExpectedErrorMessageFormat, expectedLocation, emptyHexString)
 
@@ -50,9 +52,10 @@ func TestHexToObjectIDMapperEmptyHex(t *testing.T) {
 
 func TestHexToObjectIDMapperInvalidHex(t *testing.T) {
 	t.Parallel()
-	logger := mock.NewMockLogger()
+	mockLogger := mock.NewMockLogger()
+
 	invalidHex := "12345"
-	result := model.HexToObjectIDMapper(logger, location+"TestHexToObjectIDMapperInvalidHex", invalidHex)
+	result := model.HexToObjectIDMapper(mockLogger, location+"TestHexToObjectIDMapperInvalidHex", invalidHex)
 	expectedLocation := location + "TestHexToObjectIDMapperInvalidHex.HexToObjectIDMapper"
 	expectedErrorMessage := fmt.Sprintf(test.ExpectedErrorMessageFormat, expectedLocation+".primitive.ObjectIDFromHex", invalidHexString)
 
@@ -64,11 +67,12 @@ func TestHexToObjectIDMapperInvalidHex(t *testing.T) {
 
 func TestDataToMongoDocumentMapperSuccess(t *testing.T) {
 	t.Parallel()
+	mockLogger := mock.NewMockLogger()
+
 	key := "name"
 	value := "test"
-	logger := mock.NewMockLogger()
 	incomingData := map[string]interface{}{key: value}
-	result := model.DataToMongoDocumentMapper(logger, location+"TestDataToMongoDocumentMapperSuccess", incomingData)
+	result := model.DataToMongoDocumentMapper(mockLogger, location+"TestDataToMongoDocumentMapperSuccess", incomingData)
 	expectedDocument := bson.D{{Key: key, Value: value}}
 
 	assert.False(t, validator.IsError(result.Error), test.ErrorNilMessage)
@@ -77,10 +81,10 @@ func TestDataToMongoDocumentMapperSuccess(t *testing.T) {
 
 func TestDataToMongoDocumentMapperBsonMarshalError(t *testing.T) {
 	t.Parallel()
-	logger := mock.NewMockLogger()
+	mockLogger := mock.NewMockLogger()
 
 	incomingData := make(chan int)
-	result := model.DataToMongoDocumentMapper(logger, location+"TestDataToMongoDocumentMapperBsonMarshalError", incomingData)
+	result := model.DataToMongoDocumentMapper(mockLogger, location+"TestDataToMongoDocumentMapperBsonMarshalError", incomingData)
 	expectedLocation := location + "TestDataToMongoDocumentMapperBsonMarshalError.DataToMongoDocumentMapper.bson.Marshal"
 	expectedErrorMessage := fmt.Sprintf(test.ExpectedErrorMessageFormat, expectedLocation, invalidBsonMarshalMessage)
 

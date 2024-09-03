@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/data/repository/mongo"
-	"github.com/yachnytskyi/golang-mongo-grpc/test"
+	test "github.com/yachnytskyi/golang-mongo-grpc/test"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )

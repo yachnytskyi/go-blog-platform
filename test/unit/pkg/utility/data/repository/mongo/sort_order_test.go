@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/data/repository/mongo"
-	"github.com/yachnytskyi/golang-mongo-grpc/test"
+	test "github.com/yachnytskyi/golang-mongo-grpc/test"
 )
 
 const (

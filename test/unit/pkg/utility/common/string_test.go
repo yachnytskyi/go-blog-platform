@@ -6,6 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	test "github.com/yachnytskyi/golang-mongo-grpc/test"
@@ -23,29 +24,31 @@ const (
 
 func TestDecodeValidBase64String(t *testing.T) {
 	t.Parallel()
-	logger := mock.NewMockLogger()
-	result := utility.Decode(logger, location+"TestDecodeValidBase64String", encodedString)
+	mockLogger := mock.NewMockLogger()
+	result := utility.Decode(mockLogger, location+"TestDecodeValidBase64String", encodedString)
 
 	assert.False(t, validator.IsError(result.Error), test.NotFailureMessage)
 	assert.Equal(t, originalString, result.Data, test.EqualMessage)
 }
 
-func TestDecodeInvalidBase64String(t *testing.T) {
-	t.Parallel()
-	logger := mock.NewMockLogger()
-	expectedLocation := location + "TestDecodeInvalidBase64String.Decode.DecodeString"
-	result := utility.Decode(logger, location+"TestDecodeInvalidBase64String", invalidString)
-
-	expectedErrorMessage := fmt.Sprintf(test.ExpectedErrorMessageFormat, expectedLocation, decodeErrorMessage+"7")
-	assert.True(t, validator.IsError(result.Error), test.FailureMessage)
-	assert.Equal(t, expectedErrorMessage, result.Error.Error(), test.EqualMessage)
-}
-
 func TestDecodeEmptyString(t *testing.T) {
 	t.Parallel()
-	logger := mock.NewMockLogger()
-	result := utility.Decode(logger, location+"TestDecodeEmptyString", emptyString)
+	mockLogger := mock.NewMockLogger()
+	result := utility.Decode(mockLogger, location+"TestDecodeEmptyString", emptyString)
 
 	assert.False(t, validator.IsError(result.Error), test.NotFailureMessage)
 	assert.Equal(t, emptyString, result.Data, test.EqualMessage)
+}
+
+func TestDecodeInvalidBase64String(t *testing.T) {
+	t.Parallel()
+	mockLogger := mock.NewMockLogger()
+
+	result := utility.Decode(mockLogger, location+"TestDecodeInvalidBase64String", invalidString)
+	expectedLocation := location + "TestDecodeInvalidBase64String.Decode.DecodeString"
+	expectedErrorMessage := fmt.Sprintf(test.ExpectedErrorMessageFormat, expectedLocation, decodeErrorMessage+"7")
+
+	assert.True(t, validator.IsError(result.Error), test.FailureMessage)
+	assert.IsType(t, domainError.InternalError{}, result.Error, test.EqualMessage)
+	assert.Equal(t, expectedErrorMessage, result.Error.Error(), test.EqualMessage)
 }

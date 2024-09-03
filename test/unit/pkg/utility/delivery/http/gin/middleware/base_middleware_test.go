@@ -15,28 +15,28 @@ import (
 )
 
 func setupSecureHeadersMiddlewareConfig() *config.ApplicationConfig {
-	config := mock.NewMockConfig()
-	config.Security.ContentSecurityPolicyHeader.Key = test.ContentSecurityPolicyHeader
-	config.Security.ContentSecurityPolicyHeader.Value = test.ContentSecurityPolicyValue
-	config.Security.StrictTransportSecurityHeader.Key = test.StrictTransportSecurityHeader
-	config.Security.StrictTransportSecurityHeader.Value = test.StrictTransportSecurityValue
-	config.Security.XContentTypeOptionsHeader.Key = test.XContentTypeOptionsHeader
-	config.Security.XContentTypeOptionsHeader.Value = test.XContentTypeOptionsValue
-	return config
+	mockConfig := mock.NewMockConfig()
+	mockConfig.Security.ContentSecurityPolicyHeader.Key = test.ContentSecurityPolicyHeader
+	mockConfig.Security.ContentSecurityPolicyHeader.Value = test.ContentSecurityPolicyValue
+	mockConfig.Security.StrictTransportSecurityHeader.Key = test.StrictTransportSecurityHeader
+	mockConfig.Security.StrictTransportSecurityHeader.Value = test.StrictTransportSecurityValue
+	mockConfig.Security.XContentTypeOptionsHeader.Key = test.XContentTypeOptionsHeader
+	mockConfig.Security.XContentTypeOptionsHeader.Value = test.XContentTypeOptionsValue
+	return mockConfig
 }
 
-func setupCSPMiddlewareConfig() *config.ApplicationConfig {
-	config := mock.NewMockConfig()
-	config.Security.ContentSecurityPolicyHeaderFull.Key = test.ContentSecurityPolicyFullHeader
-	config.Security.ContentSecurityPolicyHeaderFull.Value = test.ContentSecurityPolicyFullValue
-	return config
+func setupCSPMiddlewaremockConfig() *config.ApplicationConfig {
+	mockConfig := mock.NewMockConfig()
+	mockConfig.Security.ContentSecurityPolicyHeaderFull.Key = test.ContentSecurityPolicyFullHeader
+	mockConfig.Security.ContentSecurityPolicyHeaderFull.Value = test.ContentSecurityPolicyFullValue
+	return mockConfig
 }
 
 func setupValidateInputMiddlewareConfig() *config.ApplicationConfig {
-	config := mock.NewMockConfig()
-	config.Security.AllowedHTTPMethods = []string{http.MethodGet, http.MethodPost}
-	config.Security.AllowedContentTypes = []string{test.ContentTypeJSON}
-	return config
+	mockConfig := mock.NewMockConfig()
+	mockConfig.Security.AllowedHTTPMethods = []string{http.MethodGet, http.MethodPost}
+	mockConfig.Security.AllowedContentTypes = []string{test.ContentTypeJSON}
+	return mockConfig
 }
 
 func TestRequestIDMiddlewareAddsRequestIDWhenAbsent(t *testing.T) {
@@ -86,9 +86,10 @@ func TestRequestIDMiddlewareSetsRequestIDInContext(t *testing.T) {
 
 func TestSecureHeadersMiddlewareSetsHeadersCorrectly(t *testing.T) {
 	t.Parallel()
+	mockConfig := setupSecureHeadersMiddlewareConfig()
+
 	router := gin.Default()
-	config := setupSecureHeadersMiddlewareConfig()
-	router.Use(middleware.SecureHeadersMiddleware(config))
+	router.Use(middleware.SecureHeadersMiddleware(mockConfig))
 
 	recorder := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, test.TestURL, nil)
@@ -103,8 +104,8 @@ func TestSecureHeadersMiddlewareSetsHeadersCorrectly(t *testing.T) {
 func TestCSPMiddlewareSetsCSPHeader(t *testing.T) {
 	t.Parallel()
 	router := gin.Default()
-	config := setupCSPMiddlewareConfig()
-	router.Use(middleware.CSPMiddleware(config))
+	mockConfig := setupCSPMiddlewaremockConfig()
+	router.Use(middleware.CSPMiddleware(mockConfig))
 
 	router.GET(test.TestURL, func(ginContext *gin.Context) {
 		ginContext.String(http.StatusOK, constants.Success)
@@ -123,10 +124,10 @@ func TestCSPMiddlewareSetsCSPHeader(t *testing.T) {
 func TestRateLimitMiddlewareWithDifferentLimits(t *testing.T) {
 	t.Parallel()
 	router := gin.Default()
-	config := mock.NewMockConfig()
+	mockConfig := mock.NewMockConfig()
 
-	config.Security.RateLimit = 1
-	router.Use(middleware.RateLimitMiddleware(config))
+	mockConfig.Security.RateLimit = 1
+	router.Use(middleware.RateLimitMiddleware(mockConfig))
 
 	router.GET(test.TestURL, func(ginContext *gin.Context) {
 		ginContext.String(http.StatusOK, constants.Success)
@@ -144,11 +145,11 @@ func TestRateLimitMiddlewareWithDifferentLimits(t *testing.T) {
 
 func TestRateLimitMiddlewareLimitsRequests(t *testing.T) {
 	t.Parallel()
-	router := gin.Default()
-	config := mock.NewMockConfig()
-	config.Security.RateLimit = 3
-	router.Use(middleware.RateLimitMiddleware(config))
+	mockConfig := mock.NewMockConfig()
+	mockConfig.Security.RateLimit = 3
 
+	router := gin.Default()
+	router.Use(middleware.RateLimitMiddleware(mockConfig))
 	router.GET(test.TestURL, func(ginContext *gin.Context) {
 		ginContext.String(http.StatusOK, constants.Success)
 	})
@@ -166,11 +167,11 @@ func TestRateLimitMiddlewareLimitsRequests(t *testing.T) {
 
 func TestValidateInputMiddlewareAcceptsValidRequest(t *testing.T) {
 	t.Parallel()
-	router := gin.Default()
-	config := setupValidateInputMiddlewareConfig()
-	logger := mock.NewMockLogger()
-	router.Use(middleware.ValidateInputMiddleware(config, logger))
+	mockConfig := setupValidateInputMiddlewareConfig()
+	mockLogger := mock.NewMockLogger()
 
+	router := gin.Default()
+	router.Use(middleware.ValidateInputMiddleware(mockConfig, mockLogger))
 	router.POST(test.TestURL, func(ginContext *gin.Context) {
 		ginContext.String(http.StatusOK, constants.Success)
 	})
@@ -185,10 +186,11 @@ func TestValidateInputMiddlewareAcceptsValidRequest(t *testing.T) {
 
 func TestValidateInputMiddlewareRejectsInvalidMethod(t *testing.T) {
 	t.Parallel()
+	mockConfig := setupValidateInputMiddlewareConfig()
+	mockLogger := mock.NewMockLogger()
+
 	router := gin.Default()
-	config := setupValidateInputMiddlewareConfig()
-	logger := mock.NewMockLogger()
-	router.Use(middleware.ValidateInputMiddleware(config, logger))
+	router.Use(middleware.ValidateInputMiddleware(mockConfig, mockLogger))
 
 	recorder := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodDelete, test.TestURL, nil)
@@ -199,10 +201,11 @@ func TestValidateInputMiddlewareRejectsInvalidMethod(t *testing.T) {
 
 func TestValidateInputMiddlewareRejectsInvalidContentType(t *testing.T) {
 	t.Parallel()
+	mockConfig := setupValidateInputMiddlewareConfig()
+	mockLogger := mock.NewMockLogger()
+
 	router := gin.Default()
-	config := setupValidateInputMiddlewareConfig()
-	logger := mock.NewMockLogger()
-	router.Use(middleware.ValidateInputMiddleware(config, logger))
+	router.Use(middleware.ValidateInputMiddleware(mockConfig, mockLogger))
 
 	recorder := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodPost, test.TestURL, nil)
@@ -214,9 +217,10 @@ func TestValidateInputMiddlewareRejectsInvalidContentType(t *testing.T) {
 
 // func TestTimeoutMiddlewareCompletesWithinTimeout(t *testing.T) {
 // 	t.Parallel()
+// 	mockLogger := mock.NewMockLogger()
+
 // 	router := gin.Default()
-// 	logger := mock.NewMockLogger()
-// 	router.Use(middleware.TimeoutMiddleware(logger))
+// 	router.Use(middleware.TimeoutMiddleware(mockLogger))
 
 // 	router.GET(test.TestURL, func(ginContext *gin.Context) {
 // 		time.Sleep(10 * time.Millisecond)
@@ -233,9 +237,10 @@ func TestValidateInputMiddlewareRejectsInvalidContentType(t *testing.T) {
 
 // func TestTimeoutMiddlewareTimesOut(t *testing.T) {
 // 	t.Parallel()
+// 	mockLogger := mock.NewMockLogger()
+
 // 	router := gin.Default()
-// 	logger := mock.NewMockLogger()
-// 	router.Use(middleware.TimeoutMiddleware(logger))
+// 	router.Use(middleware.TimeoutMiddleware(mockLogger))
 
 // 	router.GET(test.TestURL, func(ginContext *gin.Context) {
 // 		time.Sleep(constants.DefaultContextTimer + 100*time.Millisecond)
@@ -253,6 +258,7 @@ func TestValidateInputMiddlewareRejectsInvalidContentType(t *testing.T) {
 func TestLoggerMiddlewareLogsIncomingAndOutgoingRequests(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
+
 	router := gin.Default()
 	router.Use(middleware.LoggerMiddleware(mockLogger))
 

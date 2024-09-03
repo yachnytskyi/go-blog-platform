@@ -2,17 +2,19 @@ package middleware
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	utility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
+	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
 // AuthenticationMiddleware is a Gin middleware for handling user authentication using JWT tokens.
-func AuthenticationMiddleware(config interfaces.Config, logger interfaces.Logger) gin.HandlerFunc {
+func AuthenticationMiddleware(config *config.ApplicationConfig, logger interfaces.Logger) gin.HandlerFunc {
 	return func(ginContext *gin.Context) {
 		ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 		defer cancel()
@@ -20,21 +22,20 @@ func AuthenticationMiddleware(config interfaces.Config, logger interfaces.Logger
 		// Extract the access token from the request headers or cookies.
 		accessToken := extractToken(ginContext, location+"AuthenticationMiddleware", constants.AccessTokenValue)
 		if validator.IsError(accessToken.Error) {
-			abortWithStatusJSON(ginContext, logger, accessToken.Error, constants.StatusUnauthorized)
+			abortWithStatusJSON(ginContext, logger, accessToken.Error, http.StatusUnauthorized)
 			return
 		}
 
 		// Validate the JWT token using the public key from the configuration.
-		configInstance := config.GetConfig()
 		userTokenPayload := utility.ValidateJWTToken(
 			logger,
 			location+"AuthenticationMiddleware",
 			accessToken.Data,
-			configInstance.AccessToken.PublicKey,
+			config.AccessToken.PublicKey,
 		)
 		if validator.IsError(userTokenPayload.Error) {
 			httpAuthorizationError := httpError.NewHTTPAuthorizationError(location+"AuthenticationMiddleware.ValidateJWTToken", constants.LoggingErrorNotification)
-			abortWithStatusJSON(ginContext, logger, httpAuthorizationError, constants.StatusUnauthorized)
+			abortWithStatusJSON(ginContext, logger, httpAuthorizationError, http.StatusUnauthorized)
 			return
 		}
 

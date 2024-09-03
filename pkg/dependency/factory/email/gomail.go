@@ -27,63 +27,25 @@ const (
 )
 
 type GoMail struct {
-	Config interfaces.Config
+	Config *config.ApplicationConfig
 	Logger interfaces.Logger
 }
 
-func NewGoMail(config interfaces.Config, logger interfaces.Logger) GoMail {
+func NewGoMail(config *config.ApplicationConfig, logger interfaces.Logger) GoMail {
 	return GoMail{
 		Config: config,
 		Logger: logger,
 	}
 }
 
-// parseTemplateDirectory walks through the specified directory and parses all template files.
-func parseTemplateDirectory(logger interfaces.Logger, location, templatePath string) common.Result[*template.Template] {
-	var paths []string
-
-	// Walk through the directory and gather all file paths.
-	walkError := filepath.Walk(templatePath, func(path string, info os.FileInfo, walkError error) error {
-		if validator.IsError(walkError) {
-			internalError := domainError.NewInternalError(location+".parseTemplateDirectory.Walk", walkError.Error())
-			logger.Error(internalError)
-			return internalError
-		}
-		if info.IsDir() {
-			return nil // Skip directories.
-		}
-
-		paths = append(paths, path) // Collect file paths.
-		return nil
-	})
-
-	logger.Debug(domainError.NewInfoMessage(location+".parseTemplateDirectory", parsingMessage))
-	if validator.IsError(walkError) {
-		internalError := domainError.NewInternalError(location+".parseTemplateDirectory."+parsingMessage, walkError.Error())
-		logger.Error(internalError)
-		return common.NewResultOnFailure[*template.Template](internalError)
-	}
-
-	// Parse all collected template files.
-	parseFiles, parseFilesError := template.ParseFiles(paths...)
-	if validator.IsError(parseFilesError) {
-		internalError := domainError.NewInternalError(location+".ParseFiles."+parsingMessage, parseFilesError.Error())
-		logger.Error(internalError)
-		return common.NewResultOnFailure[*template.Template](internalError)
-	}
-
-	return common.NewResultOnSuccess[*template.Template](parseFiles)
-}
-
 // SendEmail sends an email to the specified user using the provided email data.
-func (goMail GoMail) SendEmail(config interfaces.Config, logger interfaces.Logger, location string, data any, emailData interfaces.EmailData) error {
-	configInstance := config.GetConfig()
-	smtpPass := configInstance.Email.SMTPPassword
-	smtpUser := configInstance.Email.SMTPUser
-	smtpHost := configInstance.Email.SMTPHost
-	smtpPort := configInstance.Email.SMTPPort
+func (goMail GoMail) SendEmail(config *config.ApplicationConfig, logger interfaces.Logger, location string, data any, emailData interfaces.EmailData) error {
+	smtpPass := config.Email.SMTPPassword
+	smtpUser := config.Email.SMTPUser
+	smtpHost := config.Email.SMTPHost
+	smtpPort := config.Email.SMTPPort
 
-	prepareSendMessage := prepareSendMessage(configInstance, logger, location+".SendEmail", emailData)
+	prepareSendMessage := prepareSendMessage(config, logger, location+".SendEmail", emailData)
 	if validator.IsError(prepareSendMessage.Error) {
 		return prepareSendMessage.Error
 	}
@@ -138,4 +100,41 @@ func prepareSendMessage(config *config.ApplicationConfig, logger interfaces.Logg
 	message.SetBody(messageBody, body.String())
 	message.AddAlternative(messageAlternative, html2text.HTML2Text(body.String()))
 	return common.NewResultOnSuccess[*gomail.Message](message)
+}
+
+// parseTemplateDirectory walks through the specified directory and parses all template files.
+func parseTemplateDirectory(logger interfaces.Logger, location, templatePath string) common.Result[*template.Template] {
+	var paths []string
+
+	// Walk through the directory and gather all file paths.
+	walkError := filepath.Walk(templatePath, func(path string, info os.FileInfo, walkError error) error {
+		if validator.IsError(walkError) {
+			internalError := domainError.NewInternalError(location+".parseTemplateDirectory.Walk", walkError.Error())
+			logger.Error(internalError)
+			return internalError
+		}
+		if info.IsDir() {
+			return nil // Skip directories.
+		}
+
+		paths = append(paths, path) // Collect file paths.
+		return nil
+	})
+
+	logger.Debug(domainError.NewInfoMessage(location+".parseTemplateDirectory", parsingMessage))
+	if validator.IsError(walkError) {
+		internalError := domainError.NewInternalError(location+".parseTemplateDirectory."+parsingMessage, walkError.Error())
+		logger.Error(internalError)
+		return common.NewResultOnFailure[*template.Template](internalError)
+	}
+
+	// Parse all collected template files.
+	parseFiles, parseFilesError := template.ParseFiles(paths...)
+	if validator.IsError(parseFilesError) {
+		internalError := domainError.NewInternalError(location+".ParseFiles."+parsingMessage, parseFilesError.Error())
+		logger.Error(internalError)
+		return common.NewResultOnFailure[*template.Template](internalError)
+	}
+
+	return common.NewResultOnSuccess[*template.Template](parseFiles)
 }

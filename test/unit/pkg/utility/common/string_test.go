@@ -23,7 +23,6 @@ const (
 
 func TestDecodeValidBase64String(t *testing.T) {
 	t.Parallel()
-
 	logger := mock.NewMockLogger()
 	result := utility.Decode(logger, location+"TestDecodeValidBase64String", encodedString)
 
@@ -33,19 +32,17 @@ func TestDecodeValidBase64String(t *testing.T) {
 
 func TestDecodeInvalidBase64String(t *testing.T) {
 	t.Parallel()
-
 	logger := mock.NewMockLogger()
 	expectedLocation := location + "TestDecodeInvalidBase64String.Decode.DecodeString"
 	result := utility.Decode(logger, location+"TestDecodeInvalidBase64String", invalidString)
 
 	expectedErrorMessage := fmt.Sprintf(test.ExpectedErrorMessageFormat, expectedLocation, decodeErrorMessage+"7")
 	assert.True(t, validator.IsError(result.Error), test.FailureMessage)
-	assert.Equal(t, expectedErrorMessage, result.Error.Error(), expectedErrorMessage)
+	assert.Equal(t, expectedErrorMessage, result.Error.Error(), test.EqualMessage)
 }
 
 func TestDecodeEmptyString(t *testing.T) {
 	t.Parallel()
-
 	logger := mock.NewMockLogger()
 	result := utility.Decode(logger, location+"TestDecodeEmptyString", emptyString)
 

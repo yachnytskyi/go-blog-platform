@@ -1,24 +1,23 @@
 package constants
 
 import (
-	"net/http"
 	"time"
 )
 
 // Pagination constants.
 const (
-	Page                 = "page"       // Page query parameter.
-	Limit                = "limit"      // Limit query parameter.
-	OrderBy              = "order_by"   // Order by query parameter.
-	SortOrder            = "sort_order" // Sort order query parameter.
-	DefaultAmountOfPages = 10           // Default amount of pages for pagination.
-	DefaultPage          = "1"          // Default page number.
-	DefaultLimit         = "10"         // Default limit per page.
-	MaxItemsPerPage      = 100          // Maximum items per page.
-	DefaultOrderBy       = "created_at" // Default order by field.
-	DefaultSortOrder     = "descend"    // Default sort order.
-	SortAscend           = "ascend"     // Ascending sort order.
-	SortDescend          = "descend"    // Descending sort order.
+	Page                     = "page"       // Page query parameter.
+	Limit                    = "limit"      // Limit query parameter.
+	OrderBy                  = "order_by"   // Order by query parameter.
+	SortOrder                = "sort_order" // Sort order query parameter.
+	DefaultAmountOfPageLinks = 10           // Default amount of page links for pagination.
+	DefaultPage              = "1"          // Default page number.
+	DefaultLimit             = "10"         // Default limit per page.
+	MaxItemsPerPage          = 100          // Maximum items per page.
+	DefaultOrderBy           = "created_at" // Default order by field.
+	DefaultSortOrder         = "descend"    // Default sort order.
+	SortAscend               = "ascend"     // Ascending sort order.
+	SortDescend              = "descend"    // Descending sort order.
 )
 
 // Context timers.
@@ -92,23 +91,10 @@ const (
 
 // HTTP Headers used in the application.
 const (
-	CorrelationIDHeader = "X-Correlation-ID" // Correlation-ID header for tracking requests across systems.
-	ContentType         = "Content-Type"     // Content-Type header.
-	Authorization       = "Authorization"    // Authorization header.
-	Bearer              = "Bearer "          // Bearer token prefix.
-)
-
-// HTTP status codes.
-const (
-	StatusOk               = http.StatusOK               // HTTP 200 OK.
-	StatusCreated          = http.StatusCreated          // HTTP 201 Created.
-	StatusNoContent        = http.StatusNoContent        // HTTP 204 No Content.
-	StatusBadRequest       = http.StatusBadRequest       // HTTP 400 Bad Request.
-	StatusUnauthorized     = http.StatusUnauthorized     // HTTP 401 Unauthorized.
-	StatusForbidden        = http.StatusForbidden        // HTTP 403 Forbidden.
-	StatusNotFound         = http.StatusNotFound         // HTTP 404 Not Found.
-	StatusMethodNotAllowed = http.StatusMethodNotAllowed // HTTP 405 Not Allowed.
-	StatusBadGateway       = http.StatusBadGateway       // HTTP 502 Bad Gateway.
+	RequestIDHeader = "X-Request-ID"  // Request-ID header for tracking requests across systems.
+	ContentType     = "Content-Type"  // Content-Type header.
+	Authorization   = "Authorization" // Authorization header.
+	Bearer          = "Bearer "       // Bearer token prefix.
 )
 
 // Operation status messages.

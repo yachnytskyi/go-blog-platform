@@ -7,15 +7,16 @@ import (
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/usecase"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
+	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
 
 type UseCaseV1 struct {
-	Config interfaces.Config
+	Config *config.ApplicationConfig
 	Logger interfaces.Logger
 }
 
-func NewUseCaseV1(config interfaces.Config, logger interfaces.Logger) UseCaseV1 {
+func NewUseCaseV1(config *config.ApplicationConfig, logger interfaces.Logger) UseCaseV1 {
 	return UseCaseV1{
 		Config: config,
 		Logger: logger,

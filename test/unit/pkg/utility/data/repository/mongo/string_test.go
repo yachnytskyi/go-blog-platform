@@ -6,6 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/data/repository/mongo"
+	"github.com/yachnytskyi/golang-mongo-grpc/test"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -24,6 +25,7 @@ func parseResult(result string) map[string]string {
 }
 
 func TestBSONToStringMapperNestedDocumentsAndArrays(t *testing.T) {
+	t.Parallel()
 	objectID := primitive.NewObjectID()
 	embeddedDoc := bson.M{"subfield1": "subvalue1"}
 	nestedArray := []interface{}{embeddedDoc, "stringValue", 42}
@@ -42,14 +44,15 @@ func TestBSONToStringMapperNestedDocumentsAndArrays(t *testing.T) {
 
 	result := utility.BSONToStringMapper(query)
 	parsedResult := parseResult(result)
-	assert.Equal(t, expected, parsedResult)
+	assert.Equal(t, expected, parsedResult, test.EqualMessage)
 }
 
 func TestBSONToStringMapperEmptyQuery(t *testing.T) {
+	t.Parallel()
 	query := bson.M{}
 	expected := map[string]string{}
 
 	result := utility.BSONToStringMapper(query)
 	parsedResult := parseResult(result)
-	assert.Equal(t, expected, parsedResult)
+	assert.Equal(t, expected, parsedResult, test.EqualMessage)
 }

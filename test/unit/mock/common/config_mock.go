@@ -8,12 +8,6 @@ type MockConfig struct {
 	ApplicationConfig *config.ApplicationConfig
 }
 
-func NewMockConfig() MockConfig {
-	return MockConfig{
-		ApplicationConfig: &config.ApplicationConfig{},
-	}
-}
-
-func (mock MockConfig) GetConfig() *config.ApplicationConfig {
-	return mock.ApplicationConfig
+func NewMockConfig() *config.ApplicationConfig {
+	return &config.ApplicationConfig{}
 }

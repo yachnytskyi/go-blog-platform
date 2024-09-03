@@ -1,4 +1,4 @@
-package common
+package http
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 
 type HTTPIncomingLog struct {
 	Location      string    `json:"location"`       // The location where the log entry is created.
-	CorrelationID string    `json:"correlation_id"` // Unique identifier to correlate logs.
+	RequestID     string    `json:"request_id"`     // Unique identifier to request logs.
 	Time          time.Time `json:"time"`           // The time when the log entry is created.
 	RequestMethod string    `json:"request_method"` // The HTTP method of the incoming request.
 	RequestURL    string    `json:"request_url"`    // The URL of the incoming request.
@@ -19,7 +19,7 @@ type HTTPIncomingLog struct {
 
 type HTTPOutgoingLog struct {
 	Location       string        `json:"location"`        // The location where the log entry is created.
-	CorrelationID  string        `json:"correlation_id"`  // Unique identifier to correlate logs.
+	RequestID      string        `json:"request_id"`      // Unique identifier to request logs.
 	Time           time.Time     `json:"time"`            // The time when the log entry is created.
 	RequestMethod  string        `json:"request_method"`  // The HTTP method of the request corresponding to the response.
 	RequestURL     string        `json:"request_url"`     // The URL of the request corresponding to the response.
@@ -29,10 +29,10 @@ type HTTPOutgoingLog struct {
 	Duration       time.Duration `json:"duration"`        // The duration taken to process the request and send the response.
 }
 
-func NewHTTPIncomingLog(location, correlationID, method, url, ip, userAgent string) HTTPIncomingLog {
+func NewHTTPIncomingLog(location, requestID, method, url, ip, userAgent string) HTTPIncomingLog {
 	return HTTPIncomingLog{
 		Location:      location,
-		CorrelationID: correlationID,
+		RequestID:     requestID,
 		Time:          time.Now(),
 		RequestMethod: method,
 		RequestURL:    url,
@@ -41,10 +41,10 @@ func NewHTTPIncomingLog(location, correlationID, method, url, ip, userAgent stri
 	}
 }
 
-func NewHTTPOutgoingLog(location, correlationID, method, url, ip, userAgent string, status int, duration time.Duration) HTTPOutgoingLog {
+func NewHTTPOutgoingLog(location, requestID, method, url, ip, userAgent string, status int, duration time.Duration) HTTPOutgoingLog {
 	return HTTPOutgoingLog{
 		Location:       location,
-		CorrelationID:  correlationID,
+		RequestID:      requestID,
 		Time:           time.Now(),
 		RequestMethod:  method,
 		RequestURL:     url,
@@ -58,14 +58,14 @@ func NewHTTPOutgoingLog(location, correlationID, method, url, ip, userAgent stri
 func (log HTTPIncomingLog) Error() string {
 	return fmt.Sprintf(
 		"location: %s, "+
-			"correlation_id: %s, "+
+			"request_id: %s, "+
 			"time: %s, "+
 			"request_method: %s, "+
 			"request_url: %s, "+
 			"client_ip: %s, "+
 			"user_agent: %s",
 		log.Location,
-		log.CorrelationID,
+		log.RequestID,
 		log.Time.Format(constants.DateTimeFormat),
 		log.RequestMethod,
 		log.RequestURL,
@@ -77,7 +77,7 @@ func (log HTTPIncomingLog) Error() string {
 func (log HTTPOutgoingLog) Error() string {
 	return fmt.Sprintf(
 		"location: %s, "+
-			"correlation_id: %s, "+
+			"request_id: %s, "+
 			"time: %s, "+
 			"request_method: %s, "+
 			"request_url: %s, "+
@@ -86,7 +86,7 @@ func (log HTTPOutgoingLog) Error() string {
 			"response_status: %d, "+
 			"duration: %s",
 		log.Location,
-		log.CorrelationID,
+		log.RequestID,
 		log.Time.Format(constants.DateTimeFormat),
 		log.RequestMethod,
 		log.RequestURL,

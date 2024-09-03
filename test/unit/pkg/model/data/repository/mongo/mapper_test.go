@@ -1,0 +1,91 @@
+package mongo
+
+import (
+	"fmt"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
+	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
+	test "github.com/yachnytskyi/golang-mongo-grpc/test"
+	mock "github.com/yachnytskyi/golang-mongo-grpc/test/unit/mock/common"
+	"go.mongodb.org/mongo-driver/bson"
+)
+
+const (
+	location                  = "test.unit.pkg.mode.data.repository.mongo."
+	emptyObjectID             = "000000000000000000000000"
+	emptyHexString            = "Id is empty"
+	invalidHexString          = "the provided hex string is not a valid ObjectID"
+	invalidBsonMarshalMessage = "no encoder found for chan int"
+	invalidBsonUnmarshalMsg   = "bson.Unmarshal failed"
+)
+
+// Tests for HexToObjectIDMapper
+
+func TestHexToObjectIDMapperValidHex(t *testing.T) {
+	t.Parallel()
+	logger := mock.NewMockLogger()
+	validHex := "507f191e810c19729de860ea"
+	result := model.HexToObjectIDMapper(logger, location+"TestHexToObjectIDMapperValidHex", validHex)
+
+	assert.False(t, validator.IsError(result.Error), test.NotFailureMessage)
+	assert.Equal(t, validHex, result.Data.Hex(), test.EqualMessage)
+}
+
+func TestHexToObjectIDMapperEmptyHex(t *testing.T) {
+	t.Parallel()
+	logger := mock.NewMockLogger()
+	emptyHex := ""
+	result := model.HexToObjectIDMapper(logger, location+"TestHexToObjectIDMapperEmptyHex", emptyHex)
+	expectedLocation := location + "TestHexToObjectIDMapperEmptyHex.HexToObjectIDMapper"
+	expectedErrorMessage := fmt.Sprintf(test.ExpectedErrorMessageFormat, expectedLocation, emptyHexString)
+
+	assert.True(t, validator.IsError(result.Error), test.ErrorNotNilMessage)
+	assert.Equal(t, emptyObjectID, result.Data.Hex(), test.EqualMessage)
+	assert.IsType(t, domainError.InternalError{}, result.Error, test.EqualMessage)
+	assert.Equal(t, expectedErrorMessage, result.Error.Error(), test.EqualMessage)
+}
+
+func TestHexToObjectIDMapperInvalidHex(t *testing.T) {
+	t.Parallel()
+	logger := mock.NewMockLogger()
+	invalidHex := "12345"
+	result := model.HexToObjectIDMapper(logger, location+"TestHexToObjectIDMapperInvalidHex", invalidHex)
+	expectedLocation := location + "TestHexToObjectIDMapperInvalidHex.HexToObjectIDMapper"
+	expectedErrorMessage := fmt.Sprintf(test.ExpectedErrorMessageFormat, expectedLocation+".primitive.ObjectIDFromHex", invalidHexString)
+
+	assert.True(t, validator.IsError(result.Error), test.ErrorNotNilMessage)
+	assert.Equal(t, emptyObjectID, result.Data.Hex(), test.EqualMessage)
+	assert.IsType(t, domainError.InternalError{}, result.Error, test.EqualMessage)
+	assert.Equal(t, expectedErrorMessage, result.Error.Error(), test.EqualMessage)
+}
+
+func TestDataToMongoDocumentMapperSuccess(t *testing.T) {
+	t.Parallel()
+	key := "name"
+	value := "test"
+	logger := mock.NewMockLogger()
+	incomingData := map[string]interface{}{key: value}
+	result := model.DataToMongoDocumentMapper(logger, location+"TestDataToMongoDocumentMapperSuccess", incomingData)
+	expectedDocument := bson.D{{Key: key, Value: value}}
+
+	assert.False(t, validator.IsError(result.Error), test.ErrorNilMessage)
+	assert.Equal(t, expectedDocument, *result.Data, test.EqualMessage)
+}
+
+func TestDataToMongoDocumentMapperBsonMarshalError(t *testing.T) {
+	t.Parallel()
+	logger := mock.NewMockLogger()
+
+	incomingData := make(chan int)
+	result := model.DataToMongoDocumentMapper(logger, location+"TestDataToMongoDocumentMapperBsonMarshalError", incomingData)
+	expectedLocation := location + "TestDataToMongoDocumentMapperBsonMarshalError.DataToMongoDocumentMapper.bson.Marshal"
+	expectedErrorMessage := fmt.Sprintf(test.ExpectedErrorMessageFormat, expectedLocation, invalidBsonMarshalMessage)
+
+	assert.Nil(t, result.Data, test.DataNilMessage)
+	assert.True(t, validator.IsError(result.Error), test.ErrorNotNilMessage)
+	assert.IsType(t, domainError.InternalError{}, result.Error, test.EqualMessage)
+	assert.Equal(t, expectedErrorMessage, result.Error.Error(), test.EqualMessage)
+}

@@ -14,6 +14,7 @@ import (
 )
 
 func TestAnonymousMiddlewareNoToken(t *testing.T) {
+	t.Parallel()
 	router := gin.Default()
 	mockLogger := mock.NewMockLogger()
 	router.Use(middleware.AnonymousMiddleware(mockLogger))
@@ -26,11 +27,12 @@ func TestAnonymousMiddlewareNoToken(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, request)
 
-	assert.Equal(t, http.StatusOK, recorder.Code)
-	assert.Equal(t, test.SuccessResponse, recorder.Body.String())
+	assert.Equal(t, http.StatusOK, recorder.Code, test.EqualMessage)
+	assert.Equal(t, test.SuccessResponse, recorder.Body.String(), test.EqualMessage)
 }
 
 func TestAnonymousMiddlewareCookieEmptyTokenValue(t *testing.T) {
+	t.Parallel()
 	router := gin.Default()
 	mockLogger := mock.NewMockLogger()
 	router.Use(middleware.AnonymousMiddleware(mockLogger))
@@ -40,11 +42,12 @@ func TestAnonymousMiddlewareCookieEmptyTokenValue(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, request)
 
-	assert.Equal(t, http.StatusForbidden, recorder.Code)
-	assert.JSONEq(t, test.AlreadyLoggedInMessage, recorder.Body.String())
+	assert.Equal(t, http.StatusForbidden, recorder.Code, test.EqualMessage)
+	assert.JSONEq(t, test.AlreadyLoggedInMessage, recorder.Body.String(), test.EqualMessage)
 }
 
 func TestAnonymousMiddlewareCookieValidToken(t *testing.T) {
+	t.Parallel()
 	router := gin.Default()
 	mockLogger := mock.NewMockLogger()
 	router.Use(middleware.AnonymousMiddleware(mockLogger))
@@ -54,11 +57,12 @@ func TestAnonymousMiddlewareCookieValidToken(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, request)
 
-	assert.Equal(t, http.StatusForbidden, recorder.Code)
-	assert.JSONEq(t, test.AlreadyLoggedInMessage, recorder.Body.String())
+	assert.Equal(t, http.StatusForbidden, recorder.Code, test.EqualMessage)
+	assert.JSONEq(t, test.AlreadyLoggedInMessage, recorder.Body.String(), test.EqualMessage)
 }
 
 func TestAnonymousMiddlewareHeaderEmptyTokenValue(t *testing.T) {
+	t.Parallel()
 	router := gin.Default()
 	mockLogger := mock.NewMockLogger()
 	router.Use(middleware.AnonymousMiddleware(mockLogger))
@@ -72,11 +76,12 @@ func TestAnonymousMiddlewareHeaderEmptyTokenValue(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, request)
 
-	assert.Equal(t, http.StatusOK, recorder.Code)
-	assert.Equal(t, test.SuccessResponse, recorder.Body.String())
+	assert.Equal(t, http.StatusOK, recorder.Code, test.EqualMessage)
+	assert.Equal(t, test.SuccessResponse, recorder.Body.String(), test.EqualMessage)
 }
 
 func TestAnonymousMiddlewareHeaderValidToken(t *testing.T) {
+	t.Parallel()
 	router := gin.Default()
 	mockLogger := mock.NewMockLogger()
 	router.Use(middleware.AnonymousMiddleware(mockLogger))
@@ -90,11 +95,12 @@ func TestAnonymousMiddlewareHeaderValidToken(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, request)
 
-	assert.Equal(t, http.StatusForbidden, recorder.Code)
-	assert.JSONEq(t, test.AlreadyLoggedInMessage, recorder.Body.String())
+	assert.Equal(t, http.StatusForbidden, recorder.Code, test.EqualMessage)
+	assert.JSONEq(t, test.AlreadyLoggedInMessage, recorder.Body.String(), test.EqualMessage)
 }
 
 func TestAnonymousMiddlewareHeaderInvalidToken(t *testing.T) {
+	t.Parallel()
 	router := gin.Default()
 	mockLogger := mock.NewMockLogger()
 	router.Use(middleware.AnonymousMiddleware(mockLogger))
@@ -108,6 +114,6 @@ func TestAnonymousMiddlewareHeaderInvalidToken(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, request)
 
-	assert.Equal(t, http.StatusForbidden, recorder.Code)
-	assert.JSONEq(t, test.AlreadyLoggedInMessage, recorder.Body.String())
+	assert.Equal(t, http.StatusForbidden, recorder.Code, test.EqualMessage)
+	assert.JSONEq(t, test.AlreadyLoggedInMessage, recorder.Body.String(), test.EqualMessage)
 }

@@ -6,11 +6,6 @@ import (
 	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
 )
 
-// Config is an interface that defines a method for retrieving the application's configuration.
-type Config interface {
-	GetConfig() *config.ApplicationConfig
-}
-
 // Logger is an interface that defines methods for logging at different levels.
 type Logger interface {
 	Trace(data error)
@@ -24,7 +19,7 @@ type Logger interface {
 
 // Email is an interface that defines methods for sending emails.
 type Email interface {
-	SendEmail(config Config, logger Logger, location string, data any, emailData EmailData) error
+	SendEmail(config *config.ApplicationConfig, logger Logger, location string, data any, emailData EmailData) error
 }
 
 // Repository is an interface that defines methods for creating and managing repository instances.

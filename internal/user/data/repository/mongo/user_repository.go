@@ -9,6 +9,7 @@ import (
 	repositoryUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/utility"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	usecase "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
+	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
@@ -28,12 +29,12 @@ const (
 )
 
 type UserRepository struct {
-	Config     interfaces.Config
+	Config     *config.ApplicationConfig
 	Logger     interfaces.Logger
 	Collection *mongo.Collection
 }
 
-func NewUserRepository(config interfaces.Config, logger interfaces.Logger, database *mongo.Database) UserRepository {
+func NewUserRepository(config *config.ApplicationConfig, logger interfaces.Logger, database *mongo.Database) UserRepository {
 	repository := UserRepository{
 		Config:     config,
 		Logger:     logger,
@@ -64,7 +65,7 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 	}
 
 	// Set up pagination and sorting options using provided parameters.
-	paginationQuery.TotalItems = uint64(totalUsers)
+	paginationQuery.TotalItems = int(totalUsers)
 	paginationQuery = common.SetCorrectPage(paginationQuery)
 	option := options.FindOptions{}
 	option.SetLimit(int64(paginationQuery.Limit))

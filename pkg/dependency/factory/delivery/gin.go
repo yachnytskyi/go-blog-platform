@@ -20,13 +20,13 @@ import (
 )
 
 type GinDelivery struct {
-	Config interfaces.Config
+	Config *config.ApplicationConfig
 	Logger interfaces.Logger
 	Server *http.Server
 	Router *gin.Engine
 }
 
-func NewGinDelivery(config interfaces.Config, logger interfaces.Logger) *GinDelivery {
+func NewGinDelivery(config *config.ApplicationConfig, logger interfaces.Logger) *GinDelivery {
 	return &GinDelivery{
 		Config: config,
 		Logger: logger,
@@ -34,11 +34,10 @@ func NewGinDelivery(config interfaces.Config, logger interfaces.Logger) *GinDeli
 }
 
 func (ginDelivery *GinDelivery) CreateDelivery(serverRouters interfaces.ServerRouters) {
-	config := ginDelivery.Config.GetConfig()
 	ginDelivery.Router = gin.Default()
-	applyMiddleware(ginDelivery.Router, config, ginDelivery.Logger)
-	configureCORS(ginDelivery.Router, config)
-	router := ginDelivery.Router.Group(config.Gin.ServerGroup)
+	applyMiddleware(ginDelivery.Router, ginDelivery.Config, ginDelivery.Logger)
+	configureCORS(ginDelivery.Router, ginDelivery.Config)
+	router := ginDelivery.Router.Group(ginDelivery.Config.Gin.ServerGroup)
 
 	// Initialize entity-specific routers.
 	serverRouters.UserRouter.Router(router)
@@ -49,16 +48,14 @@ func (ginDelivery *GinDelivery) CreateDelivery(serverRouters interfaces.ServerRo
 	ginDelivery.Router.HandleMethodNotAllowed = true
 
 	ginDelivery.Server = &http.Server{
-		Addr:    ":" + config.Gin.Port,
+		Addr:    ":" + ginDelivery.Config.Gin.Port,
 		Handler: ginDelivery.Router,
 	}
 }
 
 func (ginDelivery GinDelivery) LaunchServer(ctx context.Context, repository interfaces.Repository) {
-	config := ginDelivery.Config.GetConfig()
-
 	go func() {
-		runError := ginDelivery.Router.Run(":" + config.Gin.Port)
+		runError := ginDelivery.Router.Run(":" + ginDelivery.Config.Gin.Port)
 		if validator.IsError(runError) {
 			repository.Close(ctx)
 			ginDelivery.Logger.Panic(domainError.NewInternalError(location+"gin.LaunchServer.Router.Run", runError.Error()))
@@ -130,7 +127,7 @@ func setNoRouteHandler(router *gin.Engine, location string, logger interfaces.Lo
 			fmt.Sprintf(constants.RouteNotFoundNotification, requestedPath),
 		)
 		logger.Error(httpRequestError)
-		ginContext.JSON(constants.StatusNotFound, httpModel.NewJSONResponseOnFailure(httpError.HandleError(httpRequestError)))
+		ginContext.JSON(http.StatusNotFound, httpModel.NewJSONResponseOnFailure(httpError.HandleError(httpRequestError)))
 	})
 }
 
@@ -143,6 +140,6 @@ func setNoMethodHandler(router *gin.Engine, location string, logger interfaces.L
 			fmt.Sprintf(constants.MethodNotAllowedNotification, forbiddenMethod),
 		)
 		logger.Error(httpRequestError)
-		ginContext.JSON(constants.StatusMethodNotAllowed, httpModel.NewJSONResponseOnFailure(httpError.HandleError(httpRequestError)))
+		ginContext.JSON(http.StatusMethodNotAllowed, httpModel.NewJSONResponseOnFailure(httpError.HandleError(httpRequestError)))
 	})
 }

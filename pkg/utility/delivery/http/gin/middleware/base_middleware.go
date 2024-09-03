@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"net/http"
 	"strings"
 	"time"
 
@@ -13,23 +14,23 @@ import (
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
-	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/common"
-	http "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
+	delivery "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
+	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
 const ()
 
-// RequestIDMiddleware adds a correlation ID to requests and responses.
+// RequestIDMiddleware adds a request ID to requests and responses.
 func RequestIDMiddleware() gin.HandlerFunc {
 	return func(ginContext *gin.Context) {
-		correlationID := ginContext.GetHeader(constants.CorrelationIDHeader)
-		if correlationID == "" {
-			correlationID = uuid.New().String()
+		requestID := ginContext.GetHeader(constants.RequestIDHeader)
+		if requestID == "" {
+			requestID = uuid.New().String()
 		}
 
-		ginContext.Set(constants.CorrelationIDHeader, correlationID)
-		ginContext.Writer.Header().Set(constants.CorrelationIDHeader, correlationID)
+		ginContext.Set(constants.RequestIDHeader, requestID)
+		ginContext.Writer.Header().Set(constants.RequestIDHeader, requestID)
 		ginContext.Next()
 	}
 }
@@ -78,8 +79,8 @@ func ValidateInputMiddleware(config *config.ApplicationConfig, logger interfaces
 		if validator.IsSliceNotContains(config.Security.AllowedHTTPMethods, ginContext.Request.Method) {
 			allowedMethods := strings.Join(config.Security.AllowedHTTPMethods, ", ")
 			notification := constants.InvalidHTTPMethodNotification + allowedMethods
-			httpRequestError := http.NewHTTPRequestError(location+"ValidateInputMiddleware.AllowedHTTPMethods", ginContext.Request.Method, notification)
-			abortWithStatusJSON(ginContext, logger, httpRequestError, constants.StatusBadRequest)
+			httpRequestError := httpError.NewHTTPRequestError(location+"ValidateInputMiddleware.AllowedHTTPMethods", ginContext.Request.Method, notification)
+			abortWithStatusJSON(ginContext, logger, httpRequestError, http.StatusBadRequest)
 			return
 		}
 
@@ -87,8 +88,8 @@ func ValidateInputMiddleware(config *config.ApplicationConfig, logger interfaces
 		if contentType != "" && validator.IsSliceNotContains(config.Security.AllowedContentTypes, contentType) {
 			allowedContentTypes := strings.Join(config.Security.AllowedContentTypes, ", ")
 			notification := constants.InvalidHTTPMethodNotification + allowedContentTypes
-			httpRequestError := http.NewHTTPRequestError(location+"ValidateInputMiddleware.AllowedContentTypes", contentType, notification)
-			abortWithStatusJSON(ginContext, logger, httpRequestError, constants.StatusBadRequest)
+			httpRequestError := httpError.NewHTTPRequestError(location+"ValidateInputMiddleware.AllowedContentTypes", contentType, notification)
+			abortWithStatusJSON(ginContext, logger, httpRequestError, http.StatusBadRequest)
 			return
 		}
 
@@ -112,8 +113,8 @@ func TimeoutMiddleware(logger interfaces.Logger) gin.HandlerFunc {
 		select {
 		case <-ch:
 		case <-ctx.Done():
-			httpInternalError := http.NewHTTPInternalError(location+"TimeOutMiddleware", ctx.Err().Error())
-			abortWithStatusJSON(ginContext, logger, httpInternalError, constants.StatusBadGateway)
+			httpInternalError := httpError.NewHTTPInternalError(location+"TimeOutMiddleware", ctx.Err().Error())
+			abortWithStatusJSON(ginContext, logger, httpInternalError, http.StatusBadGateway)
 		}
 	}
 }
@@ -122,22 +123,21 @@ func TimeoutMiddleware(logger interfaces.Logger) gin.HandlerFunc {
 func LoggerMiddleware(logger interfaces.Logger) gin.HandlerFunc {
 	return func(ginContext *gin.Context) {
 		start := time.Now()
-		correlationID := ginContext.GetString(constants.CorrelationIDHeader)
+		requestID := ginContext.GetString(constants.RequestIDHeader)
 
-		httpIncomingLog := common.NewHTTPIncomingLog(
+		httpIncomingLog := delivery.NewHTTPIncomingLog(
 			location+"LoggerMiddleware",
-			correlationID,
+			requestID,
 			ginContext.Request.Method,
 			ginContext.Request.URL.Path,
 			ginContext.ClientIP(),
 			ginContext.Request.UserAgent(),
 		)
-
 		ginContext.Next()
 
-		httpOutgoingLog := common.NewHTTPOutgoingLog(
+		httpOutgoingLog := delivery.NewHTTPOutgoingLog(
 			location+"LoggerMiddleware",
-			correlationID,
+			requestID,
 			ginContext.Request.Method,
 			ginContext.Request.URL.Path,
 			ginContext.ClientIP(),

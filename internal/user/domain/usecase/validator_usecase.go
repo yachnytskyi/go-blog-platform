@@ -12,7 +12,6 @@ import (
 	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
 	domainValidator "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain/validator"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/domain"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	bcrypt "golang.org/x/crypto/bcrypt"
 )
@@ -76,10 +75,10 @@ var (
 
 func validateUserCreate(logger interfaces.Logger, userCreate user.UserCreate) common.Result[user.UserCreate] {
 	validationErrors := make([]error, 0, 4)
-	userCreate.Email = utility.SanitizeAndToLowerString(userCreate.Email)
-	userCreate.Name = utility.SanitizeString(userCreate.Name)
-	userCreate.Password = utility.SanitizeString(userCreate.Password)
-	userCreate.PasswordConfirm = utility.SanitizeString(userCreate.PasswordConfirm)
+	userCreate.Email = strings.ToLower(strings.TrimSpace(userCreate.Email))
+	userCreate.Name = strings.TrimSpace(userCreate.Name)
+	userCreate.Password = strings.TrimSpace(userCreate.Password)
+	userCreate.PasswordConfirm = strings.TrimSpace(userCreate.PasswordConfirm)
 
 	validationErrors = validateEmail(logger, location+"validateUserCreate", userCreate.Email, validationErrors)
 	validationErrors = domainValidator.ValidateField(logger, location+"validateUserCreate", userCreate.Name, usernameValidator, validationErrors)
@@ -93,7 +92,7 @@ func validateUserCreate(logger interfaces.Logger, userCreate user.UserCreate) co
 
 func validateUserUpdate(logger interfaces.Logger, userUpdate user.UserUpdate) common.Result[user.UserUpdate] {
 	validationErrors := make([]error, 0, 1)
-	userUpdate.Name = utility.SanitizeString(userUpdate.Name)
+	userUpdate.Name = strings.TrimSpace(userUpdate.Name)
 
 	validationErrors = domainValidator.ValidateField(logger, location+"validateUserUpdate", userUpdate.Name, usernameValidator, validationErrors)
 	if len(validationErrors) > 0 {
@@ -105,8 +104,8 @@ func validateUserUpdate(logger interfaces.Logger, userUpdate user.UserUpdate) co
 
 func validateUserLogin(logger interfaces.Logger, userLogin user.UserLogin) common.Result[user.UserLogin] {
 	validationErrors := make([]error, 0, 2)
-	userLogin.Email = utility.SanitizeAndToLowerString(userLogin.Email)
-	userLogin.Password = utility.SanitizeString(userLogin.Password)
+	userLogin.Email = strings.ToLower(strings.TrimSpace(userLogin.Email))
+	userLogin.Password = strings.TrimSpace(userLogin.Password)
 
 	validationErrors = validateEmail(logger, location+"validateUserLogin", userLogin.Email, validationErrors)
 	validationErrors = domainValidator.ValidateField(logger, location+"validateUserLogin", userLogin.Password, usernameValidator, validationErrors)
@@ -120,7 +119,7 @@ func validateUserLogin(logger interfaces.Logger, userLogin user.UserLogin) commo
 
 func validateUserForgottenPassword(logger interfaces.Logger, userForgottenPassword user.UserForgottenPassword) common.Result[user.UserForgottenPassword] {
 	validationErrors := make([]error, 0, 2)
-	userForgottenPassword.Email = utility.SanitizeAndToLowerString(userForgottenPassword.Email)
+	userForgottenPassword.Email = strings.ToLower(strings.TrimSpace(userForgottenPassword.Email))
 
 	validationErrors = validateEmail(logger, location+"validateUserForgottenPassword", userForgottenPassword.Email, validationErrors)
 	if len(validationErrors) > 0 {
@@ -132,9 +131,9 @@ func validateUserForgottenPassword(logger interfaces.Logger, userForgottenPasswo
 
 func validateUserResetPassword(logger interfaces.Logger, userResetPassword user.UserResetPassword) common.Result[user.UserResetPassword] {
 	validationErrors := make([]error, 0, 2)
-	userResetPassword.ResetToken = utility.SanitizeString(userResetPassword.ResetToken)
-	userResetPassword.Password = utility.SanitizeString(userResetPassword.Password)
-	userResetPassword.PasswordConfirm = utility.SanitizeString(userResetPassword.PasswordConfirm)
+	userResetPassword.ResetToken = strings.TrimSpace(userResetPassword.ResetToken)
+	userResetPassword.Password = strings.TrimSpace(userResetPassword.Password)
+	userResetPassword.PasswordConfirm = strings.TrimSpace(userResetPassword.PasswordConfirm)
 
 	validationErrors = validatePassword(logger, location+"validateUserResetPassword", userResetPassword.Password, userResetPassword.PasswordConfirm, validationErrors)
 	validationErrors = domainValidator.ValidateField(logger, location+"validateUserResetPassword", userResetPassword.ResetToken, tokenValidator, validationErrors)

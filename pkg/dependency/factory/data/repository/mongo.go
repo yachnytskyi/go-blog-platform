@@ -9,6 +9,7 @@ import (
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post/data/repository/mongo"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/mongo"
+	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -24,12 +25,12 @@ const (
 )
 
 type MongoDBRepository struct {
-	Config      interfaces.Config
+	Config      *config.ApplicationConfig
 	Logger      interfaces.Logger
 	MongoClient *mongo.Client
 }
 
-func NewMongoDBRepository(config interfaces.Config, logger interfaces.Logger) *MongoDBRepository {
+func NewMongoDBRepository(config *config.ApplicationConfig, logger interfaces.Logger) *MongoDBRepository {
 	return &MongoDBRepository{
 		Config: config,
 		Logger: logger,
@@ -37,10 +38,9 @@ func NewMongoDBRepository(config interfaces.Config, logger interfaces.Logger) *M
 }
 
 func (mongoDBRepository *MongoDBRepository) CreateRepository(ctx context.Context) any {
-	config := mongoDBRepository.Config.GetConfig()
 	var connectError error
 
-	mongoConnection := options.Client().ApplyURI(config.MongoDB.URI)
+	mongoConnection := options.Client().ApplyURI(mongoDBRepository.Config.MongoDB.URI)
 	mongoClient := connectToMongo(ctx, location+"mongo.CreateRepository", mongoDBRepository.Logger, mongoConnection)
 	if validator.IsError(mongoClient.Error) {
 		mongoDBRepository.Logger.Panic(domainError.NewInternalError(location+"mongo.CreateRepository.mongoClient", constants.DatabaseConnectionFailure))
@@ -53,7 +53,7 @@ func (mongoDBRepository *MongoDBRepository) CreateRepository(ctx context.Context
 	}
 
 	mongoDBRepository.Logger.Info(domainError.NewInfoMessage(location+"mongo.CreateRepository", constants.DatabaseConnectionSuccess))
-	return mongoDBRepository.MongoClient.Database(config.MongoDB.Name)
+	return mongoDBRepository.MongoClient.Database(mongoDBRepository.Config.MongoDB.Name)
 }
 
 func (mongoDBRepository MongoDBRepository) NewRepository(createRepository any, repository any) any {

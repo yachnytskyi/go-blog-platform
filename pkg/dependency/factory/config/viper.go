@@ -16,11 +16,7 @@ const (
 	location = "pkg.dependency.factory.config."
 )
 
-type Viper struct {
-	ApplicationConfig *config.ApplicationConfig
-}
-
-func NewViper() Viper {
+func NewViper() *config.ApplicationConfig {
 	loadEnvironmentsError := godotenv.Load(constants.EnvironmentsPath + constants.LocalEnvironment)
 	if validator.IsError(loadEnvironmentsError) {
 		loadEnvironmentsInternalError := domainError.NewInternalError(location+"viper.Load", loadEnvironmentsError.Error())
@@ -47,9 +43,7 @@ func NewViper() Viper {
 	}
 
 	applicationConfig := viperConfigToApplicationConfigMapper(&viperConfig)
-	return Viper{
-		ApplicationConfig: &applicationConfig,
-	}
+	return &applicationConfig
 }
 
 func loadDefaultEnvironment() {
@@ -67,10 +61,6 @@ func loadDefaultConfig(viper *viper.Viper) {
 		panic(domainError.NewInternalError(location+"viper.loadDefaultConfig", readInConfigError.Error()))
 	}
 	log.Println(domainError.NewInfoMessage(location+"viper.loadDefaultConfig", constants.DefaultConfigPathNotification))
-}
-
-func (viper Viper) GetConfig() *config.ApplicationConfig {
-	return viper.ApplicationConfig
 }
 
 func viperConfigToApplicationConfigMapper(yamlConfig *config.YamlConfig) config.ApplicationConfig {

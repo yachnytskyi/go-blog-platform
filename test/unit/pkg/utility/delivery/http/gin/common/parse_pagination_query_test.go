@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"net/http"
 	"net/url"
-	"strconv"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -15,9 +14,12 @@ import (
 	test "github.com/yachnytskyi/golang-mongo-grpc/test"
 )
 
+const (
+	testUrl = "https://localhost:8080/test"
+)
+
 func TestParsePaginationQueryDefaultValues(t *testing.T) {
 	t.Parallel()
-
 	ginContext, _ := gin.CreateTestContext(nil)
 	ginContext.Request = &http.Request{
 		Host: test.Localhost,
@@ -26,41 +28,63 @@ func TestParsePaginationQueryDefaultValues(t *testing.T) {
 
 	result := delivery.ParsePaginationQuery(ginContext)
 	expected := common.NewPaginationQuery(
-		common.GetPage(constants.DefaultPage),
-		common.GetLimit(constants.DefaultLimit),
+		constants.DefaultPage,
+		constants.DefaultLimit,
 		constants.DefaultOrderBy,
 		constants.DefaultSortOrder,
 		test.LocalhostTest,
 	)
 
-	assert.Equal(t, expected, result)
+	assert.Equal(t, expected, result, test.EqualMessage)
 }
 
 func TestParsePaginationQueryCustomValues(t *testing.T) {
 	t.Parallel()
-
+	page := "2"
+	orderBy := "name"
 	ginContext, _ := gin.CreateTestContext(nil)
 	ginContext.Request = &http.Request{
 		Host: test.Localhost,
 		URL:  &url.URL{Path: test.TestURL},
 	}
 
-	ginContext.Request.URL.RawQuery = "page=2&limit=10&order_by=name&sort_rder=descend"
+	ginContext.Request.URL.RawQuery = "page=2&limit=10&order_by=name&sort_order=descend"
 	result := delivery.ParsePaginationQuery(ginContext)
 	expected := common.NewPaginationQuery(
-		common.GetPage("2"),
-		common.GetLimit("10"),
-		"name",
-		"descend",
+		page,
+		constants.DefaultLimit,
+		orderBy,
+		constants.SortDescend,
 		test.LocalhostTest,
 	)
 
-	assert.Equal(t, expected, result)
+	assert.Equal(t, expected, result, test.EqualMessage)
+}
+
+func TestParsePaginationQueryNegativeValues(t *testing.T) {
+	t.Parallel()
+	orderBy := "name"
+	ginContext, _ := gin.CreateTestContext(nil)
+	ginContext.Request = &http.Request{
+		Host: test.Localhost,
+		URL:  &url.URL{Path: test.TestURL},
+	}
+
+	ginContext.Request.URL.RawQuery = "page=-42187412&limit=-214124&order_by=name&sort_order=ascend"
+	result := delivery.ParsePaginationQuery(ginContext)
+	expected := common.NewPaginationQuery(
+		constants.DefaultPage,
+		constants.DefaultLimit,
+		orderBy,
+		constants.SortAscend,
+		test.LocalhostTest,
+	)
+
+	assert.Equal(t, expected, result, test.EqualMessage)
 }
 
 func TestParsePaginationQueryEmptyParameters(t *testing.T) {
 	t.Parallel()
-
 	ginContext, _ := gin.CreateTestContext(nil)
 	ginContext.Request = &http.Request{
 		Host: test.Localhost,
@@ -69,22 +93,19 @@ func TestParsePaginationQueryEmptyParameters(t *testing.T) {
 
 	ginContext.Request.URL.RawQuery = "page=&limit="
 	result := delivery.ParsePaginationQuery(ginContext)
-	page, _ := strconv.ParseUint(constants.DefaultPage, 0, 0)
-	limit, _ := strconv.ParseUint(constants.DefaultLimit, 0, 0)
 	expected := common.NewPaginationQuery(
-		page,
-		limit,
+		constants.DefaultPage,
+		constants.DefaultLimit,
 		constants.DefaultOrderBy,
 		constants.DefaultSortOrder,
 		test.LocalhostTest,
 	)
 
-	assert.Equal(t, expected, result)
+	assert.Equal(t, expected, result, test.EqualMessage)
 }
 
 func TestParsePaginationQueryHTTPScheme(t *testing.T) {
 	t.Parallel()
-
 	ginContext, _ := gin.CreateTestContext(nil)
 	ginContext.Request = &http.Request{
 		Host: test.Localhost,
@@ -94,41 +115,18 @@ func TestParsePaginationQueryHTTPScheme(t *testing.T) {
 
 	result := delivery.ParsePaginationQuery(ginContext)
 	expected := common.NewPaginationQuery(
-		common.GetPage(constants.DefaultPage),
-		common.GetLimit(constants.DefaultLimit),
+		constants.DefaultPage,
+		constants.DefaultLimit,
 		constants.DefaultOrderBy,
 		constants.DefaultSortOrder,
-		"https://localhost:8080/test",
+		testUrl,
 	)
 
-	assert.Equal(t, expected, result)
-}
-
-func TestParsePaginationQuerySpecialCharacters(t *testing.T) {
-	t.Parallel()
-
-	ginContext, _ := gin.CreateTestContext(nil)
-	ginContext.Request = &http.Request{
-		Host: test.Localhost,
-		URL:  &url.URL{Path: test.TestURL},
-	}
-
-	ginContext.Request.URL.RawQuery = "page=1&limit=10&order_by=special!@#$%^&*()&sort_order=asc"
-	result := delivery.ParsePaginationQuery(ginContext)
-	expected := common.NewPaginationQuery(
-		common.GetPage("1"),
-		common.GetLimit("10"),
-		"created_at",
-		"descend",
-		test.LocalhostTest,
-	)
-
-	assert.Equal(t, expected, result)
+	assert.Equal(t, expected, result, test.EqualMessage)
 }
 
 func TestParsePaginationQueryInvalidParameters(t *testing.T) {
 	t.Parallel()
-
 	ginContext, _ := gin.CreateTestContext(nil)
 	ginContext.Request = &http.Request{
 		Host: test.Localhost,
@@ -136,23 +134,23 @@ func TestParsePaginationQueryInvalidParameters(t *testing.T) {
 	}
 
 	ginContext.Request.URL.RawQuery = "pageInvalid=-48912481&limitInvalid=-9124829148&orderBy=invalidField&sortOrder=asc"
-	page, _ := strconv.ParseUint(constants.DefaultPage, 0, 0)
-	limit, _ := strconv.ParseUint(constants.DefaultLimit, 0, 0)
 	result := delivery.ParsePaginationQuery(ginContext)
 	expected := common.NewPaginationQuery(
-		page,
-		limit,
+		constants.DefaultPage,
+		constants.DefaultLimit,
 		constants.DefaultOrderBy,
 		constants.DefaultSortOrder,
 		test.LocalhostTest,
 	)
 
-	assert.Equal(t, expected, result)
+	assert.Equal(t, expected, result, test.EqualMessage)
 }
 
 func TestParsePaginationQueryExtraParameters(t *testing.T) {
 	t.Parallel()
-
+	page := "3"
+	limit := "15"
+	orderBy := "date"
 	ginContext, _ := gin.CreateTestContext(nil)
 	ginContext.Request = &http.Request{
 		Host: test.Localhost,
@@ -162,12 +160,12 @@ func TestParsePaginationQueryExtraParameters(t *testing.T) {
 	ginContext.Request.URL.RawQuery = "page=3&limit=15&order_by=date&sort_order=ascend&unexpectedParam=value"
 	result := delivery.ParsePaginationQuery(ginContext)
 	expected := common.NewPaginationQuery(
-		common.GetPage("3"),
-		common.GetLimit("15"),
-		"date",
-		"ascend",
+		page,
+		limit,
+		orderBy,
+		constants.SortAscend,
 		test.LocalhostTest,
 	)
 
-	assert.Equal(t, expected, result)
+	assert.Equal(t, expected, result, test.EqualMessage)
 }

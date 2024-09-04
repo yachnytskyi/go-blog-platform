@@ -57,7 +57,7 @@ func TestRefreshTokenMiddlewareCookieValidToken(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, request)
 
-	assert.Nil(t, validToken.Error, test.ErrorNilMessage)
+	assert.NoError(t, validToken.Error, test.ErrorNilMessage)
 	assert.Equal(t, http.StatusOK, recorder.Code, test.EqualMessage)
 	assert.Equal(t, constants.Success, recorder.Body.String(), test.EqualMessage)
 }
@@ -165,7 +165,7 @@ func TestRefreshTokenMiddlewareHeaderValidToken(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, request)
 
-	assert.Nil(t, validToken.Error, test.ErrorNilMessage)
+	assert.NoError(t, validToken.Error, test.ErrorNilMessage)
 	assert.Equal(t, http.StatusOK, recorder.Code, test.EqualMessage)
 	assert.Equal(t, constants.Success, recorder.Body.String(), test.EqualMessage)
 }

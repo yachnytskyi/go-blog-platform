@@ -36,13 +36,13 @@ func NewViper() *config.ApplicationConfig {
 		loadDefaultConfig(viperInstance)
 	}
 
-	var viperConfig config.YamlConfig
-	unmarshalError := viperInstance.Unmarshal(&viperConfig)
+	var yamlConfig config.YamlConfig
+	unmarshalError := viperInstance.Unmarshal(&yamlConfig)
 	if validator.IsError(unmarshalError) {
 		panic(domainError.NewInternalError(location+"viper.Unmarshal", unmarshalError.Error()))
 	}
 
-	applicationConfig := viperConfigToApplicationConfigMapper(&viperConfig)
+	applicationConfig := yamlConfigToApplicationConfigMapper(&yamlConfig)
 	return &applicationConfig
 }
 
@@ -63,7 +63,7 @@ func loadDefaultConfig(viper *viper.Viper) {
 	log.Println(domainError.NewInfoMessage(location+"viper.loadDefaultConfig", constants.DefaultConfigPathNotification))
 }
 
-func viperConfigToApplicationConfigMapper(yamlConfig *config.YamlConfig) config.ApplicationConfig {
+func yamlConfigToApplicationConfigMapper(yamlConfig *config.YamlConfig) config.ApplicationConfig {
 	return config.ApplicationConfig{
 		Core:         convertCore(&yamlConfig.Core),
 		MongoDB:      convertMongoDB(&yamlConfig.MongoDB),

@@ -1,6 +1,6 @@
-# Golang Mongo gRPC
+# Go Blog Platform
 
-Source code for the Golang Mongo gRPC App.
+Source code for the Go Blog Platform App.
 
 ## Introduction
 

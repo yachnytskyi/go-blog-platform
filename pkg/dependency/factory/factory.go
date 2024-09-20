@@ -25,7 +25,7 @@ func NewConfig(configType string) *configModel.ApplicationConfig {
 	switch configType {
 	case constants.Viper:
 		return config.NewViper()
-	// Add other logger options here as needed.
+	// Add other config options here as needed.
 	default:
 		panic(domainError.NewInternalError(location+"NewConfig", fmt.Sprintf(constants.UnsupportedConfig, configType)))
 	}
@@ -45,7 +45,7 @@ func NewEmail(config *configModel.ApplicationConfig, logger interfaces.Logger) i
 	switch config.Core.Logger {
 	case constants.Zerolog:
 		return email.NewGoMail(config, logger)
-	// Add other logger options here as needed.
+	// Add other email options here as needed.
 	default:
 		panic(domainError.NewInternalError(location+"NewEmail", fmt.Sprintf(constants.UnsupportedLogger, config.Core.Logger)))
 	}

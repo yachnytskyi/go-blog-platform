@@ -2,6 +2,7 @@ package common
 
 import (
 	"encoding/base64"
+	"strings"
 
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
@@ -24,4 +25,9 @@ func Decode(logger interfaces.Logger, location, encodedString string) common.Res
 	}
 
 	return common.NewResultOnSuccess[string](string(decodedBytes))
+}
+
+// SanitizeAndToLowerString trims leading and trailing white spaces from the input string.
+func SanitizeAndToLowerString(data string) string {
+	return strings.ToLower(strings.TrimSpace(data))
 }

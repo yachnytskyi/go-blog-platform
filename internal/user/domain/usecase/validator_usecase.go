@@ -12,6 +12,7 @@ import (
 	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
 	domainValidator "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain/validator"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	commonUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	bcrypt "golang.org/x/crypto/bcrypt"
 )
@@ -75,7 +76,7 @@ var (
 
 func validateUserCreate(logger interfaces.Logger, userCreate user.UserCreate) common.Result[user.UserCreate] {
 	validationErrors := make([]error, 0, 4)
-	userCreate.Email = strings.ToLower(strings.TrimSpace(userCreate.Email))
+	userCreate.Email = commonUtility.SanitizeAndToLowerString(userCreate.Email)
 	userCreate.Name = strings.TrimSpace(userCreate.Name)
 	userCreate.Password = strings.TrimSpace(userCreate.Password)
 	userCreate.PasswordConfirm = strings.TrimSpace(userCreate.PasswordConfirm)
@@ -104,7 +105,7 @@ func validateUserUpdate(logger interfaces.Logger, userUpdate user.UserUpdate) co
 
 func validateUserLogin(logger interfaces.Logger, userLogin user.UserLogin) common.Result[user.UserLogin] {
 	validationErrors := make([]error, 0, 2)
-	userLogin.Email = strings.ToLower(strings.TrimSpace(userLogin.Email))
+	userLogin.Email = commonUtility.SanitizeAndToLowerString(userLogin.Email)
 	userLogin.Password = strings.TrimSpace(userLogin.Password)
 
 	validationErrors = validateEmail(logger, location+"validateUserLogin", userLogin.Email, validationErrors)
@@ -119,7 +120,7 @@ func validateUserLogin(logger interfaces.Logger, userLogin user.UserLogin) commo
 
 func validateUserForgottenPassword(logger interfaces.Logger, userForgottenPassword user.UserForgottenPassword) common.Result[user.UserForgottenPassword] {
 	validationErrors := make([]error, 0, 2)
-	userForgottenPassword.Email = strings.ToLower(strings.TrimSpace(userForgottenPassword.Email))
+	userForgottenPassword.Email = commonUtility.SanitizeAndToLowerString(userForgottenPassword.Email)
 
 	validationErrors = validateEmail(logger, location+"validateUserForgottenPassword", userForgottenPassword.Email, validationErrors)
 	if len(validationErrors) > 0 {

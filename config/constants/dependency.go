@@ -5,7 +5,8 @@ type contextKey string
 
 // Application version.
 const (
-	Version = "v1" // Version of the application.
+	AppVersion = V1   // AppVersion represents the application's current version.
+	V1         = "v1" // V1 specifies the version value of the application.
 )
 
 // Environment configuration paths.
@@ -13,6 +14,7 @@ const (
 	EnvironmentsPath = "config/environment/.env." // Base path for environment configuration files.
 
 	// Environment types
+	Environment              = LocalEnvironment // Environment defines the default environment setting for the application.
 	TestEnvironment          = "test"           // Test development environment.
 	LocalEnvironment         = "local"          // Local development environment.
 	DockerDevEnvironment     = "docker.dev"     // Docker development environment.

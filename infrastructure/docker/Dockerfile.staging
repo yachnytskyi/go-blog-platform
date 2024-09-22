@@ -13,11 +13,11 @@ RUN go mod download
 # Copy the source code into the container.
 COPY . .
 
-# Build the Go application.
-RUN go build -o main ./cmd/server/main.go
+# Build the Go application statically.
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o main ./cmd/server/main.go
 
-# Stage 2: Run the Go application.
-FROM alpine:latest
+# Stage 2: Run the Go application using scratch.
+FROM scratch
 
 # Set the Current Working Directory inside the container.
 WORKDIR /app
@@ -26,7 +26,7 @@ WORKDIR /app
 COPY --from=builder /app/main .
 
 # Copy the configuration directory.
-COPY config /app/config
+COPY --from=builder /app/config /app/config
 
 # Expose port 8080 to the outside world.
 EXPOSE 8080

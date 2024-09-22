@@ -24,7 +24,7 @@ func NewViper() *config.ApplicationConfig {
 		loadDefaultEnvironment()
 	}
 
-	configPath := os.Getenv(constants.Version)
+	configPath := os.Getenv(constants.AppVersion)
 	viperInstance := viper.New()
 	viperInstance.SetConfigFile(configPath)
 	viperInstance.AutomaticEnv()

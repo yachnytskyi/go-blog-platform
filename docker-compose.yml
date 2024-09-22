@@ -17,8 +17,6 @@ services:
     image: app
     ports:
       - "8080:8080"
-    environment:
-      - ENV=dev
     volumes:
       - ./:/app
     working_dir: /app
@@ -28,6 +26,20 @@ services:
       - application-network
     command: reflex -r '\.go$' -s -- go run ./cmd/server/main.go
 
+  app-staging:
+    build:
+      context: ./
+      dockerfile: infrastructure/docker/Dockerfile.staging
+    image: app-staging
+    ports:
+      - "8080:8080"
+    working_dir: /app
+    depends_on:
+      - mongodb
+    networks:
+      - application-network
+    command: ./main 
+
   app-production:
     build:
       context: ./
@@ -35,8 +47,6 @@ services:
     image: app-production
     ports:
       - "8080:8080"
-    environment:
-      - ENV=prod
     working_dir: /app
     depends_on:
       - mongodb

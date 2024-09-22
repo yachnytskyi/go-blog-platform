@@ -39,7 +39,7 @@ const (
 )
 
 var (
-	emailValidator = domain.CommonValidator{
+	emailValidator = domain.StringValidator{
 		FieldName:    EmailField,
 		FieldRegex:   emailRegex,
 		MinLength:    constants.MinStringLength,
@@ -47,7 +47,7 @@ var (
 		Notification: emailAllowedCharacters,
 		IsOptional:   false,
 	}
-	usernameValidator = domain.CommonValidator{
+	usernameValidator = domain.StringValidator{
 		FieldName:    usernameField,
 		FieldRegex:   usernameRegex,
 		MinLength:    constants.MinStringLength,
@@ -55,7 +55,7 @@ var (
 		Notification: constants.StringAllowedCharacters,
 		IsOptional:   false,
 	}
-	passwordValidator = domain.CommonValidator{
+	passwordValidator = domain.StringValidator{
 		FieldName:    passwordField,
 		FieldRegex:   usernameRegex,
 		MinLength:    constants.MinStringLength,
@@ -63,7 +63,7 @@ var (
 		Notification: passwordAllowedCharacters,
 		IsOptional:   false,
 	}
-	tokenValidator = domain.CommonValidator{
+	tokenValidator = domain.StringValidator{
 		FieldName:  resetTokenField,
 		FieldRegex: usernameRegex,
 		MinLength:  resetTokenLength,
@@ -230,23 +230,23 @@ func checkEmail(logger interfaces.Logger, location, email string) error {
 	return checkEmailDomain(logger, location+".checkEmail", email)
 }
 
-func validateField(logger interfaces.Logger, location, fieldValue string, commonValidator domain.CommonValidator) error {
-	if domain.IsStringLengthInvalid(fieldValue, commonValidator.MinLength, commonValidator.MaxLength) {
+func validateField(logger interfaces.Logger, location, fieldValue string, stringValidator domain.StringValidator) error {
+	if domain.IsStringLengthInvalid(fieldValue, stringValidator.MinLength, stringValidator.MaxLength) {
 		validationError := domainError.NewValidationError(
 			location+".validateField.IsStringLengthInvalid",
-			commonValidator.FieldName,
+			stringValidator.FieldName,
 			constants.FieldRequired,
-			fmt.Sprintf(constants.StringAllowedLength, commonValidator.MinLength, commonValidator.MaxLength),
+			fmt.Sprintf(constants.StringAllowedLength, stringValidator.MinLength, stringValidator.MaxLength),
 		)
 		logger.Debug(validationError)
 		return validationError
 	}
-	if domain.AreStringCharactersInvalid(fieldValue, commonValidator.FieldRegex) {
+	if domain.AreStringCharactersInvalid(fieldValue, stringValidator.FieldRegex) {
 		validationError := domainError.NewValidationError(
 			location+".validateField.AreStringCharactersInvalid",
-			commonValidator.FieldName,
+			stringValidator.FieldName,
 			constants.FieldRequired,
-			commonValidator.Notification,
+			stringValidator.Notification,
 		)
 
 		logger.Debug(validationError)

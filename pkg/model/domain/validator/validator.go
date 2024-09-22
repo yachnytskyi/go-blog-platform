@@ -1,4 +1,4 @@
-package domain
+package validator
 
 // CommonValidator encapsulates validation rules for a field.
 type CommonValidator struct {

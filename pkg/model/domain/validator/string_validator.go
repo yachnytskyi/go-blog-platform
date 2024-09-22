@@ -6,12 +6,11 @@ import (
 
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
-	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
 
 // ValidateField validates a field based on the provided commonValidator.
-func ValidateField(logger interfaces.Logger, location, field string, commonValidator domain.CommonValidator, validationErrors []error) []error {
+func ValidateField(logger interfaces.Logger, location, field string, commonValidator CommonValidator, validationErrors []error) []error {
 	errors := validationErrors
 
 	// Skip validation if the field is optional and empty.

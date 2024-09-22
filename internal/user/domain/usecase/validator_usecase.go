@@ -9,8 +9,7 @@ import (
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
-	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
-	domainValidator "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain/validator"
+	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain/validator"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	commonUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -82,7 +81,7 @@ func validateUserCreate(logger interfaces.Logger, userCreate user.UserCreate) co
 	userCreate.PasswordConfirm = strings.TrimSpace(userCreate.PasswordConfirm)
 
 	validationErrors = validateEmail(logger, location+"validateUserCreate", userCreate.Email, validationErrors)
-	validationErrors = domainValidator.ValidateField(logger, location+"validateUserCreate", userCreate.Name, usernameValidator, validationErrors)
+	validationErrors = domain.ValidateField(logger, location+"validateUserCreate", userCreate.Name, usernameValidator, validationErrors)
 	validationErrors = validatePassword(logger, location+"validateUserCreate", userCreate.Password, userCreate.PasswordConfirm, validationErrors)
 	if len(validationErrors) > 0 {
 		return common.NewResultOnFailure[user.UserCreate](domainError.NewValidationErrors(validationErrors))
@@ -95,7 +94,7 @@ func validateUserUpdate(logger interfaces.Logger, userUpdate user.UserUpdate) co
 	validationErrors := make([]error, 0, 1)
 	userUpdate.Name = strings.TrimSpace(userUpdate.Name)
 
-	validationErrors = domainValidator.ValidateField(logger, location+"validateUserUpdate", userUpdate.Name, usernameValidator, validationErrors)
+	validationErrors = domain.ValidateField(logger, location+"validateUserUpdate", userUpdate.Name, usernameValidator, validationErrors)
 	if len(validationErrors) > 0 {
 		return common.NewResultOnFailure[user.UserUpdate](domainError.NewValidationErrors(validationErrors))
 	}
@@ -109,7 +108,7 @@ func validateUserLogin(logger interfaces.Logger, userLogin user.UserLogin) commo
 	userLogin.Password = strings.TrimSpace(userLogin.Password)
 
 	validationErrors = validateEmail(logger, location+"validateUserLogin", userLogin.Email, validationErrors)
-	validationErrors = domainValidator.ValidateField(logger, location+"validateUserLogin", userLogin.Password, usernameValidator, validationErrors)
+	validationErrors = domain.ValidateField(logger, location+"validateUserLogin", userLogin.Password, usernameValidator, validationErrors)
 
 	if len(validationErrors) > 0 {
 		return common.NewResultOnFailure[user.UserLogin](domainError.NewValidationErrors(validationErrors))
@@ -137,7 +136,7 @@ func validateUserResetPassword(logger interfaces.Logger, userResetPassword user.
 	userResetPassword.PasswordConfirm = strings.TrimSpace(userResetPassword.PasswordConfirm)
 
 	validationErrors = validatePassword(logger, location+"validateUserResetPassword", userResetPassword.Password, userResetPassword.PasswordConfirm, validationErrors)
-	validationErrors = domainValidator.ValidateField(logger, location+"validateUserResetPassword", userResetPassword.ResetToken, tokenValidator, validationErrors)
+	validationErrors = domain.ValidateField(logger, location+"validateUserResetPassword", userResetPassword.ResetToken, tokenValidator, validationErrors)
 
 	if len(validationErrors) > 0 {
 		return common.NewResultOnFailure[user.UserResetPassword](domainError.NewValidationErrors(validationErrors))
@@ -232,7 +231,7 @@ func checkEmail(logger interfaces.Logger, location, email string) error {
 }
 
 func validateField(logger interfaces.Logger, location, fieldValue string, commonValidator domain.CommonValidator) error {
-	if domainValidator.IsStringLengthInvalid(fieldValue, commonValidator.MinLength, commonValidator.MaxLength) {
+	if domain.IsStringLengthInvalid(fieldValue, commonValidator.MinLength, commonValidator.MaxLength) {
 		validationError := domainError.NewValidationError(
 			location+".validateField.IsStringLengthInvalid",
 			commonValidator.FieldName,
@@ -242,7 +241,7 @@ func validateField(logger interfaces.Logger, location, fieldValue string, common
 		logger.Debug(validationError)
 		return validationError
 	}
-	if domainValidator.AreStringCharactersInvalid(fieldValue, commonValidator.FieldRegex) {
+	if domain.AreStringCharactersInvalid(fieldValue, commonValidator.FieldRegex) {
 		validationError := domainError.NewValidationError(
 			location+".validateField.AreStringCharactersInvalid",
 			commonValidator.FieldName,

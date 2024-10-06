@@ -8,7 +8,7 @@ import (
 	repository "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/mongo/model"
 	repositoryUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/utility"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
-	usecase "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
+	useCase "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
 	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
@@ -149,7 +149,7 @@ func (userRepository UserRepository) CheckEmailDuplicate(ctx context.Context, em
 	// If a user with the given email is found, return a validation error.
 	validationError := domainError.NewValidationError(
 		location+"CheckEmailDuplicate",
-		usecase.EmailField,
+		useCase.EmailField,
 		constants.FieldRequired,
 		constants.EmailAlreadyExists,
 	)

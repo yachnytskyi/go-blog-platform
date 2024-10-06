@@ -5,6 +5,8 @@ import (
 
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
+	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/usecase"
+	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
 	factory "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory"
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 )
@@ -16,21 +18,20 @@ func NewApplication(ctx context.Context) model.Container {
 	logger := factory.NewLogger(config)
 	email := factory.NewEmail(config, logger)
 
-	// Create repository factory and repositories
+	// Create repository factory and repositories, then assert their types.
 	repositoryFactory := factory.NewRepositoryFactory(config, logger)
 	createRepository := repositoryFactory.CreateRepository(ctx)
-	userRepository := repositoryFactory.NewRepository(createRepository, (*interfaces.UserRepository)(nil))
-	postRepository := repositoryFactory.NewRepository(createRepository, (*interfaces.PostRepository)(nil))
+	userRepository := repositoryFactory.NewRepository(createRepository, (*interfaces.UserRepository)(nil)).(interfaces.UserRepository)
+	postRepository := repositoryFactory.NewRepository(createRepository, (*interfaces.PostRepository)(nil)).(interfaces.PostRepository)
 
-	// Create use case factory and use cases.
-	usecaseFactory := factory.NewUseCaseFactory(ctx, config, logger, email, repositoryFactory)
-	userUseCase := usecaseFactory.NewUseCase(email, userRepository)
-	postUseCase := usecaseFactory.NewUseCase(email, postRepository)
+	// Create use cases.
+	userUseCase := user.NewUserUseCase(config, logger, email, userRepository)
+	postUseCase := post.NewPostUseCase(logger, postRepository)
 
 	// Create delivery factory and controllers.
 	deliveryFactory := factory.NewDeliveryFactory(ctx, config, logger, repositoryFactory)
-	userController := deliveryFactory.NewController(userUseCase, nil)
-	postController := deliveryFactory.NewController(userUseCase, postUseCase)
+	userController := deliveryFactory.NewController(userUseCase)
+	postController := deliveryFactory.NewController(postUseCase)
 
 	// Create routers.
 	serverRouters := interfaces.NewServerRouters(

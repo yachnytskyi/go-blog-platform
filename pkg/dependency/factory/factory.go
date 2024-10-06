@@ -12,7 +12,6 @@ import (
 	delivery "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/delivery"
 	email "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/email"
 	logger "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/logger"
-	useCase "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/usecase"
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
@@ -61,23 +60,6 @@ func NewRepositoryFactory(config *configModel.ApplicationConfig, logger interfac
 		return nil
 	}
 
-}
-
-func NewUseCaseFactory(
-	ctx context.Context,
-	config *configModel.ApplicationConfig,
-	logger interfaces.Logger,
-	email interfaces.Email,
-	repository interfaces.Repository) interfaces.UseCase {
-	switch config.Core.UseCase {
-	case constants.UseCaseV1:
-		return useCase.NewUseCaseV1(config, logger)
-	// Add other domain options here as needed.
-	default:
-		model.GracefulShutdown(ctx, logger, repository)
-		logger.Panic(domainError.NewInternalError(location+"NewUseCaseFactory", fmt.Sprintf(constants.UnsupportedUseCase, config.Core.UseCase)))
-		return nil
-	}
 }
 
 func NewDeliveryFactory(

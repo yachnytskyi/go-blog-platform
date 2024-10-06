@@ -1,16 +1,16 @@
 package v1
 
 import (
-	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	pb "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/grpc/v1/model/pb"
+	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/usecase"
 )
 
 type PostGrpcServer struct {
 	pb.UnimplementedPostUseCaseServer
-	postUseCase interfaces.PostUseCase
+	postUseCase post.PostUseCase
 }
 
-func NewGrpcPostServer(postUseCase interfaces.PostUseCase) (*PostGrpcServer, error) {
+func NewGrpcPostServer(postUseCase post.PostUseCase) (*PostGrpcServer, error) {
 	postGrpcServer := &PostGrpcServer{
 		postUseCase: postUseCase,
 	}

@@ -29,15 +29,10 @@ type Repository interface {
 	Close
 }
 
-// UseCase is an interface that defines methods for creating use case instances.
-type UseCase interface {
-	NewUseCase(email Email, repository any) any
-}
-
 // Delivery is an interface that defines methods for creating delivery components and managing the server.
 type Delivery interface {
 	CreateDelivery(serverRouters ServerRouters)
-	NewController(userUseCase any, usecase any) any
+	NewController(useCase any) any
 	NewRouter(router any) Router
 	LaunchServer(ctx context.Context, repository Repository)
 	Close

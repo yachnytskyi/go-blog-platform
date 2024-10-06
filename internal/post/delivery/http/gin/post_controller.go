@@ -8,19 +8,17 @@ import (
 
 	"github.com/gin-gonic/gin"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	view "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/model"
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
+	useCase "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/usecase"
 )
 
 type PostController struct {
-	userUseCase interfaces.UserUseCase
-	postUseCase interfaces.PostUseCase
+	postUseCase useCase.PostUseCase
 }
 
-func NewPostController(userUseCase interfaces.UserUseCase, postUseCase interfaces.PostUseCase) PostController {
+func NewPostController(postUseCase useCase.PostUseCase) PostController {
 	return PostController{
-		userUseCase: userUseCase,
 		postUseCase: postUseCase,
 	}
 }
@@ -80,10 +78,7 @@ func (postController PostController) CreatePost(controllerContext any) {
 	defer cancel()
 
 	var createdPostData *post.PostCreate = new(post.PostCreate)
-	currentUserID := ctx.Value(constants.ID).(string)
-	user := postController.userUseCase.GetUserById(ctx, currentUserID)
-	createdPostData.UserID = user.Data.ID
-	createdPostData.User = user.Data.Name
+	createdPostData.UserID = ctx.Value(constants.ID).(string)
 	err := ginContext.ShouldBindJSON(&createdPostData)
 	if err != nil {
 		ginContext.JSON(http.StatusBadRequest, err.Error())
@@ -108,11 +103,10 @@ func (postController PostController) UpdatePostById(controllerContext any) {
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
 	postID := ginContext.Param("postID")
-	currentUserID := ctx.Value(constants.ID).(string)
 
 	var updatedPostData *post.PostUpdate = new(post.PostUpdate)
 	updatedPostData.PostID = ginContext.Param("postID")
-	updatedPostData.UserID = currentUserID
+	updatedPostData.UserID = ctx.Value(constants.ID).(string)
 	err := ginContext.ShouldBindJSON(&updatedPostData)
 	if err != nil {
 		ginContext.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})

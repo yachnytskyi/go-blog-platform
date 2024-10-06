@@ -10,7 +10,9 @@ import (
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/http/gin"
+	postUseCase "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/usecase"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin"
+	userUseCase "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
 	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
 	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
@@ -65,17 +67,14 @@ func (ginDelivery GinDelivery) LaunchServer(ctx context.Context, repository inte
 	ginDelivery.Logger.Info(domainError.NewInfoMessage(location+"gin.LaunchServer", constants.ServerConnectionSuccess))
 }
 
-func (ginDelivery GinDelivery) NewController(userUseCaseAny any, usecase any) any {
-	userUseCase := userUseCaseAny.(interfaces.UserUseCase)
-	if usecase == nil {
-		return user.NewUserController(ginDelivery.Config, ginDelivery.Logger, userUseCase)
-	}
-
-	switch usecaseType := usecase.(type) {
-	case interfaces.PostUseCase:
-		return post.NewPostController(userUseCase, usecaseType)
+func (ginDelivery GinDelivery) NewController(useCase any) any {
+	switch useCaseType := useCase.(type) {
+	case userUseCase.UserUseCase:
+		return user.NewUserController(ginDelivery.Config, ginDelivery.Logger, useCaseType)
+	case postUseCase.PostUseCase:
+		return post.NewPostController(useCaseType)
 	default:
-		ginDelivery.Logger.Panic(domainError.NewInternalError(location+"gin.NewController.default", fmt.Sprintf(constants.UnsupportedDelivery, usecaseType)))
+		ginDelivery.Logger.Panic(domainError.NewInternalError(location+"gin.NewController.default", fmt.Sprintf(constants.UnsupportedDelivery, useCaseType)))
 		return nil
 	}
 }

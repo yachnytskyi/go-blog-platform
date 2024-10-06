@@ -10,6 +10,7 @@ import (
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	utility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin/utility/cookie"
 	view "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
+	domain "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
 	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
@@ -25,10 +26,10 @@ const (
 type UserController struct {
 	Config      *config.ApplicationConfig
 	Logger      interfaces.Logger
-	UserUseCase interfaces.UserUseCase
+	UserUseCase domain.UserUseCase
 }
 
-func NewUserController(config *config.ApplicationConfig, logger interfaces.Logger, userUseCase interfaces.UserUseCase) UserController {
+func NewUserController(config *config.ApplicationConfig, logger interfaces.Logger, userUseCase domain.UserUseCase) UserController {
 	return UserController{
 		Config:      config,
 		Logger:      logger,

@@ -20,7 +20,6 @@ type Core struct {
 	Logger   string
 	Email    string
 	Database string
-	UseCase  string
 	Delivery string
 }
 

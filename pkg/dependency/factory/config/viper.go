@@ -81,7 +81,6 @@ func convertCore(core *config.YamlCore) config.Core {
 		Logger:   core.Logger,
 		Email:    core.Email,
 		Database: core.Database,
-		UseCase:  core.UseCase,
 		Delivery: core.Delivery,
 	}
 }

@@ -17,7 +17,6 @@ type YamlCore struct {
 	Logger   string `mapstructure:"Logger"`
 	Email    string `mapstructure:"Email"`
 	Database string `mapstructure:"Database"`
-	UseCase  string `mapstructure:"UseCase"`
 	Delivery string `mapstructure:"Delivery"`
 }
 

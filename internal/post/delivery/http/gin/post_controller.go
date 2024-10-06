@@ -103,10 +103,11 @@ func (postController PostController) UpdatePostById(controllerContext any) {
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
 	postID := ginContext.Param("postID")
+	currentUserID := ctx.Value(constants.ID).(string)
 
 	var updatedPostData *post.PostUpdate = new(post.PostUpdate)
 	updatedPostData.PostID = ginContext.Param("postID")
-	updatedPostData.UserID = ctx.Value(constants.ID).(string)
+	updatedPostData.UserID = currentUserID
 	err := ginContext.ShouldBindJSON(&updatedPostData)
 	if err != nil {
 		ginContext.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
@@ -133,6 +134,7 @@ func (postController PostController) DeletePostByID(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
+
 	postID := ginContext.Param("postID")
 	currentUserID := ctx.Value(constants.ID).(string)
 	err := postController.postUseCase.DeletePostByID(ctx, postID, currentUserID)

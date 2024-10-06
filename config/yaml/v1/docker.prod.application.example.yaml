@@ -2,7 +2,6 @@ Core:
   Logger: Zerolog
   Email: GoMail
   Database: MongoDB
-  UseCase: UseCaseV1
   Delivery: Gin
 
 Security:

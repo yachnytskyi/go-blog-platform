@@ -31,8 +31,8 @@ func TestNewJSONResponseOnFailureWithHTTPValidationError(t *testing.T) {
 	response := http.NewJSONResponseOnFailure(httpBaseError)
 
 	assert.Nil(t, response.Data, test.DataNilMessage)
-	assert.IsType(t, httpError.HTTPValidationError{}, response.Error, test.EqualMessage)
 	assert.NoError(t, response.Errors, test.ErrorNilMessage)
+	assert.IsType(t, httpError.HTTPValidationError{}, response.Error, test.EqualMessage)
 	assert.Equal(t, httpBaseError, response.Error, test.EqualMessage)
 	assert.Equal(t, constants.Fail, response.Status, test.EqualMessage)
 }
@@ -46,8 +46,8 @@ func TestNewJSONResponseOnFailureWithMultipleValidationErrors(t *testing.T) {
 	response := http.NewJSONResponseOnFailure(httpValidationErrors)
 
 	assert.Nil(t, response.Data, test.DataNilMessage)
-	assert.IsType(t, httpError.HTTPValidationErrors{}, response.Errors, test.EqualMessage)
 	assert.NoError(t, response.Error, test.ErrorNilMessage)
+	assert.IsType(t, httpError.HTTPValidationErrors{}, response.Errors, test.EqualMessage)
 	assert.Equal(t, httpValidationErrors, response.Errors, test.EqualMessage)
 	assert.Equal(t, constants.Fail, response.Status, test.EqualMessage)
 }
@@ -60,8 +60,8 @@ func TestNewJSONResponseOnFailureWithSingleValidationError(t *testing.T) {
 	response := http.NewJSONResponseOnFailure(httpValidationErrors)
 
 	assert.Nil(t, response.Data, test.DataNilMessage)
-	assert.IsType(t, httpError.HTTPValidationErrors{}, response.Error, test.EqualMessage)
 	assert.NoError(t, response.Errors, test.ErrorNilMessage)
+	assert.IsType(t, httpError.HTTPValidationErrors{}, response.Error, test.EqualMessage)
 	assert.Equal(t, httpValidationErrors, response.Error, test.EqualMessage)
 	assert.Equal(t, constants.Fail, response.Status, test.EqualMessage)
 }
@@ -80,8 +80,8 @@ func TestNewJSONResponseOnFailureWithEmptyValidationErrorsList(t *testing.T) {
 	response := http.NewJSONResponseOnFailure(httpValidationErrors)
 
 	assert.Nil(t, response.Data, test.DataNilMessage)
-	assert.IsType(t, httpError.HTTPValidationErrors{}, response.Errors, test.EqualMessage)
 	assert.NoError(t, response.Error, test.DataNilMessage)
+	assert.IsType(t, httpError.HTTPValidationErrors{}, response.Errors, test.EqualMessage)
 	assert.Equal(t, httpValidationErrors, response.Errors, test.EqualMessage)
 	assert.Equal(t, constants.Fail, response.Status, test.EqualMessage)
 }

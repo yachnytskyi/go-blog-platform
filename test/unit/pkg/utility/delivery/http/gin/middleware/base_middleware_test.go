@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
+	delivery "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 	middleware "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/middleware"
 	test "github.com/yachnytskyi/golang-mongo-grpc/test"
 	mock "github.com/yachnytskyi/golang-mongo-grpc/test/unit/mock/common"
@@ -260,15 +261,31 @@ func TestLoggerMiddlewareLogsIncomingAndOutgoingRequests(t *testing.T) {
 	mockLogger := mock.NewMockLogger()
 
 	router := gin.Default()
+	router.Use(middleware.RequestIDMiddleware())
 	router.Use(middleware.LoggerMiddleware(mockLogger))
-
 	router.GET(test.TestURL, func(c *gin.Context) {
 		c.String(http.StatusOK, constants.Success)
 	})
 
+	userAgentKey := "User-Agent"
+	userAgentValue := "test-user-agent"
+	expectedLocation := "pkg.utility.delivery.http.gin.middleware.LoggerMiddleware"
+
 	recorder := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, test.TestURL, nil)
+	request.Header.Set(userAgentKey, userAgentValue)
 	router.ServeHTTP(recorder, request)
 
-	assert.NotNil(t, mockLogger.LastInfo, test.DataNotNilMessage)
+	outgoingLog, _ := mockLogger.LastInfo.(delivery.HTTPOutgoingLog)
+	assert.IsType(t, delivery.HTTPOutgoingLog{}, mockLogger.LastInfo, test.EqualMessage)
+	assert.Equal(t, constants.Success, recorder.Body.String(), test.EqualMessage)
+	assert.Equal(t, outgoingLog.Location, expectedLocation, test.EqualMessage)
+	assert.NotEmpty(t, outgoingLog.RequestID, test.EqualMessage)
+	assert.Equal(t, http.MethodGet, outgoingLog.RequestMethod, test.EqualMessage)
+	assert.Equal(t, test.TestURL, outgoingLog.RequestURL, test.EqualMessage)
+	assert.NotEmpty(t, outgoingLog.ClientIP, test.EqualMessage)
+	assert.Equal(t, userAgentValue, outgoingLog.UserAgent, test.EqualMessage)
+	assert.Equal(t, constants.Success, recorder.Body.String(), test.EqualMessage)
+	assert.Equal(t, http.StatusOK, outgoingLog.ResponseStatus, test.EqualMessage)
+	assert.NotZero(t, outgoingLog.Duration, test.EqualMessage)
 }

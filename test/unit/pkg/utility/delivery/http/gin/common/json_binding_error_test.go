@@ -32,6 +32,7 @@ func setupTestRouter(location string, mockLogger *mock.MockLogger) *gin.Engine {
 			return
 		}
 	})
+
 	return router
 }
 

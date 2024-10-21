@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
+	delivery "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 	middleware "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/middleware"
 	test "github.com/yachnytskyi/golang-mongo-grpc/test"
 	mock "github.com/yachnytskyi/golang-mongo-grpc/test/unit/mock/common"
@@ -62,7 +62,7 @@ func TestAnonymousMiddlewareCookieEmptyTokenValue(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, request)
 
-	assert.IsType(t, httpError.HTTPAuthorizationError{}, mockLogger.LastError, test.EqualMessage)
+	assert.IsType(t, delivery.HTTPAuthorizationError{}, mockLogger.LastError, test.EqualMessage)
 	assert.Equal(t, http.StatusForbidden, recorder.Code, test.EqualMessage)
 	assert.JSONEq(t, test.AlreadyLoggedInMessage, recorder.Body.String(), test.EqualMessage)
 }
@@ -78,7 +78,7 @@ func TestAnonymousMiddlewareCookieValidToken(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, request)
 
-	assert.IsType(t, httpError.HTTPAuthorizationError{}, mockLogger.LastError, test.EqualMessage)
+	assert.IsType(t, delivery.HTTPAuthorizationError{}, mockLogger.LastError, test.EqualMessage)
 	assert.Equal(t, http.StatusForbidden, recorder.Code, test.EqualMessage)
 	assert.JSONEq(t, test.AlreadyLoggedInMessage, recorder.Body.String(), test.EqualMessage)
 }
@@ -98,7 +98,7 @@ func TestAnonymousMiddlewareHeaderValidToken(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, request)
 
-	assert.IsType(t, httpError.HTTPAuthorizationError{}, mockLogger.LastError, test.EqualMessage)
+	assert.IsType(t, delivery.HTTPAuthorizationError{}, mockLogger.LastError, test.EqualMessage)
 	assert.Equal(t, http.StatusForbidden, recorder.Code, test.EqualMessage)
 	assert.JSONEq(t, test.AlreadyLoggedInMessage, recorder.Body.String(), test.EqualMessage)
 }
@@ -118,7 +118,7 @@ func TestAnonymousMiddlewareHeaderInvalidToken(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, request)
 
-	assert.IsType(t, httpError.HTTPAuthorizationError{}, mockLogger.LastError, test.EqualMessage)
+	assert.IsType(t, delivery.HTTPAuthorizationError{}, mockLogger.LastError, test.EqualMessage)
 	assert.Equal(t, http.StatusForbidden, recorder.Code, test.EqualMessage)
 	assert.JSONEq(t, test.AlreadyLoggedInMessage, recorder.Body.String(), test.EqualMessage)
 }

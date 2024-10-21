@@ -1,35 +1,35 @@
 package model
 
 import (
-	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
-	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	http "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
+	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
 
 func HandleError(err error) error {
 	switch errorType := err.(type) {
-	case httpError.HTTPAuthorizationError:
+	case http.HTTPAuthorizationError:
 		return HTTPAuthorizationErrorToJSONAuthorizationErrorMapper(errorType)
-	case httpError.HTTPRequestError:
+	case http.HTTPRequestError:
 		return HTTPRequestErrorToJSONRequestErrorMapper(errorType)
-	case httpError.HTTPInternalError:
+	case http.HTTPInternalError:
 		return HTTPInternalErrorToJSONInternalErrorMapper(errorType)
-	case domainError.InfoMessage:
+	case domain.InfoMessage:
 		return InfoMessageToJSONInfoMessageMapper(errorType)
-	case domainError.ValidationError:
+	case domain.ValidationError:
 		return ValidationErrorToJSONValidationErrorMapper(errorType)
-	case domainError.ValidationErrors:
+	case domain.ValidationErrors:
 		return ValidationErrorsToJSONValidationErrorsMapper(errorType)
-	case domainError.AuthorizationError:
+	case domain.AuthorizationError:
 		return AuthorizationErrorToJSONAuthorizationErrorMapper(errorType)
-	case domainError.ItemNotFoundError:
+	case domain.ItemNotFoundError:
 		return ItemNotFoundErrorToJSONItemNotFoundErrorMapper(errorType)
-	case domainError.InvalidTokenError:
+	case domain.InvalidTokenError:
 		return InvalidTokenErrorToJSONIvalidTokenErrorMapper(errorType)
-	case domainError.TimeExpiredError:
+	case domain.TimeExpiredError:
 		return TimeExpiredErrorToJSONTimeExpiredErrorMapper(errorType)
-	case domainError.PaginationError:
+	case domain.PaginationError:
 		return PaginationErrorToJSONPaginationErrorMapper(errorType)
-	case domainError.InternalError:
+	case domain.InternalError:
 		return InternalErrorToJSONInternalErrorMapper(errorType)
 	default:
 		return errorType

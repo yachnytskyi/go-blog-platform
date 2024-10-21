@@ -13,7 +13,7 @@ import (
 	email "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/email"
 	logger "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/logger"
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
-	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
 
 const (
@@ -26,7 +26,7 @@ func NewConfig(configType string) *configModel.ApplicationConfig {
 		return config.NewViper()
 	// Add other config options here as needed.
 	default:
-		panic(domainError.NewInternalError(location+"NewConfig", fmt.Sprintf(constants.UnsupportedConfig, configType)))
+		panic(domain.NewInternalError(location+"NewConfig", fmt.Sprintf(constants.UnsupportedConfig, configType)))
 	}
 }
 
@@ -36,7 +36,7 @@ func NewLogger(config *configModel.ApplicationConfig) interfaces.Logger {
 		return logger.NewZerolog()
 	// Add other logger options here as needed.
 	default:
-		panic(domainError.NewInternalError(location+"NewLogger", fmt.Sprintf(constants.UnsupportedLogger, config.Core.Logger)))
+		panic(domain.NewInternalError(location+"NewLogger", fmt.Sprintf(constants.UnsupportedLogger, config.Core.Logger)))
 	}
 }
 
@@ -46,7 +46,7 @@ func NewEmail(config *configModel.ApplicationConfig, logger interfaces.Logger) i
 		return email.NewGoMail(config, logger)
 	// Add other email options here as needed.
 	default:
-		panic(domainError.NewInternalError(location+"NewEmail", fmt.Sprintf(constants.UnsupportedLogger, config.Core.Logger)))
+		panic(domain.NewInternalError(location+"NewEmail", fmt.Sprintf(constants.UnsupportedLogger, config.Core.Logger)))
 	}
 }
 
@@ -56,7 +56,7 @@ func NewRepositoryFactory(config *configModel.ApplicationConfig, logger interfac
 		return repository.NewMongoDBRepository(config, logger)
 	// Add other repository options here as needed.
 	default:
-		logger.Panic(domainError.NewInternalError(location+"NewRepositoryFactory", fmt.Sprintf(constants.UnsupportedRepository, config.Core.Database)))
+		logger.Panic(domain.NewInternalError(location+"NewRepositoryFactory", fmt.Sprintf(constants.UnsupportedRepository, config.Core.Database)))
 		return nil
 	}
 
@@ -73,7 +73,7 @@ func NewDeliveryFactory(
 	// Add other delivery options here as needed.
 	default:
 		model.GracefulShutdown(ctx, logger, repository)
-		logger.Panic(domainError.NewInternalError(location+"NewDeliveryFactory", fmt.Sprintf(constants.UnsupportedDelivery, config.Core.Delivery)))
+		logger.Panic(domain.NewInternalError(location+"NewDeliveryFactory", fmt.Sprintf(constants.UnsupportedDelivery, config.Core.Delivery)))
 		return nil
 	}
 }

@@ -1,10 +1,10 @@
 package http
 
 import (
-	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
 
-func ValidationErrorToHTTPValidationErrorMapper(validationError domainError.ValidationError) HTTPValidationError {
+func ValidationErrorToHTTPValidationErrorMapper(validationError domain.ValidationError) HTTPValidationError {
 	return NewHTTPValidationError(
 		validationError.Field,
 		validationError.FieldType,
@@ -12,10 +12,10 @@ func ValidationErrorToHTTPValidationErrorMapper(validationError domainError.Vali
 	)
 }
 
-func ValidationErrorsToHTTPValidationErrorsMapper(validationErrors domainError.ValidationErrors) HTTPValidationErrors {
+func ValidationErrorsToHTTPValidationErrorsMapper(validationErrors domain.ValidationErrors) HTTPValidationErrors {
 	httpValidationErrors := make([]error, 0, len(validationErrors.Errors))
 	for _, validationError := range validationErrors.Errors {
-		validationError, ok := validationError.(domainError.ValidationError)
+		validationError, ok := validationError.(domain.ValidationError)
 		if ok {
 			httpValidationError := NewHTTPValidationError(
 				validationError.Field,
@@ -29,32 +29,32 @@ func ValidationErrorsToHTTPValidationErrorsMapper(validationErrors domainError.V
 	return NewHTTPValidationErrors(httpValidationErrors)
 }
 
-func AuthorizationErrorToHTTPAuthorizationErrorMapper(authorizationError domainError.AuthorizationError) HTTPAuthorizationError {
+func AuthorizationErrorToHTTPAuthorizationErrorMapper(authorizationError domain.AuthorizationError) HTTPAuthorizationError {
 	return NewHTTPAuthorizationError(
 		authorizationError.Location,
 		authorizationError.Notification,
 	)
 }
 
-func ItemNotFoundErrorToHTTPItemNotFoundErrorMapper(itemNotFoundError domainError.ItemNotFoundError) HTTPItemNotFoundError {
+func ItemNotFoundErrorToHTTPItemNotFoundErrorMapper(itemNotFoundError domain.ItemNotFoundError) HTTPItemNotFoundError {
 	return NewHTTPItemNotFoundError(
 		itemNotFoundError.Notification,
 	)
 }
 
-func InvalidTokenErrorToHTTPIvalidTokenErrorMapper(invalidTokenError domainError.InvalidTokenError) HTTPInvalidTokenError {
+func InvalidTokenErrorToHTTPIvalidTokenErrorMapper(invalidTokenError domain.InvalidTokenError) HTTPInvalidTokenError {
 	return NewHTTPInvalidTokenError(
 		invalidTokenError.Notification,
 	)
 }
 
-func TimeExpiredErrorToHTTPTimeExpiredErrorMapper(timeExpiredError domainError.TimeExpiredError) HTTPTimeExpiredError {
+func TimeExpiredErrorToHTTPTimeExpiredErrorMapper(timeExpiredError domain.TimeExpiredError) HTTPTimeExpiredError {
 	return NewHTTPTimeExpiredError(
 		timeExpiredError.Notification,
 	)
 }
 
-func PaginationErrorToHTTPPaginationErrorMapper(paginationError domainError.PaginationError) HTTPPaginationError {
+func PaginationErrorToHTTPPaginationErrorMapper(paginationError domain.PaginationError) HTTPPaginationError {
 	return NewHTTPPaginationError(
 		paginationError.CurrentPage,
 		paginationError.TotalPages,
@@ -62,7 +62,7 @@ func PaginationErrorToHTTPPaginationErrorMapper(paginationError domainError.Pagi
 	)
 }
 
-func InternalErrorToHTTPInternalErrorMapper(internalError domainError.InternalError) HTTPInternalError {
+func InternalErrorToHTTPInternalErrorMapper(internalError domain.InternalError) HTTPInternalError {
 	return NewHTTPInternalError(
 		internalError.Location,
 		internalError.Notification,

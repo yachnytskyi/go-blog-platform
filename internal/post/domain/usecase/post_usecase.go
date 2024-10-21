@@ -6,7 +6,7 @@ import (
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	model "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
-	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
 
 const (
@@ -49,7 +49,7 @@ func (postUseCase PostUseCase) UpdatePostById(ctx context.Context, postID string
 
 	userID := fetchedPost.UserID
 	if currentUserID != userID {
-		return nil, domainError.NewAuthorizationError(location, constants.AuthorizationErrorNotification)
+		return nil, domain.NewAuthorizationError(location, constants.AuthorizationErrorNotification)
 	}
 
 	updatedPost, err := postUseCase.PostRepository.UpdatePostById(ctx, postID, post)
@@ -65,7 +65,7 @@ func (postUseCase PostUseCase) DeletePostByID(ctx context.Context, postID string
 
 	userID := fetchedPost.UserID
 	if currentUserID != userID {
-		return domainError.NewAuthorizationError(location, constants.AuthorizationErrorNotification)
+		return domain.NewAuthorizationError(location, constants.AuthorizationErrorNotification)
 	}
 
 	deletedPost := postUseCase.PostRepository.DeletePostByID(ctx, postID)

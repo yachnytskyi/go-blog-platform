@@ -8,7 +8,7 @@ import (
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	http "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
-	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
+	delivery "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 )
 
 const (
@@ -33,12 +33,12 @@ func extractToken(ginContext *gin.Context, location, tokenType string) common.Re
 	}
 
 	// If no token was found, return a failure with an HTTP authorization error.
-	return common.NewResultOnFailure[string](httpError.NewHTTPAuthorizationError(location+".extractToken.token", constants.LoggingErrorNotification))
+	return common.NewResultOnFailure[string](delivery.NewHTTPAuthorizationError(location+".extractToken.token", constants.LoggingErrorNotification))
 }
 
 // abortWithStatusJSON aborts the request, logs the error, and responds with a JSON error.
 func abortWithStatusJSON(ginContext *gin.Context, logger interfaces.Logger, err error, httpCode int) {
 	logger.Error(err)
-	jsonResponse := http.NewJSONResponseOnFailure(httpError.HandleError(err))
+	jsonResponse := http.NewJSONResponseOnFailure(delivery.HandleError(err))
 	ginContext.AbortWithStatusJSON(httpCode, jsonResponse)
 }

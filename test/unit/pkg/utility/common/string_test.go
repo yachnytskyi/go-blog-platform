@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	test "github.com/yachnytskyi/golang-mongo-grpc/test"
@@ -49,6 +49,6 @@ func TestDecodeInvalidBase64String(t *testing.T) {
 	expectedErrorMessage := fmt.Sprintf(test.ExpectedErrorMessageFormat, expectedLocation, decodeErrorMessage+"7")
 
 	assert.True(t, validator.IsError(result.Error), test.FailureMessage)
-	assert.IsType(t, domainError.InternalError{}, result.Error, test.EqualMessage)
+	assert.IsType(t, domain.InternalError{}, result.Error, test.EqualMessage)
 	assert.Equal(t, expectedErrorMessage, result.Error.Error(), test.EqualMessage)
 }

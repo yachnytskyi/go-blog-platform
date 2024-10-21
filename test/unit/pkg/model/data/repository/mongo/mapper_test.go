@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
-	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	test "github.com/yachnytskyi/golang-mongo-grpc/test"
 	mock "github.com/yachnytskyi/golang-mongo-grpc/test/unit/mock/common"
@@ -46,7 +46,7 @@ func TestHexToObjectIDMapperEmptyHex(t *testing.T) {
 
 	assert.True(t, validator.IsError(result.Error), test.ErrorNotNilMessage)
 	assert.Equal(t, emptyObjectID, result.Data.Hex(), test.EqualMessage)
-	assert.IsType(t, domainError.InternalError{}, result.Error, test.EqualMessage)
+	assert.IsType(t, domain.InternalError{}, result.Error, test.EqualMessage)
 	assert.Equal(t, expectedErrorMessage, result.Error.Error(), test.EqualMessage)
 }
 
@@ -61,7 +61,7 @@ func TestHexToObjectIDMapperInvalidHex(t *testing.T) {
 
 	assert.True(t, validator.IsError(result.Error), test.ErrorNotNilMessage)
 	assert.Equal(t, emptyObjectID, result.Data.Hex(), test.EqualMessage)
-	assert.IsType(t, domainError.InternalError{}, result.Error, test.EqualMessage)
+	assert.IsType(t, domain.InternalError{}, result.Error, test.EqualMessage)
 	assert.Equal(t, expectedErrorMessage, result.Error.Error(), test.EqualMessage)
 }
 
@@ -90,6 +90,6 @@ func TestDataToMongoDocumentMapperBsonMarshalError(t *testing.T) {
 
 	assert.Nil(t, result.Data, test.DataNilMessage)
 	assert.True(t, validator.IsError(result.Error), test.ErrorNotNilMessage)
-	assert.IsType(t, domainError.InternalError{}, result.Error, test.EqualMessage)
+	assert.IsType(t, domain.InternalError{}, result.Error, test.EqualMessage)
 	assert.Equal(t, expectedErrorMessage, result.Error.Error(), test.EqualMessage)
 }

@@ -6,7 +6,7 @@ import (
 
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
-	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
 
 // ValidateField validates a field based on the provided StringValidator.
@@ -26,7 +26,7 @@ func ValidateField(logger interfaces.Logger, location, field string, stringValid
 		}
 
 		stringValidator.Notification = notification
-		validationError := domainError.NewValidationError(
+		validationError := domain.NewValidationError(
 			location+".ValidateField.IsStringLengthInvalid",
 			stringValidator.FieldName,
 			fieldRequirement(stringValidator.IsOptional),
@@ -38,7 +38,7 @@ func ValidateField(logger interfaces.Logger, location, field string, stringValid
 
 	// Validate field characters.
 	if AreStringCharactersInvalid(field, stringValidator.FieldRegex) {
-		validationError := domainError.NewValidationError(
+		validationError := domain.NewValidationError(
 			location+".ValidateField.AreStringCharactersInvalid",
 			stringValidator.FieldName,
 			fieldRequirement(stringValidator.IsOptional),

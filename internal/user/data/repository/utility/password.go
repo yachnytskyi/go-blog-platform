@@ -3,7 +3,7 @@ package utility
 import (
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
-	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -12,7 +12,7 @@ import (
 func HashPassword(logger interfaces.Logger, location, password string) common.Result[string] {
 	hashedPassword, generateFromPasswordError := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if validator.IsError(generateFromPasswordError) {
-		internalError := domainError.NewInternalError(location+".HashPassword.GenerateFromPassword", generateFromPasswordError.Error())
+		internalError := domain.NewInternalError(location+".HashPassword.GenerateFromPassword", generateFromPasswordError.Error())
 		logger.Error(internalError)
 		return common.NewResultOnFailure[string](internalError)
 	}

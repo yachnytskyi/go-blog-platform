@@ -11,7 +11,7 @@ import (
 	utility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
 	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
-	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
+	delivery "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 	middleware "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/middleware"
 	test "github.com/yachnytskyi/golang-mongo-grpc/test"
 	mock "github.com/yachnytskyi/golang-mongo-grpc/test/unit/mock/common"
@@ -78,7 +78,7 @@ func TestRefreshTokenMiddlewareCookieInvalidTokenValue(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, request)
 
-	assert.IsType(t, httpError.HTTPAuthorizationError{}, mockLogger.LastError, test.EqualMessage)
+	assert.IsType(t, delivery.HTTPAuthorizationError{}, mockLogger.LastError, test.EqualMessage)
 	assert.Equal(t, http.StatusUnauthorized, recorder.Code, test.EqualMessage)
 	assert.JSONEq(t, test.NotLoggedInMessage, recorder.Body.String(), test.EqualMessage)
 }
@@ -99,7 +99,7 @@ func TestRefreshTokenMiddlewareCookieEmptyTokenValue(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, request)
 
-	assert.IsType(t, httpError.HTTPAuthorizationError{}, mockLogger.LastError, test.EqualMessage)
+	assert.IsType(t, delivery.HTTPAuthorizationError{}, mockLogger.LastError, test.EqualMessage)
 	assert.Equal(t, http.StatusUnauthorized, recorder.Code, test.EqualMessage)
 	assert.JSONEq(t, test.NotLoggedInMessage, recorder.Body.String(), test.EqualMessage)
 }
@@ -121,7 +121,7 @@ func TestRefreshTokenMiddlewareCookieMultipleTokens(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, request)
 
-	assert.IsType(t, httpError.HTTPAuthorizationError{}, mockLogger.LastError, test.EqualMessage)
+	assert.IsType(t, delivery.HTTPAuthorizationError{}, mockLogger.LastError, test.EqualMessage)
 	assert.Equal(t, http.StatusUnauthorized, recorder.Code, test.EqualMessage)
 	assert.JSONEq(t, test.NotLoggedInMessage, recorder.Body.String(), test.EqualMessage)
 }
@@ -143,7 +143,7 @@ func TestRefreshTokenMiddlewareCookieExpiredToken(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, request)
 
-	assert.IsType(t, httpError.HTTPAuthorizationError{}, mockLogger.LastError, test.EqualMessage)
+	assert.IsType(t, delivery.HTTPAuthorizationError{}, mockLogger.LastError, test.EqualMessage)
 	assert.Equal(t, http.StatusUnauthorized, recorder.Code, test.EqualMessage)
 	assert.JSONEq(t, test.NotLoggedInMessage, recorder.Body.String(), test.EqualMessage)
 }
@@ -186,7 +186,7 @@ func TestRefreshTokenMiddlewareHeaderInvalidTokenValue(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, request)
 
-	assert.IsType(t, httpError.HTTPAuthorizationError{}, mockLogger.LastError, test.EqualMessage)
+	assert.IsType(t, delivery.HTTPAuthorizationError{}, mockLogger.LastError, test.EqualMessage)
 	assert.Equal(t, http.StatusUnauthorized, recorder.Code, test.EqualMessage)
 	assert.JSONEq(t, test.NotLoggedInMessage, recorder.Body.String(), test.EqualMessage)
 }
@@ -207,7 +207,7 @@ func TestRefreshTokenMiddlewareHeaderEmptyTokenValue(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, request)
 
-	assert.IsType(t, httpError.HTTPAuthorizationError{}, mockLogger.LastError, test.EqualMessage)
+	assert.IsType(t, delivery.HTTPAuthorizationError{}, mockLogger.LastError, test.EqualMessage)
 	assert.Equal(t, http.StatusUnauthorized, recorder.Code, test.EqualMessage)
 	assert.JSONEq(t, test.NotLoggedInMessage, recorder.Body.String(), test.EqualMessage)
 }
@@ -229,7 +229,7 @@ func TestRefreshTokenMiddlewareHeaderMultipleTokens(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, request)
 
-	assert.IsType(t, httpError.HTTPAuthorizationError{}, mockLogger.LastError, test.EqualMessage)
+	assert.IsType(t, delivery.HTTPAuthorizationError{}, mockLogger.LastError, test.EqualMessage)
 	assert.Equal(t, http.StatusUnauthorized, recorder.Code, test.EqualMessage)
 	assert.JSONEq(t, test.NotLoggedInMessage, recorder.Body.String(), test.EqualMessage)
 }
@@ -251,7 +251,7 @@ func TestRefreshTokenMiddlewareHeaderExpiredToken(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, request)
 
-	assert.IsType(t, httpError.HTTPAuthorizationError{}, mockLogger.LastError, test.EqualMessage)
+	assert.IsType(t, delivery.HTTPAuthorizationError{}, mockLogger.LastError, test.EqualMessage)
 	assert.Equal(t, http.StatusUnauthorized, recorder.Code, test.EqualMessage)
 	assert.JSONEq(t, test.NotLoggedInMessage, recorder.Body.String(), test.EqualMessage)
 }
@@ -271,7 +271,7 @@ func TestRefreshTokenMiddlewareHeaderNoToken(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	router.ServeHTTP(recorder, request)
 
-	assert.IsType(t, httpError.HTTPAuthorizationError{}, mockLogger.LastError, test.EqualMessage)
+	assert.IsType(t, delivery.HTTPAuthorizationError{}, mockLogger.LastError, test.EqualMessage)
 	assert.Equal(t, http.StatusUnauthorized, recorder.Code, test.EqualMessage)
 	assert.JSONEq(t, test.NotLoggedInMessage, recorder.Body.String(), test.EqualMessage)
 }

@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	http "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
-	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
+	delivery "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 	test "github.com/yachnytskyi/golang-mongo-grpc/test"
 )
 
@@ -27,41 +27,41 @@ func TestNewJSONResponseOnSuccess(t *testing.T) {
 }
 
 func TestNewJSONResponseOnFailureWithHTTPValidationError(t *testing.T) {
-	httpBaseError := httpError.NewHTTPValidationError(field, constants.FieldRequired, validationNotification)
+	httpBaseError := delivery.NewHTTPValidationError(field, constants.FieldRequired, validationNotification)
 	response := http.NewJSONResponseOnFailure(httpBaseError)
 
 	assert.Nil(t, response.Data, test.DataNilMessage)
 	assert.NoError(t, response.Errors, test.ErrorNilMessage)
-	assert.IsType(t, httpError.HTTPValidationError{}, response.Error, test.EqualMessage)
+	assert.IsType(t, delivery.HTTPValidationError{}, response.Error, test.EqualMessage)
 	assert.Equal(t, httpBaseError, response.Error, test.EqualMessage)
 	assert.Equal(t, constants.Fail, response.Status, test.EqualMessage)
 }
 
 func TestNewJSONResponseOnFailureWithMultipleValidationErrors(t *testing.T) {
 	errorsList := []error{
-		httpError.NewHTTPValidationError(field, constants.FieldRequired, validationNotification),
-		httpError.NewHTTPValidationError(field, constants.FieldRequired, validationNotification),
+		delivery.NewHTTPValidationError(field, constants.FieldRequired, validationNotification),
+		delivery.NewHTTPValidationError(field, constants.FieldRequired, validationNotification),
 	}
-	httpValidationErrors := httpError.NewHTTPValidationErrors(errorsList)
+	httpValidationErrors := delivery.NewHTTPValidationErrors(errorsList)
 	response := http.NewJSONResponseOnFailure(httpValidationErrors)
 
 	assert.Nil(t, response.Data, test.DataNilMessage)
 	assert.NoError(t, response.Error, test.ErrorNilMessage)
-	assert.IsType(t, httpError.HTTPValidationErrors{}, response.Errors, test.EqualMessage)
+	assert.IsType(t, delivery.HTTPValidationErrors{}, response.Errors, test.EqualMessage)
 	assert.Equal(t, httpValidationErrors, response.Errors, test.EqualMessage)
 	assert.Equal(t, constants.Fail, response.Status, test.EqualMessage)
 }
 
 func TestNewJSONResponseOnFailureWithSingleValidationError(t *testing.T) {
 	errorsList := []error{
-		httpError.NewHTTPValidationError(field, constants.FieldRequired, validationNotification),
+		delivery.NewHTTPValidationError(field, constants.FieldRequired, validationNotification),
 	}
-	httpValidationErrors := httpError.NewHTTPValidationErrors(errorsList)
+	httpValidationErrors := delivery.NewHTTPValidationErrors(errorsList)
 	response := http.NewJSONResponseOnFailure(httpValidationErrors)
 
 	assert.Nil(t, response.Data, test.DataNilMessage)
 	assert.NoError(t, response.Errors, test.ErrorNilMessage)
-	assert.IsType(t, httpError.HTTPValidationErrors{}, response.Error, test.EqualMessage)
+	assert.IsType(t, delivery.HTTPValidationErrors{}, response.Error, test.EqualMessage)
 	assert.Equal(t, httpValidationErrors, response.Error, test.EqualMessage)
 	assert.Equal(t, constants.Fail, response.Status, test.EqualMessage)
 }
@@ -76,12 +76,12 @@ func TestNewJSONResponseOnFailureWithNilError(t *testing.T) {
 }
 
 func TestNewJSONResponseOnFailureWithEmptyValidationErrorsList(t *testing.T) {
-	httpValidationErrors := httpError.NewHTTPValidationErrors([]error{})
+	httpValidationErrors := delivery.NewHTTPValidationErrors([]error{})
 	response := http.NewJSONResponseOnFailure(httpValidationErrors)
 
 	assert.Nil(t, response.Data, test.DataNilMessage)
 	assert.NoError(t, response.Error, test.DataNilMessage)
-	assert.IsType(t, httpError.HTTPValidationErrors{}, response.Errors, test.EqualMessage)
+	assert.IsType(t, delivery.HTTPValidationErrors{}, response.Errors, test.EqualMessage)
 	assert.Equal(t, httpValidationErrors, response.Errors, test.EqualMessage)
 	assert.Equal(t, constants.Fail, response.Status, test.EqualMessage)
 }

@@ -15,8 +15,8 @@ import (
 	userUseCase "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
 	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
 	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
-	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
-	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	delivery "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
+	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	middleware "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/middleware"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
@@ -60,11 +60,11 @@ func (ginDelivery GinDelivery) LaunchServer(ctx context.Context, repository inte
 		runError := ginDelivery.Router.Run(":" + ginDelivery.Config.Gin.Port)
 		if validator.IsError(runError) {
 			repository.Close(ctx)
-			ginDelivery.Logger.Panic(domainError.NewInternalError(location+"gin.LaunchServer.Router.Run", runError.Error()))
+			ginDelivery.Logger.Panic(domain.NewInternalError(location+"gin.LaunchServer.Router.Run", runError.Error()))
 		}
 	}()
 
-	ginDelivery.Logger.Info(domainError.NewInfoMessage(location+"gin.LaunchServer", constants.ServerConnectionSuccess))
+	ginDelivery.Logger.Info(domain.NewInfoMessage(location+"gin.LaunchServer", constants.ServerConnectionSuccess))
 }
 
 func (ginDelivery GinDelivery) NewController(useCase any) any {
@@ -74,7 +74,7 @@ func (ginDelivery GinDelivery) NewController(useCase any) any {
 	case postUseCase.PostUseCase:
 		return post.NewPostController(useCaseType)
 	default:
-		ginDelivery.Logger.Panic(domainError.NewInternalError(location+"gin.NewController.default", fmt.Sprintf(constants.UnsupportedDelivery, useCaseType)))
+		ginDelivery.Logger.Panic(domain.NewInternalError(location+"gin.NewController.default", fmt.Sprintf(constants.UnsupportedDelivery, useCaseType)))
 		return nil
 	}
 }
@@ -94,10 +94,10 @@ func (ginDelivery GinDelivery) NewRouter(controller any) interfaces.Router {
 func (ginDelivery GinDelivery) Close(ctx context.Context) {
 	closeError := ginDelivery.Server.Shutdown(ctx)
 	if validator.IsError(closeError) {
-		ginDelivery.Logger.Panic(domainError.NewInternalError(location+"gin.Close.Server.Close", closeError.Error()))
+		ginDelivery.Logger.Panic(domain.NewInternalError(location+"gin.Close.Server.Close", closeError.Error()))
 	}
 
-	ginDelivery.Logger.Info(domainError.NewInfoMessage(location+"gin.Close", constants.ServerConnectionClosed))
+	ginDelivery.Logger.Info(domain.NewInfoMessage(location+"gin.Close", constants.ServerConnectionClosed))
 }
 
 func applyMiddleware(router *gin.Engine, config *config.ApplicationConfig, logger interfaces.Logger) {
@@ -120,25 +120,25 @@ func configureCORS(router *gin.Engine, config *config.ApplicationConfig) {
 func setNoRouteHandler(router *gin.Engine, location string, logger interfaces.Logger) {
 	router.NoRoute(func(ginContext *gin.Context) {
 		requestedPath := ginContext.Request.URL.Path
-		httpRequestError := httpError.NewHTTPRequestError(
+		httpRequestError := delivery.NewHTTPRequestError(
 			location+"gin.setNoRouteHandler.NoRoute",
 			requestedPath,
 			fmt.Sprintf(constants.RouteNotFoundNotification, requestedPath),
 		)
 		logger.Error(httpRequestError)
-		ginContext.JSON(http.StatusNotFound, httpModel.NewJSONResponseOnFailure(httpError.HandleError(httpRequestError)))
+		ginContext.JSON(http.StatusNotFound, httpModel.NewJSONResponseOnFailure(delivery.HandleError(httpRequestError)))
 	})
 }
 
 func setNoMethodHandler(router *gin.Engine, location string, logger interfaces.Logger) {
 	router.NoMethod(func(ginContext *gin.Context) {
 		forbiddenMethod := ginContext.Request.Method
-		httpRequestError := httpError.NewHTTPRequestError(
+		httpRequestError := delivery.NewHTTPRequestError(
 			location+"gin.setNoMethodHandler.NoMethod",
 			forbiddenMethod,
 			fmt.Sprintf(constants.MethodNotAllowedNotification, forbiddenMethod),
 		)
 		logger.Error(httpRequestError)
-		ginContext.JSON(http.StatusMethodNotAllowed, httpModel.NewJSONResponseOnFailure(httpError.HandleError(httpRequestError)))
+		ginContext.JSON(http.StatusMethodNotAllowed, httpModel.NewJSONResponseOnFailure(delivery.HandleError(httpRequestError)))
 	})
 }

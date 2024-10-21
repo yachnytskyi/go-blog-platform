@@ -12,7 +12,7 @@ import (
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
-	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	"gopkg.in/gomail.v2"
 )
@@ -55,7 +55,7 @@ func (goMail GoMail) SendEmail(config *config.ApplicationConfig, logger interfac
 
 	dialAndSendError := dialer.DialAndSend(prepareSendMessage.Data)
 	if validator.IsError(dialAndSendError) {
-		internalError := domainError.NewInternalError(location+".SendEmail.DialAndSend", dialAndSendError.Error())
+		internalError := domain.NewInternalError(location+".SendEmail.DialAndSend", dialAndSendError.Error())
 		logger.Error(internalError)
 		return internalError
 	}
@@ -71,7 +71,7 @@ func prepareSendMessage(config *config.ApplicationConfig, logger interfaces.Logg
 	var body bytes.Buffer
 	template := parseTemplateDirectory(logger, location+".prepareSendMessage", data.TemplatePath)
 	if validator.IsError(template.Error) {
-		internalError := domainError.NewInternalError(location+".prepareSendMessage.parseTemplateDirectory", template.Error.Error())
+		internalError := domain.NewInternalError(location+".prepareSendMessage.parseTemplateDirectory", template.Error.Error())
 		logger.Error(internalError)
 		return common.NewResultOnFailure[*gomail.Message](internalError)
 	}
@@ -79,7 +79,7 @@ func prepareSendMessage(config *config.ApplicationConfig, logger interfaces.Logg
 	// Retrieve the specific email template.
 	emailTemplate := template.Data.Lookup(data.TemplateName)
 	if emailTemplate == nil {
-		internalError := domainError.NewInternalError(location+".prepareSendMessage.Lookup", constants.EmailTemplateNotFound)
+		internalError := domain.NewInternalError(location+".prepareSendMessage.Lookup", constants.EmailTemplateNotFound)
 		logger.Error(internalError)
 		return common.NewResultOnFailure[*gomail.Message](internalError)
 	}
@@ -87,7 +87,7 @@ func prepareSendMessage(config *config.ApplicationConfig, logger interfaces.Logg
 	// Execute the template to generate the email body.
 	executeError := emailTemplate.Execute(&body, &data)
 	if validator.IsError(executeError) {
-		internalError := domainError.NewInternalError(location+".prepareSendMessage.Execute", executeError.Error())
+		internalError := domain.NewInternalError(location+".prepareSendMessage.Execute", executeError.Error())
 		logger.Error(internalError)
 		return common.NewResultOnFailure[*gomail.Message](internalError)
 	}
@@ -109,7 +109,7 @@ func parseTemplateDirectory(logger interfaces.Logger, location, templatePath str
 	// Walk through the directory and gather all file paths.
 	walkError := filepath.Walk(templatePath, func(path string, info os.FileInfo, walkError error) error {
 		if validator.IsError(walkError) {
-			internalError := domainError.NewInternalError(location+".parseTemplateDirectory.Walk", walkError.Error())
+			internalError := domain.NewInternalError(location+".parseTemplateDirectory.Walk", walkError.Error())
 			logger.Error(internalError)
 			return internalError
 		}
@@ -121,9 +121,9 @@ func parseTemplateDirectory(logger interfaces.Logger, location, templatePath str
 		return nil
 	})
 
-	logger.Debug(domainError.NewInfoMessage(location+".parseTemplateDirectory", parsingMessage))
+	logger.Debug(domain.NewInfoMessage(location+".parseTemplateDirectory", parsingMessage))
 	if validator.IsError(walkError) {
-		internalError := domainError.NewInternalError(location+".parseTemplateDirectory."+parsingMessage, walkError.Error())
+		internalError := domain.NewInternalError(location+".parseTemplateDirectory."+parsingMessage, walkError.Error())
 		logger.Error(internalError)
 		return common.NewResultOnFailure[*template.Template](internalError)
 	}
@@ -131,7 +131,7 @@ func parseTemplateDirectory(logger interfaces.Logger, location, templatePath str
 	// Parse all collected template files.
 	parseFiles, parseFilesError := template.ParseFiles(paths...)
 	if validator.IsError(parseFilesError) {
-		internalError := domainError.NewInternalError(location+".ParseFiles."+parsingMessage, parseFilesError.Error())
+		internalError := domain.NewInternalError(location+".ParseFiles."+parsingMessage, parseFilesError.Error())
 		logger.Error(internalError)
 		return common.NewResultOnFailure[*template.Template](internalError)
 	}

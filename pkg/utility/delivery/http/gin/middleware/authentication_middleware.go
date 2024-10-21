@@ -9,7 +9,7 @@ import (
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	utility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
 	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
-	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
+	delivery "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
@@ -34,7 +34,7 @@ func AuthenticationMiddleware(config *config.ApplicationConfig, logger interface
 			config.AccessToken.PublicKey,
 		)
 		if validator.IsError(userTokenPayload.Error) {
-			httpAuthorizationError := httpError.NewHTTPAuthorizationError(location+"AuthenticationMiddleware.ValidateJWTToken", constants.LoggingErrorNotification)
+			httpAuthorizationError := delivery.NewHTTPAuthorizationError(location+"AuthenticationMiddleware.ValidateJWTToken", constants.LoggingErrorNotification)
 			abortWithStatusJSON(ginContext, logger, httpAuthorizationError, http.StatusUnauthorized)
 			return
 		}

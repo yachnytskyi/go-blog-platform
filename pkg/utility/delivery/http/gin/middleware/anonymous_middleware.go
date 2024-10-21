@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
-	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
+	delivery "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 )
 
 // AnonymousMiddleware is a Gin middleware to check if the user is anonymous based on the presence of an access token.
@@ -17,7 +17,7 @@ func AnonymousMiddleware(logger interfaces.Logger) gin.HandlerFunc {
 
 		// If the access token is present, indicating that the user is already authenticated.
 		if anonymousAccessToken {
-			httpAuthorizationError := httpError.NewHTTPAuthorizationError(location+"AnonymousMiddleware.anonymousAccessToken", constants.AlreadyLoggedInNotification)
+			httpAuthorizationError := delivery.NewHTTPAuthorizationError(location+"AnonymousMiddleware.anonymousAccessToken", constants.AlreadyLoggedInNotification)
 			abortWithStatusJSON(ginContext, logger, httpAuthorizationError, http.StatusForbidden)
 			return
 		}

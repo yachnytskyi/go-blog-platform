@@ -13,11 +13,10 @@ import (
 
 func (postGrpcServer *PostGrpcServer) CreatePost(ctx context.Context, createdPostData *postProtobufV1.PostCreate) (*postProtobufV1.PostView, error) {
 	post := &post.PostCreate{
+		UserID:  createdPostData.UserID,
 		Title:   createdPostData.Title,
 		Content: createdPostData.Content,
 		Image:   createdPostData.Image,
-		UserID:  createdPostData.UserID,
-		User:    createdPostData.UserID,
 	}
 
 	createdPost, err := postGrpcServer.postUseCase.CreatePost(ctx, post)
@@ -33,10 +32,9 @@ func (postGrpcServer *PostGrpcServer) CreatePost(ctx context.Context, createdPos
 	postView := &postProtobufV1.PostView{
 		Post: &postProtobufV1.Post{
 			PostID:    createdPost.PostID,
+			UserID:    createdPost.UserID,
 			Title:     createdPost.Title,
 			Content:   createdPost.Content,
-			UserID:    createdPost.UserID,
-			User:      createdPost.User,
 			CreatedAt: timestamppb.New(createdPost.CreatedAt),
 			UpdatedAt: timestamppb.New(createdPost.UpdatedAt),
 		},

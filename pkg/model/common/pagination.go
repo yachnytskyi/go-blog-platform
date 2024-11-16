@@ -36,7 +36,7 @@ func NewPaginationQuery(page, limit, orderBy, sortOrder, baseURL string) Paginat
 func getPage(page string) int {
 	intPage, stringConversionError := strconv.ParseInt(page, 0, 0)
 	if validator.IsError(stringConversionError) || intPage < 1 {
-		intPage, _ = strconv.ParseInt(constants.DefaultPage, 0, 0)
+		return constants.DefaultPageInteger
 	}
 
 	return int(intPage)
@@ -45,10 +45,10 @@ func getPage(page string) int {
 func getLimit(limit string) int {
 	intLimit, stringConversionError := strconv.ParseInt(limit, 0, 0)
 	if validator.IsError(stringConversionError) || intLimit < 1 {
-		intLimit, _ = strconv.ParseInt(constants.DefaultLimit, 0, 0)
+		return constants.DefaultLimitInteger
 	}
-	if isLimitInvalid(int(intLimit)) {
-		intLimit, _ = strconv.ParseInt(constants.DefaultLimit, 0, 0)
+	if intLimit > constants.MaxItemsPerPage {
+		return constants.DefaultLimitInteger
 	}
 
 	return int(intLimit)
@@ -72,14 +72,6 @@ func getSortOrder(sortOrder string) string {
 
 func getSkip(page, limit int) int {
 	return (page - 1) * limit
-}
-
-func isLimitInvalid(data int) bool {
-	if data > constants.MaxItemsPerPage {
-		return true
-	}
-
-	return false
 }
 
 func SetCorrectPage(paginationQuery PaginationQuery) PaginationQuery {

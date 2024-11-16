@@ -37,10 +37,9 @@ func (postGrpcServer *PostGrpcServer) UpdatePostById(ctx context.Context, update
 	postView := &postProtobufV1.PostView{
 		Post: &postProtobufV1.Post{
 			PostID:    createdPost.PostID,
+			UserID:    createdPost.UserID,
 			Title:     createdPost.Title,
 			Content:   createdPost.Content,
-			UserID:    createdPost.UserID,
-			User:      createdPost.User,
 			CreatedAt: timestamppb.New(createdPost.CreatedAt),
 			UpdatedAt: timestamppb.New(createdPost.UpdatedAt),
 		},

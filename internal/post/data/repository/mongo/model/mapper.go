@@ -27,7 +27,6 @@ func PostRepositoryToPostMapper(postRepository *PostRepository) *post.Post {
 		Title:     postRepository.Title,
 		Content:   postRepository.Content,
 		Image:     postRepository.Image,
-		User:      postRepository.User,
 		CreatedAt: postRepository.CreatedAt,
 		UpdatedAt: postRepository.UpdatedAt,
 	}
@@ -44,7 +43,6 @@ func PostCreateToPostCreateRepositoryMapper(logger interfaces.Logger, postCreate
 		Title:     postCreate.Title,
 		Content:   postCreate.Content,
 		Image:     postCreate.Image,
-		User:      postCreate.User,
 		CreatedAt: postCreate.CreatedAt,
 		UpdatedAt: postCreate.UpdatedAt,
 	}, nil
@@ -67,7 +65,6 @@ func PostUpdateToPostUpdateRepositoryMapper(logger interfaces.Logger, postUpdate
 		Title:     postUpdate.Title,
 		Content:   postUpdate.Content,
 		Image:     postUpdate.Image,
-		User:      postUpdate.User,
 		CreatedAt: postUpdate.CreatedAt,
 		UpdatedAt: postUpdate.UpdatedAt,
 	}, nil

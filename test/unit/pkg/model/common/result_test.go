@@ -18,9 +18,8 @@ const (
 func TestNewResultOnSuccess(t *testing.T) {
 	t.Parallel()
 	data := "test data"
-	result := common.NewResultOnSuccess("test data")
+	result := common.NewResultOnSuccess(data)
 
-	assert.False(t, validator.IsError(result.Error), test.FailureMessage)
 	assert.Equal(t, data, result.Data, test.EqualMessage)
 	assert.NoError(t, result.Error, test.ErrorNilMessage)
 }
@@ -33,14 +32,6 @@ func TestNewResultOnFailure(t *testing.T) {
 	assert.True(t, validator.IsError(result.Error), test.ErrorNotNilMessage)
 	assert.Equal(t, err, result.Error, test.EqualMessage)
 	assert.Equal(t, "", result.Data, test.EqualMessage)
-}
-
-func TestResultIsErrorNoError(t *testing.T) {
-	t.Parallel()
-	data := 123
-	result := common.NewResultOnSuccess(data)
-
-	assert.False(t, validator.IsError(result.Error), test.NotFailureMessage)
 }
 
 func TestResultIsErrorWithError(t *testing.T) {

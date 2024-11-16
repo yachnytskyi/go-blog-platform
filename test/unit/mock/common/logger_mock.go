@@ -14,30 +14,30 @@ func NewMockLogger() *MockLogger {
 	return &MockLogger{}
 }
 
-func (mock *MockLogger) Trace(data error) {
-	mock.LastTrace = data
+func (mock *MockLogger) Trace(err error) {
+	mock.LastTrace = err
 }
 
-func (mock *MockLogger) Debug(data error) {
-	mock.LastDebug = data
+func (mock *MockLogger) Debug(err error) {
+	mock.LastDebug = err
 }
 
-func (mock *MockLogger) Info(data error) {
-	mock.LastInfo = data
+func (mock *MockLogger) Info(err error) {
+	mock.LastInfo = err
 }
 
-func (mock *MockLogger) Warn(data error) {
-	mock.LastWarn = data
+func (mock *MockLogger) Warn(err error) {
+	mock.LastWarn = err
 }
 
-func (mock *MockLogger) Error(data error) {
-	mock.LastError = data
+func (mock *MockLogger) Error(err error) {
+	mock.LastError = err
 }
 
-func (mock *MockLogger) Fatal(data error) {
-	mock.LastFatal = data
+func (mock *MockLogger) Fatal(err error) {
+	mock.LastFatal = err
 }
 
-func (mock *MockLogger) Panic(data error) {
-	mock.LastPanic = data
+func (mock *MockLogger) Panic(err error) {
+	mock.LastPanic = err
 }

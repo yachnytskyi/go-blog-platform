@@ -116,7 +116,7 @@ func NewPaginationResponse(paginationQuery PaginationQuery) PaginationResponse {
 		BaseURL:    paginationQuery.BaseURL,
 	}
 
-	paginationResponse.PageLinks = generatePageLinks(paginationResponse, constants.DefaultAmountOfPageLinks) // You can specify the number of pages to show here.
+	paginationResponse.PageLinks = generatePageLinks(paginationResponse)
 	return paginationResponse
 }
 
@@ -129,18 +129,18 @@ func calculateItemsLeft(page, totalItems, limit int) int {
 }
 
 // generatePageLinks generates the page links for the pagination response.
-func generatePageLinks(paginationResponse PaginationResponse, amountOfPageLinks int) []string {
+func generatePageLinks(paginationResponse PaginationResponse) []string {
 	// Preallocate memory for the pageLinks slice based on amountOfPageLinks, adding space for potential first and last page links.
-	pageLinks := make([]string, 0, amountOfPageLinks+2)
+	pageLinks := make([]string, 0, constants.DefaultAmountOfPageLinks+2)
 
 	// Calculate the start page to display, centering around the current page.
-	startPage := paginationResponse.Page - (amountOfPageLinks / 2)
+	startPage := paginationResponse.Page - (constants.DefaultAmountOfPageLinks / 2)
 	if startPage < 1 {
 		startPage = 1
 	}
 
 	// Calculate the end page based on the adjusted start page and amountOfPageLinks.
-	endPage := startPage + amountOfPageLinks
+	endPage := startPage + constants.DefaultAmountOfPageLinks
 	if startPage == 1 {
 		endPage++
 	}
@@ -148,7 +148,7 @@ func generatePageLinks(paginationResponse PaginationResponse, amountOfPageLinks 
 	// Ensure the endPage does not exceed the total number of pages, and adjust startPage accordingly.
 	if endPage >= paginationResponse.TotalPages {
 		endPage = paginationResponse.TotalPages
-		startPage = endPage - amountOfPageLinks - 1
+		startPage = endPage - constants.DefaultAmountOfPageLinks - 1
 		if startPage < 1 {
 			startPage = 1
 		}

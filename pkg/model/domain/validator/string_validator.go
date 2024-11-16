@@ -42,7 +42,7 @@ func ValidateField(logger interfaces.Logger, location, field string, stringValid
 			location+".ValidateField.AreStringCharactersInvalid",
 			stringValidator.FieldName,
 			fieldRequirement(stringValidator.IsOptional),
-			stringValidator.Notification,
+			fmt.Sprintf(constants.StringAllowedCharacters),
 		)
 		logger.Debug(validationError)
 		errors = append(errors, validationError)

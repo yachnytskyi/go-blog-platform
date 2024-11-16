@@ -3,11 +3,14 @@ package repository
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	repository "github.com/yachnytskyi/golang-mongo-grpc/internal/post/data/repository/mongo/model"
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
+	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/mongo/model"
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	"go.mongodb.org/mongo-driver/bson"
@@ -20,14 +23,16 @@ const (
 )
 
 type PostRepository struct {
-	Logger     interfaces.Logger
-	collection *mongo.Collection
+	Logger interfaces.Logger
+	posts  *mongo.Collection
+	users  *mongo.Collection
 }
 
 func NewPostRepository(logger interfaces.Logger, db *mongo.Database) interfaces.PostRepository {
 	return &PostRepository{
-		Logger:     logger,
-		collection: db.Collection("posts"),
+		Logger: logger,
+		posts:  db.Collection(constants.PostsTable),
+		users:  db.Collection(constants.UsersTable),
 	}
 }
 
@@ -47,7 +52,7 @@ func (postRepository *PostRepository) GetAllPosts(ctx context.Context, page int,
 	option.SetSkip(int64(skip))
 
 	query := bson.M{}
-	cursor, err := postRepository.collection.Find(ctx, query, &option)
+	cursor, err := postRepository.posts.Find(ctx, query, &option)
 
 	if validator.IsError(err) {
 		return nil, err
@@ -90,9 +95,9 @@ func (postRepository *PostRepository) GetPostById(ctx context.Context, postID st
 		return nil, postObjectID.Error
 	}
 
-	query := bson.M{"_id": postObjectID.Data}
 	var fetchedPost *repository.PostRepository
-	err := postRepository.collection.FindOne(ctx, query).Decode(&fetchedPost)
+	query := bson.M{model.ID: postObjectID.Data}
+	err := postRepository.posts.FindOne(ctx, query).Decode(&fetchedPost)
 	if validator.IsError(err) {
 		if err == mongo.ErrNoDocuments {
 			return nil, errors.New("no document with that Id exists")
@@ -105,34 +110,51 @@ func (postRepository *PostRepository) GetPostById(ctx context.Context, postID st
 }
 
 func (postRepository *PostRepository) CreatePost(ctx context.Context, post *post.PostCreate) (*post.Post, error) {
+	// Map PostCreate to PostCreateRepository
 	postMappedToRepository, postCreateToPostCreateRepositoryMapperError := repository.PostCreateToPostCreateRepositoryMapper(postRepository.Logger, post)
 	if validator.IsError(postCreateToPostCreateRepositoryMapperError) {
 		return nil, postCreateToPostCreateRepositoryMapperError
 	}
-	postMappedToRepository.CreatedAt = time.Now()
-	postMappedToRepository.UpdatedAt = post.CreatedAt
 
-	result, err := postRepository.collection.InsertOne(ctx, postMappedToRepository)
+	// Fetch the username from the users collection.
+	var user user.UserRepository
+	query := bson.M{model.ID: postMappedToRepository.UserID}
+	err := postRepository.users.FindOne(ctx, query).Decode(&user)
+	if validator.IsError(err) {
+		fmt.Println(err)
+		if err == mongo.ErrNoDocuments {
+			return nil, errors.New("user not found")
+		}
+		return nil, errors.New("error fetching user details")
+	}
+
+	postMappedToRepository.Username = user.Name
+	postMappedToRepository.CreatedAt = time.Now()
+	postMappedToRepository.UpdatedAt = postMappedToRepository.CreatedAt
+
+	// Insert the post into the collection
+	result, err := postRepository.posts.InsertOne(ctx, postMappedToRepository)
 	if validator.IsError(err) {
 		er, ok := err.(mongo.WriteException)
-		if ok && er.WriteErrors[0].Code == 11000 {
+		if ok && len(er.WriteErrors) > 0 && er.WriteErrors[0].Code == 11000 {
 			return nil, errors.New("post with that title already exists")
 		}
 		return nil, err
 	}
 
+	// Create an index for the title field
 	option := options.Index()
 	option.SetUnique(true)
-
 	index := mongo.IndexModel{Keys: bson.M{"title": 1}, Options: option}
-	_, err = postRepository.collection.Indexes().CreateOne(ctx, index)
+	_, err = postRepository.posts.Indexes().CreateOne(ctx, index)
 	if validator.IsError(err) {
-		return nil, errors.New("could not create an index for a title")
+		return nil, errors.New("could not create an index for the title")
 	}
 
+	// Retrieve the created post
 	var createdPost *repository.PostRepository
-	query := bson.M{"_id": result.InsertedID}
-	err = postRepository.collection.FindOne(ctx, query).Decode(&createdPost)
+	query = bson.M{model.ID: result.InsertedID}
+	err = postRepository.posts.FindOne(ctx, query).Decode(&createdPost)
 	if validator.IsError(err) {
 		return nil, err
 	}
@@ -159,9 +181,9 @@ func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID
 		return nil, postObjectID.Error
 	}
 
-	query := bson.D{{Key: "_id", Value: postObjectID.Data}}
+	query := bson.D{{Key: model.ID, Value: postObjectID.Data}}
 	update := bson.D{{Key: "$set", Value: postUpdateBson.Data}}
-	result := postRepository.collection.FindOneAndUpdate(ctx, query, update, options.FindOneAndUpdate().SetReturnDocument(1))
+	result := postRepository.posts.FindOneAndUpdate(ctx, query, update, options.FindOneAndUpdate().SetReturnDocument(1))
 
 	var updatedPost *post.Post
 	err := result.Decode(&updatedPost)
@@ -178,8 +200,8 @@ func (postRepository *PostRepository) DeletePostByID(ctx context.Context, postID
 		return postObjectID.Error
 	}
 
-	query := bson.M{"_id": postObjectID.Data}
-	result, err := postRepository.collection.DeleteOne(ctx, query)
+	query := bson.M{model.ID: postObjectID.Data}
+	result, err := postRepository.posts.DeleteOne(ctx, query)
 	if validator.IsError(err) {
 		return err
 	}

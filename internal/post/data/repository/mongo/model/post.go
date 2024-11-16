@@ -12,6 +12,7 @@ type PostRepository struct {
 	Title     string             `bson:"title"`
 	Content   string             `bson:"content"`
 	Image     string             `bson:"image"`
+	Username  string             `bson:"username"`
 	CreatedAt time.Time          `bson:"created_at"`
 	UpdatedAt time.Time          `bson:"updated_at"`
 }
@@ -21,6 +22,7 @@ type PostCreateRepository struct {
 	Title     string             `bson:"title"`
 	Content   string             `bson:"content"`
 	Image     string             `bson:"image"`
+	Username  string             `bson:"username"`
 	CreatedAt time.Time          `bson:"created_at"`
 	UpdatedAt time.Time          `bson:"updated_at"`
 }
@@ -31,6 +33,7 @@ type PostUpdateRepository struct {
 	Title     string             `bson:"title"`
 	Content   string             `bson:"content"`
 	Image     string             `bson:"image"`
+	Username  string             `bson:"username"`
 	CreatedAt time.Time          `bson:"created_at"`
 	UpdatedAt time.Time          `bson:"updated_at"`
 }

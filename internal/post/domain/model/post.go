@@ -12,6 +12,7 @@ type Post struct {
 	Title     string
 	Content   string
 	Image     string
+	Username  string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

@@ -27,6 +27,7 @@ func PostRepositoryToPostMapper(postRepository *PostRepository) *post.Post {
 		Title:     postRepository.Title,
 		Content:   postRepository.Content,
 		Image:     postRepository.Image,
+		Username:  postRepository.Username,
 		CreatedAt: postRepository.CreatedAt,
 		UpdatedAt: postRepository.UpdatedAt,
 	}

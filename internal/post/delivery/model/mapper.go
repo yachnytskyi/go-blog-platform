@@ -25,9 +25,11 @@ func PostsToPostsViewMapper(posts *model.Posts) PostsView {
 func PostToPostViewMapper(post *model.Post) PostView {
 	return PostView{
 		PostID:    post.PostID,
+		UserID:    post.UserID,
 		Title:     post.Title,
 		Content:   post.Content,
 		Image:     post.Image,
+		Username:  post.Username,
 		CreatedAt: post.CreatedAt,
 		UpdatedAt: post.UpdatedAt,
 	}

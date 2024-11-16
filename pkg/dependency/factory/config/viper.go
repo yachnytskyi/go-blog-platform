@@ -17,7 +17,7 @@ const (
 )
 
 func NewViper() *config.ApplicationConfig {
-	loadEnvironmentsError := godotenv.Load(constants.EnvironmentsPath + constants.LocalEnvironment)
+	loadEnvironmentsError := godotenv.Load(constants.EnvironmentsPath + constants.Environment)
 	if validator.IsError(loadEnvironmentsError) {
 		loadEnvironmentsInternalError := domain.NewInternalError(location+"viper.Load", loadEnvironmentsError.Error())
 		log.Println(loadEnvironmentsInternalError)

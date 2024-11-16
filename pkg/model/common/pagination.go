@@ -75,8 +75,11 @@ func getSkip(page, limit int) int {
 }
 
 func SetCorrectPage(paginationQuery PaginationQuery) PaginationQuery {
-	paginationQuery.Page = calculateTotalPages(paginationQuery.TotalItems, paginationQuery.Limit)
-	paginationQuery.Skip = getSkip(paginationQuery.Page, paginationQuery.Limit)
+	if paginationQuery.TotalItems <= paginationQuery.Skip {
+		paginationQuery.Page = calculateTotalPages(paginationQuery.TotalItems, paginationQuery.Limit)
+		paginationQuery.Skip = getSkip(paginationQuery.Page, paginationQuery.Limit)
+	}
+
 	return paginationQuery
 }
 

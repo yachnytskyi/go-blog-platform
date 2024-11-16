@@ -31,12 +31,12 @@ func TestSetSortOrderDescend(t *testing.T) {
 func TestSetSortOrderInvalid(t *testing.T) {
 	t.Parallel()
 	result := utility.SetSortOrder("invalid")
+
 	if constants.DefaultSortOrder == constants.SortAscend {
 		assert.Equal(t, sortAscend, result, test.EqualMessage)
-
+	} else {
+		assert.Equal(t, sortDescend, result, test.EqualMessage)
 	}
-
-	assert.Equal(t, sortDescend, result, test.EqualMessage)
 }
 
 func TestSetSortOrderEmpty(t *testing.T) {
@@ -44,9 +44,9 @@ func TestSetSortOrderEmpty(t *testing.T) {
 	result := utility.SetSortOrder("")
 	if constants.DefaultSortOrder == constants.SortAscend {
 		assert.Equal(t, sortAscend, result, test.EqualMessage)
+	} else {
+		assert.Equal(t, sortDescend, result, test.EqualMessage)
 	}
-
-	assert.Equal(t, sortDescend, result, test.EqualMessage)
 }
 
 func TestSetSortOrderMixedCase(t *testing.T) {

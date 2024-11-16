@@ -1,7 +1,7 @@
-// Switch to the `golang_mongodb` database
+// Switch to the database.
 db = db.getSiblingDB('golang_mongodb');
 
-// Create a user with the required roles
+// Create a user with the required roles.
 db.createUser({
   user: "root",
   pwd: "root",

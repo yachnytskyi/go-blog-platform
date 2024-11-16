@@ -8,6 +8,7 @@ services:
     volumes:
       - mongodbDATA:/data/db
       - ./infrastructure/script/data/repository/mongo/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
+      - ./infrastructure/script/data/repository/mongo/init-test-data-mongo.js:/docker-entrypoint-initdb.d/init-test-data-mongo.js
     networks:
       - application-network
 

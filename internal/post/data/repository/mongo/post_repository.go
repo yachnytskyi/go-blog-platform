@@ -130,7 +130,7 @@ func (postRepository *PostRepository) CreatePost(ctx context.Context, post *post
 
 	postMappedToRepository.Username = user.Username
 	postMappedToRepository.CreatedAt = time.Now()
-	postMappedToRepository.UpdatedAt = postMappedToRepository.CreatedAt
+	postMappedToRepository.UpdatedAt = time.Now()
 
 	// Insert the post into the collection
 	result, err := postRepository.posts.InsertOne(ctx, postMappedToRepository)
@@ -189,22 +189,17 @@ func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID
 		return nil, postUpdateBson.Error
 	}
 
-	postObjectID := model.HexToObjectIDMapper(postRepository.Logger, location+"UpdatePostById", postID)
-	if validator.IsError(postObjectID.Error) {
-		return nil, postObjectID.Error
-	}
-
-	query := bson.D{{Key: model.ID, Value: postObjectID.Data}}
-	update := bson.D{{Key: "$set", Value: postUpdateBson.Data}}
+	query := bson.D{{Key: model.ID, Value: postUpdateRepository.PostID}}
+	update := bson.D{{Key: model.Set, Value: postUpdateBson.Data}}
 	result := postRepository.posts.FindOneAndUpdate(ctx, query, update, options.FindOneAndUpdate().SetReturnDocument(1))
-
-	var updatedPost *post.Post
-	err = result.Decode(&updatedPost)
+	updatedPost := &repository.PostRepository{}
+	decodeError := result.Decode(&updatedPost)
 	if validator.IsError(err) {
-		return nil, errors.New("sorry, but this title already exists. Please choose another one")
+		fmt.Println(decodeError)
+		return nil, decodeError
 	}
 
-	return updatedPost, nil
+	return repository.PostRepositoryToPostMapper(updatedPost), nil
 }
 
 func (postRepository *PostRepository) DeletePostByID(ctx context.Context, postID string) error {

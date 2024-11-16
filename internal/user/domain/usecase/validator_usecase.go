@@ -31,7 +31,7 @@ const (
 	invalidEmailOrPassword    = "Invalid email or password."
 
 	// Field Names used in validation.
-	usernameField         = "name"
+	usernameField         = "username"
 	EmailField            = "email"
 	passwordField         = "password"
 	emailOrPasswordFields = "email or password"
@@ -76,12 +76,12 @@ var (
 func validateUserCreate(logger interfaces.Logger, userCreate user.UserCreate) common.Result[user.UserCreate] {
 	validationErrors := make([]error, 0, 4)
 	userCreate.Email = commonUtility.SanitizeAndToLowerString(userCreate.Email)
-	userCreate.Name = strings.TrimSpace(userCreate.Name)
+	userCreate.Username = strings.TrimSpace(userCreate.Username)
 	userCreate.Password = strings.TrimSpace(userCreate.Password)
 	userCreate.PasswordConfirm = strings.TrimSpace(userCreate.PasswordConfirm)
 
 	validationErrors = validateEmail(logger, location+"validateUserCreate", userCreate.Email, validationErrors)
-	validationErrors = model.ValidateField(logger, location+"validateUserCreate", userCreate.Name, usernameValidator, validationErrors)
+	validationErrors = model.ValidateField(logger, location+"validateUserCreate", userCreate.Username, usernameValidator, validationErrors)
 	validationErrors = validatePassword(logger, location+"validateUserCreate", userCreate.Password, userCreate.PasswordConfirm, validationErrors)
 	if len(validationErrors) > 0 {
 		return common.NewResultOnFailure[user.UserCreate](domain.NewValidationErrors(validationErrors))
@@ -92,9 +92,9 @@ func validateUserCreate(logger interfaces.Logger, userCreate user.UserCreate) co
 
 func validateUserUpdate(logger interfaces.Logger, userUpdate user.UserUpdate) common.Result[user.UserUpdate] {
 	validationErrors := make([]error, 0, 1)
-	userUpdate.Name = strings.TrimSpace(userUpdate.Name)
+	userUpdate.Username = strings.TrimSpace(userUpdate.Username)
 
-	validationErrors = model.ValidateField(logger, location+"validateUserUpdate", userUpdate.Name, usernameValidator, validationErrors)
+	validationErrors = model.ValidateField(logger, location+"validateUserUpdate", userUpdate.Username, usernameValidator, validationErrors)
 	if len(validationErrors) > 0 {
 		return common.NewResultOnFailure[user.UserUpdate](domain.NewValidationErrors(validationErrors))
 	}

@@ -15,7 +15,7 @@ type UsersRepository struct {
 
 type UserRepository struct {
 	mongoModel.BaseEntity `bson:",inline"`
-	Name                  string `bson:"name"`
+	Username              string `bson:"username"`
 	Email                 string `bson:"email"`
 	Password              string `bson:"password"`
 	Role                  string `bson:"role"`
@@ -23,7 +23,7 @@ type UserRepository struct {
 }
 
 type UserCreateRepository struct {
-	Name             string    `bson:"name"`
+	Username         string    `bson:"username"`
 	Email            string    `bson:"email"`
 	Password         string    `bson:"password"`
 	Role             string    `bson:"role"`
@@ -35,7 +35,7 @@ type UserCreateRepository struct {
 
 type UserUpdateRepository struct {
 	UserID    primitive.ObjectID `bson:"_id"`
-	Name      string             `bson:"name"`
+	Username  string             `bson:"username"`
 	UpdatedAt time.Time          `bson:"updated_at"`
 }
 
@@ -52,35 +52,21 @@ type UserResetExpiryRepository struct {
 	ResetExpiry time.Time `bson:"reset_expiry"`
 }
 
-func NewUserRepository(id primitive.ObjectID, createdAt, updatedAt time.Time, name, email, password, role string, verified bool) UserRepository {
-	return UserRepository{
-		BaseEntity: mongoModel.NewBaseEntity(id, createdAt, updatedAt),
-		Name:       name,
-		Email:      email,
-		Password:   password,
-		Role:       role,
-		Verified:   verified,
-	}
-}
-
-func NewUserCreateRepository(name, email, password, role string, verified bool, verificationCode string, createdAt, updatedAt time.Time) UserCreateRepository {
+func NewUserCreateRepository(username, email, password, role string, verified bool, verificationCode string) UserCreateRepository {
 	return UserCreateRepository{
-		Name:             name,
+		Username:         username,
 		Email:            email,
 		Password:         password,
 		Role:             role,
 		Verified:         verified,
 		VerificationCode: verificationCode,
-		CreatedAt:        createdAt,
-		UpdatedAt:        updatedAt,
 	}
 }
 
-func NewUserUpdateRepository(userID primitive.ObjectID, name string, updatedAt time.Time) UserUpdateRepository {
+func NewUserUpdateRepository(userID primitive.ObjectID, username string) UserUpdateRepository {
 	return UserUpdateRepository{
-		UserID:    userID,
-		Name:      name,
-		UpdatedAt: updatedAt,
+		UserID:   userID,
+		Username: username,
 	}
 }
 

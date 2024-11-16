@@ -88,9 +88,6 @@ func (userUseCase UserUseCase) Register(ctx context.Context, userCreateData user
 	userCreate.Data.Role = userRole
 	userCreate.Data.Verified = true
 	userCreate.Data.VerificationCode = token
-	currentTime := time.Now()
-	userCreate.Data.CreatedAt = currentTime
-	userCreate.Data.UpdatedAt = currentTime
 
 	createdUser := userUseCase.UserRepository.Register(ctx, userCreate.Data)
 	if validator.IsError(createdUser.Error) {
@@ -112,7 +109,6 @@ func (userUseCase UserUseCase) UpdateCurrentUser(ctx context.Context, userUpdate
 		return common.NewResultOnFailure[user.User](domain.HandleError(userUpdate.Error))
 	}
 
-	userUpdate.Data.UpdatedAt = time.Now()
 	updatedUser := userUseCase.UserRepository.UpdateCurrentUser(ctx, userUpdate.Data)
 	if validator.IsError(updatedUser.Error) {
 		return common.NewResultOnFailure[user.User](domain.HandleError(updatedUser.Error))
@@ -223,7 +219,7 @@ func (userUseCase UserUseCase) ResetUserPassword(ctx context.Context, userResetP
 }
 
 func prepareEmailData(config *config.ApplicationConfig, user user.User, tokenValue, subject, url, templateName, templatePath string) interfaces.EmailData {
-	userFirstName := domainUtility.UserFirstName(user.Name)
+	userFirstName := domainUtility.UserFirstName(user.Username)
 	emailData := interfaces.NewEmailData(
 		user.Email,
 		config.Email.ClientOriginUrl+url+tokenValue,

@@ -32,6 +32,5 @@ type PostUpdate struct {
 	Title     string
 	Content   string
 	Image     string
-	CreatedAt time.Time
 	UpdatedAt time.Time
 }

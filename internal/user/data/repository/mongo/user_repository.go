@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
@@ -168,6 +169,8 @@ func (userRepository UserRepository) Register(ctx context.Context, userCreate us
 	}
 
 	userCreateRepository.Password = hashedPassword.Data
+	userCreateRepository.CreatedAt = time.Now()
+	userCreateRepository.UpdatedAt = time.Now()
 	insertOneResult, insertOneResultError := userRepository.Users.InsertOne(ctx, &userCreateRepository)
 	if validator.IsError(insertOneResultError) {
 		internalError := domain.NewInternalError(location+"Register.InsertOne", insertOneResultError.Error())
@@ -186,6 +189,7 @@ func (userRepository UserRepository) UpdateCurrentUser(ctx context.Context, user
 		return common.NewResultOnFailure[user.User](userUpdateRepository.Error)
 	}
 
+	userUpdateRepository.Data.UpdatedAt = time.Now()
 	userUpdateBSON := model.DataToMongoDocumentMapper(userRepository.Logger, location+"UpdateCurrentUser", userUpdateRepository.Data)
 	if validator.IsError(userUpdateBSON.Error) {
 		return common.NewResultOnFailure[user.User](userUpdateBSON.Error)

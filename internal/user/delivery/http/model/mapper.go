@@ -7,7 +7,7 @@ import (
 
 func UserCreateViewToUserCreateMapper(userCreateView UserCreateView) user.UserCreate {
 	return user.NewUserCreate(
-		userCreateView.Name,
+		userCreateView.Username,
 		userCreateView.Email,
 		userCreateView.Password,
 		userCreateView.PasswordConfirm,
@@ -17,7 +17,7 @@ func UserCreateViewToUserCreateMapper(userCreateView UserCreateView) user.UserCr
 func UserUpdateViewToUserUpdateMapper(userUpdateView UserUpdateView) user.UserUpdate {
 	return user.NewUserUpdate(
 		userUpdateView.ID,
-		userUpdateView.Name,
+		userUpdateView.Username,
 	)
 }
 
@@ -64,11 +64,11 @@ func UsersToUsersViewMapper(users user.Users) UsersView {
 func UserToUserViewMapper(user user.User) UserView {
 	return NewUserView(
 		user.ID,
-		user.CreatedAt,
-		user.UpdatedAt,
-		user.Name,
+		user.Username,
 		user.Email,
 		user.Role,
+		user.CreatedAt,
+		user.UpdatedAt,
 	)
 }
 

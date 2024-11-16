@@ -3,7 +3,6 @@ package v1
 import (
 	"context"
 	"strings"
-	"time"
 
 	postProtobufV1 "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/grpc/v1/model/pb"
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
@@ -17,11 +16,10 @@ func (postGrpcServer *PostGrpcServer) UpdatePostById(ctx context.Context, update
 	userID := updatedPostData.GetUserID()
 
 	post := &post.PostUpdate{
-		Title:     updatedPostData.GetTitle(),
-		Content:   updatedPostData.GetContent(),
-		Image:     updatedPostData.GetImage(),
-		UserID:    updatedPostData.GetUserID(),
-		UpdatedAt: time.Now(),
+		Title:   updatedPostData.GetTitle(),
+		Content: updatedPostData.GetContent(),
+		Image:   updatedPostData.GetImage(),
+		UserID:  updatedPostData.GetUserID(),
 	}
 
 	createdPost, err := postGrpcServer.postUseCase.UpdatePostById(ctx, postID, post, userID)

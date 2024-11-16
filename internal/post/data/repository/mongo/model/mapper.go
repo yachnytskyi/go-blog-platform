@@ -61,12 +61,10 @@ func PostUpdateToPostUpdateRepositoryMapper(logger interfaces.Logger, postUpdate
 	}
 
 	return &PostUpdateRepository{
-		PostID:    postObjectID.Data,
-		UserID:    userObjectID.Data,
-		Title:     postUpdate.Title,
-		Content:   postUpdate.Content,
-		Image:     postUpdate.Image,
-		CreatedAt: postUpdate.CreatedAt,
-		UpdatedAt: postUpdate.UpdatedAt,
+		PostID:  postObjectID.Data,
+		UserID:  userObjectID.Data,
+		Title:   postUpdate.Title,
+		Content: postUpdate.Content,
+		Image:   postUpdate.Image,
 	}, nil
 }

@@ -10,7 +10,7 @@ import (
 
 func (userGrpcServer *UserGrpcServer) Register(ctx context.Context, request *pb.UserCreate) (*pb.GenericResponse, error) {
 	user := user.UserCreate{
-		Name:            request.GetName(),
+		Username:        request.GetName(),
 		Email:           request.GetEmail(),
 		Password:        request.GetPassword(),
 		PasswordConfirm: request.GetPasswordConfirm(),

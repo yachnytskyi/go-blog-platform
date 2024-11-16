@@ -128,7 +128,7 @@ func (postRepository *PostRepository) CreatePost(ctx context.Context, post *post
 		return nil, errors.New("error fetching user details")
 	}
 
-	postMappedToRepository.Username = user.Name
+	postMappedToRepository.Username = user.Username
 	postMappedToRepository.CreatedAt = time.Now()
 	postMappedToRepository.UpdatedAt = postMappedToRepository.CreatedAt
 
@@ -168,6 +168,19 @@ func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID
 		return nil, postUpdateToPostUpdateRepositoryMapper
 	}
 
+	// Fetch the username from the users collection.
+	var user user.UserRepository
+	userQuery := bson.M{model.ID: postUpdateRepository.UserID}
+	err := postRepository.users.FindOne(ctx, userQuery).Decode(&user)
+	if validator.IsError(err) {
+		fmt.Println(err)
+		if err == mongo.ErrNoDocuments {
+			return nil, errors.New("user not found")
+		}
+		return nil, errors.New("error fetching user details")
+	}
+
+	postUpdateRepository.Username = user.Username
 	postUpdateRepository.UpdatedAt = time.Now()
 
 	// Map the user update repository to a BSON document for MongoDB update.
@@ -186,7 +199,7 @@ func (postRepository *PostRepository) UpdatePostById(ctx context.Context, postID
 	result := postRepository.posts.FindOneAndUpdate(ctx, query, update, options.FindOneAndUpdate().SetReturnDocument(1))
 
 	var updatedPost *post.Post
-	err := result.Decode(&updatedPost)
+	err = result.Decode(&updatedPost)
 	if validator.IsError(err) {
 		return nil, errors.New("sorry, but this title already exists. Please choose another one")
 	}

@@ -34,6 +34,5 @@ type PostUpdateRepository struct {
 	Content   string             `bson:"content"`
 	Image     string             `bson:"image"`
 	Username  string             `bson:"username"`
-	CreatedAt time.Time          `bson:"created_at"`
 	UpdatedAt time.Time          `bson:"updated_at"`
 }

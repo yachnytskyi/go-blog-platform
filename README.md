@@ -15,7 +15,7 @@ Ensure you have the following installed:
 
 ## Initializing
 
-To set up the configuration files, rename the following files by removing "example" from their filenames:
+To set up the configuration files, rename the following files by removing the .example from their filenames and adjust any necessary parameters within the files:
 
 - `config/yaml/v1/local.application.example.yaml` → `config/yaml/v1/local.application.yaml`
 - `config/yaml/v1/docker.dev.application.example.yaml` → `config/yaml/v1/docker.dev.application.yaml`

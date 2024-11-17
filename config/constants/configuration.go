@@ -10,12 +10,14 @@ const (
 	Limit                    = "limit"      // Limit query parameter.
 	OrderBy                  = "order_by"   // Order by query parameter.
 	SortOrder                = "sort_order" // Sort order query parameter.
-	DefaultAmountOfPageLinks = 10           // Default amount of page links for pagination.
 	DefaultPage              = "1"          // Default page number.
 	DefaultLimit             = "10"         // Default limit per page.
+	DefaultAmountOfPageLinks = 10           // Default amount of page links for pagination.
+	DefaultPageInteger       = 1            // Default page number.
+	DefaultLimitInteger      = 10           // Default limit per page.
 	MaxItemsPerPage          = 100          // Maximum items per page.
+	DefaultSortOrder         = SortAscend   // Default sort order.
 	DefaultOrderBy           = "created_at" // Default order by field.
-	DefaultSortOrder         = "descend"    // Default sort order.
 	SortAscend               = "ascend"     // Ascending sort order.
 	SortDescend              = "descend"    // Descending sort order.
 )
@@ -81,6 +83,7 @@ const (
 // Database table names.
 const (
 	UsersTable = "users" // Users table name in the database.
+	PostsTable = "posts" // Posts table name in the database.
 )
 
 // Schemes used in the application.

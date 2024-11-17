@@ -40,9 +40,18 @@ Make sure Docker and Docker Compose are installed.
 
 ## Stop Docker Compose Services
 
-To stop the services, use:
-- `make down` (shortcut command from Makefile)
-- `docker-compose down` (full command)
+To stop and clean up the running services, use the following `make` commands:
+
+- **Stop the services**:  
+  `make stop` – Stops the services without removing the containers.
+
+- **Remove the containers**:  
+  `make down` – Stops the services and removes the containers.
+
+- **Remove containers and volumes**:  
+  `make down-v` – Stops the services, removes the containers, and also removes any associated Docker volumes (which may contain persistent data).
+
+
 
 ## License
 

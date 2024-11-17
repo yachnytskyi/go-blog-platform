@@ -13,17 +13,14 @@ Ensure you have the following installed:
 - Docker
 - Docker Compose
 
-## Initializing
+## Initializing 
 
-To set up the configuration files, rename the following files by removing the .example from their filenames and adjust any necessary parameters within the files:
+To set up the configuration files, rename the files in the following directories by removing the `.example` suffix from their filenames and adjust any necessary parameters within the files:
 
-- `config/yaml/v1/local.application.example.yaml` → `config/yaml/v1/local.application.yaml`
-- `config/yaml/v1/docker.dev.application.example.yaml` → `config/yaml/v1/docker.dev.application.yaml`
-- `config/yaml/v1/test.application.example.yaml` → `config/yaml/v1/test.application.yaml`
-- `config/yaml/v1/docker.staging.application.example.yaml` → `config/yaml/v1/docker.staging.application.yaml`
-- `config/yaml/v1/docker.prod.application.example.yaml` →  `config/yaml/v1/docker.prod.application.yaml`
-- `infrastructure/script/.init-mongo.example.js` → `infrastructure/script/.init-mongo.js`
-- `infrastructure/script/.init-test-data-mongo.example.js` → `infrastructure/script/.init-test-data-mongo.js`
+- `config/yaml/v1`
+- `infrastructure/script`
+
+After renaming, review and update the configuration settings to match your environment (local, development, staging, production, etc.).
 
 ## API Endpoints
 

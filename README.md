@@ -31,7 +31,7 @@ For a complete list of available API requests/URLs, check the server terminal up
 ## Build and Run
 
 To run the project, choose from:
-- `make local` (for local environment)
+- `make mongo-local` (for local environment)
 - `make mongo-dev` (for dev Docker environment)
 - `make mongo-staging` (for staging Docker environment)
 - `make mongo-production` (for production Docker environment)

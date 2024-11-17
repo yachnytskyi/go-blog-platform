@@ -19,7 +19,7 @@ const (
 	LocalEnvironment         = "local"          // Local development environment.
 	DockerDevEnvironment     = "docker.dev"     // Docker development environment.
 	DockerStagingEnvironment = "docker.staging" // Docker staging environment.
-	DockerProductEnvironment = "docker.prod"    // Docker product environment.
+	DockerProductEnvironment = "docker.prod"    // Docker productuction environment.
 
 	// Default configuration paths
 	DefaultEnvironmentsPath = "config/environment/.env."                  // Default path for environment configuration files.

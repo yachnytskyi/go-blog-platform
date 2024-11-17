@@ -15,12 +15,10 @@ Ensure you have the following installed:
 
 ## Initializing 
 
-To set up the configuration files, rename the files in the following directories by removing the `.example` suffix from their filenames and adjust any necessary parameters within the files:
+To set up the project, run the following command:
+- `make initial` 
 
-- `config/yaml/v1`
-- `infrastructure/script`
-
-After renaming, review and update the configuration settings to match your environment (local, development, staging, production, etc.).
+After this, review and update the configuration settings to match your environment (local, development, staging, production, etc.).
 
 ## API Endpoints
 
@@ -32,13 +30,11 @@ For a complete list of available API requests/URLs, check the server terminal up
 
 ## Build and Run
 
-To build the project, use one of the following commands:
-- `make build` (shortcut command from Makefile)
-- `docker-compose build` (full command)
-
 To run the project, choose from:
-- `make up` (for Docker environment)
 - `make local` (for local environment)
+- `make mongo-dev` (for dev Docker environment)
+- `make mongo-staging` (for staging Docker environment)
+- `make mongo-production` (for production Docker environment)
 
 Make sure Docker and Docker Compose are installed.
 

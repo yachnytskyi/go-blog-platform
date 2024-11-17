@@ -12,7 +12,7 @@ services:
     networks:
       - application-network
 
-  app:
+  app-dev:
     build:
       context: ./
       dockerfile: infrastructure/deployment/docker/Dockerfile.dev

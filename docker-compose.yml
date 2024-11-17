@@ -15,7 +15,7 @@ services:
   app:
     build:
       context: ./
-      dockerfile: infrastructure/docker/Dockerfile.dev
+      dockerfile: infrastructure/deployment/docker/Dockerfile.dev
     image: app
     ports:
       - "8080:8080"
@@ -31,7 +31,7 @@ services:
   app-staging:
     build:
       context: ./
-      dockerfile: infrastructure/docker/Dockerfile.staging
+      dockerfile: infrastructure/deployment/docker/Dockerfile.staging
     image: app-staging
     ports:
       - "8080:8080"
@@ -45,7 +45,7 @@ services:
   app-production:
     build:
       context: ./
-      dockerfile: infrastructure/docker/Dockerfile.prod
+      dockerfile: infrastructure/deployment/docker/Dockerfile.prod
     image: app-production
     ports:
       - "8080:8080"

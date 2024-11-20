@@ -48,17 +48,10 @@ func UsersToUsersViewMapper(users user.Users) UsersView {
 		usersView[index] = UserToUserViewMapper(user)
 	}
 
-	return NewUsersView(usersView, model.NewHTTPPaginationResponse(
-		users.PaginationResponse.Page,
-		users.PaginationResponse.TotalPages,
-		users.PaginationResponse.PagesLeft,
-		users.PaginationResponse.ItemsLeft,
-		users.PaginationResponse.TotalItems,
-		users.PaginationResponse.Limit,
-		users.PaginationResponse.OrderBy,
-		users.PaginationResponse.SortOrder,
-		users.PaginationResponse.PageLinks,
-	))
+	return NewUsersView(
+		usersView,
+		model.NewHTTPPaginationResponse(users.PaginationResponse),
+	)
 }
 
 func UserToUserViewMapper(user user.User) UserView {

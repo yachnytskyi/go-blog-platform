@@ -222,7 +222,6 @@ func TestNewPaginationResponseEmptyData(t *testing.T) {
 	assert.Equal(t, constants.DefaultOrderBy, paginationQuery.OrderBy, test.EqualMessage)
 	assert.Equal(t, constants.SortAscend, paginationQuery.SortOrder, test.EqualMessage)
 	assert.ElementsMatch(t, expectedPageLinks, result.PageLinks, test.EqualMessage)
-	assert.Equal(t, "", result.BaseURL, test.EqualMessage)
 }
 
 func TestNewPaginationResponseSinglePage(t *testing.T) {
@@ -245,7 +244,6 @@ func TestNewPaginationResponseSinglePage(t *testing.T) {
 	assert.Equal(t, orderBy, paginationQuery.OrderBy, test.EqualMessage)
 	assert.Equal(t, constants.SortAscend, paginationQuery.SortOrder, test.EqualMessage)
 	assert.ElementsMatch(t, expectedPageLinks, result.PageLinks, test.EqualMessage)
-	assert.Equal(t, baseURL, result.BaseURL, test.EqualMessage)
 }
 
 func TestNewPaginationResponseMiddlePage(t *testing.T) {
@@ -277,7 +275,6 @@ func TestNewPaginationResponseMiddlePage(t *testing.T) {
 	assert.Equal(t, orderBy, paginationQuery.OrderBy, test.EqualMessage)
 	assert.Equal(t, constants.SortAscend, paginationQuery.SortOrder, test.EqualMessage)
 	assert.ElementsMatch(t, expectedPageLinks, result.PageLinks, test.EqualMessage)
-	assert.Equal(t, baseURL, result.BaseURL, test.EqualMessage)
 }
 
 func TestNewPaginationResponseFirstPage(t *testing.T) {
@@ -313,7 +310,6 @@ func TestNewPaginationResponseFirstPage(t *testing.T) {
 	assert.Equal(t, orderBy, paginationQuery.OrderBy, test.EqualMessage)
 	assert.Equal(t, constants.SortAscend, paginationQuery.SortOrder, test.EqualMessage)
 	assert.ElementsMatch(t, expectedPageLinks, result.PageLinks, test.EqualMessage)
-	assert.Equal(t, baseURL, result.BaseURL, test.EqualMessage)
 }
 
 func TestNewPaginationResponseSeventhPage(t *testing.T) {
@@ -349,7 +345,6 @@ func TestNewPaginationResponseSeventhPage(t *testing.T) {
 	assert.Equal(t, orderBy, paginationQuery.OrderBy, test.EqualMessage)
 	assert.Equal(t, constants.SortDescend, paginationQuery.SortOrder, test.EqualMessage)
 	assert.ElementsMatch(t, expectedPageLinks, result.PageLinks, test.EqualMessage)
-	assert.Equal(t, baseURL, result.BaseURL, test.EqualMessage)
 }
 
 func TestNewPaginationResponseEighthPage(t *testing.T) {
@@ -385,7 +380,6 @@ func TestNewPaginationResponseEighthPage(t *testing.T) {
 	assert.Equal(t, orderBy, paginationQuery.OrderBy, test.EqualMessage)
 	assert.Equal(t, constants.SortAscend, paginationQuery.SortOrder, test.EqualMessage)
 	assert.ElementsMatch(t, expectedPageLinks, result.PageLinks, test.EqualMessage)
-	assert.Equal(t, baseURL, result.BaseURL, test.EqualMessage)
 }
 
 func TestNewPaginationResponseTwelvethPage(t *testing.T) {
@@ -421,7 +415,6 @@ func TestNewPaginationResponseTwelvethPage(t *testing.T) {
 	assert.Equal(t, orderBy, paginationQuery.OrderBy, test.EqualMessage)
 	assert.Equal(t, constants.SortAscend, paginationQuery.SortOrder, test.EqualMessage)
 	assert.ElementsMatch(t, expectedPageLinks, result.PageLinks, test.EqualMessage)
-	assert.Equal(t, baseURL, result.BaseURL, test.EqualMessage)
 }
 
 func TestNewPaginationFourteenthPage(t *testing.T) {
@@ -457,7 +450,6 @@ func TestNewPaginationFourteenthPage(t *testing.T) {
 	assert.Equal(t, orderBy, paginationQuery.OrderBy, test.EqualMessage)
 	assert.Equal(t, constants.SortDescend, paginationQuery.SortOrder, test.EqualMessage)
 	assert.ElementsMatch(t, expectedPageLinks, result.PageLinks, test.EqualMessage)
-	assert.Equal(t, baseURL, result.BaseURL, test.EqualMessage)
 }
 
 func TestNewPaginationEighteenthPage(t *testing.T) {
@@ -493,7 +485,6 @@ func TestNewPaginationEighteenthPage(t *testing.T) {
 	assert.Equal(t, orderBy, paginationQuery.OrderBy, test.EqualMessage)
 	assert.Equal(t, constants.SortAscend, paginationQuery.SortOrder, test.EqualMessage)
 	assert.ElementsMatch(t, expectedPageLinks, result.PageLinks, test.EqualMessage)
-	assert.Equal(t, baseURL, result.BaseURL, test.EqualMessage)
 }
 
 func TestNewPaginationLastPage(t *testing.T) {
@@ -529,5 +520,4 @@ func TestNewPaginationLastPage(t *testing.T) {
 	assert.Equal(t, orderBy, paginationQuery.OrderBy, test.EqualMessage)
 	assert.Equal(t, constants.SortAscend, paginationQuery.SortOrder, test.EqualMessage)
 	assert.ElementsMatch(t, expectedPageLinks, result.PageLinks, test.EqualMessage)
-	assert.Equal(t, baseURL, result.BaseURL, test.EqualMessage)
 }

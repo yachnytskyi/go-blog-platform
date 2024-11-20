@@ -89,11 +89,31 @@ type PaginationResponse struct {
 	PagesLeft  int      // Number of pages remaining.
 	TotalItems int      // Total number of items.
 	ItemsLeft  int      // Number of items remaining on the current page.
+	PageStart  int      // The index of the first item displayed on the current page.
+	PageEnd    int      // The index of the last item displayed on the current page.
 	Limit      int      // Maximum items per page.
 	OrderBy    string   // Field used for ordering.
 	SortOrder  string   // Sorting direction ("asc" for ascending, "desc" for descending).
 	PageLinks  []string // Array of page links.
-	BaseURL    string   // Base URL for pagination.
+}
+
+func NewPaginationResponse(paginationQuery PaginationQuery) PaginationResponse {
+	totalPages := calculateTotalPages(paginationQuery.TotalItems, paginationQuery.Limit)
+	paginationResponse := PaginationResponse{
+		Page:       paginationQuery.Page,
+		TotalPages: totalPages,
+		PagesLeft:  totalPages - paginationQuery.Page,
+		TotalItems: paginationQuery.TotalItems,
+		ItemsLeft:  calculateItemsLeft(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit),
+		PageStart:  getPageStart(paginationQuery.Page, paginationQuery.Limit),
+		PageEnd:    getPageEnd(paginationQuery.Page, paginationQuery.Limit),
+		Limit:      paginationQuery.Limit,
+		OrderBy:    paginationQuery.OrderBy,
+		SortOrder:  paginationQuery.SortOrder,
+	}
+
+	paginationResponse.PageLinks = generatePageLinks(paginationResponse, paginationQuery.BaseURL)
+	return paginationResponse
 }
 
 func calculateTotalPages(totalItems, limit int) int {
@@ -105,24 +125,6 @@ func calculateTotalPages(totalItems, limit int) int {
 	return int(math.Ceil(totalPages))
 }
 
-func NewPaginationResponse(paginationQuery PaginationQuery) PaginationResponse {
-	totalPages := calculateTotalPages(paginationQuery.TotalItems, paginationQuery.Limit)
-	paginationResponse := PaginationResponse{
-		Page:       paginationQuery.Page,
-		TotalPages: totalPages,
-		PagesLeft:  totalPages - paginationQuery.Page,
-		TotalItems: paginationQuery.TotalItems,
-		ItemsLeft:  calculateItemsLeft(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit),
-		Limit:      paginationQuery.Limit,
-		OrderBy:    paginationQuery.OrderBy,
-		SortOrder:  paginationQuery.SortOrder,
-		BaseURL:    paginationQuery.BaseURL,
-	}
-
-	paginationResponse.PageLinks = generatePageLinks(paginationResponse)
-	return paginationResponse
-}
-
 func calculateItemsLeft(page, totalItems, limit int) int {
 	if totalItems <= page*limit {
 		return 0
@@ -131,8 +133,22 @@ func calculateItemsLeft(page, totalItems, limit int) int {
 	return totalItems - (page * limit)
 }
 
+// Calculates the index of the first item displayed on the given page.
+func getPageStart(page, limit int) int {
+	if page > 1 {
+		return (page-1)*limit + 1
+	}
+
+	return page
+}
+
+// Calculates the index of the last item displayed on the given page.
+func getPageEnd(page, limit int) int {
+	return page * limit
+}
+
 // generatePageLinks generates the page links for the pagination response.
-func generatePageLinks(paginationResponse PaginationResponse) []string {
+func generatePageLinks(paginationResponse PaginationResponse, baseURL string) []string {
 	// Preallocate memory for the pageLinks slice based on amountOfPageLinks, adding space for potential first and last page links.
 	pageLinks := make([]string, 0, constants.DefaultAmountOfPageLinks+2)
 
@@ -159,24 +175,24 @@ func generatePageLinks(paginationResponse PaginationResponse) []string {
 
 	// If the first page is not included, add it to the pageLinks slice.
 	if startPage > 1 {
-		pageLinks = append(pageLinks, buildPageLink(paginationResponse, 1))
+		pageLinks = append(pageLinks, buildPageLink(paginationResponse, 1, baseURL))
 	}
 
 	// Append links for pages within the calculated range, excluding the current page.
 	for index := startPage; index <= endPage; index++ {
-		pageLinks = append(pageLinks, buildPageLink(paginationResponse, index))
+		pageLinks = append(pageLinks, buildPageLink(paginationResponse, index, baseURL))
 	}
 
 	// If the last page is not included, add it to the pageLinks slice.
 	if endPage < paginationResponse.TotalPages {
-		pageLinks = append(pageLinks, buildPageLink(paginationResponse, paginationResponse.TotalPages))
+		pageLinks = append(pageLinks, buildPageLink(paginationResponse, paginationResponse.TotalPages, baseURL))
 	}
 
 	return pageLinks
 }
 
 // buildPageLink builds the page link with given page number.
-func buildPageLink(paginationResponse PaginationResponse, pageNumber int) string {
+func buildPageLink(paginationResponse PaginationResponse, pageNumber int, baseURL string) string {
 	queryParams := fmt.Sprintf(
 		"%s=%d&%s=%d&%s=%s&%s=%s",
 		constants.Page,
@@ -190,6 +206,5 @@ func buildPageLink(paginationResponse PaginationResponse, pageNumber int) string
 	)
 
 	// Combine the base URL and query parameters.
-	baseURL := paginationResponse.BaseURL
 	return fmt.Sprintf("%s?%s", baseURL, queryParams)
 }

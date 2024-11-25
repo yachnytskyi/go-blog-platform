@@ -16,7 +16,7 @@ const (
 	DefaultPageInteger       = 1            // Default page number.
 	DefaultLimitInteger      = 10           // Default limit per page.
 	MaxItemsPerPage          = 100          // Maximum items per page.
-	DefaultSortOrder         = SortAscend   // Default sort order.
+	DefaultSortOrder         = SortDescend  // Default sort order.
 	DefaultOrderBy           = "created_at" // Default order by field.
 	SortAscend               = "ascend"     // Ascending sort order.
 	SortDescend              = "descend"    // Descending sort order.

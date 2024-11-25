@@ -1,4 +1,4 @@
-package validator
+package domain
 
 // StringValidator defines validation rules for string fields.
 type StringValidator struct {

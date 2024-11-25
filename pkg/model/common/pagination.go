@@ -105,8 +105,8 @@ func NewPaginationResponse(paginationQuery PaginationQuery) PaginationResponse {
 		PagesLeft:  totalPages - paginationQuery.Page,
 		TotalItems: paginationQuery.TotalItems,
 		ItemsLeft:  calculateItemsLeft(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit),
-		PageStart:  getPageStart(paginationQuery.Page, paginationQuery.Limit),
-		PageEnd:    getPageEnd(paginationQuery.Page, paginationQuery.Limit),
+		PageStart:  getPageStart(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit),
+		PageEnd:    getPageEnd(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit),
 		Limit:      paginationQuery.Limit,
 		OrderBy:    paginationQuery.OrderBy,
 		SortOrder:  paginationQuery.SortOrder,
@@ -134,7 +134,10 @@ func calculateItemsLeft(page, totalItems, limit int) int {
 }
 
 // Calculates the index of the first item displayed on the given page.
-func getPageStart(page, limit int) int {
+func getPageStart(page, totalItems, limit int) int {
+	if totalItems == 0 {
+		return 0
+	}
 	if page > 1 {
 		return (page-1)*limit + 1
 	}
@@ -143,8 +146,17 @@ func getPageStart(page, limit int) int {
 }
 
 // Calculates the index of the last item displayed on the given page.
-func getPageEnd(page, limit int) int {
-	return page * limit
+func getPageEnd(page, totalItems, limit int) int {
+	if totalItems == 0 {
+		return 0
+	}
+
+	end := page * limit
+	if end > totalItems {
+		return totalItems
+	}
+
+	return end
 }
 
 // generatePageLinks generates the page links for the pagination response.

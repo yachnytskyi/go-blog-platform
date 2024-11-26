@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	location     = "test.unit.pkg.model.domain.HandleError"
+	location     = "test.unit.pkg.model.error.domain."
 	field        = "Username"
 	notification = "Test error notification"
 )

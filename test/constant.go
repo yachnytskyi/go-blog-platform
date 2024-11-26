@@ -5,17 +5,17 @@ const (
 	ExpectedErrorMessageFormat = "location: %s notification: %s"
 	ExpectedStatusOk           = "Expected status OK but got %v"
 	ExpectedBody               = "Expected body %v but got %v"
-	EqualMessage               = "they should be equal"
+	EqualMessage               = "they must be equal"
 
 	// Failure/Success Messages.
-	FailureMessage     = "result should be a failure"
-	NotFailureMessage  = "result should not be a failure"
-	DataNilMessage     = "data should be nil"
-	DataNotNilMessage  = "data should not be nil"
-	ErrorNilMessage    = "error should be nil"
-	ErrorNotNilMessage = "error should not be nil"
+	FailureMessage     = "result must be a failure"
+	NotFailureMessage  = "result must not be a failure"
+	DataNilMessage     = "data must be nil"
+	DataNotNilMessage  = "data must not be nil"
+	ErrorNilMessage    = "error must be nil"
+	ErrorNotNilMessage = "error must not be nil"
 
-	CorrectErrorMessage = "error message should be correct"
+	CorrectErrorMessage = "error message must be correct"
 
 	// Response Messages.
 	ResponseBodyMismatch = "response body mismatch"

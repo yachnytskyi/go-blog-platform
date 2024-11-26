@@ -434,6 +434,7 @@ func TestValidateFieldMultipleErrors(t *testing.T) {
 	expectedErrorMessage3 := fmt.Sprintf("location: %s notification: %s field: %s type: %s",
 		expectedLocation3, expectedNotification3, stringValidator3.FieldName, constants.FieldRequired)
 
+	assert.Len(t, validationErrors, 3, test.EqualMessage)
 	assert.IsType(t, domain.ValidationError{}, validationErrors[0], test.EqualMessage)
 	assert.Equal(t, expectedErrorMessage1, validationErrors[0].Error(), test.EqualMessage)
 	assert.IsType(t, domain.ValidationError{}, validationErrors[1], test.EqualMessage)

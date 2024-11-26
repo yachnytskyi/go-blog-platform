@@ -13,7 +13,7 @@ import (
 	logger "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/logger"
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/interfaces"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/interfaces"
 )
 
 const (

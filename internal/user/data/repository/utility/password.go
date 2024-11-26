@@ -1,7 +1,7 @@
 package utility
 
 import (
-	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/interfaces"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/interfaces"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"

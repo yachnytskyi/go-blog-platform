@@ -1,13 +1,11 @@
 package interfaces
 
-// ServerRouters holds the routers for different modules of the application.
 type ServerRouters struct {
 	UserRouter Router
 	PostRouter Router
 	// Add other routers as needed.
 }
 
-// NewServerRouters creates a new instance of ServerRouters with the given routers.
 func NewServerRouters(userRouter Router, postRouter Router) ServerRouters {
 	return ServerRouters{
 		UserRouter: userRouter,
@@ -16,7 +14,6 @@ func NewServerRouters(userRouter Router, postRouter Router) ServerRouters {
 	}
 }
 
-// EmailData holds the data required for sending an email.
 type EmailData struct {
 	Recipient    string // Recipient's email address.
 	URL          string // URL to be included in the email.

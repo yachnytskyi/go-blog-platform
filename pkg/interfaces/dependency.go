@@ -6,7 +6,6 @@ import (
 	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
 )
 
-// Logger is an interface that defines methods for logging at different levels.
 type Logger interface {
 	Trace(data error)
 	Debug(data error)
@@ -17,19 +16,16 @@ type Logger interface {
 	Panic(data error)
 }
 
-// Email is an interface that defines methods for sending emails.
 type Email interface {
 	SendEmail(config *config.ApplicationConfig, logger Logger, location string, data any, emailData EmailData) error
 }
 
-// Repository is an interface that defines methods for creating and managing repository instances.
 type Repository interface {
 	CreateRepository(ctx context.Context) any
 	NewRepository(createRepository any, repository any) any
 	Close
 }
 
-// Delivery is an interface that defines methods for creating delivery components and managing the server.
 type Delivery interface {
 	CreateDelivery(serverRouters ServerRouters)
 	NewController(useCase any) any

@@ -1,7 +1,7 @@
 package v1
 
 import (
-	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/interfaces"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/interfaces"
 	pb "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1/model/pb"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
 	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"

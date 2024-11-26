@@ -8,7 +8,7 @@ import (
 
 	"github.com/golang-jwt/jwt"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/interfaces"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/interfaces"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
 	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"

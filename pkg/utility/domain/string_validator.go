@@ -5,7 +5,7 @@ import (
 	"regexp"
 
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/interfaces"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/interfaces"
 	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
 

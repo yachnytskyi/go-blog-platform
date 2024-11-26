@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/interfaces"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/interfaces"
 	utility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
 	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
 	delivery "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"

@@ -1,7 +1,7 @@
 package model
 
 import (
-	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/interfaces"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/interfaces"
 )
 
 // Container holds the factory interfaces required to initialize and manage dependencies.

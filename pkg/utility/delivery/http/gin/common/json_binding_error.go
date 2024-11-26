@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/interfaces"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/interfaces"
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 	delivery "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 )

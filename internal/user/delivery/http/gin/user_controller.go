@@ -7,7 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/interfaces"
 	utility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin/utility/cookie"
 	view "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
 	domain "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"

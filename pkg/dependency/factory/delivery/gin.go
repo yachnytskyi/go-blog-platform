@@ -8,7 +8,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/interfaces"
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/http/gin"
 	postUseCase "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/usecase"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin"

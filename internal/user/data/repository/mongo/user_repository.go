@@ -5,7 +5,7 @@ import (
 	"time"
 
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/interfaces"
 	repository "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/mongo/model"
 	repositoryUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/utility"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"

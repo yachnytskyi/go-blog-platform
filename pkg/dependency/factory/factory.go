@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config"
 	configModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
 	repository "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/data/repository"
@@ -14,6 +13,7 @@ import (
 	logger "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/logger"
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/interfaces"
 )
 
 const (

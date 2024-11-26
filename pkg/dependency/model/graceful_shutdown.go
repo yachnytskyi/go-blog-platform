@@ -3,7 +3,7 @@ package model
 import (
 	"context"
 
-	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/interfaces"
 	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
 

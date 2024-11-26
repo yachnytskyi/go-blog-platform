@@ -136,7 +136,7 @@ func (userRepository UserRepository) CheckEmailDuplicate(ctx context.Context, em
 	// Find and decode the user.
 	// If no user is found, return nil (indicating that the email is unique).
 	query := bson.M{emailKey: email}
-
+	
 	userFindOneError := userRepository.Users.FindOne(ctx, query).Decode(&fetchedUser)
 	if validator.IsError(userFindOneError) {
 		if userFindOneError == mongo.ErrNoDocuments {

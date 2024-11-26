@@ -10,16 +10,16 @@ import (
 )
 
 // ValidateField validates a field based on the provided StringValidator.
-func ValidateField(logger interfaces.Logger, location, field string, stringValidator StringValidator, validationErrors []error) []error {
+func ValidateField(logger interfaces.Logger, location string, stringValidator StringValidator, validationErrors []error) []error {
 	errors := validationErrors
 
 	// Skip validation if the field is optional and empty.
-	if stringValidator.IsOptional && field == "" {
+	if stringValidator.IsOptional && stringValidator.Field == "" {
 		return errors
 	}
 
 	// Validate field length.
-	if IsStringLengthInvalid(field, stringValidator.MinLength, stringValidator.MaxLength) {
+	if IsStringLengthInvalid(stringValidator.Field, stringValidator.MinLength, stringValidator.MaxLength) {
 		notification := fmt.Sprintf(constants.StringAllowedLength, stringValidator.MinLength, stringValidator.MaxLength)
 		if stringValidator.IsOptional {
 			notification = fmt.Sprintf(constants.StringOptionalAllowedLength, stringValidator.MinLength, stringValidator.MaxLength)
@@ -37,7 +37,7 @@ func ValidateField(logger interfaces.Logger, location, field string, stringValid
 	}
 
 	// Validate field characters.
-	if AreStringCharactersInvalid(field, stringValidator.FieldRegex) {
+	if AreStringCharactersInvalid(stringValidator.Field, stringValidator.FieldRegex) {
 		validationError := domain.NewValidationError(
 			location+".ValidateField.AreStringCharactersInvalid",
 			stringValidator.FieldName,

@@ -37,5 +37,17 @@ func TestHandleErrorAuthorizationError(t *testing.T) {
 	result := domain.HandleError(authorizationError)
 
 	assert.IsType(t, domain.AuthorizationError{}, result)
+	assert.Equal(t, authorizationError.Location, result.(domain.AuthorizationError).Location)
 	assert.Equal(t, constants.AuthorizationErrorNotification, result.(domain.AuthorizationError).Notification)
+}
+
+func TestHandleErrorItemNotFoundError(t *testing.T) {
+	t.Parallel()
+	query := "some test query"
+	itemNotFoundError := domain.NewItemNotFoundError(location, query, notification)
+	result := domain.HandleError(itemNotFoundError)
+
+	assert.IsType(t, domain.ItemNotFoundError{}, result)
+	assert.Equal(t, itemNotFoundError.Location, result.(domain.ItemNotFoundError).Location)
+	assert.Equal(t, constants.ItemNotFoundErrorNotification, result.(domain.ItemNotFoundError).Notification)
 }

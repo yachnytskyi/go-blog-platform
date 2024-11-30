@@ -1,6 +1,6 @@
 module github.com/yachnytskyi/golang-mongo-grpc
 
-go 1.20
+go 1.23.3
 
 require (
 	github.com/gin-contrib/cors v1.4.0

@@ -48,7 +48,6 @@ func getExpectedPageEnd(page, totalItems, limit int) int {
 	return end
 }
 
-// generateExpectedPageLinks creates paginated URLs based on the given pagination response and page numbers.
 func generateExpectedPageLinks(paginationResponse common.PaginationResponse, pages []int) []string {
 	var pageLinks []string
 	for _, page := range pages {

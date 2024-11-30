@@ -48,7 +48,15 @@ func getExpectedPageEnd(page, totalItems, limit int) int {
 	return end
 }
 
-func generateExpectedPageLinks(paginationResponse common.PaginationResponse, pages []int) []string {
+func getExpectedPagesLeft(totalPages, page int) int {
+	return totalPages - page
+}
+
+func getExpectedItemsLeft(paginationQuery common.PaginationQuery, totalItems int) int {
+	return totalItems - (paginationQuery.Page * paginationQuery.Limit)
+}
+
+func getExpectedPageLinks(paginationResponse common.PaginationResponse, pages []int) []string {
 	var pageLinks []string
 	for _, page := range pages {
 		link := fmt.Sprintf(
@@ -260,7 +268,7 @@ func TestNewPaginationResponseEmptyData(t *testing.T) {
 	expectedPageStart := getExpectedPageStart(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit)
 	expectedPageEnd := getExpectedPageEnd(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit)
 	expectedPages := []int{1}
-	expectedPageLinks := generateExpectedPageLinks(result, expectedPages)
+	expectedPageLinks := getExpectedPageLinks(result, expectedPages)
 
 	assert.Equal(t, constants.DefaultPageInteger, result.Page, test.EqualMessage)
 	assert.Equal(t, constants.DefaultPageInteger, result.TotalPages, test.EqualMessage)
@@ -281,18 +289,18 @@ func TestNewPaginationResponsePageEnd(t *testing.T) {
 	paginationQuery.TotalItems = 95
 
 	result := common.NewPaginationResponse(paginationQuery)
-	expectedTotalItems := paginationQuery.TotalItems
+	expectedPagesLeft := getExpectedPagesLeft(result.TotalPages, result.Page)
+	expectedItemsLeft := getExpectedItemsLeft(paginationQuery, paginationQuery.TotalItems)
 	expectedPageStart := getExpectedPageStart(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit)
 	expectedPageEnd := getExpectedPageEnd(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit)
 	expectedPages := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	expectedPageLinks := generateExpectedPageLinks(result, expectedPages)
+	expectedPageLinks := getExpectedPageLinks(result, expectedPages)
 
 	assert.Equal(t, constants.DefaultPageInteger, result.Page, test.EqualMessage)
 	assert.Equal(t, totalPages, result.TotalPages, test.EqualMessage)
-	assert.Equal(t, totalPages-paginationQuery.Page, result.PagesLeft, test.EqualMessage)
-	assert.Equal(t, expectedTotalItems, result.TotalItems, test.EqualMessage)
-	assert.Equal(t, expectedTotalItems-paginationQuery.Page*paginationQuery.Limit, result.ItemsLeft, test.EqualMessage)
-	assert.Equal(t, expectedTotalItems-paginationQuery.Page*paginationQuery.Limit, result.ItemsLeft, test.EqualMessage)
+	assert.Equal(t, expectedPagesLeft, result.PagesLeft, test.EqualMessage)
+	assert.Equal(t, paginationQuery.TotalItems, result.TotalItems, test.EqualMessage)
+	assert.Equal(t, expectedItemsLeft, result.ItemsLeft, test.EqualMessage)
 	assert.Equal(t, constants.DefaultLimitInteger, result.Limit, test.EqualMessage)
 	assert.Equal(t, expectedPageStart, result.PageStart, test.EqualMessage)
 	assert.Equal(t, expectedPageEnd, result.PageEnd, test.EqualMessage)
@@ -307,18 +315,18 @@ func TestNewPaginationResponseSinglePage(t *testing.T) {
 	paginationQuery.TotalItems = 1
 
 	result := common.NewPaginationResponse(paginationQuery)
-	expectedTotalItems := 1
-	expectedItemsPagesLeft := 0
+	expectedPagesLeft := 0
+	expectedItemsLeft := 0
 	expectedPageStart := getExpectedPageStart(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit)
 	expectedPageEnd := getExpectedPageEnd(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit)
 	expectedPages := []int{1}
-	expectedPageLinks := generateExpectedPageLinks(result, expectedPages)
+	expectedPageLinks := getExpectedPageLinks(result, expectedPages)
 
 	assert.Equal(t, constants.DefaultPageInteger, result.Page, test.EqualMessage)
 	assert.Equal(t, constants.DefaultPageInteger, result.TotalPages, test.EqualMessage)
-	assert.Equal(t, expectedItemsPagesLeft, result.PagesLeft, test.EqualMessage)
-	assert.Equal(t, expectedTotalItems, result.TotalItems, test.EqualMessage)
-	assert.Equal(t, expectedItemsPagesLeft, result.ItemsLeft, test.EqualMessage)
+	assert.Equal(t, expectedPagesLeft, result.PagesLeft, test.EqualMessage)
+	assert.Equal(t, paginationQuery.TotalItems, result.TotalItems, test.EqualMessage)
+	assert.Equal(t, expectedItemsLeft, result.ItemsLeft, test.EqualMessage)
 	assert.Equal(t, expectedPageStart, result.PageStart, test.EqualMessage)
 	assert.Equal(t, expectedPageEnd, result.PageEnd, test.EqualMessage)
 	assert.Equal(t, constants.DefaultLimitInteger, paginationQuery.Limit, test.EqualMessage)
@@ -334,16 +342,18 @@ func TestNewPaginationResponseMiddlePage(t *testing.T) {
 	paginationQuery.TotalItems = totalItems
 
 	result := common.NewPaginationResponse(paginationQuery)
+	expectedPagesLeft := getExpectedPagesLeft(result.TotalPages, result.Page)
+	expectedItemsLeft := getExpectedItemsLeft(paginationQuery, paginationQuery.TotalItems)
 	expectedPageStart := getExpectedPageStart(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit)
 	expectedPageEnd := getExpectedPageEnd(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit)
 	expectedPages := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	expectedPageLinks := generateExpectedPageLinks(result, expectedPages)
+	expectedPageLinks := getExpectedPageLinks(result, expectedPages)
 
 	assert.Equal(t, page, result.Page, test.EqualMessage)
 	assert.Equal(t, totalPages, result.TotalPages, test.EqualMessage)
-	assert.Equal(t, totalPages-paginationQuery.Page, result.PagesLeft, test.EqualMessage)
+	assert.Equal(t, expectedPagesLeft, result.PagesLeft, test.EqualMessage)
 	assert.Equal(t, totalItems, result.TotalItems, test.EqualMessage)
-	assert.Equal(t, totalItems-paginationQuery.Page*paginationQuery.Limit, result.ItemsLeft, test.EqualMessage)
+	assert.Equal(t, expectedItemsLeft, result.ItemsLeft, test.EqualMessage)
 	assert.Equal(t, expectedPageStart, result.PageStart, test.EqualMessage)
 	assert.Equal(t, expectedPageEnd, result.PageEnd, test.EqualMessage)
 	assert.Equal(t, constants.DefaultLimitInteger, result.Limit, test.EqualMessage)
@@ -360,17 +370,18 @@ func TestNewPaginationResponseFirstPage(t *testing.T) {
 
 	result := common.NewPaginationResponse(paginationQuery)
 	expectedTotalPages := totalPages * 2
-	expectedTotalItems := totalItems * 2
+	expectedPagesLeft := getExpectedPagesLeft(result.TotalPages, result.Page)
+	expectedItemsLeft := getExpectedItemsLeft(paginationQuery, paginationQuery.TotalItems)
 	expectedPageStart := getExpectedPageStart(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit)
 	expectedPageEnd := getExpectedPageEnd(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit)
 	expectedPages := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 20}
-	expectedPageLinks := generateExpectedPageLinks(result, expectedPages)
+	expectedPageLinks := getExpectedPageLinks(result, expectedPages)
 
 	assert.Equal(t, page, result.Page, test.EqualMessage)
 	assert.Equal(t, expectedTotalPages, result.TotalPages, test.EqualMessage)
-	assert.Equal(t, expectedTotalPages-paginationQuery.Page, result.PagesLeft, test.EqualMessage)
-	assert.Equal(t, expectedTotalItems, result.TotalItems, test.EqualMessage)
-	assert.Equal(t, expectedTotalItems-paginationQuery.Page*paginationQuery.Limit, result.ItemsLeft, test.EqualMessage)
+	assert.Equal(t, expectedPagesLeft, result.PagesLeft, test.EqualMessage)
+	assert.Equal(t, paginationQuery.TotalItems, result.TotalItems, test.EqualMessage)
+	assert.Equal(t, expectedItemsLeft, result.ItemsLeft, test.EqualMessage)
 	assert.Equal(t, expectedPageStart, result.PageStart, test.EqualMessage)
 	assert.Equal(t, expectedPageEnd, result.PageEnd, test.EqualMessage)
 	assert.Equal(t, constants.DefaultLimitInteger, result.Limit, test.EqualMessage)
@@ -387,17 +398,18 @@ func TestNewPaginationResponseSeventhPage(t *testing.T) {
 
 	result := common.NewPaginationResponse(paginationQuery)
 	expectedTotalPages := totalPages * 2
-	expectedTotalItems := totalItems * 2
+	expectedPagesLeft := getExpectedPagesLeft(result.TotalPages, result.Page)
+	expectedItemsLeft := getExpectedItemsLeft(paginationQuery, paginationQuery.TotalItems)
 	expectedPageStart := getExpectedPageStart(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit)
 	expectedPageEnd := getExpectedPageEnd(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit)
 	expectedPages := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 20}
-	expectedPageLinks := generateExpectedPageLinks(result, expectedPages)
+	expectedPageLinks := getExpectedPageLinks(result, expectedPages)
 
 	assert.Equal(t, page, result.Page, test.EqualMessage)
 	assert.Equal(t, expectedTotalPages, result.TotalPages, test.EqualMessage)
-	assert.Equal(t, expectedTotalPages-paginationQuery.Page, result.PagesLeft, test.EqualMessage)
-	assert.Equal(t, expectedTotalItems, result.TotalItems, test.EqualMessage)
-	assert.Equal(t, expectedTotalItems-paginationQuery.Page*paginationQuery.Limit, result.ItemsLeft, test.EqualMessage)
+	assert.Equal(t, expectedPagesLeft, result.PagesLeft, test.EqualMessage)
+	assert.Equal(t, paginationQuery.TotalItems, result.TotalItems, test.EqualMessage)
+	assert.Equal(t, expectedItemsLeft, result.ItemsLeft, test.EqualMessage)
 	assert.Equal(t, expectedPageStart, result.PageStart, test.EqualMessage)
 	assert.Equal(t, expectedPageEnd, result.PageEnd, test.EqualMessage)
 	assert.Equal(t, constants.DefaultLimitInteger, result.Limit, test.EqualMessage)
@@ -414,17 +426,18 @@ func TestNewPaginationResponseEighthPage(t *testing.T) {
 
 	result := common.NewPaginationResponse(paginationQuery)
 	expectedTotalPages := totalPages * 2
-	expectedTotalItems := totalItems * 2
+	expectedPagesLeft := getExpectedPagesLeft(result.TotalPages, result.Page)
+	expectedItemsLeft := getExpectedItemsLeft(paginationQuery, paginationQuery.TotalItems)
 	expectedPageStart := getExpectedPageStart(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit)
 	expectedPageEnd := getExpectedPageEnd(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit)
 	expectedPages := []int{1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 20}
-	expectedPageLinks := generateExpectedPageLinks(result, expectedPages)
+	expectedPageLinks := getExpectedPageLinks(result, expectedPages)
 
 	assert.Equal(t, page, result.Page, test.EqualMessage)
 	assert.Equal(t, expectedTotalPages, result.TotalPages, test.EqualMessage)
-	assert.Equal(t, expectedTotalPages-paginationQuery.Page, result.PagesLeft, test.EqualMessage)
-	assert.Equal(t, expectedTotalItems, result.TotalItems, test.EqualMessage)
-	assert.Equal(t, expectedTotalItems-paginationQuery.Page*paginationQuery.Limit, result.ItemsLeft, test.EqualMessage)
+	assert.Equal(t, expectedPagesLeft, result.PagesLeft, test.EqualMessage)
+	assert.Equal(t, paginationQuery.TotalItems, result.TotalItems, test.EqualMessage)
+	assert.Equal(t, expectedItemsLeft, result.ItemsLeft, test.EqualMessage)
 	assert.Equal(t, expectedPageStart, result.PageStart, test.EqualMessage)
 	assert.Equal(t, expectedPageEnd, result.PageEnd, test.EqualMessage)
 	assert.Equal(t, constants.DefaultLimitInteger, result.Limit, test.EqualMessage)
@@ -441,17 +454,18 @@ func TestNewPaginationResponseTwelvethPage(t *testing.T) {
 
 	result := common.NewPaginationResponse(paginationQuery)
 	expectedTotalPages := totalPages * 2
-	expectedTotalItems := totalItems * 2
+	expectedPagesLeft := getExpectedPagesLeft(result.TotalPages, result.Page)
+	expectedItemsLeft := getExpectedItemsLeft(paginationQuery, paginationQuery.TotalItems)
 	expectedPageStart := getExpectedPageStart(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit)
 	expectedPageEnd := getExpectedPageEnd(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit)
 	expectedPages := []int{1, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 20}
-	expectedPageLinks := generateExpectedPageLinks(result, expectedPages)
+	expectedPageLinks := getExpectedPageLinks(result, expectedPages)
 
 	assert.Equal(t, page, result.Page, test.EqualMessage)
 	assert.Equal(t, expectedTotalPages, result.TotalPages, test.EqualMessage)
-	assert.Equal(t, expectedTotalPages-paginationQuery.Page, result.PagesLeft, test.EqualMessage)
-	assert.Equal(t, expectedTotalItems, result.TotalItems, test.EqualMessage)
-	assert.Equal(t, expectedTotalItems-paginationQuery.Page*paginationQuery.Limit, result.ItemsLeft, test.EqualMessage)
+	assert.Equal(t, expectedPagesLeft, result.PagesLeft, test.EqualMessage)
+	assert.Equal(t, paginationQuery.TotalItems, result.TotalItems, test.EqualMessage)
+	assert.Equal(t, expectedItemsLeft, result.ItemsLeft, test.EqualMessage)
 	assert.Equal(t, expectedPageStart, result.PageStart, test.EqualMessage)
 	assert.Equal(t, expectedPageEnd, result.PageEnd, test.EqualMessage)
 	assert.Equal(t, constants.DefaultLimitInteger, result.Limit, test.EqualMessage)
@@ -468,17 +482,18 @@ func TestNewPaginationFourteenthPage(t *testing.T) {
 
 	result := common.NewPaginationResponse(paginationQuery)
 	expectedTotalPages := totalPages * 2
-	expectedTotalItems := totalItems * 2
+	expectedPagesLeft := getExpectedPagesLeft(result.TotalPages, result.Page)
+	expectedItemsLeft := getExpectedItemsLeft(paginationQuery, paginationQuery.TotalItems)
 	expectedPageStart := getExpectedPageStart(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit)
 	expectedPageEnd := getExpectedPageEnd(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit)
 	expectedPages := []int{1, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 20}
-	expectedPageLinks := generateExpectedPageLinks(result, expectedPages)
+	expectedPageLinks := getExpectedPageLinks(result, expectedPages)
 
 	assert.Equal(t, page, result.Page, test.EqualMessage)
 	assert.Equal(t, expectedTotalPages, result.TotalPages, test.EqualMessage)
-	assert.Equal(t, expectedTotalPages-paginationQuery.Page, result.PagesLeft, test.EqualMessage)
-	assert.Equal(t, expectedTotalItems, result.TotalItems, test.EqualMessage)
-	assert.Equal(t, expectedTotalItems-paginationQuery.Page*paginationQuery.Limit, result.ItemsLeft, test.EqualMessage)
+	assert.Equal(t, expectedPagesLeft, result.PagesLeft, test.EqualMessage)
+	assert.Equal(t, paginationQuery.TotalItems, result.TotalItems, test.EqualMessage)
+	assert.Equal(t, expectedItemsLeft, result.ItemsLeft, test.EqualMessage)
 	assert.Equal(t, expectedPageStart, result.PageStart, test.EqualMessage)
 	assert.Equal(t, expectedPageEnd, result.PageEnd, test.EqualMessage)
 	assert.Equal(t, constants.DefaultLimitInteger, result.Limit, test.EqualMessage)
@@ -495,17 +510,18 @@ func TestNewPaginationEighteenthPage(t *testing.T) {
 
 	result := common.NewPaginationResponse(paginationQuery)
 	expectedTotalPages := totalPages * 2
-	expectedTotalItems := totalItems * 2
+	expectedPagesLeft := getExpectedPagesLeft(result.TotalPages, result.Page)
+	expectedItemsLeft := getExpectedItemsLeft(paginationQuery, paginationQuery.TotalItems)
 	expectedPageStart := getExpectedPageStart(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit)
 	expectedPageEnd := getExpectedPageEnd(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit)
 	expectedPages := []int{1, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}
-	expectedPageLinks := generateExpectedPageLinks(result, expectedPages)
+	expectedPageLinks := getExpectedPageLinks(result, expectedPages)
 
 	assert.Equal(t, page, result.Page, test.EqualMessage)
 	assert.Equal(t, expectedTotalPages, result.TotalPages, test.EqualMessage)
-	assert.Equal(t, expectedTotalPages-paginationQuery.Page, result.PagesLeft, test.EqualMessage)
-	assert.Equal(t, expectedTotalItems, result.TotalItems, test.EqualMessage)
-	assert.Equal(t, expectedTotalItems-paginationQuery.Page*paginationQuery.Limit, result.ItemsLeft, test.EqualMessage)
+	assert.Equal(t, expectedPagesLeft, result.PagesLeft, test.EqualMessage)
+	assert.Equal(t, paginationQuery.TotalItems, result.TotalItems, test.EqualMessage)
+	assert.Equal(t, expectedItemsLeft, result.ItemsLeft, test.EqualMessage)
 	assert.Equal(t, expectedPageStart, result.PageStart, test.EqualMessage)
 	assert.Equal(t, expectedPageEnd, result.PageEnd, test.EqualMessage)
 	assert.Equal(t, constants.DefaultLimitInteger, result.Limit, test.EqualMessage)
@@ -522,17 +538,18 @@ func TestNewPaginationLastPage(t *testing.T) {
 
 	result := common.NewPaginationResponse(paginationQuery)
 	expectedTotalPages := totalPages * 2
-	expectedTotalItems := totalItems * 2
+	expectedPagesLeft := getExpectedPagesLeft(result.TotalPages, result.Page)
+	expectedItemsLeft := getExpectedItemsLeft(paginationQuery, paginationQuery.TotalItems)
 	expectedPageStart := getExpectedPageStart(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit)
 	expectedPageEnd := getExpectedPageEnd(paginationQuery.Page, paginationQuery.TotalItems, paginationQuery.Limit)
 	expectedPages := []int{1, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}
-	expectedPageLinks := generateExpectedPageLinks(result, expectedPages)
+	expectedPageLinks := getExpectedPageLinks(result, expectedPages)
 
 	assert.Equal(t, page, result.Page, test.EqualMessage)
 	assert.Equal(t, expectedTotalPages, result.TotalPages, test.EqualMessage)
-	assert.Equal(t, expectedTotalPages-paginationQuery.Page, result.PagesLeft, test.EqualMessage)
-	assert.Equal(t, expectedTotalItems, result.TotalItems, test.EqualMessage)
-	assert.Equal(t, expectedTotalItems-paginationQuery.Page*paginationQuery.Limit, result.ItemsLeft, test.EqualMessage)
+	assert.Equal(t, expectedPagesLeft, result.PagesLeft, test.EqualMessage)
+	assert.Equal(t, paginationQuery.TotalItems, result.TotalItems, test.EqualMessage)
+	assert.Equal(t, expectedItemsLeft, result.ItemsLeft, test.EqualMessage)
 	assert.Equal(t, expectedPageStart, result.PageStart, test.EqualMessage)
 	assert.Equal(t, expectedPageEnd, result.PageEnd, test.EqualMessage)
 	assert.Equal(t, constants.DefaultLimitInteger, result.Limit, test.EqualMessage)

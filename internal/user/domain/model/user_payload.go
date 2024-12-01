@@ -1,4 +1,4 @@
-package domain
+package model
 
 type UserTokenPayload struct {
 	UserID string

@@ -6,7 +6,7 @@ import (
 
 	pb "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1/model/pb"
 	utility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
-	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
+	model "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

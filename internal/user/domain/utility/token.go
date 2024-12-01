@@ -10,7 +10,7 @@ import (
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/interfaces"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
-	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
+	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
@@ -27,7 +27,7 @@ const (
 
 // GenerateJWTToken generates a JWT token with the provided UserTokenPayload, using the given private key,
 // and sets the token's expiration based on the specified token lifetime.
-func GenerateJWTToken(logger interfaces.Logger, location, privateKey string, tokenLifeTime time.Duration, userTokenPayload model.UserTokenPayload) common.Result[string] {
+func GenerateJWTToken(logger interfaces.Logger, location, privateKey string, tokenLifeTime time.Duration, userTokenPayload user.UserTokenPayload) common.Result[string] {
 	decodedPrivateKey := decodeBase64String(logger, location+".GenerateJWTToken", privateKey)
 	if validator.IsError(decodedPrivateKey.Error) {
 		return common.NewResultOnFailure[string](decodedPrivateKey.Error)
@@ -50,36 +50,36 @@ func GenerateJWTToken(logger interfaces.Logger, location, privateKey string, tok
 
 // ValidateJWTToken validates a JWT token using the provided public key and returns the claims
 // extracted from the token if it's valid.
-func ValidateJWTToken(logger interfaces.Logger, location, token, publicKey string) common.Result[model.UserTokenPayload] {
+func ValidateJWTToken(logger interfaces.Logger, location, token, publicKey string) common.Result[user.UserTokenPayload] {
 	decodedPublicKey := decodeBase64String(logger, location+".ValidateJWTToken", publicKey)
 	if validator.IsError(decodedPublicKey.Error) {
-		return common.NewResultOnFailure[model.UserTokenPayload](decodedPublicKey.Error)
+		return common.NewResultOnFailure[user.UserTokenPayload](decodedPublicKey.Error)
 	}
 
 	key := parsePublicKey(logger, location+".ValidateJWTToken", decodedPublicKey.Data)
 	if validator.IsError(key.Error) {
-		return common.NewResultOnFailure[model.UserTokenPayload](key.Error)
+		return common.NewResultOnFailure[user.UserTokenPayload](key.Error)
 	}
 
 	parsedToken := parseToken(logger, location+".ValidateJWTToken", token, key.Data)
 	if validator.IsError(parsedToken.Error) {
-		return common.NewResultOnFailure[model.UserTokenPayload](parsedToken.Error)
+		return common.NewResultOnFailure[user.UserTokenPayload](parsedToken.Error)
 	}
 
 	// Extract and validate the claims from the parsed token.
 	claims, ok := parsedToken.Data.Claims.(jwt.MapClaims)
 	if ok && parsedToken.Data.Valid {
-		payload := model.NewUserTokenPayload(
+		payload := user.NewUserTokenPayload(
 			fmt.Sprint(claims[userIDClaim]),
 			fmt.Sprint(claims[userRoleClaim]),
 		)
 
-		return common.NewResultOnSuccess[model.UserTokenPayload](payload)
+		return common.NewResultOnSuccess[user.UserTokenPayload](payload)
 	}
 
 	invalidTokenError := domain.NewInvalidTokenError(location+".ValidateJWTToken.Claims.ok", constants.InvalidTokenErrorMessage)
 	logger.Error(invalidTokenError)
-	return common.NewResultOnFailure[model.UserTokenPayload](invalidTokenError)
+	return common.NewResultOnFailure[user.UserTokenPayload](invalidTokenError)
 }
 
 // decodeBase64String decodes a base64-encoded string into a byte slice.
@@ -95,7 +95,7 @@ func decodeBase64String(logger interfaces.Logger, location, base64String string)
 }
 
 // generateClaims generates JWT claims with the specified token lifetime and UserTokenPayload.
-func generateClaims(tokenLifeTime time.Duration, now time.Time, userTokenPayload model.UserTokenPayload) jwt.MapClaims {
+func generateClaims(tokenLifeTime time.Duration, now time.Time, userTokenPayload user.UserTokenPayload) jwt.MapClaims {
 	return jwt.MapClaims{
 		userIDClaim:     userTokenPayload.UserID,
 		userRoleClaim:   userTokenPayload.Role,

@@ -6,12 +6,11 @@ import (
 
 	"github.com/thanhpk/randstr"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/interfaces"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	domainUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
 	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/interfaces"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
-	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/domain"
 	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -138,7 +137,7 @@ func (userUseCase UserUseCase) Login(ctx context.Context, userLoginData user.Use
 		return common.NewResultOnFailure[user.UserToken](domain.HandleError(checkPasswordsError))
 	}
 
-	userTokenPayload := model.NewUserTokenPayload(fetchedUser.Data.ID, fetchedUser.Data.Role)
+	userTokenPayload := user.NewUserTokenPayload(fetchedUser.Data.ID, fetchedUser.Data.Role)
 	userToken := generateToken(userUseCase.Config, userUseCase.Logger, location+"Login", userTokenPayload)
 	if validator.IsError(userToken.Error) {
 		return common.NewResultOnFailure[user.UserToken](domain.HandleError(userToken.Error))
@@ -148,7 +147,7 @@ func (userUseCase UserUseCase) Login(ctx context.Context, userLoginData user.Use
 }
 
 func (userUseCase UserUseCase) RefreshAccessToken(ctx context.Context, userData user.User) common.Result[user.UserToken] {
-	userTokenPayload := model.NewUserTokenPayload(userData.ID, userData.Role)
+	userTokenPayload := user.NewUserTokenPayload(userData.ID, userData.Role)
 	userToken := generateToken(userUseCase.Config, userUseCase.Logger, location+"RefreshAccessToken", userTokenPayload)
 	if validator.IsError(userToken.Error) {
 		return common.NewResultOnFailure[user.UserToken](domain.HandleError(userToken.Error))
@@ -256,7 +255,7 @@ func prepareEmailDataForForgottenPassword(config *config.ApplicationConfig, user
 	)
 }
 
-func generateToken(config *config.ApplicationConfig, logger interfaces.Logger, location string, userTokenPayload model.UserTokenPayload) common.Result[user.UserToken] {
+func generateToken(config *config.ApplicationConfig, logger interfaces.Logger, location string, userTokenPayload user.UserTokenPayload) common.Result[user.UserToken] {
 	accessToken := domainUtility.GenerateJWTToken(
 		logger,
 		location+".generateToken.accessToken",

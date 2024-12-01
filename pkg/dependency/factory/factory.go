@@ -59,7 +59,6 @@ func NewRepositoryFactory(config *configModel.ApplicationConfig, logger interfac
 		logger.Panic(domain.NewInternalError(location+"NewRepositoryFactory", fmt.Sprintf(constants.UnsupportedRepository, config.Core.Database)))
 		return nil
 	}
-
 }
 
 func NewDeliveryFactory(

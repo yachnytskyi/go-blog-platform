@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -50,4 +51,43 @@ func TestHandleErrorItemNotFoundError(t *testing.T) {
 	assert.IsType(t, domain.ItemNotFoundError{}, result)
 	assert.Equal(t, itemNotFoundError.Location, result.(domain.ItemNotFoundError).Location)
 	assert.Equal(t, constants.ItemNotFoundErrorNotification, result.(domain.ItemNotFoundError).Notification)
+}
+
+func TestHandleErrorPaginationError(t *testing.T) {
+	t.Parallel()
+	currentPage := "52"
+	totalPages := "100"
+	notification := "Pagination error"
+	paginationError := domain.NewPaginationError(location, currentPage, totalPages, notification)
+	result := domain.HandleError(paginationError)
+
+	assert.IsType(t, domain.PaginationError{}, result)
+	assert.Equal(t, paginationError.Location, result.(domain.PaginationError).Location)
+	assert.Equal(t, constants.PaginationErrorNotification, result.(domain.PaginationError).Notification)
+}
+
+func TestHandleErrorInternalError(t *testing.T) {
+	t.Parallel()
+	internalError := domain.NewInternalError(location, notification)
+	result := domain.HandleError(internalError)
+
+	assert.IsType(t, domain.InternalError{}, result, test.EqualMessage)
+	assert.Equal(t, internalError.Location, result.(domain.InternalError).Location, test.EqualMessage)
+	assert.Equal(t, constants.InternalErrorNotification, result.(domain.InternalError).Notification, test.EqualMessage)
+}
+
+func TestHandleErrorUnknownError(t *testing.T) {
+	t.Parallel()
+	err := fmt.Errorf("some error")
+	result := domain.HandleError(err)
+
+	assert.IsType(t, err, result, test.EqualMessage)
+	assert.Equal(t, err, result, test.EqualMessage)
+}
+
+func TestHandleErrorNil(t *testing.T) {
+	t.Parallel()
+
+	result := domain.HandleError(nil)
+	assert.Nil(t, result, test.ErrorNilMessage)
 }

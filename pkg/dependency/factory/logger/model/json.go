@@ -135,27 +135,23 @@ func NewJSONPaginationError(location, currentPage, totalPages, notification stri
 }
 
 type JSONRequestError struct {
-	Location    string `json:"location"`
 	RequestType string `json:"request_type"`
 	JSONBaseError
 }
 
 func NewJSONRequestError(location, requestType, notification string) JSONRequestError {
 	return JSONRequestError{
-		Location:      location,
 		RequestType:   requestType,
 		JSONBaseError: NewJSONBaseError(location, notification),
 	}
 }
 
 type JSONInternalError struct {
-	Location string `json:"location"`
 	JSONBaseError
 }
 
 func NewJSONInternalError(location, notification string) JSONInternalError {
 	return JSONInternalError{
-		Location:      location,
 		JSONBaseError: NewJSONBaseError(location, notification),
 	}
 }

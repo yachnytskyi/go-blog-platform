@@ -39,6 +39,7 @@ func (jsonBaseErrors JSONBaseErrors) Error() string {
 		}
 		result.WriteString(baseError.Error())
 	}
+	
 	result.WriteString("]")
 	return result.String()
 }

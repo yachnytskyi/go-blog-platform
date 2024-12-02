@@ -33,6 +33,11 @@ const (
 	LoggerDateTimeFormat = time.RFC3339                  // Format for machine-readable dates (ISO 8601).
 )
 
+// Error message formatting constants.
+const (
+	BaseErrorMessageFormat = "location: %s notification: %s" // Format string for logging or displaying error messages with location and notification details.
+)
+
 // Token-related constants.
 const (
 	AccessTokenValue                            = "access_token"                          // Access token value.

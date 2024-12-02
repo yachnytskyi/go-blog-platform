@@ -23,7 +23,10 @@ const (
 	expectedAllowedOrigins     = "http://localhost:8080"
 	expectedAllowedMethod      = "GET"
 
-	openFileError = "open %s: no such file or directory"
+	writePermissions = 0755
+	readPermissions  = 0644
+	openFileError    = "open %s: no such file or directory"
+	yamlParsingError = "While parsing config: yaml: line 1: did not find expected ',' or ']'"
 )
 
 func setupYamlFilePath() string {
@@ -67,12 +70,12 @@ grpc:
   server_url: 0.0.0.0:8081
 `)
 
-	err := os.MkdirAll(yamlConfigPath, 0755)
+	err := os.MkdirAll(yamlConfigPath, writePermissions)
 	if err != nil {
 		return ""
 	}
 
-	err = os.WriteFile(yamlFilePath, yamlContent, 0644)
+	err = os.WriteFile(yamlFilePath, yamlContent, readPermissions)
 	if err != nil {
 		return ""
 	}
@@ -83,12 +86,12 @@ grpc:
 func setupEnvFilePath() string {
 	envFilePath := constants.EnvironmentsPath + constants.Environment
 	envContent := []byte(fmt.Sprintf(v1, constants.ConfigPath))
-	
-	err := os.MkdirAll(environmentConfigPath, 0755)
+
+	err := os.MkdirAll(environmentConfigPath, writePermissions)
 	if err != nil {
 		return ""
 	}
-	err = os.WriteFile(envFilePath, envContent, 0644)
+	err = os.WriteFile(envFilePath, envContent, readPermissions)
 	if err != nil {
 		return ""
 	}
@@ -120,7 +123,7 @@ func TestViperWithoutEnvironment(t *testing.T) {
 	t.Parallel()
 	notification := fmt.Sprintf(openFileError, constants.EnvironmentsPath+constants.Environment)
 	expectedMessage := fmt.Sprintf(constants.BaseErrorMessageFormat, expectedLocation+"loadDefaultEnvironment", notification)
-	
+
 	defer func() {
 		recover := recover()
 		if recover != nil {
@@ -138,6 +141,31 @@ func TestViperLoadEnvironmentWithoutYamlConfig(t *testing.T) {
 
 	notification := fmt.Sprintf(openFileError, constants.ConfigPath)
 	expectedMessage := fmt.Sprintf(constants.BaseErrorMessageFormat, expectedLocation+"loadDefaultConfig", notification)
+	defer func() {
+		recover := recover()
+		if recover != nil {
+			assert.Equal(t, fmt.Sprintf("%v", recover), expectedMessage, test.EqualMessage)
+		}
+	}()
+
+	config.NewViper()
+}
+
+func TestViperUnmarshalInvalidYAML(t *testing.T) {
+	yamlFilePath := constants.ConfigPath
+	invalidYAMLContent := []byte(`invalid_yaml: [unterminated`)
+	
+	envFilePath := setupEnvFilePath()
+	defer cleanupTestEnvironment(string(invalidYAMLContent), envFilePath)
+
+	err := os.MkdirAll(yamlConfigPath, writePermissions)
+	assert.NoError(t, err, test.ErrorNilMessage)
+
+	err = os.WriteFile(yamlFilePath, invalidYAMLContent, readPermissions)
+	assert.NoError(t, err, test.ErrorNilMessage)
+
+	defer cleanupTestEnvironment(yamlFilePath, "")
+	expectedMessage := fmt.Sprintf(constants.BaseErrorMessageFormat, expectedLocation+"loadDefaultConfig", yamlParsingError)
 	defer func() {
 		recover := recover()
 		if recover != nil {

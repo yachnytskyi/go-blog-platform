@@ -18,7 +18,7 @@ const (
 
 func TestHandleErrorValidationErrors(t *testing.T) {
 	t.Parallel()
-	
+
 	validationErrors := domain.NewValidationErrors([]error{
 		domain.NewValidationError(location+"TestHandleErrorValidationErrors", field, constants.FieldRequired, constants.StringAllowedCharacters),
 		domain.NewValidationError(location+"TestHandleErrorValidationErrors", field, constants.FieldRequired, constants.StringAllowedCharacters),

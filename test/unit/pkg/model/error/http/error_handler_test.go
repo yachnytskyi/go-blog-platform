@@ -124,7 +124,7 @@ func TestHandleErrorHTTPInternalError(t *testing.T) {
 	assert.Equal(t, constants.InternalErrorNotification, httpError.Notification, test.EqualMessage)
 }
 
-func TestHandleErrorHTTPUnknownError(t *testing.T) {
+func TestHandleErrorUnknownError(t *testing.T) {
 	t.Parallel()
 	err := fmt.Errorf("notification: %s", notification)
 	result := http.HandleError(err)

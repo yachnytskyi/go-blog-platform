@@ -30,8 +30,6 @@ const (
 )
 
 func setupYamlFilePath() string {
-	yamlFilePath := constants.ConfigPath
-
 	yamlContent := []byte(`
 core:
   logger: Zerolog
@@ -75,12 +73,27 @@ grpc:
 		return ""
 	}
 
-	err = os.WriteFile(yamlFilePath, yamlContent, readPermissions)
+	err = os.WriteFile(constants.YamlConfigPath, yamlContent, readPermissions)
 	if err != nil {
 		return ""
 	}
 
-	return yamlFilePath
+	return constants.YamlConfigPath
+}
+
+func setupInvalidYamlFilePath() string {
+	invalidYAMLContent := []byte(`invalid_yaml: [unterminated`)
+
+	err := os.MkdirAll(yamlConfigPath, writePermissions)
+	if err != nil {
+		return ""
+	}
+	err = os.WriteFile(constants.YamlConfigPath, invalidYAMLContent, readPermissions)
+	if err != nil {
+		return ""
+	}
+
+	return constants.YamlConfigPath
 }
 
 func setupEnvFilePath() string {
@@ -106,6 +119,7 @@ func cleanupTestEnvironment(yamlFilePath, envFilePath string) {
 
 func TestViperLoadYamlConfiguration(t *testing.T) {
 	t.Parallel()
+
 	yamlFilePath := setupYamlFilePath()
 	envFilePath := setupEnvFilePath()
 	defer cleanupTestEnvironment(yamlFilePath, envFilePath)
@@ -152,19 +166,10 @@ func TestViperLoadEnvironmentWithoutYamlConfig(t *testing.T) {
 }
 
 func TestViperUnmarshalInvalidYAML(t *testing.T) {
-	yamlFilePath := constants.ConfigPath
-	invalidYAMLContent := []byte(`invalid_yaml: [unterminated`)
-	
+	yamlInvalidFilePath := setupInvalidYamlFilePath()
 	envFilePath := setupEnvFilePath()
-	defer cleanupTestEnvironment(string(invalidYAMLContent), envFilePath)
+	defer cleanupTestEnvironment(yamlInvalidFilePath, envFilePath)
 
-	err := os.MkdirAll(yamlConfigPath, writePermissions)
-	assert.NoError(t, err, test.ErrorNilMessage)
-
-	err = os.WriteFile(yamlFilePath, invalidYAMLContent, readPermissions)
-	assert.NoError(t, err, test.ErrorNilMessage)
-
-	defer cleanupTestEnvironment(yamlFilePath, "")
 	expectedMessage := fmt.Sprintf(constants.BaseErrorMessageFormat, expectedLocation+"loadDefaultConfig", yamlParsingError)
 	defer func() {
 		recover := recover()

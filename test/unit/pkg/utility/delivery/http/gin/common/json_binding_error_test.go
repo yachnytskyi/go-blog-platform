@@ -44,6 +44,7 @@ func makeTestRequest(router *gin.Engine) *httptest.ResponseRecorder {
 }
 
 func TestHandleJSONBindingError(t *testing.T) {
+	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 	router := setupTestRouter(location+"TestHandleJSONBindingError", mockLogger)
 	recorder := makeTestRequest(router)

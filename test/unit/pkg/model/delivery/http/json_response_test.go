@@ -17,6 +17,7 @@ const (
 )
 
 func TestNewJSONResponseOnSuccess(t *testing.T) {
+	t.Parallel()
 	data := "test data"
 	response := http.NewJSONResponseOnSuccess(data)
 
@@ -27,6 +28,7 @@ func TestNewJSONResponseOnSuccess(t *testing.T) {
 }
 
 func TestNewJSONResponseOnFailureWithHTTPValidationError(t *testing.T) {
+	t.Parallel()
 	httpBaseError := delivery.NewHTTPValidationError(field, constants.FieldRequired, validationNotification)
 	response := http.NewJSONResponseOnFailure(httpBaseError)
 
@@ -38,6 +40,7 @@ func TestNewJSONResponseOnFailureWithHTTPValidationError(t *testing.T) {
 }
 
 func TestNewJSONResponseOnFailureWithMultipleValidationErrors(t *testing.T) {
+	t.Parallel()
 	errorsList := []error{
 		delivery.NewHTTPValidationError(field, constants.FieldRequired, validationNotification),
 		delivery.NewHTTPValidationError(field, constants.FieldRequired, validationNotification),
@@ -53,6 +56,7 @@ func TestNewJSONResponseOnFailureWithMultipleValidationErrors(t *testing.T) {
 }
 
 func TestNewJSONResponseOnFailureWithSingleValidationError(t *testing.T) {
+	t.Parallel()
 	errorsList := []error{
 		delivery.NewHTTPValidationError(field, constants.FieldRequired, validationNotification),
 	}
@@ -67,6 +71,7 @@ func TestNewJSONResponseOnFailureWithSingleValidationError(t *testing.T) {
 }
 
 func TestNewJSONResponseOnFailureWithNilError(t *testing.T) {
+	t.Parallel()
 	response := http.NewJSONResponseOnFailure(nil)
 
 	assert.Nil(t, response.Data, test.DataNilMessage)
@@ -76,6 +81,7 @@ func TestNewJSONResponseOnFailureWithNilError(t *testing.T) {
 }
 
 func TestNewJSONResponseOnFailureWithEmptyValidationErrorsList(t *testing.T) {
+	t.Parallel()
 	httpValidationErrors := delivery.NewHTTPValidationErrors([]error{})
 	response := http.NewJSONResponseOnFailure(httpValidationErrors)
 

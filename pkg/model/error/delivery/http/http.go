@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 )
 
 type HTTPBaseError struct {
@@ -60,10 +62,7 @@ func NewHTTPValidationError(field, fieldType, notification string) HTTPValidatio
 }
 
 func (httpValidationError HTTPValidationError) Error() string {
-	return fmt.Sprintf("field: %s type: %s notification: %s",
-		httpValidationError.Field,
-		httpValidationError.FieldType,
-		httpValidationError.Notification)
+	return fmt.Sprintf("field: %s type: %s notification: %s", httpValidationError.Field, httpValidationError.FieldType, httpValidationError.Notification)
 }
 
 type HTTPValidationErrors struct {
@@ -87,9 +86,7 @@ func NewHTTPAuthorizationError(location, notification string) HTTPAuthorizationE
 }
 
 func (httpAuthorizationError HTTPAuthorizationError) Error() string {
-	return fmt.Sprintf("location: %s notification: %s",
-		httpAuthorizationError.Location,
-		httpAuthorizationError.Notification)
+	return fmt.Sprintf(constants.BaseErrorMessageFormat, httpAuthorizationError.Location, httpAuthorizationError.Notification)
 }
 
 type HTTPItemNotFoundError struct {
@@ -168,10 +165,7 @@ func NewHTTPRequestError(location, requestType, notification string) HTTPRequest
 }
 
 func (httpRequestError HTTPRequestError) Error() string {
-	return fmt.Sprintf("location: %s request_type: %s notification: %s",
-		httpRequestError.Location,
-		httpRequestError.RequestType,
-		httpRequestError.Notification)
+	return fmt.Sprintf("location: %s request_type: %s notification: %s", httpRequestError.Location, httpRequestError.RequestType, httpRequestError.Notification)
 }
 
 type HTTPInternalError struct {
@@ -187,9 +181,7 @@ func NewHTTPInternalError(location, notification string) HTTPInternalError {
 }
 
 func (httpInternalError HTTPInternalError) Error() string {
-	return fmt.Sprintf("location: %s notification: %s",
-		httpInternalError.Location,
-		httpInternalError.Notification)
+	return fmt.Sprintf(constants.BaseErrorMessageFormat,httpInternalError.Location,httpInternalError.Notification)
 }
 
 type HTTPInternalErrors struct {

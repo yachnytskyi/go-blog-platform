@@ -12,8 +12,8 @@ import (
 	email "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/email"
 	logger "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/logger"
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
-	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/interfaces"
+	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
 
 const (
@@ -41,8 +41,8 @@ func NewLogger(config *configModel.ApplicationConfig) interfaces.Logger {
 }
 
 func NewEmail(config *configModel.ApplicationConfig, logger interfaces.Logger) interfaces.Email {
-	switch config.Core.Logger {
-	case constants.Zerolog:
+	switch config.Core.Email {
+	case constants.GoMail:
 		return email.NewGoMail(config, logger)
 	// Add other email options here as needed.
 	default:
@@ -61,11 +61,7 @@ func NewRepositoryFactory(config *configModel.ApplicationConfig, logger interfac
 	}
 }
 
-func NewDeliveryFactory(
-	ctx context.Context,
-	config *configModel.ApplicationConfig,
-	logger interfaces.Logger,
-	repository interfaces.Repository) interfaces.Delivery {
+func NewDeliveryFactory(ctx context.Context, config *configModel.ApplicationConfig, logger interfaces.Logger, repository interfaces.Repository) interfaces.Delivery {
 	switch config.Core.Delivery {
 	case constants.Gin:
 		return delivery.NewGinDelivery(config, logger)

@@ -11,21 +11,24 @@ const (
 
 // Environment configuration paths.
 const (
-	EnvironmentsPath = "config/environment/.env." // Base path for environment configuration files.
+	DefaultEnvironmentsPath = EnvironmentsPath           // Default path for environment configuration files.
+	EnvironmentsPath        = "config/environment/.env." // Base path for environment configuration files.
 
-	// Environment types
-	Environment              = LocalEnvironment // Environment defines the default environment setting for the application.
+	// Environment types.
+	DefaultEnvironment       = LocalEnvironment // Default environment defines the default environment setting for the application.
+	Environment              = LocalEnvironment // Environment defines the environment setting for the application.
 	TestEnvironment          = "test"           // Test development environment.
 	LocalEnvironment         = "local"          // Local development environment.
 	DockerDevEnvironment     = "docker.dev"     // Docker development environment.
 	DockerStagingEnvironment = "docker.staging" // Docker staging environment.
 	DockerProductEnvironment = "docker.prod"    // Docker productuction environment.
 
-	// Default configuration paths
-	DefaultEnvironmentsPath = "config/environment/.env."                  // Default path for environment configuration files.
-	DefaultConfigPath       = "config/yaml/v1/local.dev.application.yaml" // Default path for the application configuration file.
+	// Configuration paths.
+	DefaultConfigPath = YamlConfigPath                          // Default path for the application configuration file.
+	ConfigPath        = YamlConfigPath                          // Path for the application configuration file.
+	YamlConfigPath    = "config/yaml/v1/local.application.yaml" // Path for the application yaml configuration file.
 
-	// Notification messages
+	// Notification messages.
 	DefaultConfigPathNotification      = "Using default configuration path" // Notification message for using the default configuration path.
 	DefaultEnvironmentPathNotification = "Using default environment path"   // Notification message for using the default environment path.
 )
@@ -41,14 +44,14 @@ const (
 	Zerolog = "Zerolog" // Zerolog logger library.
 )
 
+// Email libraries used in the application.
+const (
+	GoMail = "GoMail" // GoMail email library.
+)
+
 // Databases used in the application.
 const (
 	MongoDB = "MongoDB" // MongoDB database name.
-)
-
-// Domains used in the application.
-const (
-	UseCaseV1 = "UseCaseV1" // UseCaseV1 domain name.
 )
 
 // Deliveries used in the application.

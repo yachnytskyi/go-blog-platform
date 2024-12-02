@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
 	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -42,7 +43,7 @@ func TestHexToObjectIDMapperEmptyHex(t *testing.T) {
 	emptyHex := ""
 	result := model.HexToObjectIDMapper(mockLogger, location+"TestHexToObjectIDMapperEmptyHex", emptyHex)
 	expectedLocation := location + "TestHexToObjectIDMapperEmptyHex.HexToObjectIDMapper"
-	expectedErrorMessage := fmt.Sprintf(test.ExpectedErrorMessageFormat, expectedLocation, emptyHexString)
+	expectedErrorMessage := fmt.Sprintf(constants.BaseErrorMessageFormat, expectedLocation, emptyHexString)
 
 	assert.True(t, validator.IsError(result.Error), test.ErrorNotNilMessage)
 	assert.Equal(t, emptyObjectID, result.Data.Hex(), test.EqualMessage)
@@ -57,7 +58,7 @@ func TestHexToObjectIDMapperInvalidHex(t *testing.T) {
 	invalidHex := "12345"
 	result := model.HexToObjectIDMapper(mockLogger, location+"TestHexToObjectIDMapperInvalidHex", invalidHex)
 	expectedLocation := location + "TestHexToObjectIDMapperInvalidHex.HexToObjectIDMapper"
-	expectedErrorMessage := fmt.Sprintf(test.ExpectedErrorMessageFormat, expectedLocation+".primitive.ObjectIDFromHex", invalidHexString)
+	expectedErrorMessage := fmt.Sprintf(constants.BaseErrorMessageFormat, expectedLocation+".primitive.ObjectIDFromHex", invalidHexString)
 
 	assert.True(t, validator.IsError(result.Error), test.ErrorNotNilMessage)
 	assert.Equal(t, emptyObjectID, result.Data.Hex(), test.EqualMessage)
@@ -86,7 +87,7 @@ func TestDataToMongoDocumentMapperBsonMarshalError(t *testing.T) {
 	incomingData := make(chan int)
 	result := model.DataToMongoDocumentMapper(mockLogger, location+"TestDataToMongoDocumentMapperBsonMarshalError", incomingData)
 	expectedLocation := location + "TestDataToMongoDocumentMapperBsonMarshalError.DataToMongoDocumentMapper.bson.Marshal"
-	expectedErrorMessage := fmt.Sprintf(test.ExpectedErrorMessageFormat, expectedLocation, invalidBsonMarshalMessage)
+	expectedErrorMessage := fmt.Sprintf(constants.BaseErrorMessageFormat, expectedLocation, invalidBsonMarshalMessage)
 
 	assert.Nil(t, result.Data, test.DataNilMessage)
 	assert.True(t, validator.IsError(result.Error), test.ErrorNotNilMessage)

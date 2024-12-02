@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 )
 
 type JSONBaseError struct {
@@ -12,7 +14,7 @@ type JSONBaseError struct {
 }
 
 func (jsonBaseError JSONBaseError) Error() string {
-	return fmt.Sprintf("location: %s notification: %s", jsonBaseError.Location, jsonBaseError.Notification)
+	return fmt.Sprintf(constants.BaseErrorMessageFormat, jsonBaseError.Location, jsonBaseError.Notification)
 }
 
 func NewJSONBaseError(location, notification string) JSONBaseError {

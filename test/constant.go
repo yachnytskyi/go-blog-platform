@@ -2,10 +2,9 @@ package test
 
 const (
 	// Error Message Formats.
-	ExpectedErrorMessageFormat = "location: %s notification: %s"
-	ExpectedStatusOk           = "Expected status OK but got %v"
-	ExpectedBody               = "Expected body %v but got %v"
-	EqualMessage               = "they must be equal"
+	ExpectedStatusOk = "Expected status OK but got %v"
+	ExpectedBody     = "Expected body %v but got %v"
+	EqualMessage     = "they must be equal"
 
 	// Failure/Success Messages.
 	FailureMessage     = "result must be a failure"

@@ -47,7 +47,7 @@ func NewViper() *config.ApplicationConfig {
 }
 
 func loadDefaultEnvironment() {
-	defaultEnvironmentError := godotenv.Load(constants.DefaultEnvironmentsPath + constants.LocalEnvironment)
+	defaultEnvironmentError := godotenv.Load(constants.DefaultEnvironmentsPath + constants.DefaultEnvironment)
 	if validator.IsError(defaultEnvironmentError) {
 		panic(domain.NewInternalError(location+"viper.loadDefaultEnvironment", defaultEnvironmentError.Error()))
 	}

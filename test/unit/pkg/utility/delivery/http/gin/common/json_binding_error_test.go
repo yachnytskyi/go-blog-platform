@@ -56,7 +56,7 @@ func TestHandleJSONBindingError(t *testing.T) {
 }` + "\n"
 
 	expectedLocation := location + "TestHandleJSONBindingError.ShouldBindJSON"
-	expectedErrorMessage := fmt.Sprintf(test.ExpectedErrorMessageFormat, expectedLocation, invalidRequest)
+	expectedErrorMessage := fmt.Sprintf(constants.BaseErrorMessageFormat, expectedLocation, invalidRequest)
 
 	assert.IsType(t, delivery.HTTPInternalError{}, mockLogger.LastError, test.EqualMessage)
 	assert.Equal(t, http.StatusBadRequest, recorder.Code, test.EqualMessage)

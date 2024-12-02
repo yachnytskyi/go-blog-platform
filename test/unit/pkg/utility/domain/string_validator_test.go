@@ -14,6 +14,8 @@ import (
 
 const (
 	location = "test.unit.pkg.model.domain.validator."
+
+	expectedErrorMessage = "location: %s notification: %s field: %s type: %s"
 )
 
 func TestValidateField(t *testing.T) {
@@ -106,7 +108,7 @@ func TestValidateFieldTooShort(t *testing.T) {
 	expectedLocation := location + "TestValidateFieldTooShort.ValidateField.IsStringLengthInvalid"
 	expectedField := "testField"
 	expectedNotification := fmt.Sprintf(constants.StringAllowedLength, stringValidator.MinLength, stringValidator.MaxLength)
-	expectedErrorMessage := fmt.Sprintf("location: %s notification: %s field: %s type: %s",
+	expectedErrorMessage := fmt.Sprintf(expectedErrorMessage,
 		expectedLocation, expectedNotification, expectedField, constants.FieldRequired)
 
 	assert.Len(t, validationErrors, 1, test.EqualMessage)
@@ -132,7 +134,7 @@ func TestValidateFieldTooLong(t *testing.T) {
 	expectedLocation := location + "TestValidateFieldTooLong.ValidateField.IsStringLengthInvalid"
 	expectedField := "testField"
 	expectedNotification := fmt.Sprintf(constants.StringAllowedLength, stringValidator.MinLength, stringValidator.MaxLength)
-	expectedErrorMessage := fmt.Sprintf("location: %s notification: %s field: %s type: %s",
+	expectedErrorMessage := fmt.Sprintf(expectedErrorMessage,
 		expectedLocation, expectedNotification, expectedField, constants.FieldRequired)
 
 	assert.Len(t, validationErrors, 1, test.ErrorNotNilMessage)
@@ -159,7 +161,7 @@ func TestValidateFieldInvalidCharacters(t *testing.T) {
 	expectedLocation := location + "TestValidateFieldInvalidCharacters.ValidateField.AreStringCharactersInvalid"
 	expectedNotification := fmt.Sprintf(constants.StringAllowedCharacters)
 	expectedField := fieldName
-	expectedErrorMessage := fmt.Sprintf("location: %s notification: %s field: %s type: %s",
+	expectedErrorMessage := fmt.Sprintf(expectedErrorMessage,
 		expectedLocation, expectedNotification, expectedField, constants.FieldRequired)
 
 	assert.Len(t, validationErrors, 1, test.ErrorNotNilMessage)
@@ -185,7 +187,7 @@ func TestValidateFieldEmptyField(t *testing.T) {
 	expectedLocation := location + "TestValidateFieldEmptyField.ValidateField.IsStringLengthInvalid"
 	expectedField := "testField"
 	expectedNotification := fmt.Sprintf(constants.StringAllowedLength, stringValidator.MinLength, stringValidator.MaxLength)
-	expectedErrorMessage := fmt.Sprintf("location: %s notification: %s field: %s type: %s",
+	expectedErrorMessage := fmt.Sprintf(expectedErrorMessage,
 		expectedLocation, expectedNotification, expectedField, constants.FieldRequired)
 
 	assert.Len(t, validationErrors, 1, test.ErrorNotNilMessage)
@@ -211,7 +213,7 @@ func TestValidateFieldValidCharactersButIncorrectLength(t *testing.T) {
 	expectedLocation := location + "TestValidateFieldValidCharactersButIncorrectLength.ValidateField.IsStringLengthInvalid"
 	expectedField := "testField"
 	expectedNotification := fmt.Sprintf(constants.StringAllowedLength, stringValidator.MinLength, stringValidator.MaxLength)
-	expectedErrorMessage := fmt.Sprintf("location: %s notification: %s field: %s type: %s",
+	expectedErrorMessage := fmt.Sprintf(expectedErrorMessage,
 		expectedLocation, expectedNotification, expectedField, constants.FieldRequired)
 
 	assert.Len(t, validationErrors, 1, test.ErrorNotNilMessage)
@@ -237,7 +239,7 @@ func TestValidateFieldValidLengthButInvalidCharacters(t *testing.T) {
 	expectedLocation := location + "TestValidateFieldValidLengthButInvalidCharacters.ValidateField.AreStringCharactersInvalid"
 	expectedField := "testField"
 	expectedNotification := fmt.Sprintf(constants.StringAllowedCharacters)
-	expectedErrorMessage := fmt.Sprintf("location: %s notification: %s field: %s type: %s",
+	expectedErrorMessage := fmt.Sprintf(expectedErrorMessage,
 		expectedLocation, expectedNotification, expectedField, constants.FieldRequired)
 
 	assert.Len(t, validationErrors, 1, test.ErrorNotNilMessage)
@@ -263,7 +265,7 @@ func TestValidateOptionalFieldTooShort(t *testing.T) {
 	expectedLocation := location + "TestValidateOptionalFieldTooShort.ValidateField.IsStringLengthInvalid"
 	expectedField := "testField"
 	expectedNotification := fmt.Sprintf(constants.StringOptionalAllowedLength, stringValidator.MinLength, stringValidator.MaxLength)
-	expectedErrorMessage := fmt.Sprintf("location: %s notification: %s field: %s type: %s",
+	expectedErrorMessage := fmt.Sprintf(expectedErrorMessage,
 		expectedLocation, expectedNotification, expectedField, constants.FieldOptional)
 
 	assert.Len(t, validationErrors, 1, test.EqualMessage)
@@ -289,7 +291,7 @@ func TestValidateOptionalFieldTooLong(t *testing.T) {
 	expectedLocation := location + "TestValidateOptionalFieldTooLong.ValidateField.IsStringLengthInvalid"
 	expectedField := "testField"
 	expectedNotification := fmt.Sprintf(constants.StringOptionalAllowedLength, stringValidator.MinLength, stringValidator.MaxLength)
-	expectedErrorMessage := fmt.Sprintf("location: %s notification: %s field: %s type: %s",
+	expectedErrorMessage := fmt.Sprintf(expectedErrorMessage,
 		expectedLocation, expectedNotification, expectedField, constants.FieldOptional)
 
 	assert.Len(t, validationErrors, 1, test.ErrorNotNilMessage)
@@ -316,7 +318,7 @@ func TestValidateOptionalFieldInvalidCharacters(t *testing.T) {
 	expectedLocation := location + "TestValidateOptionalFieldInvalidCharacters.ValidateField.AreStringCharactersInvalid"
 	expectedNotification := fmt.Sprintf(constants.StringAllowedCharacters)
 	expectedField := fieldName
-	expectedErrorMessage := fmt.Sprintf("location: %s notification: %s field: %s type: %s",
+	expectedErrorMessage := fmt.Sprintf(expectedErrorMessage,
 		expectedLocation, expectedNotification, expectedField, constants.FieldOptional)
 
 	assert.Len(t, validationErrors, 1, test.ErrorNotNilMessage)
@@ -342,7 +344,7 @@ func TestValidateOptionalFieldValidCharactersButIncorrectLength(t *testing.T) {
 	expectedLocation := location + "TestValidateOptionalFieldValidCharactersButIncorrectLength.ValidateField.IsStringLengthInvalid"
 	expectedField := "testField"
 	expectedNotification := fmt.Sprintf(constants.StringOptionalAllowedLength, stringValidator.MinLength, stringValidator.MaxLength)
-	expectedErrorMessage := fmt.Sprintf("location: %s notification: %s field: %s type: %s",
+	expectedErrorMessage := fmt.Sprintf(expectedErrorMessage,
 		expectedLocation, expectedNotification, expectedField, constants.FieldOptional)
 
 	assert.Len(t, validationErrors, 1, test.ErrorNotNilMessage)
@@ -368,7 +370,7 @@ func TestValidateOptionalFieldValidLengthButInvalidCharacters(t *testing.T) {
 	expectedLocation := location + "TestValidateOptionalFieldValidLengthButInvalidCharacters.ValidateField.AreStringCharactersInvalid"
 	expectedField := "testField"
 	expectedNotification := fmt.Sprintf(constants.StringAllowedCharacters)
-	expectedErrorMessage := fmt.Sprintf("location: %s notification: %s field: %s type: %s",
+	expectedErrorMessage := fmt.Sprintf(expectedErrorMessage,
 		expectedLocation, expectedNotification, expectedField, constants.FieldOptional)
 
 	assert.Len(t, validationErrors, 1, test.ErrorNotNilMessage)
@@ -421,17 +423,17 @@ func TestValidateFieldMultipleErrors(t *testing.T) {
 
 	expectedLocation1 := location + "TestValidateFieldMultipleErrors.Field1.ValidateField.IsStringLengthInvalid"
 	expectedNotification1 := fmt.Sprintf(constants.StringAllowedLength, stringValidator1.MinLength, stringValidator1.MaxLength)
-	expectedErrorMessage1 := fmt.Sprintf("location: %s notification: %s field: %s type: %s",
+	expectedErrorMessage1 := fmt.Sprintf(expectedErrorMessage,
 		expectedLocation1, expectedNotification1, stringValidator1.FieldName, constants.FieldRequired)
 
 	expectedLocation2 := location + "TestValidateFieldMultipleErrors.Field2.ValidateField.AreStringCharactersInvalid"
 	expectedNotification2 := fmt.Sprintf(constants.StringAllowedCharacters)
-	expectedErrorMessage2 := fmt.Sprintf("location: %s notification: %s field: %s type: %s",
+	expectedErrorMessage2 := fmt.Sprintf(expectedErrorMessage,
 		expectedLocation2, expectedNotification2, stringValidator2.FieldName, constants.FieldRequired)
 
 	expectedLocation3 := location + "TestValidateFieldMultipleErrors.Field3.ValidateField.IsStringLengthInvalid"
 	expectedNotification3 := fmt.Sprintf(constants.StringAllowedLength, stringValidator3.MinLength, stringValidator3.MaxLength)
-	expectedErrorMessage3 := fmt.Sprintf("location: %s notification: %s field: %s type: %s",
+	expectedErrorMessage3 := fmt.Sprintf(expectedErrorMessage,
 		expectedLocation3, expectedNotification3, stringValidator3.FieldName, constants.FieldRequired)
 
 	assert.Len(t, validationErrors, 3, test.EqualMessage)

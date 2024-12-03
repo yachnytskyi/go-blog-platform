@@ -24,7 +24,7 @@ temp/
 config/yaml/v1/test.application.yaml
 config/yaml/v1/local.application.yaml
 config/yaml/v1/docker.dev.application.yaml
-config/yaml/v1/docker.staging.application.yaml
+config/yaml/v1/docker.release.application.yaml
 config/yaml/v1/docker.prod.application.yaml
 
 infrastructure/script/data/repository/mongo/init-mongo.js

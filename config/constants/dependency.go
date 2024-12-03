@@ -20,7 +20,7 @@ const (
 	TestEnvironment          = "test"           // Test development environment.
 	LocalEnvironment         = "local"          // Local development environment.
 	DockerDevEnvironment     = "docker.dev"     // Docker development environment.
-	DockerStagingEnvironment = "docker.staging" // Docker staging environment.
+	DockerReleaseEnvironment = "docker.release" // Docker release environment.
 	DockerProductEnvironment = "docker.prod"    // Docker productuction environment.
 
 	// Configuration paths.

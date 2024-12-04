@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config"
+	"github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	test "github.com/yachnytskyi/golang-mongo-grpc/test"
 )
 
@@ -81,19 +82,14 @@ grpc:
 	return constants.YamlConfigPath
 }
 
-func setupInvalidYamlFilePath() string {
+func setupInvalidYamlFilePath() {
 	invalidYAMLContent := []byte(`invalid_yaml: [unterminated`)
 
 	err := os.MkdirAll(yamlConfigPath, writePermissions)
-	if err != nil {
-		return ""
-	}
-	err = os.WriteFile(constants.YamlConfigPath, invalidYAMLContent, readPermissions)
-	if err != nil {
-		return ""
-	}
+	fmt.Println(err)
 
-	return constants.YamlConfigPath
+	err = os.WriteFile(constants.YamlConfigPath, invalidYAMLContent, readPermissions)
+	fmt.Println(err)
 }
 
 func setupEmptyYamlFilePath() string {
@@ -127,17 +123,15 @@ func setupEnvFilePath() string {
 	return envFilePath
 }
 
-func cleanupTestEnvironment(yamlFilePath, envFilePath string) {
-	os.Remove(yamlFilePath)
-	os.Remove(envFilePath)
+func cleanupTestEnvironment() {
+	os.RemoveAll("config")
 }
 
 func TestViperLoadYamlConfiguration(t *testing.T) {
 	t.Parallel()
-
-	yamlFilePath := setupYamlFilePath()
-	envFilePath := setupEnvFilePath()
-	defer cleanupTestEnvironment(yamlFilePath, envFilePath)
+	setupYamlFilePath()
+	setupEnvFilePath()
+	defer cleanupTestEnvironment()
 
 	viper := config.NewViper()
 	assert.NotNil(t, viper, test.EqualMessage)
@@ -151,55 +145,54 @@ func TestViperLoadYamlConfiguration(t *testing.T) {
 func TestViperWithoutEnvironment(t *testing.T) {
 	t.Parallel()
 	notification := fmt.Sprintf(openFileError, constants.EnvironmentsPath+constants.Environment)
-	expectedMessage := fmt.Sprintf(constants.BaseErrorMessageFormat, expectedLocation+"loadDefaultEnvironment", notification)
+	expectedError := domain.NewInternalError(expectedLocation+"loadDefaultEnvironment", notification)
 
 	defer func() {
 		recover := recover()
 		if recover != nil {
-			assert.Equal(t, fmt.Sprintf("%v", recover), expectedMessage, test.EqualMessage)
+			assert.Equal(t, recover, expectedError, test.EqualMessage)
 		}
 	}()
-
 	config.NewViper()
 }
 
 func TestViperLoadEnvironmentWithoutYamlConfig(t *testing.T) {
 	t.Parallel()
-	envFilePath := setupEnvFilePath()
-	defer cleanupTestEnvironment("", envFilePath)
+	setupEnvFilePath()
+	defer cleanupTestEnvironment()
 
 	notification := fmt.Sprintf(openFileError, constants.ConfigPath)
-	expectedMessage := fmt.Sprintf(constants.BaseErrorMessageFormat, expectedLocation+"loadDefaultConfig", notification)
+	expectedError := domain.NewInternalError(expectedLocation+"loadDefaultConfig", notification)
+	
 	defer func() {
 		recover := recover()
 		if recover != nil {
-			assert.Equal(t, fmt.Sprintf("%v", recover), expectedMessage, test.EqualMessage)
+			assert.Equal(t, recover, expectedError, test.EqualMessage)
 		}
 	}()
-
 	config.NewViper()
 }
 
 func TestViperUnmarshalInvalidYAML(t *testing.T) {
-	yamlInvalidFilePath := setupInvalidYamlFilePath()
-	envFilePath := setupEnvFilePath()
-	defer cleanupTestEnvironment(yamlInvalidFilePath, envFilePath)
+	setupInvalidYamlFilePath()
+	setupEnvFilePath()
+	defer cleanupTestEnvironment()
 
-	expectedMessage := fmt.Sprintf(constants.BaseErrorMessageFormat, expectedLocation+"loadDefaultConfig", yamlParsingError)
+	expectedError := domain.NewInternalError(expectedLocation+"loadDefaultConfig", yamlParsingError)
 	defer func() {
 		recover := recover()
 		if recover != nil {
-			assert.Equal(t, fmt.Sprintf("%v", recover), expectedMessage, test.EqualMessage)
+			assert.Equal(t, recover, expectedError, test.EqualMessage)
 		}
 	}()
-
 	config.NewViper()
 }
 
 func TestViperUnmarshalEmptyAML(t *testing.T) {
-	yamlInvalidFilePath := setupEmptyYamlFilePath()
-	envFilePath := setupEnvFilePath()
-	defer cleanupTestEnvironment(yamlInvalidFilePath, envFilePath)
+	t.Parallel()
+	setupEmptyYamlFilePath()
+	setupEnvFilePath()
+	defer cleanupTestEnvironment()
 
 	expectedMessage := fmt.Sprintf(constants.BaseErrorMessageFormat, expectedLocation+"loadDefaultConfig", yamlParsingError)
 	defer func() {

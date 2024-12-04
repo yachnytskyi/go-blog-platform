@@ -23,9 +23,10 @@ const (
 func TestHandleErrorHTTPAuthorizationError(t *testing.T) {
 	t.Parallel()
 	authorizationError := http.NewHTTPAuthorizationError(location+"TestHandleErrorHTTPAuthorizationError", notification)
+	
 	result := logger.HandleError(authorizationError)
-
 	jsonAuthorizationError, ok := result.(logger.JSONAuthorizationError)
+
 	assert.True(t, ok, test.EqualMessage)
 	assert.Equal(t, authorizationError.Location, jsonAuthorizationError.Location, test.EqualMessage)
 	assert.Equal(t, authorizationError.Notification, jsonAuthorizationError.Notification, test.EqualMessage)
@@ -35,8 +36,8 @@ func TestHandleErrorHTTPRequestError(t *testing.T) {
 	t.Parallel()
 	requestError := http.NewHTTPRequestError(location+"TestHandleErrorHTTPRequestError", requestType, notification)
 	result := logger.HandleError(requestError)
-
 	jsonRequestError, ok := result.(logger.JSONRequestError)
+
 	assert.True(t, ok, test.EqualMessage)
 	assert.Equal(t, requestError.Location, jsonRequestError.Location, test.EqualMessage)
 	assert.Equal(t, requestError.RequestType, jsonRequestError.RequestType, test.EqualMessage)
@@ -67,7 +68,6 @@ func TestHandleErrorInfoMessage(t *testing.T) {
 
 func TestHandleErrorValidationErrors(t *testing.T) {
 	t.Parallel()
-
 	validationErrors := domain.NewValidationErrors([]error{
 		domain.NewValidationError(location+"TestHandleErrorValidationErrors", field, constants.FieldRequired, notification),
 		domain.NewValidationError(location+"TestHandleErrorValidationErrors", field, constants.FieldRequired, notification),

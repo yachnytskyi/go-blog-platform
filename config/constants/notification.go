@@ -4,6 +4,7 @@ package constants
 const (
 	UnsupportedConfig     = "Unsupported config type: %s"     // Unsupported config type error message.
 	UnsupportedLogger     = "Unsupported logger type: %s"     // Unsupported logger type error message.
+	UnsupportedEmail      = "Unsupported email type: %s"      // Unsupported email type error message.
 	UnsupportedRepository = "Unsupported repository type: %s" // Unsupported repository type error message.
 	UnsupportedDelivery   = "Unsupported delivery type: %s"   // Unsupported delivery type error message.
 )

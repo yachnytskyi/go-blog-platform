@@ -46,7 +46,7 @@ func NewEmail(config *configModel.ApplicationConfig, logger interfaces.Logger) i
 		return email.NewGoMail(config, logger)
 	// Add other email options here as needed.
 	default:
-		panic(domain.NewInternalError(location+"NewEmail", fmt.Sprintf(constants.UnsupportedLogger, config.Core.Logger)))
+		panic(domain.NewInternalError(location+"NewEmail", fmt.Sprintf(constants.UnsupportedEmail, config.Core.Email)))
 	}
 }
 

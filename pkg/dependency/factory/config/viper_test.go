@@ -104,7 +104,6 @@ func cleanupTestEnvironment(yamlFilePath, envFilePath string) {
 
 func TestViperLoadYamlConfiguration(t *testing.T) {
 	t.Parallel()
-
 	yamlFilePath := setupYamlFilePath()
 	envFilePath := setupEnvFilePath()
 	defer cleanupTestEnvironment(yamlFilePath, envFilePath)
@@ -113,7 +112,6 @@ func TestViperLoadYamlConfiguration(t *testing.T) {
 		recover := recover()
 		assert.Nil(t, recover)
 	}()
-
 	loadDefaultEnvironment()
 }
 

@@ -14,8 +14,6 @@ import (
 
 const (
 	location = "test.unit.pkg.model.domain.validator."
-
-	expectedErrorMessage = "location: %s notification: %s field: %s type: %s"
 )
 
 func TestValidateField(t *testing.T) {
@@ -106,14 +104,12 @@ func TestValidateFieldTooShort(t *testing.T) {
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateFieldTooShort", stringValidator, validationErrors)
 
 	expectedLocation := location + "TestValidateFieldTooShort.ValidateField.IsStringLengthInvalid"
-	expectedField := "testField"
 	expectedNotification := fmt.Sprintf(constants.StringAllowedLength, stringValidator.MinLength, stringValidator.MaxLength)
-	expectedErrorMessage := fmt.Sprintf(expectedErrorMessage,
-		expectedLocation, expectedNotification, expectedField, constants.FieldRequired)
+	expectedError := domain.NewValidationError(expectedLocation, stringValidator.FieldName, constants.FieldRequired, expectedNotification)
 
 	assert.Len(t, validationErrors, 1, test.EqualMessage)
 	assert.IsType(t, domain.ValidationError{}, validationErrors[0], test.EqualMessage)
-	assert.Equal(t, expectedErrorMessage, validationErrors[0].Error(), test.EqualMessage)
+	assert.Equal(t, expectedError, validationErrors[0], test.EqualMessage)
 }
 
 func TestValidateFieldTooLong(t *testing.T) {
@@ -132,14 +128,12 @@ func TestValidateFieldTooLong(t *testing.T) {
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateFieldTooLong", stringValidator, validationErrors)
 
 	expectedLocation := location + "TestValidateFieldTooLong.ValidateField.IsStringLengthInvalid"
-	expectedField := "testField"
 	expectedNotification := fmt.Sprintf(constants.StringAllowedLength, stringValidator.MinLength, stringValidator.MaxLength)
-	expectedErrorMessage := fmt.Sprintf(expectedErrorMessage,
-		expectedLocation, expectedNotification, expectedField, constants.FieldRequired)
+	expectedError := domain.NewValidationError(expectedLocation, stringValidator.FieldName, constants.FieldRequired, expectedNotification)
 
 	assert.Len(t, validationErrors, 1, test.ErrorNotNilMessage)
 	assert.IsType(t, domain.ValidationError{}, validationErrors[0], test.EqualMessage)
-	assert.Equal(t, expectedErrorMessage, validationErrors[0].Error(), test.EqualMessage)
+	assert.Equal(t, expectedError, validationErrors[0], test.EqualMessage)
 }
 
 func TestValidateFieldInvalidCharacters(t *testing.T) {
@@ -160,13 +154,11 @@ func TestValidateFieldInvalidCharacters(t *testing.T) {
 
 	expectedLocation := location + "TestValidateFieldInvalidCharacters.ValidateField.AreStringCharactersInvalid"
 	expectedNotification := fmt.Sprintf(constants.StringAllowedCharacters)
-	expectedField := fieldName
-	expectedErrorMessage := fmt.Sprintf(expectedErrorMessage,
-		expectedLocation, expectedNotification, expectedField, constants.FieldRequired)
+	expectedError := domain.NewValidationError(expectedLocation, stringValidator.FieldName, constants.FieldRequired, expectedNotification)
 
 	assert.Len(t, validationErrors, 1, test.ErrorNotNilMessage)
 	assert.IsType(t, domain.ValidationError{}, validationErrors[0], test.EqualMessage)
-	assert.Equal(t, expectedErrorMessage, validationErrors[0].Error(), test.EqualMessage)
+	assert.Equal(t, expectedError, validationErrors[0], test.EqualMessage)
 }
 
 func TestValidateFieldEmptyField(t *testing.T) {
@@ -185,14 +177,12 @@ func TestValidateFieldEmptyField(t *testing.T) {
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateFieldEmptyField", stringValidator, validationErrors)
 
 	expectedLocation := location + "TestValidateFieldEmptyField.ValidateField.IsStringLengthInvalid"
-	expectedField := "testField"
 	expectedNotification := fmt.Sprintf(constants.StringAllowedLength, stringValidator.MinLength, stringValidator.MaxLength)
-	expectedErrorMessage := fmt.Sprintf(expectedErrorMessage,
-		expectedLocation, expectedNotification, expectedField, constants.FieldRequired)
+	expectedError := domain.NewValidationError(expectedLocation, stringValidator.FieldName, constants.FieldRequired, expectedNotification)
 
 	assert.Len(t, validationErrors, 1, test.ErrorNotNilMessage)
 	assert.IsType(t, domain.ValidationError{}, validationErrors[0], test.EqualMessage)
-	assert.Equal(t, expectedErrorMessage, validationErrors[0].Error(), test.EqualMessage)
+	assert.Equal(t, expectedError, validationErrors[0], test.EqualMessage)
 }
 
 func TestValidateFieldValidCharactersButIncorrectLength(t *testing.T) {
@@ -211,14 +201,12 @@ func TestValidateFieldValidCharactersButIncorrectLength(t *testing.T) {
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateFieldValidCharactersButIncorrectLength", stringValidator, validationErrors)
 
 	expectedLocation := location + "TestValidateFieldValidCharactersButIncorrectLength.ValidateField.IsStringLengthInvalid"
-	expectedField := "testField"
 	expectedNotification := fmt.Sprintf(constants.StringAllowedLength, stringValidator.MinLength, stringValidator.MaxLength)
-	expectedErrorMessage := fmt.Sprintf(expectedErrorMessage,
-		expectedLocation, expectedNotification, expectedField, constants.FieldRequired)
+	expectedError := domain.NewValidationError(expectedLocation, stringValidator.FieldName, constants.FieldRequired, expectedNotification)
 
 	assert.Len(t, validationErrors, 1, test.ErrorNotNilMessage)
 	assert.IsType(t, domain.ValidationError{}, validationErrors[0], test.EqualMessage)
-	assert.Equal(t, expectedErrorMessage, validationErrors[0].Error(), test.EqualMessage)
+	assert.Equal(t, expectedError, validationErrors[0], test.EqualMessage)
 }
 
 func TestValidateFieldValidLengthButInvalidCharacters(t *testing.T) {
@@ -237,14 +225,12 @@ func TestValidateFieldValidLengthButInvalidCharacters(t *testing.T) {
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateFieldValidLengthButInvalidCharacters", stringValidator, validationErrors)
 
 	expectedLocation := location + "TestValidateFieldValidLengthButInvalidCharacters.ValidateField.AreStringCharactersInvalid"
-	expectedField := "testField"
 	expectedNotification := fmt.Sprintf(constants.StringAllowedCharacters)
-	expectedErrorMessage := fmt.Sprintf(expectedErrorMessage,
-		expectedLocation, expectedNotification, expectedField, constants.FieldRequired)
+	expectedError := domain.NewValidationError(expectedLocation, stringValidator.FieldName, constants.FieldRequired, expectedNotification)
 
 	assert.Len(t, validationErrors, 1, test.ErrorNotNilMessage)
 	assert.IsType(t, domain.ValidationError{}, validationErrors[0], test.EqualMessage)
-	assert.Equal(t, expectedErrorMessage, validationErrors[0].Error(), test.EqualMessage)
+	assert.Equal(t, expectedError, validationErrors[0], test.EqualMessage)
 }
 
 func TestValidateOptionalFieldTooShort(t *testing.T) {
@@ -263,14 +249,12 @@ func TestValidateOptionalFieldTooShort(t *testing.T) {
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateOptionalFieldTooShort", stringValidator, validationErrors)
 
 	expectedLocation := location + "TestValidateOptionalFieldTooShort.ValidateField.IsStringLengthInvalid"
-	expectedField := "testField"
 	expectedNotification := fmt.Sprintf(constants.StringOptionalAllowedLength, stringValidator.MinLength, stringValidator.MaxLength)
-	expectedErrorMessage := fmt.Sprintf(expectedErrorMessage,
-		expectedLocation, expectedNotification, expectedField, constants.FieldOptional)
+	expectedError := domain.NewValidationError(expectedLocation, stringValidator.FieldName, constants.FieldOptional, expectedNotification)
 
 	assert.Len(t, validationErrors, 1, test.EqualMessage)
 	assert.IsType(t, domain.ValidationError{}, validationErrors[0], test.EqualMessage)
-	assert.Equal(t, expectedErrorMessage, validationErrors[0].Error(), test.EqualMessage)
+	assert.Equal(t, expectedError, validationErrors[0], test.EqualMessage)
 }
 
 func TestValidateOptionalFieldTooLong(t *testing.T) {
@@ -289,14 +273,12 @@ func TestValidateOptionalFieldTooLong(t *testing.T) {
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateOptionalFieldTooLong", stringValidator, validationErrors)
 
 	expectedLocation := location + "TestValidateOptionalFieldTooLong.ValidateField.IsStringLengthInvalid"
-	expectedField := "testField"
 	expectedNotification := fmt.Sprintf(constants.StringOptionalAllowedLength, stringValidator.MinLength, stringValidator.MaxLength)
-	expectedErrorMessage := fmt.Sprintf(expectedErrorMessage,
-		expectedLocation, expectedNotification, expectedField, constants.FieldOptional)
+	expectedError := domain.NewValidationError(expectedLocation, stringValidator.FieldName, constants.FieldOptional, expectedNotification)
 
 	assert.Len(t, validationErrors, 1, test.ErrorNotNilMessage)
 	assert.IsType(t, domain.ValidationError{}, validationErrors[0], test.EqualMessage)
-	assert.Equal(t, expectedErrorMessage, validationErrors[0].Error(), test.EqualMessage)
+	assert.Equal(t, expectedError, validationErrors[0], test.EqualMessage)
 }
 
 func TestValidateOptionalFieldInvalidCharacters(t *testing.T) {
@@ -317,13 +299,11 @@ func TestValidateOptionalFieldInvalidCharacters(t *testing.T) {
 
 	expectedLocation := location + "TestValidateOptionalFieldInvalidCharacters.ValidateField.AreStringCharactersInvalid"
 	expectedNotification := fmt.Sprintf(constants.StringAllowedCharacters)
-	expectedField := fieldName
-	expectedErrorMessage := fmt.Sprintf(expectedErrorMessage,
-		expectedLocation, expectedNotification, expectedField, constants.FieldOptional)
+	expectedError := domain.NewValidationError(expectedLocation, stringValidator.FieldName, constants.FieldOptional, expectedNotification)
 
 	assert.Len(t, validationErrors, 1, test.ErrorNotNilMessage)
 	assert.IsType(t, domain.ValidationError{}, validationErrors[0], test.EqualMessage)
-	assert.Equal(t, expectedErrorMessage, validationErrors[0].Error(), test.EqualMessage)
+	assert.Equal(t, expectedError, validationErrors[0], test.EqualMessage)
 }
 
 func TestValidateOptionalFieldValidCharactersButIncorrectLength(t *testing.T) {
@@ -342,14 +322,12 @@ func TestValidateOptionalFieldValidCharactersButIncorrectLength(t *testing.T) {
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateOptionalFieldValidCharactersButIncorrectLength", stringValidator, validationErrors)
 
 	expectedLocation := location + "TestValidateOptionalFieldValidCharactersButIncorrectLength.ValidateField.IsStringLengthInvalid"
-	expectedField := "testField"
 	expectedNotification := fmt.Sprintf(constants.StringOptionalAllowedLength, stringValidator.MinLength, stringValidator.MaxLength)
-	expectedErrorMessage := fmt.Sprintf(expectedErrorMessage,
-		expectedLocation, expectedNotification, expectedField, constants.FieldOptional)
+	expectedError := domain.NewValidationError(expectedLocation, stringValidator.FieldName, constants.FieldOptional, expectedNotification)
 
 	assert.Len(t, validationErrors, 1, test.ErrorNotNilMessage)
 	assert.IsType(t, domain.ValidationError{}, validationErrors[0], test.EqualMessage)
-	assert.Equal(t, expectedErrorMessage, validationErrors[0].Error(), test.EqualMessage)
+	assert.Equal(t, expectedError, validationErrors[0], test.EqualMessage)
 }
 
 func TestValidateOptionalFieldValidLengthButInvalidCharacters(t *testing.T) {
@@ -368,14 +346,12 @@ func TestValidateOptionalFieldValidLengthButInvalidCharacters(t *testing.T) {
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateOptionalFieldValidLengthButInvalidCharacters", stringValidator, validationErrors)
 
 	expectedLocation := location + "TestValidateOptionalFieldValidLengthButInvalidCharacters.ValidateField.AreStringCharactersInvalid"
-	expectedField := "testField"
 	expectedNotification := fmt.Sprintf(constants.StringAllowedCharacters)
-	expectedErrorMessage := fmt.Sprintf(expectedErrorMessage,
-		expectedLocation, expectedNotification, expectedField, constants.FieldOptional)
+	expectedError := domain.NewValidationError(expectedLocation, stringValidator.FieldName, constants.FieldOptional, expectedNotification)
 
 	assert.Len(t, validationErrors, 1, test.ErrorNotNilMessage)
 	assert.IsType(t, domain.ValidationError{}, validationErrors[0], test.EqualMessage)
-	assert.Equal(t, expectedErrorMessage, validationErrors[0].Error(), test.EqualMessage)
+	assert.Equal(t, expectedError, validationErrors[0], test.EqualMessage)
 }
 
 func TestValidateFieldMultipleErrors(t *testing.T) {
@@ -423,24 +399,23 @@ func TestValidateFieldMultipleErrors(t *testing.T) {
 
 	expectedLocation1 := location + "TestValidateFieldMultipleErrors.Field1.ValidateField.IsStringLengthInvalid"
 	expectedNotification1 := fmt.Sprintf(constants.StringAllowedLength, stringValidator1.MinLength, stringValidator1.MaxLength)
-	expectedErrorMessage1 := fmt.Sprintf(expectedErrorMessage,
-		expectedLocation1, expectedNotification1, stringValidator1.FieldName, constants.FieldRequired)
+	expectedError1 := domain.NewValidationError(expectedLocation1, stringValidator1.FieldName, constants.FieldRequired, expectedNotification1)
 
 	expectedLocation2 := location + "TestValidateFieldMultipleErrors.Field2.ValidateField.AreStringCharactersInvalid"
 	expectedNotification2 := fmt.Sprintf(constants.StringAllowedCharacters)
-	expectedErrorMessage2 := fmt.Sprintf(expectedErrorMessage,
-		expectedLocation2, expectedNotification2, stringValidator2.FieldName, constants.FieldRequired)
+	expectedError2 := domain.NewValidationError(expectedLocation2, stringValidator2.FieldName, constants.FieldRequired, expectedNotification2)
 
 	expectedLocation3 := location + "TestValidateFieldMultipleErrors.Field3.ValidateField.IsStringLengthInvalid"
 	expectedNotification3 := fmt.Sprintf(constants.StringAllowedLength, stringValidator3.MinLength, stringValidator3.MaxLength)
-	expectedErrorMessage3 := fmt.Sprintf(expectedErrorMessage,
-		expectedLocation3, expectedNotification3, stringValidator3.FieldName, constants.FieldRequired)
+	expectedError3 := domain.NewValidationError(expectedLocation3, stringValidator3.FieldName, constants.FieldRequired, expectedNotification3)
 
 	assert.Len(t, validationErrors, 3, test.EqualMessage)
 	assert.IsType(t, domain.ValidationError{}, validationErrors[0], test.EqualMessage)
-	assert.Equal(t, expectedErrorMessage1, validationErrors[0].Error(), test.EqualMessage)
+	assert.Equal(t, expectedError1, validationErrors[0], test.EqualMessage)
 	assert.IsType(t, domain.ValidationError{}, validationErrors[1], test.EqualMessage)
-	assert.Equal(t, expectedErrorMessage2, validationErrors[1].Error(), test.EqualMessage)
+	assert.Equal(t, expectedError2, validationErrors[1], test.EqualMessage)
 	assert.IsType(t, domain.ValidationError{}, validationErrors[2], test.EqualMessage)
-	assert.Equal(t, expectedErrorMessage3, validationErrors[2].Error(), test.EqualMessage)
+	assert.Equal(t, expectedError3, validationErrors[2], test.EqualMessage)
+	assert.IsType(t, domain.ValidationError{}, validationErrors[2], test.EqualMessage)
+
 }

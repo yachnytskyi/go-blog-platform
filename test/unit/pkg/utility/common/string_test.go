@@ -1,12 +1,10 @@
 package common
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
-	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -47,9 +45,10 @@ func TestDecodeInvalidBase64String(t *testing.T) {
 
 	result := utility.Decode(mockLogger, location+"TestDecodeInvalidBase64String", invalidString)
 	expectedLocation := location + "TestDecodeInvalidBase64String.Decode.DecodeString"
-	expectedErrorMessage := fmt.Sprintf(constants.BaseErrorMessageFormat, expectedLocation, decodeErrorMessage+"7")
+	expectedError := domain.NewInternalError(expectedLocation, decodeErrorMessage+"7")
 
+	assert.Equal(t, "", result.Data, test.DataNilMessage)
 	assert.True(t, validator.IsError(result.Error), test.FailureMessage)
 	assert.IsType(t, domain.InternalError{}, result.Error, test.EqualMessage)
-	assert.Equal(t, expectedErrorMessage, result.Error.Error(), test.EqualMessage)
+	assert.Equal(t, expectedError, result.Error, test.EqualMessage)
 }

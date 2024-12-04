@@ -1,7 +1,6 @@
 package common
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -57,10 +56,10 @@ func TestHandleJSONBindingError(t *testing.T) {
 }` + "\n"
 
 	expectedLocation := location + "TestHandleJSONBindingError.ShouldBindJSON"
-	expectedErrorMessage := fmt.Sprintf(constants.BaseErrorMessageFormat, expectedLocation, invalidRequest)
+	expectedError := delivery.NewHTTPInternalError(expectedLocation, invalidRequest)
 
 	assert.IsType(t, delivery.HTTPInternalError{}, mockLogger.LastError, test.EqualMessage)
 	assert.Equal(t, http.StatusBadRequest, recorder.Code, test.EqualMessage)
 	assert.JSONEq(t, expectedResponse, recorder.Body.String(), test.EqualMessage)
-	assert.Equal(t, expectedErrorMessage, mockLogger.LastError.Error(), test.EqualMessage)
+	assert.Equal(t, expectedError, mockLogger.LastError, test.EqualMessage)
 }

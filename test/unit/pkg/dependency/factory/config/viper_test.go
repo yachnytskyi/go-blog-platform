@@ -194,13 +194,12 @@ func TestViperUnmarshalEmptyAML(t *testing.T) {
 	setupEnvFilePath()
 	defer cleanupTestEnvironment()
 
-	expectedMessage := fmt.Sprintf(constants.BaseErrorMessageFormat, expectedLocation+"loadDefaultConfig", yamlParsingError)
+	expectedError := domain.NewInternalError(expectedLocation+"loadDefaultConfig", yamlParsingError)
 	defer func() {
 		recover := recover()
 		if recover != nil {
-			assert.Equal(t, fmt.Sprintf("%v", recover), expectedMessage, test.EqualMessage)
+			assert.Equal(t, recover, expectedError, test.EqualMessage)
 		}
 	}()
-
 	config.NewViper()
 }

@@ -51,7 +51,21 @@ To stop and clean up the running services, use the following `make` commands:
 - **Remove containers and volumes**:  
   `make down-v` – Stops the services, removes the containers, and also removes any associated Docker volumes (which may contain persistent data).
 
+## Update Dependencies
 
+To update all Go dependencies to their latest compatible versions, use the following command:
+
+- `make update`
+
+## Testing
+
+To run tests, use the following `make` commands:
+
+- **Run all tests**:  
+  `make tests` – Executes all tests in the project.
+
+- **Run unit tests only**:  
+  `make unit-tests` – Executes only the unit tests.
 
 ## License
 

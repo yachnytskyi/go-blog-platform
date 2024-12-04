@@ -26,7 +26,7 @@ func TestNewLoggerZerolog(t *testing.T) {
 	t.Parallel()
 	mockConfig := mock.NewMockConfig()
 	mockConfig.Core.Logger = constants.Zerolog
-	
+
 	zerolog := factory.NewLogger(mockConfig)
 	assert.IsType(t, zerolog, logger.Zerolog{}, test.EqualMessage)
 	assert.Implements(t, (*interfaces.Logger)(nil), zerolog, test.EqualMessage)
@@ -37,7 +37,7 @@ func TestNewEmailGoMail(t *testing.T) {
 	mockConfig := mock.NewMockConfig()
 	mockLogger := mock.NewMockLogger()
 	mockConfig.Core.Email = constants.GoMail
-	
+
 	goMail := factory.NewEmail(mockConfig, mockLogger)
 	assert.IsType(t, goMail, email.GoMail{}, test.EqualMessage)
 	assert.Implements(t, (*interfaces.Email)(nil), goMail, test.EqualMessage)
@@ -48,7 +48,7 @@ func TestNewRepositoryMongoDB(t *testing.T) {
 	mockConfig := mock.NewMockConfig()
 	mockConfig.Core.Database = constants.MongoDB
 	mockLogger := mock.NewMockLogger()
-	
+
 	mongoDBRepository := factory.NewRepositoryFactory(mockConfig, mockLogger)
 	assert.IsType(t, &repository.MongoDBRepository{}, mongoDBRepository, test.EqualMessage)
 	assert.Implements(t, (*interfaces.Repository)(nil), mongoDBRepository, test.EqualMessage)
@@ -56,12 +56,12 @@ func TestNewRepositoryMongoDB(t *testing.T) {
 
 func TestNewDeliveryGin(t *testing.T) {
 	t.Parallel()
-	ctx := context.Background()
 	mockConfig := mock.NewMockConfig()
 	mockConfig.Core.Delivery = constants.Gin
 	mockLogger := mock.NewMockLogger()
 	mockRepository := mock.NewMockRepository()
 
+	ctx := context.Background()
 	ginDelivery := factory.NewDeliveryFactory(ctx, mockConfig, mockLogger, mockRepository)
 	assert.IsType(t, &delivery.GinDelivery{}, ginDelivery, test.EqualMessage)
 	assert.Implements(t, (*interfaces.Delivery)(nil), ginDelivery, test.EqualMessage)
@@ -71,10 +71,9 @@ func TestNewLoggerInvalidType(t *testing.T) {
 	t.Parallel()
 	mockConfig := mock.NewMockConfig()
 	mockConfig.Core.Logger = constants.Zerolog + "1"
-	
+
 	notification := fmt.Sprintf(constants.UnsupportedLogger, mockConfig.Core.Logger)
 	expectedError := domain.NewInternalError(expectedLocation+"NewLogger", notification)
-	
 	defer func() {
 		recover := recover()
 		if recover != nil {
@@ -105,10 +104,9 @@ func TestNewRepositoryInvalidType(t *testing.T) {
 	mockConfig := mock.NewMockConfig()
 	mockConfig.Core.Database = constants.MongoDB + "1"
 	mockLogger := mock.NewMockLogger()
-	
+
 	notification := fmt.Sprintf(constants.UnsupportedRepository, mockConfig.Core.Database)
 	expectedError := domain.NewInternalError(expectedLocation+"NewRepositoryFactory", notification)
-	
 	defer func() {
 		recover := recover()
 		if recover != nil {
@@ -120,20 +118,20 @@ func TestNewRepositoryInvalidType(t *testing.T) {
 
 func TestNewDeliveryInvalidType(t *testing.T) {
 	t.Parallel()
-	ctx := context.Background()
 	mockConfig := mock.NewMockConfig()
 	mockConfig.Core.Delivery = constants.Gin + "1"
 	mockLogger := mock.NewMockLogger()
 	mockRepository := mock.NewMockRepository()
-	
+
 	notification := fmt.Sprintf(constants.UnsupportedDelivery, mockConfig.Core.Delivery)
 	expectedError := domain.NewInternalError(expectedLocation+"NewDeliveryFactory", notification)
-	
 	defer func() {
 		recover := recover()
 		if recover != nil {
 			assert.Equal(t, recover, expectedError, test.EqualMessage)
 		}
 	}()
+
+	ctx := context.Background()
 	factory.NewDeliveryFactory(ctx, mockConfig, mockLogger, mockRepository)
 }

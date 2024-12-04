@@ -27,8 +27,8 @@ func TestIsTimeNotValidCurrentTime(t *testing.T) {
 
 func TestIsTimeNotValidFutureTime(t *testing.T) {
 	t.Parallel()
-	FutureTime := time.Now().Add(100 * time.Millisecond)
-	result := validator.IsTimeNotValid(FutureTime)
+	futureTime := time.Now().Add(100 * time.Millisecond)
+	result := validator.IsTimeNotValid(futureTime)
 
 	assert.False(t, result, test.FailureMessage)
 }

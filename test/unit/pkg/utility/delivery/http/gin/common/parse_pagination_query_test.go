@@ -132,8 +132,8 @@ func TestParsePaginationQueryInvalidParameters(t *testing.T) {
 		Host: test.Localhost,
 		URL:  &url.URL{Path: test.TestURL},
 	}
-
 	ginContext.Request.URL.RawQuery = "pageInvalid=-48912481&limitInvalid=-9124829148&orderBy=invalidField&sortOrder=asc"
+
 	result := delivery.ParsePaginationQuery(ginContext)
 	expected := common.NewPaginationQuery(
 		constants.DefaultPage,
@@ -156,8 +156,8 @@ func TestParsePaginationQueryExtraParameters(t *testing.T) {
 		Host: test.Localhost,
 		URL:  &url.URL{Path: test.TestURL},
 	}
-
 	ginContext.Request.URL.RawQuery = "page=3&limit=15&order_by=date&sort_order=ascend&unexpectedParam=value"
+
 	result := delivery.ParsePaginationQuery(ginContext)
 	expected := common.NewPaginationQuery(
 		page,

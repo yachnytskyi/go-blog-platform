@@ -36,8 +36,8 @@ func TestHandleErrorHTTPRequestError(t *testing.T) {
 	t.Parallel()
 	requestError := http.NewHTTPRequestError(location+"TestHandleErrorHTTPRequestError", requestType, notification)
 	result := logger.HandleError(requestError)
+	
 	jsonRequestError, ok := result.(logger.JSONRequestError)
-
 	assert.True(t, ok, test.EqualMessage)
 	assert.Equal(t, requestError.Location, jsonRequestError.Location, test.EqualMessage)
 	assert.Equal(t, requestError.RequestType, jsonRequestError.RequestType, test.EqualMessage)

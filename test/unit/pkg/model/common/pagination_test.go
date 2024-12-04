@@ -91,7 +91,6 @@ func TestNewPaginationQueryFirstPage(t *testing.T) {
 func TestNewPaginationQueryLastPage(t *testing.T) {
 	t.Parallel()
 	page := 20
-
 	result := common.NewPaginationQuery(strconv.Itoa(int(page)), constants.Limit, orderBy, constants.SortAscend, baseURL)
 	expectedSkip := getExpectedSkip(page, constants.DefaultLimitInteger)
 
@@ -106,7 +105,6 @@ func TestNewPaginationQueryLastPage(t *testing.T) {
 func TestNewPaginationQueryValidInputs(t *testing.T) {
 	t.Parallel()
 	page := 2
-
 	result := common.NewPaginationQuery(strconv.Itoa(int(page)), constants.Limit, orderBy, constants.SortAscend, baseURL)
 	expectedSkip := getExpectedSkip(page, constants.DefaultLimitInteger)
 
@@ -219,8 +217,8 @@ func TestSetCorrectPageLimitIsMoreThanTotalItems(t *testing.T) {
 	totalItems := 5
 	paginationQuery := common.NewPaginationQuery(constants.DefaultPage, constants.Limit, orderBy, constants.SortAscend, baseURL)
 	paginationQuery.TotalItems = totalItems
+	
 	result := common.SetCorrectPage(paginationQuery)
-
 	assert.Equal(t, paginationQuery, result, test.EqualMessage)
 
 }

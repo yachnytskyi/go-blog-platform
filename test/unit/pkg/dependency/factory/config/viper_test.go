@@ -128,7 +128,6 @@ func cleanupTestEnvironment() {
 }
 
 func TestViperLoadYamlConfiguration(t *testing.T) {
-	t.Parallel()
 	setupYamlFilePath()
 	setupEnvFilePath()
 	defer cleanupTestEnvironment()
@@ -143,7 +142,6 @@ func TestViperLoadYamlConfiguration(t *testing.T) {
 }
 
 func TestViperWithoutEnvironment(t *testing.T) {
-	t.Parallel()
 	notification := fmt.Sprintf(openFileError, constants.EnvironmentsPath+constants.Environment)
 	expectedError := domain.NewInternalError(expectedLocation+"loadDefaultEnvironment", notification)
 
@@ -157,13 +155,11 @@ func TestViperWithoutEnvironment(t *testing.T) {
 }
 
 func TestViperLoadEnvironmentWithoutYamlConfig(t *testing.T) {
-	t.Parallel()
 	setupEnvFilePath()
 	defer cleanupTestEnvironment()
 
 	notification := fmt.Sprintf(openFileError, constants.ConfigPath)
 	expectedError := domain.NewInternalError(expectedLocation+"loadDefaultConfig", notification)
-	
 	defer func() {
 		recover := recover()
 		if recover != nil {
@@ -189,7 +185,6 @@ func TestViperUnmarshalInvalidYAML(t *testing.T) {
 }
 
 func TestViperUnmarshalEmptyAML(t *testing.T) {
-	t.Parallel()
 	setupEmptyYamlFilePath()
 	setupEnvFilePath()
 	defer cleanupTestEnvironment()

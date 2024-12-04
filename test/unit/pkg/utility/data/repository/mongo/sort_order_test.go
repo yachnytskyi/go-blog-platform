@@ -42,6 +42,7 @@ func TestSetSortOrderInvalid(t *testing.T) {
 func TestSetSortOrderEmpty(t *testing.T) {
 	t.Parallel()
 	result := utility.SetSortOrder("")
+	
 	if constants.DefaultSortOrder == constants.SortAscend {
 		assert.Equal(t, sortAscend, result, test.EqualMessage)
 	} else {

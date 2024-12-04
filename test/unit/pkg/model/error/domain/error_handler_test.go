@@ -18,7 +18,6 @@ const (
 
 func TestHandleErrorValidationErrors(t *testing.T) {
 	t.Parallel()
-
 	validationErrors := domain.NewValidationErrors([]error{
 		domain.NewValidationError(location+"TestHandleErrorValidationErrors", field, constants.FieldRequired, constants.StringAllowedCharacters),
 		domain.NewValidationError(location+"TestHandleErrorValidationErrors", field, constants.FieldRequired, constants.StringAllowedCharacters),
@@ -69,8 +68,8 @@ func TestHandleErrorPaginationError(t *testing.T) {
 	totalPages := "100"
 	notification := "Pagination error"
 	paginationError := domain.NewPaginationError(location+"TestHandleErrorPaginationError", currentPage, totalPages, notification)
+	
 	result := domain.HandleError(paginationError)
-
 	assert.IsType(t, domain.PaginationError{}, result, test.EqualMessage)
 	assert.Equal(t, paginationError.Location, result.(domain.PaginationError).Location, test.EqualMessage)
 	assert.Equal(t, constants.PaginationErrorNotification, result.(domain.PaginationError).Notification, test.EqualMessage)

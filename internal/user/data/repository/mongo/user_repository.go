@@ -5,12 +5,12 @@ import (
 	"time"
 
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/interfaces"
 	repository "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/mongo/model"
 	repositoryUtility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/data/repository/utility"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	useCase "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
 	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/interfaces"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
 	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
@@ -136,7 +136,7 @@ func (userRepository UserRepository) CheckEmailDuplicate(ctx context.Context, em
 	// Find and decode the user.
 	// If no user is found, return nil (indicating that the email is unique).
 	query := bson.M{emailKey: email}
-	
+
 	userFindOneError := userRepository.Users.FindOne(ctx, query).Decode(&fetchedUser)
 	if validator.IsError(userFindOneError) {
 		if userFindOneError == mongo.ErrNoDocuments {

@@ -1,23 +1,24 @@
 package domain
 
+import "regexp"
+
 // StringValidator defines validation rules for string fields.
 type StringValidator struct {
-	FieldName    string // The name of the field being validated.
-	FieldRegex   string // The regular expression used to validate the field's characters.
-	Field        string
-	MinLength    int    // The minimum allowed length for the field.
-	MaxLength    int    // The maximum allowed length for the field.
-	Notification string // The notification message for validation errors.
-	IsOptional   bool   // Indicates if the field is optional.
+	FieldName    string         // The name of the field being validated.
+	Field        string         // The value of the field being validated.
+	FieldRegex   *regexp.Regexp // The compiled regular expression used to validate the field's characters.
+	MinLength    int            // The minimum allowed length for the field.
+	MaxLength    int            // The maximum allowed length for the field.
+	IsOptional   bool           // Indicates if the field is optional.
 }
 
-func NewStringValidator(fieldName, fieldRegex, field string, minLength, maxLength int, notification string) StringValidator {
+func NewStringValidator(fieldName string, field string, fieldRegex *regexp.Regexp, minLength, maxLength int,  isOptional bool) StringValidator {
 	return StringValidator{
 		FieldName:    fieldName,
-		FieldRegex:   fieldRegex,
 		Field:        field,
+		FieldRegex:   fieldRegex,
 		MinLength:    minLength,
 		MaxLength:    maxLength,
-		Notification: notification,
+		IsOptional:   isOptional,
 	}
 }

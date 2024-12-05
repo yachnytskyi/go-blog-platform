@@ -2,6 +2,7 @@ package domain
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -14,20 +15,28 @@ import (
 
 const (
 	location = "test.unit.pkg.model.domain.validator."
+
+	testField = "testField"
+)
+
+var (
+	alphaNumericRegex         = regexp.MustCompile(`^[a-zA-Z0-9]+$`)
+	alphaRegex                = regexp.MustCompile(`^[a-zA-Z]+$`)
+	alphaNumericOptionalRegex = regexp.MustCompile(`^[a-zA-Z0-9]*$`)
 )
 
 func TestValidateField(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	stringValidator := utility.StringValidator{
-		FieldName:  "testField",
-		FieldRegex: "^[a-zA-Z0-9]+$",
-		Field:      "Valid123",
-		MinLength:  3,
-		MaxLength:  10,
-		IsOptional: false,
-	}
+	stringValidator := utility.NewStringValidator(
+		testField,
+		"Valid123",
+		alphaNumericRegex,
+		3,
+		10,
+		false,
+	)
 	validationErrors := []error{}
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateField", stringValidator, validationErrors)
 
@@ -38,17 +47,16 @@ func TestValidateFieldAtMinLength(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	stringValidator := utility.StringValidator{
-		FieldName:  "testField",
-		FieldRegex: "^[a-zA-Z0-9]+$",
-		Field:      "Min",
-		MinLength:  3,
-		MaxLength:  10,
-		IsOptional: false,
-	}
+	stringValidator := utility.NewStringValidator(
+		testField,
+		"Min",
+		alphaNumericRegex,
+		3,
+		10,
+		false,
+	)
 	validationErrors := []error{}
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateFieldAtMinLength", stringValidator, validationErrors)
-
 	assert.Len(t, validationErrors, 0, test.ErrorNilMessage)
 }
 
@@ -56,14 +64,14 @@ func TestValidateFieldAtMaxLength(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	stringValidator := utility.StringValidator{
-		FieldName:  "testField",
-		FieldRegex: "^[a-zA-Z0-9]+$",
-		Field:      "MaximumLen",
-		MinLength:  3,
-		MaxLength:  10,
-		IsOptional: false,
-	}
+	stringValidator := utility.NewStringValidator(
+		testField,
+		"MaximumLen",
+		alphaNumericRegex,
+		3,
+		10,
+		false,
+	)
 	validationErrors := []error{}
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateFieldAtMaxLength", stringValidator, validationErrors)
 
@@ -74,14 +82,14 @@ func TestValidateOptionalFieldEmptyField(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	stringValidator := utility.StringValidator{
-		FieldName:  "testField",
-		FieldRegex: "^[a-zA-Z0-9]+$",
-		Field:      "",
-		MinLength:  3,
-		MaxLength:  10,
-		IsOptional: true,
-	}
+	stringValidator := utility.NewStringValidator(
+		testField,
+		"",
+		alphaNumericRegex,
+		3,
+		10,
+		true,
+	)
 	validationErrors := []error{}
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateOptionalFieldEmptyField", stringValidator, validationErrors)
 
@@ -92,14 +100,15 @@ func TestValidateFieldTooShort(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	stringValidator := utility.StringValidator{
-		FieldName:  "testField",
-		FieldRegex: "^[a-zA-Z0-9]+$",
-		Field:      "No",
-		MinLength:  3,
-		MaxLength:  10,
-		IsOptional: false,
-	}
+	stringValidator := utility.NewStringValidator(
+		testField,
+		"No",
+		alphaNumericRegex,
+		3,
+		10,
+		false,
+	)
+
 	validationErrors := []error{}
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateFieldTooShort", stringValidator, validationErrors)
 
@@ -116,14 +125,15 @@ func TestValidateFieldTooLong(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	stringValidator := utility.StringValidator{
-		FieldName:  "testField",
-		FieldRegex: "^[a-zA-Z0-9]+$",
-		Field:      "ThisFieldIsWayTooLong",
-		MinLength:  3,
-		MaxLength:  10,
-		IsOptional: false,
-	}
+	stringValidator := utility.NewStringValidator(
+		testField,
+		"ThisFieldIsWayTooLong",
+		alphaNumericRegex,
+		3,
+		10,
+		false,
+	)
+
 	validationErrors := []error{}
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateFieldTooLong", stringValidator, validationErrors)
 
@@ -140,21 +150,20 @@ func TestValidateFieldInvalidCharacters(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	fieldName := "testField"
-	stringValidator := utility.StringValidator{
-		FieldName:  fieldName,
-		FieldRegex: "^[a-zA-Z0-9]+$",
-		Field:      "Invalid@!",
-		MinLength:  3,
-		MaxLength:  10,
-		IsOptional: false,
-	}
+	fieldName := testField
+	stringValidator := utility.NewStringValidator(
+		fieldName,
+		"Invalid@!",
+		alphaNumericRegex,
+		3,
+		10,
+		false,
+	)
 	validationErrors := []error{}
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateFieldInvalidCharacters", stringValidator, validationErrors)
 
 	expectedLocation := location + "TestValidateFieldInvalidCharacters.ValidateField.AreStringCharactersInvalid"
-	expectedNotification := fmt.Sprintf(constants.StringAllowedCharacters)
-	expectedError := domain.NewValidationError(expectedLocation, stringValidator.FieldName, constants.FieldRequired, expectedNotification)
+	expectedError := domain.NewValidationError(expectedLocation, stringValidator.FieldName, constants.FieldRequired, constants.StringAllowedCharacters)
 
 	assert.Len(t, validationErrors, 1, test.ErrorNotNilMessage)
 	assert.IsType(t, domain.ValidationError{}, validationErrors[0], test.EqualMessage)
@@ -165,14 +174,14 @@ func TestValidateFieldEmptyField(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	stringValidator := utility.StringValidator{
-		FieldName:  "testField",
-		FieldRegex: "^[a-zA-Z0-9]*$",
-		Field:      "",
-		MinLength:  3,
-		MaxLength:  10,
-		IsOptional: false,
-	}
+	stringValidator := utility.NewStringValidator(
+		testField,
+		"",
+		alphaNumericOptionalRegex,
+		3,
+		10,
+		false,
+	)
 	validationErrors := []error{}
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateFieldEmptyField", stringValidator, validationErrors)
 
@@ -189,14 +198,14 @@ func TestValidateFieldValidCharactersButIncorrectLength(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	stringValidator := utility.StringValidator{
-		FieldRegex: "^[a-zA-Z]+$",
-		FieldName:  "testField",
-		Field:      "Abc",
-		MinLength:  5,
-		MaxLength:  10,
-		IsOptional: false,
-	}
+	stringValidator := utility.NewStringValidator(
+		testField,
+		"Abc",
+		alphaRegex,
+		5,
+		10,
+		false,
+	)
 	validationErrors := []error{}
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateFieldValidCharactersButIncorrectLength", stringValidator, validationErrors)
 
@@ -212,21 +221,69 @@ func TestValidateFieldValidCharactersButIncorrectLength(t *testing.T) {
 func TestValidateFieldValidLengthButInvalidCharacters(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
-	stringValidator := utility.StringValidator{
-		FieldRegex: "^[a-zA-Z]+$",
-		FieldName:  "testField",
-		Field:      "12345",
-		MinLength:  3,
-		MaxLength:  10,
-		IsOptional: false,
-	}
+
+	stringValidator := utility.NewStringValidator(
+		testField,
+		"12345",
+		alphaRegex,
+		3,
+		10,
+		false,
+	)
 
 	validationErrors := []error{}
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateFieldValidLengthButInvalidCharacters", stringValidator, validationErrors)
 
 	expectedLocation := location + "TestValidateFieldValidLengthButInvalidCharacters.ValidateField.AreStringCharactersInvalid"
-	expectedNotification := fmt.Sprintf(constants.StringAllowedCharacters)
-	expectedError := domain.NewValidationError(expectedLocation, stringValidator.FieldName, constants.FieldRequired, expectedNotification)
+	expectedError := domain.NewValidationError(expectedLocation, stringValidator.FieldName, constants.FieldRequired, constants.StringAllowedCharacters)
+
+	assert.Len(t, validationErrors, 1, test.ErrorNotNilMessage)
+	assert.IsType(t, domain.ValidationError{}, validationErrors[0], test.EqualMessage)
+	assert.Equal(t, expectedError, validationErrors[0], test.EqualMessage)
+}
+
+func TestValidateFieldWithLeadingAndTrailingSpaces(t *testing.T) {
+	t.Parallel()
+	mockLogger := mock.NewMockLogger()
+
+	stringValidator := utility.NewStringValidator(
+		testField,
+		"  Valid123  ",
+		alphaNumericRegex,
+		3,
+		20,
+		false,
+	)
+
+	validationErrors := []error{}
+	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateFieldWithLeadingAndTrailingSpaces", stringValidator, validationErrors)
+
+	expectedLocation := location + "TestValidateFieldWithLeadingAndTrailingSpaces.ValidateField.AreStringCharactersInvalid"
+	expectedError := domain.NewValidationError(expectedLocation, stringValidator.FieldName, constants.FieldRequired, constants.StringAllowedCharacters)
+
+	assert.Len(t, validationErrors, 1, test.ErrorNotNilMessage)
+	assert.IsType(t, domain.ValidationError{}, validationErrors[0], test.EqualMessage)
+	assert.Equal(t, expectedError, validationErrors[0], test.EqualMessage)
+}
+
+func TestValidateFieldWithInternalTab(t *testing.T) {
+	t.Parallel()
+	mockLogger := mock.NewMockLogger()
+
+	stringValidator := utility.NewStringValidator(
+		testField,
+		"Valid 123",
+		alphaNumericRegex,
+		3,
+		20,
+		false,
+	)
+
+	validationErrors := []error{}
+	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateFieldWithLeadingAndTrailingSpaces", stringValidator, validationErrors)
+
+	expectedLocation := location + "TestValidateFieldWithLeadingAndTrailingSpaces.ValidateField.AreStringCharactersInvalid"
+	expectedError := domain.NewValidationError(expectedLocation, stringValidator.FieldName, constants.FieldRequired, constants.StringAllowedCharacters)
 
 	assert.Len(t, validationErrors, 1, test.ErrorNotNilMessage)
 	assert.IsType(t, domain.ValidationError{}, validationErrors[0], test.EqualMessage)
@@ -237,14 +294,15 @@ func TestValidateOptionalFieldTooShort(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	stringValidator := utility.StringValidator{
-		FieldName:  "testField",
-		FieldRegex: "^[a-zA-Z0-9]+$",
-		Field:      "No",
-		MinLength:  3,
-		MaxLength:  10,
-		IsOptional: true,
-	}
+	stringValidator := utility.NewStringValidator(
+		testField,
+		"No",
+		alphaNumericRegex,
+		3,
+		10,
+		true,
+	)
+
 	validationErrors := []error{}
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateOptionalFieldTooShort", stringValidator, validationErrors)
 
@@ -261,14 +319,15 @@ func TestValidateOptionalFieldTooLong(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	stringValidator := utility.StringValidator{
-		FieldName:  "testField",
-		FieldRegex: "^[a-zA-Z0-9]+$",
-		Field:      "ThisFieldIsWayTooLong",
-		MinLength:  3,
-		MaxLength:  10,
-		IsOptional: true,
-	}
+	stringValidator := utility.NewStringValidator(
+		testField,
+		"ThisFieldIsWayTooLong",
+		alphaNumericRegex,
+		3,
+		10,
+		true,
+	)
+
 	validationErrors := []error{}
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateOptionalFieldTooLong", stringValidator, validationErrors)
 
@@ -285,21 +344,20 @@ func TestValidateOptionalFieldInvalidCharacters(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	fieldName := "testField"
-	stringValidator := utility.StringValidator{
-		FieldName:  fieldName,
-		FieldRegex: "^[a-zA-Z0-9]+$",
-		Field:      "Invalid@!",
-		MinLength:  3,
-		MaxLength:  10,
-		IsOptional: true,
-	}
+	stringValidator := utility.NewStringValidator(
+		testField,
+		"Invalid@!",
+		alphaNumericRegex,
+		3,
+		10,
+		true,
+	)
+
 	validationErrors := []error{}
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateOptionalFieldInvalidCharacters", stringValidator, validationErrors)
 
 	expectedLocation := location + "TestValidateOptionalFieldInvalidCharacters.ValidateField.AreStringCharactersInvalid"
-	expectedNotification := fmt.Sprintf(constants.StringAllowedCharacters)
-	expectedError := domain.NewValidationError(expectedLocation, stringValidator.FieldName, constants.FieldOptional, expectedNotification)
+	expectedError := domain.NewValidationError(expectedLocation, stringValidator.FieldName, constants.FieldOptional, constants.StringAllowedCharacters)
 
 	assert.Len(t, validationErrors, 1, test.ErrorNotNilMessage)
 	assert.IsType(t, domain.ValidationError{}, validationErrors[0], test.EqualMessage)
@@ -310,14 +368,15 @@ func TestValidateOptionalFieldValidCharactersButIncorrectLength(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	stringValidator := utility.StringValidator{
-		FieldRegex: "^[a-zA-Z]+$",
-		FieldName:  "testField",
-		Field:      "Abc",
-		MinLength:  5,
-		MaxLength:  10,
-		IsOptional: true,
-	}
+	stringValidator := utility.NewStringValidator(
+		testField,
+		"Abc",
+		alphaRegex,
+		5,
+		10,
+		true,
+	)
+
 	validationErrors := []error{}
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateOptionalFieldValidCharactersButIncorrectLength", stringValidator, validationErrors)
 
@@ -333,21 +392,69 @@ func TestValidateOptionalFieldValidCharactersButIncorrectLength(t *testing.T) {
 func TestValidateOptionalFieldValidLengthButInvalidCharacters(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
-	stringValidator := utility.StringValidator{
-		FieldRegex: "^[a-zA-Z]+$",
-		FieldName:  "testField",
-		Field:      "12345",
-		MinLength:  3,
-		MaxLength:  10,
-		IsOptional: true,
-	}
+
+	stringValidator := utility.NewStringValidator(
+		testField,
+		"12345",
+		alphaRegex,
+		3,
+		10,
+		true,
+	)
 
 	validationErrors := []error{}
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateOptionalFieldValidLengthButInvalidCharacters", stringValidator, validationErrors)
 
 	expectedLocation := location + "TestValidateOptionalFieldValidLengthButInvalidCharacters.ValidateField.AreStringCharactersInvalid"
-	expectedNotification := fmt.Sprintf(constants.StringAllowedCharacters)
-	expectedError := domain.NewValidationError(expectedLocation, stringValidator.FieldName, constants.FieldOptional, expectedNotification)
+	expectedError := domain.NewValidationError(expectedLocation, stringValidator.FieldName, constants.FieldOptional, constants.StringAllowedCharacters)
+
+	assert.Len(t, validationErrors, 1, test.ErrorNotNilMessage)
+	assert.IsType(t, domain.ValidationError{}, validationErrors[0], test.EqualMessage)
+	assert.Equal(t, expectedError, validationErrors[0], test.EqualMessage)
+}
+
+func TestValidateOptionalFieldWithLeadingAndTrailingSpaces(t *testing.T) {
+	t.Parallel()
+	mockLogger := mock.NewMockLogger()
+
+	stringValidator := utility.NewStringValidator(
+		testField,
+		"  Valid123  ",
+		alphaNumericRegex,
+		3,
+		20,
+		true,
+	)
+
+	validationErrors := []error{}
+	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateOptionalFieldWithLeadingAndTrailingSpaces", stringValidator, validationErrors)
+
+	expectedLocation := location + "TestValidateOptionalFieldWithLeadingAndTrailingSpaces.ValidateField.AreStringCharactersInvalid"
+	expectedError := domain.NewValidationError(expectedLocation, stringValidator.FieldName, constants.FieldOptional, constants.StringAllowedCharacters)
+
+	assert.Len(t, validationErrors, 1, test.ErrorNotNilMessage)
+	assert.IsType(t, domain.ValidationError{}, validationErrors[0], test.EqualMessage)
+	assert.Equal(t, expectedError, validationErrors[0], test.EqualMessage)
+}
+
+func TestValidateOptionalFieldWithInternalTab(t *testing.T) {
+	t.Parallel()
+	mockLogger := mock.NewMockLogger()
+
+	stringValidator := utility.NewStringValidator(
+		testField,
+		"Valid 123",
+		alphaNumericRegex,
+		3,
+		20,
+		true,
+	)
+
+	validationErrors := []error{}
+	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateOptionalFieldWithInternalTab", stringValidator, validationErrors)
+
+	expectedLocation := location + "TestValidateOptionalFieldWithInternalTab.ValidateField.AreStringCharactersInvalid"
+	expectedError := domain.NewValidationError(expectedLocation, stringValidator.FieldName, constants.FieldOptional, constants.StringAllowedCharacters)
 
 	assert.Len(t, validationErrors, 1, test.ErrorNotNilMessage)
 	assert.IsType(t, domain.ValidationError{}, validationErrors[0], test.EqualMessage)
@@ -358,38 +465,41 @@ func TestValidateFieldMultipleErrors(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	stringValidator := utility.StringValidator{
-		FieldName:  "testField",
-		FieldRegex: "^[a-zA-Z0-9]+$",
-		Field:      "",
-		MinLength:  3,
-		MaxLength:  10,
-		IsOptional: true,
-	}
-	stringValidator1 := utility.StringValidator{
-		FieldName:  "field1",
-		FieldRegex: "^[a-zA-Z]+$",
-		Field:      "Shor",
-		MinLength:  5,
-		MaxLength:  10,
-		IsOptional: false,
-	}
-	stringValidator2 := utility.StringValidator{
-		FieldName:  "field2",
-		FieldRegex: "^[a-zA-Z0-9]+$",
-		Field:      "Invalid@!",
-		MinLength:  3,
-		MaxLength:  10,
-		IsOptional: false,
-	}
-	stringValidator3 := utility.StringValidator{
-		FieldName:  "field3",
-		FieldRegex: "^[a-zA-Z0-9]*$",
-		Field:      "",
-		MinLength:  3,
-		MaxLength:  10,
-		IsOptional: false,
-	}
+	stringValidator := utility.NewStringValidator(
+		testField,
+		"",
+		alphaNumericRegex,
+		3,
+		10,
+		true,
+	)
+
+	stringValidator1 := utility.NewStringValidator(
+		testField+"1",
+		"Shor",
+		alphaRegex,
+		5,
+		10,
+		false,
+	)
+
+	stringValidator2 := utility.NewStringValidator(
+		testField+"2",
+		"Invalid@!",
+		alphaNumericRegex,
+		3,
+		10,
+		false,
+	)
+
+	stringValidator3 := utility.NewStringValidator(
+		testField+"3",
+		"",
+		alphaNumericOptionalRegex,
+		3,
+		10,
+		false,
+	)
 
 	validationErrors := make([]error, 0, 3)
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateFieldMultipleErrors.Field", stringValidator, validationErrors)
@@ -402,8 +512,7 @@ func TestValidateFieldMultipleErrors(t *testing.T) {
 	expectedError1 := domain.NewValidationError(expectedLocation1, stringValidator1.FieldName, constants.FieldRequired, expectedNotification1)
 
 	expectedLocation2 := location + "TestValidateFieldMultipleErrors.Field2.ValidateField.AreStringCharactersInvalid"
-	expectedNotification2 := fmt.Sprintf(constants.StringAllowedCharacters)
-	expectedError2 := domain.NewValidationError(expectedLocation2, stringValidator2.FieldName, constants.FieldRequired, expectedNotification2)
+	expectedError2 := domain.NewValidationError(expectedLocation2, stringValidator2.FieldName, constants.FieldRequired, constants.StringAllowedCharacters)
 
 	expectedLocation3 := location + "TestValidateFieldMultipleErrors.Field3.ValidateField.IsStringLengthInvalid"
 	expectedNotification3 := fmt.Sprintf(constants.StringAllowedLength, stringValidator3.MinLength, stringValidator3.MaxLength)
@@ -417,5 +526,4 @@ func TestValidateFieldMultipleErrors(t *testing.T) {
 	assert.IsType(t, domain.ValidationError{}, validationErrors[2], test.EqualMessage)
 	assert.Equal(t, expectedError3, validationErrors[2], test.EqualMessage)
 	assert.IsType(t, domain.ValidationError{}, validationErrors[2], test.EqualMessage)
-
 }

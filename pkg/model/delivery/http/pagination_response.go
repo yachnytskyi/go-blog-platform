@@ -25,7 +25,7 @@ func NewHTTPPaginationResponse(paginationRespones common.PaginationResponse) HTT
 		ItemsLeft:   paginationRespones.ItemsLeft,
 		PageStart:   paginationRespones.PageStart,
 		PageEnd:     paginationRespones.PageEnd,
-		Limit:       paginationRespones.PageEnd,
+		Limit:       paginationRespones.Limit,
 		OrderBy:     paginationRespones.OrderBy,
 		SortOrder:   paginationRespones.SortOrder,
 		PageLinks:   paginationRespones.PageLinks,

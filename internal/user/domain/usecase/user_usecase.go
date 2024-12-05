@@ -218,13 +218,12 @@ func (userUseCase UserUseCase) ResetUserPassword(ctx context.Context, userResetP
 }
 
 func prepareEmailData(config *config.ApplicationConfig, user user.User, tokenValue, subject, url, templateName, templatePath string) interfaces.EmailData {
-	userFirstName := domainUtility.UserFirstName(user.Username)
 	emailData := interfaces.NewEmailData(
 		user.Email,
 		config.Email.ClientOriginUrl+url+tokenValue,
 		templateName,
 		templatePath,
-		userFirstName,
+		user.Username,
 		subject,
 	)
 

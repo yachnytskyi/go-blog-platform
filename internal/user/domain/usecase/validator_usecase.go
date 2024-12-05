@@ -3,11 +3,12 @@ package usecase
 import (
 	"fmt"
 	"net"
+	"regexp"
 	"strings"
 
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/interfaces"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/interfaces"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	commonUtility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/common"
@@ -18,11 +19,6 @@ import (
 
 // Constants used for various validation messages and field names.
 const (
-	// Regex Patterns for validating email, username, and password.
-	emailRegex    = "^(?:(?:(?:(?:[a-zA-Z]|\\d|[\\\\\\\\/=\\\\{\\|}]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])+(?:\\.([a-zA-Z]|\\d|[\\\\+\\-\\/=\\\\_{\\|}]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])+)*)|(?:(?:\\x22)(?:(?:(?:(?:\\x20|\\x09)*(?:\\x0d\\x0a))?(?:\\x20|\\x09)+)?(?:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x7f]|\\x21|[\\x23-\\x5b]|[\\x5d-\\x7e]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])|(?:(?:[\\x01-\\x09\\x0b\\x0c\\x0d-\\x7f]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}]))))*(?:(?:(?:\\x20|\\x09)*(?:\\x0d\\x0a))?(\\x20|\\x09)+)?(?:\\x22))))@(?:(?:(?:[a-zA-Z]|\\d|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])|(?:(?:[a-zA-Z]|\\d|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])(?:[a-zA-Z]|\\d|-|\\.||[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])*(?:[a-zA-Z]|\\d|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])))\\.)+(?:(?:[a-zA-Z]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])|(?:(?:[a-zA-Z]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])(?:[a-zA-Z]|\\d|-|\\.||[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])*(?:[a-zA-Z]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])))\\.?$"
-	usernameRegex = `^[a-zA-z0-9-_ \t]*$`
-	passwordRegex = `^[a-zA-z0-9-_*,.]*$`
-
 	// Error Messages for invalid inputs.
 	passwordAllowedCharacters = "Sorry, only letters (a-z), numbers(0-9), the asterics, hyphen and underscore characters are allowed."
 	emailAllowedCharacters    = "Sorry, only letters (a-z), numbers(0-9) and periods (.) are allowed, you cannot use a period in the end and more than one in a row."
@@ -38,50 +34,22 @@ const (
 	resetTokenField       = "reset token"
 )
 
+// Regular expressions for validating the fields.
 var (
-	emailValidator = utility.StringValidator{
-		FieldName:    EmailField,
-		FieldRegex:   emailRegex,
-		MinLength:    constants.MinStringLength,
-		MaxLength:    constants.MaxStringLength,
-		Notification: emailAllowedCharacters,
-		IsOptional:   false,
-	}
-	usernameValidator = utility.StringValidator{
-		FieldName:    usernameField,
-		FieldRegex:   usernameRegex,
-		MinLength:    constants.MinStringLength,
-		MaxLength:    constants.MaxStringLength,
-		Notification: constants.StringAllowedCharacters,
-		IsOptional:   false,
-	}
-	passwordValidator = utility.StringValidator{
-		FieldName:    passwordField,
-		FieldRegex:   usernameRegex,
-		MinLength:    constants.MinStringLength,
-		MaxLength:    constants.MaxStringLength,
-		Notification: passwordAllowedCharacters,
-		IsOptional:   false,
-	}
-	tokenValidator = utility.StringValidator{
-		FieldName:  resetTokenField,
-		FieldRegex: usernameRegex,
-		MinLength:  resetTokenLength,
-		MaxLength:  resetTokenLength,
-		IsOptional: false,
-	}
-	// Add more validators for other fields as needed.
+	emailRegex    = regexp.MustCompile("^(?:(?:(?:(?:[a-zA-Z]|\\d|[\\\\\\\\/=\\\\{\\|}]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])+(?:\\.([a-zA-Z]|\\d|[\\\\+\\-\\/=\\\\_{\\|}]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])+)*)|(?:(?:\\x22)(?:(?:(?:(?:\\x20|\\x09)*(?:\\x0d\\x0a))?(?:\\x20|\\x09)+)?(?:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x7f]|\\x21|[\\x23-\\x5b]|[\\x5d-\\x7e]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])|(?:(?:[\\x01-\\x09\\x0b\\x0c\\x0d-\\x7f]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}]))))*(?:(?:(?:\\x20|\\x09)*(?:\\x0d\\x0a))?(\\x20|\\x09)+)?(?:\\x22))))@(?:(?:(?:[a-zA-Z]|\\d|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])|(?:(?:[a-zA-Z]|\\d|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])(?:[a-zA-Z]|\\d|-|\\.||[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])*(?:[a-zA-Z]|\\d|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])))\\.)+(?:(?:[a-zA-Z]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])|(?:(?:[a-zA-Z]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])(?:[a-zA-Z]|\\d|-|\\.||[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])*(?:[a-zA-Z]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])))\\.?$")
+	usernameRegex  = regexp.MustCompile(`^[a-zA-z0-9-_ \t]*$`)
+	passwordRegex = regexp.MustCompile((`^[a-zA-z0-9-_*,.]*$`))
 )
 
 func validateUserCreate(logger interfaces.Logger, userCreate user.UserCreate) common.Result[user.UserCreate] {
 	validationErrors := make([]error, 0, 4)
+
 	userCreate.Email = commonUtility.SanitizeAndToLowerString(userCreate.Email)
-	userCreate.Username = strings.TrimSpace(userCreate.Username)
+	userCreate.Username = commonUtility.SanitizeAndCollapseWhitespace(userCreate.Username)
 	userCreate.Password = strings.TrimSpace(userCreate.Password)
 	userCreate.PasswordConfirm = strings.TrimSpace(userCreate.PasswordConfirm)
-	emailValidator.Field = userCreate.Email
-	usernameValidator.Field = userCreate.Username
-	
+	usernameValidator := utility.NewStringValidator(usernameField, userCreate.Username, usernameRegex, constants.MinStringLength, constants.MaxStringLength, false)
+
 	validationErrors = validateEmail(logger, location+"validateUserCreate", userCreate.Email, validationErrors)
 	validationErrors = utility.ValidateField(logger, location+"validateUserCreate", usernameValidator, validationErrors)
 	validationErrors = validatePassword(logger, location+"validateUserCreate", userCreate.Password, userCreate.PasswordConfirm, validationErrors)
@@ -94,9 +62,9 @@ func validateUserCreate(logger interfaces.Logger, userCreate user.UserCreate) co
 
 func validateUserUpdate(logger interfaces.Logger, userUpdate user.UserUpdate) common.Result[user.UserUpdate] {
 	validationErrors := make([]error, 0, 1)
-	userUpdate.Username = strings.TrimSpace(userUpdate.Username)
-	usernameValidator.Field = userUpdate.Username
 
+	userUpdate.Username = commonUtility.SanitizeAndCollapseWhitespace(userUpdate.Username)
+	usernameValidator := utility.NewStringValidator(usernameField, userUpdate.Username, usernameRegex, constants.MinStringLength, constants.MaxStringLength, false)
 	validationErrors = utility.ValidateField(logger, location+"validateUserUpdate", usernameValidator, validationErrors)
 	if len(validationErrors) > 0 {
 		return common.NewResultOnFailure[user.UserUpdate](domain.NewValidationErrors(validationErrors))
@@ -107,9 +75,10 @@ func validateUserUpdate(logger interfaces.Logger, userUpdate user.UserUpdate) co
 
 func validateUserLogin(logger interfaces.Logger, userLogin user.UserLogin) common.Result[user.UserLogin] {
 	validationErrors := make([]error, 0, 2)
+
 	userLogin.Email = commonUtility.SanitizeAndToLowerString(userLogin.Email)
 	userLogin.Password = strings.TrimSpace(userLogin.Password)
-	passwordValidator.Field = userLogin.Password
+	passwordValidator := utility.NewStringValidator(passwordField, userLogin.Password, passwordRegex, constants.MinStringLength, constants.MaxStringLength, false)
 
 	validationErrors = validateEmail(logger, location+"validateUserLogin", userLogin.Email, validationErrors)
 	validationErrors = utility.ValidateField(logger, location+"validateUserLogin", passwordValidator, validationErrors)
@@ -122,8 +91,8 @@ func validateUserLogin(logger interfaces.Logger, userLogin user.UserLogin) commo
 
 func validateUserForgottenPassword(logger interfaces.Logger, userForgottenPassword user.UserForgottenPassword) common.Result[user.UserForgottenPassword] {
 	validationErrors := make([]error, 0, 2)
+	
 	userForgottenPassword.Email = commonUtility.SanitizeAndToLowerString(userForgottenPassword.Email)
-
 	validationErrors = validateEmail(logger, location+"validateUserForgottenPassword", userForgottenPassword.Email, validationErrors)
 	if len(validationErrors) > 0 {
 		return common.NewResultOnFailure[user.UserForgottenPassword](domain.NewValidationErrors(validationErrors))
@@ -134,13 +103,14 @@ func validateUserForgottenPassword(logger interfaces.Logger, userForgottenPasswo
 
 func validateUserResetPassword(logger interfaces.Logger, userResetPassword user.UserResetPassword) common.Result[user.UserResetPassword] {
 	validationErrors := make([]error, 0, 2)
-	userResetPassword.ResetToken =  strings.TrimSpace(userResetPassword.ResetToken)
-	tokenValidator.Field = userResetPassword.ResetToken
+	
+	userResetPassword.ResetToken = strings.TrimSpace(userResetPassword.ResetToken)
 	userResetPassword.Password = strings.TrimSpace(userResetPassword.Password)
 	userResetPassword.PasswordConfirm = strings.TrimSpace(userResetPassword.PasswordConfirm)
+	tokenValidator := utility.NewStringValidator(resetTokenField, userResetPassword.ResetToken, usernameRegex, constants.MinStringLength, constants.MaxStringLength, false)
 
-	validationErrors = validatePassword(logger, location+"validateUserResetPassword", userResetPassword.Password, userResetPassword.PasswordConfirm, validationErrors)
 	validationErrors = utility.ValidateField(logger, location+"validateUserResetPassword", tokenValidator, validationErrors)
+	validationErrors = validatePassword(logger, location+"validateUserResetPassword", userResetPassword.Password, userResetPassword.PasswordConfirm, validationErrors)
 	if len(validationErrors) > 0 {
 		return common.NewResultOnFailure[user.UserResetPassword](domain.NewValidationErrors(validationErrors))
 	}
@@ -150,9 +120,9 @@ func validateUserResetPassword(logger interfaces.Logger, userResetPassword user.
 
 func validateEmail(logger interfaces.Logger, location, email string, validationErrors []error) []error {
 	errors := validationErrors
-	emailValidator.Field = email
-
-	validateFieldError := validateField(logger, location+".validateEmail", emailValidator)
+	
+	emailValidator := utility.NewStringValidator(EmailField, email, emailRegex, constants.MinStringLength, constants.MaxStringLength, false)
+	validateFieldError := validateField(logger, location+".validateEmail", emailAllowedCharacters, emailValidator)
 	if validator.IsError(validateFieldError) {
 		errors = append(errors, validateFieldError)
 		return errors
@@ -168,9 +138,9 @@ func validateEmail(logger interfaces.Logger, location, email string, validationE
 
 func validatePassword(logger interfaces.Logger, location, password, passwordConfirm string, validationErrors []error) []error {
 	errors := validationErrors
-	passwordValidator.Field = password
-
-	validateFieldError := validateField(logger, location+".validatePassword", passwordValidator)
+	
+	passwordValidator := utility.NewStringValidator(passwordField, password, passwordRegex, constants.MinStringLength, constants.MaxStringLength, false)
+	validateFieldError := validateField(logger, location+".validatePassword", passwordAllowedCharacters, passwordValidator)
 	if validator.IsError(validateFieldError) {
 		errors = append(errors, validateFieldError)
 		return errors
@@ -226,8 +196,8 @@ func checkPasswords(logger interfaces.Logger, location, hashedPassword string, c
 }
 
 func checkEmail(logger interfaces.Logger, location, email string) error {
-	emailValidator.Field = email
-	validateFieldError := validateField(logger, location+".checkEmail", emailValidator)
+	emailValidator := utility.NewStringValidator(EmailField, email, emailRegex, constants.MinStringLength, constants.MaxStringLength, false)
+	validateFieldError := validateField(logger, location+".checkEmail", emailAllowedCharacters, emailValidator)
 	if validator.IsError(validateFieldError) {
 		return validateFieldError
 	}
@@ -235,7 +205,7 @@ func checkEmail(logger interfaces.Logger, location, email string) error {
 	return checkEmailDomain(logger, location+".checkEmail", email)
 }
 
-func validateField(logger interfaces.Logger, location string, stringValidator utility.StringValidator) error {
+func validateField(logger interfaces.Logger, location, notification string, stringValidator utility.StringValidator) error {
 	if utility.IsStringLengthInvalid(stringValidator.Field, stringValidator.MinLength, stringValidator.MaxLength) {
 		validationError := domain.NewValidationError(
 			location+".validateField.IsStringLengthInvalid",
@@ -251,7 +221,7 @@ func validateField(logger interfaces.Logger, location string, stringValidator ut
 			location+".validateField.AreStringCharactersInvalid",
 			stringValidator.FieldName,
 			constants.FieldRequired,
-			stringValidator.Notification,
+			notification,
 		)
 
 		logger.Debug(validationError)

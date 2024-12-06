@@ -28,16 +28,9 @@ var (
 func TestValidateField(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
-
-	stringValidator := utility.NewStringValidator(
-		testField,
-		"Valid123",
-		alphaNumericRegex,
-		3,
-		10,
-		false,
-	)
+	
 	validationErrors := []error{}
+	stringValidator := utility.NewStringValidator(testField, "Valid123", alphaNumericRegex, 3, 10, false)
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateField", stringValidator, validationErrors)
 
 	assert.Len(t, validationErrors, 0, test.ErrorNilMessage)
@@ -46,16 +39,9 @@ func TestValidateField(t *testing.T) {
 func TestValidateFieldAtMinLength(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
-
-	stringValidator := utility.NewStringValidator(
-		testField,
-		"Min",
-		alphaNumericRegex,
-		3,
-		10,
-		false,
-	)
+	
 	validationErrors := []error{}
+	stringValidator := utility.NewStringValidator(testField, "Min", alphaNumericRegex, 3, 10, false)
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateFieldAtMinLength", stringValidator, validationErrors)
 	assert.Len(t, validationErrors, 0, test.ErrorNilMessage)
 }
@@ -63,16 +49,9 @@ func TestValidateFieldAtMinLength(t *testing.T) {
 func TestValidateFieldAtMaxLength(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
-
-	stringValidator := utility.NewStringValidator(
-		testField,
-		"MaximumLen",
-		alphaNumericRegex,
-		3,
-		10,
-		false,
-	)
+	
 	validationErrors := []error{}
+	stringValidator := utility.NewStringValidator(testField, "MaximumLen", alphaNumericRegex, 3, 10, false)
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateFieldAtMaxLength", stringValidator, validationErrors)
 
 	assert.Len(t, validationErrors, 0, test.ErrorNilMessage)
@@ -82,15 +61,8 @@ func TestValidateOptionalFieldEmptyField(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	stringValidator := utility.NewStringValidator(
-		testField,
-		"",
-		alphaNumericRegex,
-		3,
-		10,
-		true,
-	)
 	validationErrors := []error{}
+	stringValidator := utility.NewStringValidator(testField, "No", alphaNumericRegex, 3, 10, false)
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateOptionalFieldEmptyField", stringValidator, validationErrors)
 
 	assert.Len(t, validationErrors, 0, test.ErrorNilMessage)
@@ -100,16 +72,8 @@ func TestValidateFieldTooShort(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	stringValidator := utility.NewStringValidator(
-		testField,
-		"No",
-		alphaNumericRegex,
-		3,
-		10,
-		false,
-	)
-
 	validationErrors := []error{}
+	stringValidator := utility.NewStringValidator(testField, "No", alphaNumericRegex, 3, 10, false)
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateFieldTooShort", stringValidator, validationErrors)
 
 	expectedLocation := location + "TestValidateFieldTooShort.ValidateField.IsStringLengthInvalid"
@@ -125,16 +89,8 @@ func TestValidateFieldTooLong(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	stringValidator := utility.NewStringValidator(
-		testField,
-		"ThisFieldIsWayTooLong",
-		alphaNumericRegex,
-		3,
-		10,
-		false,
-	)
-
 	validationErrors := []error{}
+	stringValidator := utility.NewStringValidator(testField, "ThisFieldIsWayTooLong", alphaNumericRegex, 3, 10, false)
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateFieldTooLong", stringValidator, validationErrors)
 
 	expectedLocation := location + "TestValidateFieldTooLong.ValidateField.IsStringLengthInvalid"
@@ -149,17 +105,9 @@ func TestValidateFieldTooLong(t *testing.T) {
 func TestValidateFieldInvalidCharacters(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
-
-	fieldName := testField
-	stringValidator := utility.NewStringValidator(
-		fieldName,
-		"Invalid@!",
-		alphaNumericRegex,
-		3,
-		10,
-		false,
-	)
+	
 	validationErrors := []error{}
+	stringValidator := utility.NewStringValidator(testField, "Invalid@!", alphaNumericRegex, 3, 10, false)
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateFieldInvalidCharacters", stringValidator, validationErrors)
 
 	expectedLocation := location + "TestValidateFieldInvalidCharacters.ValidateField.AreStringCharactersInvalid"
@@ -173,16 +121,9 @@ func TestValidateFieldInvalidCharacters(t *testing.T) {
 func TestValidateFieldEmptyField(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
-
-	stringValidator := utility.NewStringValidator(
-		testField,
-		"",
-		alphaNumericOptionalRegex,
-		3,
-		10,
-		false,
-	)
+	
 	validationErrors := []error{}
+	stringValidator := utility.NewStringValidator(testField, "", alphaNumericOptionalRegex, 3, 10, false)
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateFieldEmptyField", stringValidator, validationErrors)
 
 	expectedLocation := location + "TestValidateFieldEmptyField.ValidateField.IsStringLengthInvalid"
@@ -197,16 +138,9 @@ func TestValidateFieldEmptyField(t *testing.T) {
 func TestValidateFieldValidCharactersButIncorrectLength(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
-
-	stringValidator := utility.NewStringValidator(
-		testField,
-		"Abc",
-		alphaRegex,
-		5,
-		10,
-		false,
-	)
+	
 	validationErrors := []error{}
+	stringValidator := utility.NewStringValidator(testField, "Abc", alphaRegex, 5, 10, false)
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateFieldValidCharactersButIncorrectLength", stringValidator, validationErrors)
 
 	expectedLocation := location + "TestValidateFieldValidCharactersButIncorrectLength.ValidateField.IsStringLengthInvalid"
@@ -222,16 +156,8 @@ func TestValidateFieldValidLengthButInvalidCharacters(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	stringValidator := utility.NewStringValidator(
-		testField,
-		"12345",
-		alphaRegex,
-		3,
-		10,
-		false,
-	)
-
 	validationErrors := []error{}
+	stringValidator := utility.NewStringValidator(testField, "12345", alphaRegex, 3, 10, false)
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateFieldValidLengthButInvalidCharacters", stringValidator, validationErrors)
 
 	expectedLocation := location + "TestValidateFieldValidLengthButInvalidCharacters.ValidateField.AreStringCharactersInvalid"
@@ -246,16 +172,8 @@ func TestValidateFieldWithLeadingAndTrailingSpaces(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	stringValidator := utility.NewStringValidator(
-		testField,
-		"  Valid123  ",
-		alphaNumericRegex,
-		3,
-		20,
-		false,
-	)
-
 	validationErrors := []error{}
+	stringValidator := utility.NewStringValidator(testField, "  Valid123  ", alphaNumericRegex, 3, 20, false)
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateFieldWithLeadingAndTrailingSpaces", stringValidator, validationErrors)
 
 	expectedLocation := location + "TestValidateFieldWithLeadingAndTrailingSpaces.ValidateField.AreStringCharactersInvalid"
@@ -270,16 +188,8 @@ func TestValidateFieldWithInternalTab(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	stringValidator := utility.NewStringValidator(
-		testField,
-		"Valid 123",
-		alphaNumericRegex,
-		3,
-		20,
-		false,
-	)
-
 	validationErrors := []error{}
+	stringValidator := utility.NewStringValidator(testField, "Valid 123", alphaNumericRegex, 3, 20, false)
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateFieldWithLeadingAndTrailingSpaces", stringValidator, validationErrors)
 
 	expectedLocation := location + "TestValidateFieldWithLeadingAndTrailingSpaces.ValidateField.AreStringCharactersInvalid"
@@ -294,15 +204,7 @@ func TestValidateOptionalFieldTooShort(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	stringValidator := utility.NewStringValidator(
-		testField,
-		"No",
-		alphaNumericRegex,
-		3,
-		10,
-		true,
-	)
-
+	stringValidator := utility.NewStringValidator(testField, "No", alphaNumericRegex, 3, 10, true)
 	validationErrors := []error{}
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateOptionalFieldTooShort", stringValidator, validationErrors)
 
@@ -319,15 +221,7 @@ func TestValidateOptionalFieldTooLong(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	stringValidator := utility.NewStringValidator(
-		testField,
-		"ThisFieldIsWayTooLong",
-		alphaNumericRegex,
-		3,
-		10,
-		true,
-	)
-
+	stringValidator := utility.NewStringValidator(testField, "ThisFieldIsWayTooLong", alphaNumericRegex, 3, 10, true)
 	validationErrors := []error{}
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateOptionalFieldTooLong", stringValidator, validationErrors)
 
@@ -344,15 +238,7 @@ func TestValidateOptionalFieldInvalidCharacters(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	stringValidator := utility.NewStringValidator(
-		testField,
-		"Invalid@!",
-		alphaNumericRegex,
-		3,
-		10,
-		true,
-	)
-
+	stringValidator := utility.NewStringValidator(testField, "Invalid@!", alphaNumericRegex, 3, 10, true)
 	validationErrors := []error{}
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateOptionalFieldInvalidCharacters", stringValidator, validationErrors)
 
@@ -368,15 +254,7 @@ func TestValidateOptionalFieldValidCharactersButIncorrectLength(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	stringValidator := utility.NewStringValidator(
-		testField,
-		"Abc",
-		alphaRegex,
-		5,
-		10,
-		true,
-	)
-
+	stringValidator := utility.NewStringValidator(testField, "Abc", alphaRegex, 5, 10, true)
 	validationErrors := []error{}
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateOptionalFieldValidCharactersButIncorrectLength", stringValidator, validationErrors)
 
@@ -393,15 +271,7 @@ func TestValidateOptionalFieldValidLengthButInvalidCharacters(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	stringValidator := utility.NewStringValidator(
-		testField,
-		"12345",
-		alphaRegex,
-		3,
-		10,
-		true,
-	)
-
+	stringValidator := utility.NewStringValidator(testField, "12345", alphaRegex, 3, 10, true)
 	validationErrors := []error{}
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateOptionalFieldValidLengthButInvalidCharacters", stringValidator, validationErrors)
 
@@ -417,15 +287,7 @@ func TestValidateOptionalFieldWithLeadingAndTrailingSpaces(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	stringValidator := utility.NewStringValidator(
-		testField,
-		"  Valid123  ",
-		alphaNumericRegex,
-		3,
-		20,
-		true,
-	)
-
+	stringValidator := utility.NewStringValidator(testField, "  Valid123  ", alphaNumericRegex, 3, 20, true)
 	validationErrors := []error{}
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateOptionalFieldWithLeadingAndTrailingSpaces", stringValidator, validationErrors)
 
@@ -441,15 +303,7 @@ func TestValidateOptionalFieldWithInternalTab(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	stringValidator := utility.NewStringValidator(
-		testField,
-		"Valid 123",
-		alphaNumericRegex,
-		3,
-		20,
-		true,
-	)
-
+	stringValidator := utility.NewStringValidator(testField, "Valid 123", alphaNumericRegex, 3, 20, true)
 	validationErrors := []error{}
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateOptionalFieldWithInternalTab", stringValidator, validationErrors)
 
@@ -465,41 +319,10 @@ func TestValidateFieldMultipleErrors(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	stringValidator := utility.NewStringValidator(
-		testField,
-		"",
-		alphaNumericRegex,
-		3,
-		10,
-		true,
-	)
-
-	stringValidator1 := utility.NewStringValidator(
-		testField+"1",
-		"Shor",
-		alphaRegex,
-		5,
-		10,
-		false,
-	)
-
-	stringValidator2 := utility.NewStringValidator(
-		testField+"2",
-		"Invalid@!",
-		alphaNumericRegex,
-		3,
-		10,
-		false,
-	)
-
-	stringValidator3 := utility.NewStringValidator(
-		testField+"3",
-		"",
-		alphaNumericOptionalRegex,
-		3,
-		10,
-		false,
-	)
+	stringValidator := utility.NewStringValidator(testField, "", alphaNumericRegex, 3, 10, true)
+	stringValidator1 := utility.NewStringValidator(testField+"1", "Shor", alphaRegex, 5, 10, false)
+	stringValidator2 := utility.NewStringValidator(testField+"2", "Invalid@!", alphaNumericRegex, 3, 10, false)
+	stringValidator3 := utility.NewStringValidator(testField+"3", "", alphaNumericOptionalRegex, 3, 10, false)
 
 	validationErrors := make([]error, 0, 3)
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateFieldMultipleErrors.Field", stringValidator, validationErrors)

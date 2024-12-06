@@ -151,6 +151,7 @@ func TestViperWithoutEnvironment(t *testing.T) {
 			assert.Equal(t, recover, expectedError, test.EqualMessage)
 		}
 	}()
+	
 	config.NewViper()
 }
 
@@ -166,6 +167,7 @@ func TestViperLoadEnvironmentWithoutYamlConfig(t *testing.T) {
 			assert.Equal(t, recover, expectedError, test.EqualMessage)
 		}
 	}()
+
 	config.NewViper()
 }
 
@@ -181,6 +183,7 @@ func TestViperUnmarshalInvalidYAML(t *testing.T) {
 			assert.Equal(t, recover, expectedError, test.EqualMessage)
 		}
 	}()
+
 	config.NewViper()
 }
 
@@ -196,5 +199,6 @@ func TestViperUnmarshalEmptyAML(t *testing.T) {
 			assert.Equal(t, recover, expectedError, test.EqualMessage)
 		}
 	}()
+	
 	config.NewViper()
 }

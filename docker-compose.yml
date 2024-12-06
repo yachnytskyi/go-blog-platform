@@ -12,11 +12,11 @@ services:
     networks:
       - application-network
 
-  app-dev:
+  app-local:
     build:
       context: ./
-      dockerfile: infrastructure/deployment/docker/Dockerfile.dev
-    image: app
+      dockerfile: infrastructure/deployment/docker/Dockerfile.local
+    image: app-local
     ports:
       - "8080:8080"
     volumes:
@@ -27,6 +27,20 @@ services:
     networks:
       - application-network
     command: reflex -r '\.go$' -s -- go run ./cmd/server/main.go
+
+  app-dev:
+    build:
+      context: ./
+      dockerfile: infrastructure/deployment/docker/Dockerfile.dev
+    image: app-dev
+    ports:
+      - "8080:8080"
+    working_dir: /app
+    depends_on:
+      - mongodb
+    networks:
+      - application-network
+    command: ./main 
 
   app-release:
     build:

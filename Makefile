@@ -12,6 +12,9 @@ mongo-local:
 	docker compose up mongodb -d 
 	reflex -s go run cmd/server/main.go 
 
+mongo--local-docker:
+	docker compose up mongodb app-local
+
 mongo-dev:
 	docker compose up mongodb app-dev
 

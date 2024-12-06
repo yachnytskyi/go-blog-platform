@@ -24,7 +24,7 @@ func TestNewResultOnSuccess(t *testing.T) {
 	assert.NoError(t, result.Error, test.ErrorNilMessage)
 }
 
-func TestNewResultOnFailure(t *testing.T) {
+func TestNewResultOnFailureWithError(t *testing.T) {
 	t.Parallel()
 	err := errors.New(testError)
 	result := common.NewResultOnFailure[string](err)
@@ -34,11 +34,12 @@ func TestNewResultOnFailure(t *testing.T) {
 	assert.Equal(t, "", result.Data, test.EqualMessage)
 }
 
-func TestResultIsErrorWithError(t *testing.T) {
+func TestResultOnFailureWithInternalErrorError(t *testing.T) {
 	t.Parallel()
 	err := domain.InternalError{}
 	result := common.NewResultOnFailure[int](err)
 
 	assert.True(t, validator.IsError(result.Error), test.FailureMessage)
 	assert.IsType(t, domain.InternalError{}, result.Error, test.EqualMessage)
+	assert.Equal(t, 0, result.Data, test.EqualMessage)
 }

@@ -34,14 +34,14 @@ func TestHexToObjectIDMapperValidHex(t *testing.T) {
 	assert.Equal(t, validHex, result.Data.Hex(), test.EqualMessage)
 }
 
-func TestDataToMongoDocumentMapperSuccess(t *testing.T) {
+func TestDataToMongoDocumentMapper(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
 	key := "name"
 	value := "test"
 	incomingData := map[string]interface{}{key: value}
-	result := model.DataToMongoDocumentMapper(mockLogger, location+"TestDataToMongoDocumentMapperSuccess", incomingData)
+	result := model.DataToMongoDocumentMapper(mockLogger, location+"TestDataToMongoDocumentMapper", incomingData)
 	expectedDocument := bson.D{{Key: key, Value: value}}
 
 	assert.False(t, validator.IsError(result.Error), test.ErrorNilMessage)

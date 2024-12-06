@@ -123,7 +123,7 @@ func TestViperLoadDefaultConfiguration(t *testing.T) {
 		recover := recover()
 		assert.Nil(t, recover)
 	}()
-
+	
 	viperInstance := viper.New()
 	viperInstance.SetConfigFile(envFilePath)
 	viperInstance.AutomaticEnv()

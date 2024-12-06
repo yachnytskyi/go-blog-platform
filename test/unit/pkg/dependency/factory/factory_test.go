@@ -80,6 +80,7 @@ func TestNewLoggerInvalidType(t *testing.T) {
 			assert.Equal(t, recover, expectedError, test.EqualMessage)
 		}
 	}()
+
 	factory.NewLogger(mockConfig)
 }
 
@@ -96,6 +97,7 @@ func TestNewEmailInvalidType(t *testing.T) {
 			assert.Equal(t, recover, expectedError, test.EqualMessage)
 		}
 	}()
+
 	factory.NewEmail(mockConfig, nil)
 }
 
@@ -113,6 +115,7 @@ func TestNewRepositoryInvalidType(t *testing.T) {
 			assert.Equal(t, recover, expectedError, test.EqualMessage)
 		}
 	}()
+	
 	factory.NewRepositoryFactory(mockConfig, mockLogger)
 }
 

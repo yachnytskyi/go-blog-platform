@@ -72,7 +72,6 @@ func TestRequestIDMiddlewareSetsRequestIDInContext(t *testing.T) {
 	t.Parallel()
 	router := gin.Default()
 	recorder := httptest.NewRecorder()
-
 	router.GET(test.TestURL, func(ginContext *gin.Context) {
 		requestID := ginContext.GetString(constants.RequestIDHeader)
 		ginContext.String(http.StatusOK, requestID)
@@ -88,7 +87,6 @@ func TestRequestIDMiddlewareSetsRequestIDInContext(t *testing.T) {
 func TestSecureHeadersMiddlewareSetsHeadersCorrectly(t *testing.T) {
 	t.Parallel()
 	mockConfig := setupSecureHeadersMiddlewareConfig()
-
 	router := gin.Default()
 	router.Use(middleware.SecureHeadersMiddleware(mockConfig))
 
@@ -104,10 +102,9 @@ func TestSecureHeadersMiddlewareSetsHeadersCorrectly(t *testing.T) {
 
 func TestCSPMiddlewareSetsCSPHeader(t *testing.T) {
 	t.Parallel()
-	router := gin.Default()
 	mockConfig := setupCSPMiddlewaremockConfig()
+	router := gin.Default()
 	router.Use(middleware.CSPMiddleware(mockConfig))
-
 	router.GET(test.TestURL, func(ginContext *gin.Context) {
 		ginContext.String(http.StatusOK, constants.Success)
 	})
@@ -122,14 +119,98 @@ func TestCSPMiddlewareSetsCSPHeader(t *testing.T) {
 	assert.Equal(t, test.ContentSecurityPolicyFullValue, header, test.EqualMessage)
 }
 
+func TestValidateInputMiddlewareAcceptsValidRequest(t *testing.T) {
+	t.Parallel()
+	mockConfig := setupValidateInputMiddlewareConfig()
+	mockLogger := mock.NewMockLogger()
+	router := gin.Default()
+	router.Use(middleware.ValidateInputMiddleware(mockConfig, mockLogger))
+	router.POST(test.TestURL, func(ginContext *gin.Context) {
+		ginContext.String(http.StatusOK, constants.Success)
+	})
+
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodPost, test.TestURL, nil)
+	request.Header.Set(constants.ContentType, test.ContentTypeJSON)
+	router.ServeHTTP(recorder, request)
+
+	assert.Equal(t, http.StatusOK, recorder.Code, test.EqualMessage)
+}
+
+// func TestTimeoutMiddlewareCompletesWithinTimeout(t *testing.T) {
+// 	t.Parallel()
+// 	mockLogger := mock.NewMockLogger()
+// 	router := gin.Default()
+// 	router.Use(middleware.TimeoutMiddleware(mockLogger))
+// 	router.GET(test.TestURL, func(ginContext *gin.Context) {
+// 		time.Sleep(10 * time.Millisecond)
+// 		ginContext.String(http.StatusOK, constants.Success)
+// 	})
+
+// 	recorder := httptest.NewRecorder()
+// 	request := httptest.NewRequest(http.MethodGet, test.TestURL, nil)
+// 	router.ServeHTTP(recorder, request)
+
+// 	assert.Equal(t, http.StatusOK, recorder.Code, test.EqualMessage)
+// 	assert.Equal(t, constants.Success, recorder.Body.String(), test.EqualMessage)
+// }
+
+// func TestTimeoutMiddlewareTimesOut(t *testing.T) {
+// 	t.Parallel()
+// 	mockLogger := mock.NewMockLogger()
+// 	router := gin.Default()
+// 	router.Use(middleware.TimeoutMiddleware(mockLogger))
+// 	router.GET(test.TestURL, func(ginContext *gin.Context) {
+// 		time.Sleep(constants.DefaultContextTimer + 100*time.Millisecond)
+// 		ginContext.String(http.StatusOK, constants.Success)
+// 	})
+
+// 	recorder := httptest.NewRecorder()
+// 	request := httptest.NewRequest(http.MethodGet, test.TestURL, nil)
+// 	router.ServeHTTP(recorder, request)
+
+// 	assert.Equal(t, http.StatusBadGateway, recorder.Code, test.EqualMessage)
+// 	assert.Contains(t, recorder.Body.String(), constants.InternalErrorNotification, test.EqualMessage)
+// }
+
+func TestLoggerMiddlewareLogsIncomingAndOutgoingRequests(t *testing.T) {
+	t.Parallel()
+	mockLogger := mock.NewMockLogger()
+	router := gin.Default()
+	router.Use(middleware.RequestIDMiddleware())
+	router.Use(middleware.LoggerMiddleware(mockLogger))
+	router.GET(test.TestURL, func(c *gin.Context) {
+		c.String(http.StatusOK, constants.Success)
+	})
+
+	userAgentKey := "User-Agent"
+	userAgentValue := "test-user-agent"
+	expectedLocation := "pkg.utility.delivery.http.gin.middleware.LoggerMiddleware"
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, test.TestURL, nil)
+	request.Header.Set(userAgentKey, userAgentValue)
+	router.ServeHTTP(recorder, request)
+
+	outgoingLog, _ := mockLogger.LastInfo.(delivery.HTTPOutgoingLog)
+	assert.IsType(t, delivery.HTTPOutgoingLog{}, mockLogger.LastInfo, test.EqualMessage)
+	assert.Equal(t, constants.Success, recorder.Body.String(), test.EqualMessage)
+	assert.Equal(t, outgoingLog.Location, expectedLocation, test.EqualMessage)
+	assert.NotEmpty(t, outgoingLog.RequestID, test.EqualMessage)
+	assert.Equal(t, http.MethodGet, outgoingLog.RequestMethod, test.EqualMessage)
+	assert.Equal(t, test.TestURL, outgoingLog.RequestURL, test.EqualMessage)
+	assert.NotEmpty(t, outgoingLog.ClientIP, test.EqualMessage)
+	assert.Equal(t, userAgentValue, outgoingLog.UserAgent, test.EqualMessage)
+	assert.Equal(t, constants.Success, recorder.Body.String(), test.EqualMessage)
+	assert.Equal(t, http.StatusOK, outgoingLog.ResponseStatus, test.EqualMessage)
+	assert.NotZero(t, outgoingLog.Duration, test.EqualMessage)
+}
+
 func TestRateLimitMiddlewareWithDifferentLimits(t *testing.T) {
 	t.Parallel()
-	router := gin.Default()
 	mockConfig := mock.NewMockConfig()
-
 	mockConfig.Security.RateLimit = 1
+	router := gin.Default()
 	router.Use(middleware.RateLimitMiddleware(mockConfig))
-
 	router.GET(test.TestURL, func(ginContext *gin.Context) {
 		ginContext.String(http.StatusOK, constants.Success)
 	})
@@ -148,7 +229,6 @@ func TestRateLimitMiddlewareLimitsRequests(t *testing.T) {
 	t.Parallel()
 	mockConfig := mock.NewMockConfig()
 	mockConfig.Security.RateLimit = 3
-
 	router := gin.Default()
 	router.Use(middleware.RateLimitMiddleware(mockConfig))
 	router.GET(test.TestURL, func(ginContext *gin.Context) {
@@ -166,30 +246,10 @@ func TestRateLimitMiddlewareLimitsRequests(t *testing.T) {
 	assert.Equal(t, http.StatusTooManyRequests, recorder.Code, test.EqualMessage)
 }
 
-func TestValidateInputMiddlewareAcceptsValidRequest(t *testing.T) {
-	t.Parallel()
-	mockConfig := setupValidateInputMiddlewareConfig()
-	mockLogger := mock.NewMockLogger()
-
-	router := gin.Default()
-	router.Use(middleware.ValidateInputMiddleware(mockConfig, mockLogger))
-	router.POST(test.TestURL, func(ginContext *gin.Context) {
-		ginContext.String(http.StatusOK, constants.Success)
-	})
-
-	recorder := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodPost, test.TestURL, nil)
-	request.Header.Set(constants.ContentType, test.ContentTypeJSON)
-	router.ServeHTTP(recorder, request)
-
-	assert.Equal(t, http.StatusOK, recorder.Code, test.EqualMessage)
-}
-
 func TestValidateInputMiddlewareRejectsInvalidMethod(t *testing.T) {
 	t.Parallel()
 	mockConfig := setupValidateInputMiddlewareConfig()
 	mockLogger := mock.NewMockLogger()
-
 	router := gin.Default()
 	router.Use(middleware.ValidateInputMiddleware(mockConfig, mockLogger))
 
@@ -204,7 +264,6 @@ func TestValidateInputMiddlewareRejectsInvalidContentType(t *testing.T) {
 	t.Parallel()
 	mockConfig := setupValidateInputMiddlewareConfig()
 	mockLogger := mock.NewMockLogger()
-
 	router := gin.Default()
 	router.Use(middleware.ValidateInputMiddleware(mockConfig, mockLogger))
 
@@ -214,78 +273,4 @@ func TestValidateInputMiddlewareRejectsInvalidContentType(t *testing.T) {
 	router.ServeHTTP(recorder, request)
 
 	assert.Equal(t, http.StatusBadRequest, recorder.Code, test.EqualMessage)
-}
-
-// func TestTimeoutMiddlewareCompletesWithinTimeout(t *testing.T) {
-// 	t.Parallel()
-// 	mockLogger := mock.NewMockLogger()
-
-// 	router := gin.Default()
-// 	router.Use(middleware.TimeoutMiddleware(mockLogger))
-
-// 	router.GET(test.TestURL, func(ginContext *gin.Context) {
-// 		time.Sleep(10 * time.Millisecond)
-// 		ginContext.String(http.StatusOK, constants.Success)
-// 	})
-
-// 	recorder := httptest.NewRecorder()
-// 	request := httptest.NewRequest(http.MethodGet, test.TestURL, nil)
-// 	router.ServeHTTP(recorder, request)
-
-// 	assert.Equal(t, http.StatusOK, recorder.Code, test.EqualMessage)
-// 	assert.Equal(t, constants.Success, recorder.Body.String(), test.EqualMessage)
-// }
-
-// func TestTimeoutMiddlewareTimesOut(t *testing.T) {
-// 	t.Parallel()
-// 	mockLogger := mock.NewMockLogger()
-
-// 	router := gin.Default()
-// 	router.Use(middleware.TimeoutMiddleware(mockLogger))
-
-// 	router.GET(test.TestURL, func(ginContext *gin.Context) {
-// 		time.Sleep(constants.DefaultContextTimer + 100*time.Millisecond)
-// 		ginContext.String(http.StatusOK, constants.Success)
-// 	})
-
-// 	recorder := httptest.NewRecorder()
-// 	request := httptest.NewRequest(http.MethodGet, test.TestURL, nil)
-// 	router.ServeHTTP(recorder, request)
-
-// 	assert.Equal(t, http.StatusBadGateway, recorder.Code, test.EqualMessage)
-// 	assert.Contains(t, recorder.Body.String(), constants.InternalErrorNotification, test.EqualMessage)
-// }
-
-func TestLoggerMiddlewareLogsIncomingAndOutgoingRequests(t *testing.T) {
-	t.Parallel()
-	mockLogger := mock.NewMockLogger()
-
-	router := gin.Default()
-	router.Use(middleware.RequestIDMiddleware())
-	router.Use(middleware.LoggerMiddleware(mockLogger))
-	router.GET(test.TestURL, func(c *gin.Context) {
-		c.String(http.StatusOK, constants.Success)
-	})
-
-	userAgentKey := "User-Agent"
-	userAgentValue := "test-user-agent"
-	expectedLocation := "pkg.utility.delivery.http.gin.middleware.LoggerMiddleware"
-
-	recorder := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodGet, test.TestURL, nil)
-	request.Header.Set(userAgentKey, userAgentValue)
-	router.ServeHTTP(recorder, request)
-
-	outgoingLog, _ := mockLogger.LastInfo.(delivery.HTTPOutgoingLog)
-	assert.IsType(t, delivery.HTTPOutgoingLog{}, mockLogger.LastInfo, test.EqualMessage)
-	assert.Equal(t, constants.Success, recorder.Body.String(), test.EqualMessage)
-	assert.Equal(t, outgoingLog.Location, expectedLocation, test.EqualMessage)
-	assert.NotEmpty(t, outgoingLog.RequestID, test.EqualMessage)
-	assert.Equal(t, http.MethodGet, outgoingLog.RequestMethod, test.EqualMessage)
-	assert.Equal(t, test.TestURL, outgoingLog.RequestURL, test.EqualMessage)
-	assert.NotEmpty(t, outgoingLog.ClientIP, test.EqualMessage)
-	assert.Equal(t, userAgentValue, outgoingLog.UserAgent, test.EqualMessage)
-	assert.Equal(t, constants.Success, recorder.Body.String(), test.EqualMessage)
-	assert.Equal(t, http.StatusOK, outgoingLog.ResponseStatus, test.EqualMessage)
-	assert.NotZero(t, outgoingLog.Duration, test.EqualMessage)
 }

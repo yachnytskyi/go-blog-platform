@@ -17,7 +17,6 @@ import (
 func TestAnonymousMiddlewareNoToken(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
-
 	router := gin.Default()
 	router.Use(middleware.AnonymousMiddleware(mockLogger))
 	router.GET(test.TestURL, func(ginContext *gin.Context) {
@@ -35,7 +34,6 @@ func TestAnonymousMiddlewareNoToken(t *testing.T) {
 func TestAnonymousMiddlewareHeaderEmptyTokenValue(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
-
 	router := gin.Default()
 	router.Use(middleware.AnonymousMiddleware(mockLogger))
 	router.GET(test.TestURL, func(ginContext *gin.Context) {
@@ -56,7 +54,7 @@ func TestAnonymousMiddlewareCookieEmptyTokenValue(t *testing.T) {
 	mockLogger := mock.NewMockLogger()
 	router := gin.Default()
 	router.Use(middleware.AnonymousMiddleware(mockLogger))
-
+	
 	request := httptest.NewRequest(http.MethodGet, test.TestURL, nil)
 	request.AddCookie(&http.Cookie{Name: constants.AccessTokenValue, Value: ""})
 	recorder := httptest.NewRecorder()
@@ -86,7 +84,6 @@ func TestAnonymousMiddlewareCookieValidToken(t *testing.T) {
 func TestAnonymousMiddlewareHeaderValidToken(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
-
 	router := gin.Default()
 	router.Use(middleware.AnonymousMiddleware(mockLogger))
 	router.GET(test.TestURL, func(ginContext *gin.Context) {

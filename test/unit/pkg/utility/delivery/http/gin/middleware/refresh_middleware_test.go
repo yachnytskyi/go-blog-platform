@@ -44,7 +44,6 @@ func TestRefreshTokenMiddlewareCookieValidToken(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 	mockConfig := setupRefreshTokenMiddlewareConfig()
-
 	router := gin.Default()
 	router.Use(middleware.RefreshTokenMiddleware(mockConfig, mockLogger))
 	router.GET(test.TestURL, func(ginContext *gin.Context) {
@@ -62,11 +61,31 @@ func TestRefreshTokenMiddlewareCookieValidToken(t *testing.T) {
 	assert.Equal(t, constants.Success, recorder.Body.String(), test.EqualMessage)
 }
 
+func TestRefreshTokenMiddlewareHeaderValidToken(t *testing.T) {
+	t.Parallel()
+	mockLogger := mock.NewMockLogger()
+	mockConfig := setupRefreshTokenMiddlewareConfig()
+	router := gin.Default()
+	router.Use(middleware.RefreshTokenMiddleware(mockConfig, mockLogger))
+	router.GET(test.TestURL, func(ginContext *gin.Context) {
+		ginContext.String(http.StatusOK, constants.Success)
+	})
+
+	validToken := getValidToken(location + "TestRefreshTokenMiddlewareHeaderValidToken")
+	request := httptest.NewRequest(http.MethodGet, test.TestURL, nil)
+	request.Header.Set(constants.Authorization, constants.Bearer+validToken.Data)
+	recorder := httptest.NewRecorder()
+	router.ServeHTTP(recorder, request)
+
+	assert.NoError(t, validToken.Error, test.ErrorNilMessage)
+	assert.Equal(t, http.StatusOK, recorder.Code, test.EqualMessage)
+	assert.Equal(t, constants.Success, recorder.Body.String(), test.EqualMessage)
+}
+
 func TestRefreshTokenMiddlewareCookieInvalidTokenValue(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 	mockConfig := setupRefreshTokenMiddlewareConfig()
-
 	router := gin.Default()
 	router.Use(middleware.RefreshTokenMiddleware(mockConfig, mockLogger))
 	router.GET(test.TestURL, func(ginContext *gin.Context) {
@@ -87,7 +106,6 @@ func TestRefreshTokenMiddlewareCookieEmptyTokenValue(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 	mockConfig := setupRefreshTokenMiddlewareConfig()
-
 	router := gin.Default()
 	router.Use(middleware.RefreshTokenMiddleware(mockConfig, mockLogger))
 	router.GET(test.TestURL, func(ginContext *gin.Context) {
@@ -108,7 +126,6 @@ func TestRefreshTokenMiddlewareCookieMultipleTokens(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 	mockConfig := setupRefreshTokenMiddlewareConfig()
-
 	router := gin.Default()
 	router.Use(middleware.RefreshTokenMiddleware(mockConfig, mockLogger))
 	router.GET(test.TestURL, func(ginContext *gin.Context) {
@@ -130,7 +147,6 @@ func TestRefreshTokenMiddlewareCookieExpiredToken(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 	mockConfig := setupRefreshTokenMiddlewareConfig()
-
 	router := gin.Default()
 	router.Use(middleware.RefreshTokenMiddleware(mockConfig, mockLogger))
 	router.GET(test.TestURL, func(ginContext *gin.Context) {
@@ -148,33 +164,10 @@ func TestRefreshTokenMiddlewareCookieExpiredToken(t *testing.T) {
 	assert.JSONEq(t, test.NotLoggedInMessage, recorder.Body.String(), test.EqualMessage)
 }
 
-func TestRefreshTokenMiddlewareHeaderValidToken(t *testing.T) {
-	t.Parallel()
-	mockLogger := mock.NewMockLogger()
-	mockConfig := setupRefreshTokenMiddlewareConfig()
-
-	router := gin.Default()
-	router.Use(middleware.RefreshTokenMiddleware(mockConfig, mockLogger))
-	router.GET(test.TestURL, func(ginContext *gin.Context) {
-		ginContext.String(http.StatusOK, constants.Success)
-	})
-
-	validToken := getValidToken(location + "TestRefreshTokenMiddlewareHeaderValidToken")
-	request := httptest.NewRequest(http.MethodGet, test.TestURL, nil)
-	request.Header.Set(constants.Authorization, constants.Bearer+validToken.Data)
-	recorder := httptest.NewRecorder()
-	router.ServeHTTP(recorder, request)
-
-	assert.NoError(t, validToken.Error, test.ErrorNilMessage)
-	assert.Equal(t, http.StatusOK, recorder.Code, test.EqualMessage)
-	assert.Equal(t, constants.Success, recorder.Body.String(), test.EqualMessage)
-}
-
 func TestRefreshTokenMiddlewareHeaderInvalidTokenValue(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 	mockConfig := setupRefreshTokenMiddlewareConfig()
-
 	router := gin.Default()
 	router.Use(middleware.RefreshTokenMiddleware(mockConfig, mockLogger))
 	router.GET(test.TestURL, func(ginContext *gin.Context) {
@@ -195,7 +188,6 @@ func TestRefreshTokenMiddlewareHeaderEmptyTokenValue(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 	mockConfig := setupRefreshTokenMiddlewareConfig()
-
 	router := gin.Default()
 	router.Use(middleware.RefreshTokenMiddleware(mockConfig, mockLogger))
 	router.GET(test.TestURL, func(ginContext *gin.Context) {
@@ -216,7 +208,6 @@ func TestRefreshTokenMiddlewareHeaderMultipleTokens(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 	mockConfig := setupRefreshTokenMiddlewareConfig()
-
 	router := gin.Default()
 	router.Use(middleware.RefreshTokenMiddleware(mockConfig, mockLogger))
 	router.GET(test.TestURL, func(ginContext *gin.Context) {
@@ -238,7 +229,6 @@ func TestRefreshTokenMiddlewareHeaderExpiredToken(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 	mockConfig := setupRefreshTokenMiddlewareConfig()
-
 	router := gin.Default()
 	router.Use(middleware.RefreshTokenMiddleware(mockConfig, mockLogger))
 	router.GET(test.TestURL, func(ginContext *gin.Context) {
@@ -260,7 +250,6 @@ func TestRefreshTokenMiddlewareHeaderNoToken(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 	mockConfig := setupRefreshTokenMiddlewareConfig()
-
 	router := gin.Default()
 	router.Use(middleware.RefreshTokenMiddleware(mockConfig, mockLogger))
 	router.GET(test.TestURL, func(ginContext *gin.Context) {

@@ -21,6 +21,7 @@ func parseResult(result string) map[string]string {
 			parsed[parts[0]] = parts[1]
 		}
 	}
+
 	return parsed
 }
 
@@ -41,9 +42,9 @@ func TestBSONToStringMapperNestedDocumentsAndArrays(t *testing.T) {
 		"field1": objectID.Hex(),
 		"field2": "map[nestedField1:[map[subfield1:subvalue1] stringValue 42] nestedField2:3.14]",
 	}
-
 	result := utility.BSONToStringMapper(query)
 	parsedResult := parseResult(result)
+
 	assert.Equal(t, expected, parsedResult, test.EqualMessage)
 }
 
@@ -51,8 +52,8 @@ func TestBSONToStringMapperEmptyQuery(t *testing.T) {
 	t.Parallel()
 	query := bson.M{}
 	expected := map[string]string{}
-
 	result := utility.BSONToStringMapper(query)
 	parsedResult := parseResult(result)
+
 	assert.Equal(t, expected, parsedResult, test.EqualMessage)
 }

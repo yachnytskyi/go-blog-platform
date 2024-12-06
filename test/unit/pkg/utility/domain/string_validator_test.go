@@ -43,6 +43,7 @@ func TestValidateFieldAtMinLength(t *testing.T) {
 	validationErrors := []error{}
 	stringValidator := utility.NewStringValidator(testField, "Min", alphaNumericRegex, 3, 10, false)
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateFieldAtMinLength", stringValidator, validationErrors)
+	
 	assert.Len(t, validationErrors, 0, test.ErrorNilMessage)
 }
 
@@ -204,8 +205,8 @@ func TestValidateOptionalFieldTooShort(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	stringValidator := utility.NewStringValidator(testField, "No", alphaNumericRegex, 3, 10, true)
 	validationErrors := []error{}
+	stringValidator := utility.NewStringValidator(testField, "No", alphaNumericRegex, 3, 10, true)
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateOptionalFieldTooShort", stringValidator, validationErrors)
 
 	expectedLocation := location + "TestValidateOptionalFieldTooShort.ValidateField.IsStringLengthInvalid"
@@ -221,8 +222,8 @@ func TestValidateOptionalFieldTooLong(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	stringValidator := utility.NewStringValidator(testField, "ThisFieldIsWayTooLong", alphaNumericRegex, 3, 10, true)
 	validationErrors := []error{}
+	stringValidator := utility.NewStringValidator(testField, "ThisFieldIsWayTooLong", alphaNumericRegex, 3, 10, true)
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateOptionalFieldTooLong", stringValidator, validationErrors)
 
 	expectedLocation := location + "TestValidateOptionalFieldTooLong.ValidateField.IsStringLengthInvalid"
@@ -238,8 +239,8 @@ func TestValidateOptionalFieldInvalidCharacters(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	stringValidator := utility.NewStringValidator(testField, "Invalid@!", alphaNumericRegex, 3, 10, true)
 	validationErrors := []error{}
+	stringValidator := utility.NewStringValidator(testField, "Invalid@!", alphaNumericRegex, 3, 10, true)
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateOptionalFieldInvalidCharacters", stringValidator, validationErrors)
 
 	expectedLocation := location + "TestValidateOptionalFieldInvalidCharacters.ValidateField.AreStringCharactersInvalid"
@@ -254,8 +255,8 @@ func TestValidateOptionalFieldValidCharactersButIncorrectLength(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	stringValidator := utility.NewStringValidator(testField, "Abc", alphaRegex, 5, 10, true)
 	validationErrors := []error{}
+	stringValidator := utility.NewStringValidator(testField, "Abc", alphaRegex, 5, 10, true)
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateOptionalFieldValidCharactersButIncorrectLength", stringValidator, validationErrors)
 
 	expectedLocation := location + "TestValidateOptionalFieldValidCharactersButIncorrectLength.ValidateField.IsStringLengthInvalid"
@@ -271,8 +272,8 @@ func TestValidateOptionalFieldValidLengthButInvalidCharacters(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	stringValidator := utility.NewStringValidator(testField, "12345", alphaRegex, 3, 10, true)
 	validationErrors := []error{}
+	stringValidator := utility.NewStringValidator(testField, "12345", alphaRegex, 3, 10, true)
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateOptionalFieldValidLengthButInvalidCharacters", stringValidator, validationErrors)
 
 	expectedLocation := location + "TestValidateOptionalFieldValidLengthButInvalidCharacters.ValidateField.AreStringCharactersInvalid"
@@ -287,8 +288,8 @@ func TestValidateOptionalFieldWithLeadingAndTrailingSpaces(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	stringValidator := utility.NewStringValidator(testField, "  Valid123  ", alphaNumericRegex, 3, 20, true)
 	validationErrors := []error{}
+	stringValidator := utility.NewStringValidator(testField, "  Valid123  ", alphaNumericRegex, 3, 20, true)
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateOptionalFieldWithLeadingAndTrailingSpaces", stringValidator, validationErrors)
 
 	expectedLocation := location + "TestValidateOptionalFieldWithLeadingAndTrailingSpaces.ValidateField.AreStringCharactersInvalid"
@@ -303,8 +304,8 @@ func TestValidateOptionalFieldWithInternalTab(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
 
-	stringValidator := utility.NewStringValidator(testField, "Valid 123", alphaNumericRegex, 3, 20, true)
 	validationErrors := []error{}
+	stringValidator := utility.NewStringValidator(testField, "Valid 123", alphaNumericRegex, 3, 20, true)
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateOptionalFieldWithInternalTab", stringValidator, validationErrors)
 
 	expectedLocation := location + "TestValidateOptionalFieldWithInternalTab.ValidateField.AreStringCharactersInvalid"

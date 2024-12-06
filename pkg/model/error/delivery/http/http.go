@@ -144,10 +144,12 @@ func NewHTTPPaginationError(currentPage, totalPages, notification string) HTTPPa
 }
 
 func (httpPaginationError HTTPPaginationError) Error() string {
-	return fmt.Sprintf("current_page: %s total_pages: %s notification: %s",
+	return fmt.Sprintf(
+		"current_page: %s total_pages: %s notification: %s",
 		httpPaginationError.CurrentPage,
 		httpPaginationError.TotalPages,
-		httpPaginationError.Notification)
+		httpPaginationError.Notification,
+	)
 }
 
 type HTTPRequestError struct {
@@ -181,7 +183,7 @@ func NewHTTPInternalError(location, notification string) HTTPInternalError {
 }
 
 func (httpInternalError HTTPInternalError) Error() string {
-	return fmt.Sprintf(constants.BaseErrorMessageFormat,httpInternalError.Location,httpInternalError.Notification)
+	return fmt.Sprintf(constants.BaseErrorMessageFormat, httpInternalError.Location, httpInternalError.Notification)
 }
 
 type HTTPInternalErrors struct {

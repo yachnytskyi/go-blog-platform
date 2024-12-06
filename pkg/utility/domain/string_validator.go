@@ -26,7 +26,6 @@ func ValidateField(logger interfaces.Logger, location string, stringValidator St
 		} else {
 			notification = fmt.Sprintf(constants.StringAllowedLength, stringValidator.MinLength, stringValidator.MaxLength)
 		}
-
 		validationError := domain.NewValidationError(
 			location+".ValidateField.IsStringLengthInvalid",
 			stringValidator.FieldName,
@@ -39,11 +38,15 @@ func ValidateField(logger interfaces.Logger, location string, stringValidator St
 
 	// Validate field characters.
 	if AreStringCharactersInvalid(stringValidator.Field, stringValidator.FieldRegex) {
+		if stringValidator.Notification == "" {
+			stringValidator.Notification = constants.StringAllowedCharacters
+
+		}
 		validationError := domain.NewValidationError(
 			location+".ValidateField.AreStringCharactersInvalid",
 			stringValidator.FieldName,
 			fieldRequirement(stringValidator.IsOptional),
-			fmt.Sprintf(constants.StringAllowedCharacters),
+			stringValidator.Notification,
 		)
 		logger.Debug(validationError)
 		errors = append(errors, validationError)

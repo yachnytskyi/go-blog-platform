@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"fmt"
 	"net"
 	"regexp"
 	"strings"
@@ -37,7 +36,7 @@ const (
 // Regular expressions for validating the fields.
 var (
 	emailRegex    = regexp.MustCompile("^(?:(?:(?:(?:[a-zA-Z]|\\d|[\\\\\\\\/=\\\\{\\|}]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])+(?:\\.([a-zA-Z]|\\d|[\\\\+\\-\\/=\\\\_{\\|}]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])+)*)|(?:(?:\\x22)(?:(?:(?:(?:\\x20|\\x09)*(?:\\x0d\\x0a))?(?:\\x20|\\x09)+)?(?:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x7f]|\\x21|[\\x23-\\x5b]|[\\x5d-\\x7e]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])|(?:(?:[\\x01-\\x09\\x0b\\x0c\\x0d-\\x7f]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}]))))*(?:(?:(?:\\x20|\\x09)*(?:\\x0d\\x0a))?(\\x20|\\x09)+)?(?:\\x22))))@(?:(?:(?:[a-zA-Z]|\\d|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])|(?:(?:[a-zA-Z]|\\d|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])(?:[a-zA-Z]|\\d|-|\\.||[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])*(?:[a-zA-Z]|\\d|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])))\\.)+(?:(?:[a-zA-Z]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])|(?:(?:[a-zA-Z]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])(?:[a-zA-Z]|\\d|-|\\.||[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])*(?:[a-zA-Z]|[\\x{00A0}-\\x{D7FF}\\x{F900}-\\x{FDCF}\\x{FDF0}-\\x{FFEF}])))\\.?$")
-	usernameRegex  = regexp.MustCompile(`^[a-zA-z0-9-_ \t]*$`)
+	usernameRegex = regexp.MustCompile(`^[a-zA-z0-9-_ \t]*$`)
 	passwordRegex = regexp.MustCompile((`^[a-zA-z0-9-_*,.]*$`))
 )
 
@@ -91,7 +90,7 @@ func validateUserLogin(logger interfaces.Logger, userLogin user.UserLogin) commo
 
 func validateUserForgottenPassword(logger interfaces.Logger, userForgottenPassword user.UserForgottenPassword) common.Result[user.UserForgottenPassword] {
 	validationErrors := make([]error, 0, 2)
-	
+
 	userForgottenPassword.Email = commonUtility.SanitizeAndToLowerString(userForgottenPassword.Email)
 	validationErrors = validateEmail(logger, location+"validateUserForgottenPassword", userForgottenPassword.Email, validationErrors)
 	if len(validationErrors) > 0 {
@@ -103,7 +102,7 @@ func validateUserForgottenPassword(logger interfaces.Logger, userForgottenPasswo
 
 func validateUserResetPassword(logger interfaces.Logger, userResetPassword user.UserResetPassword) common.Result[user.UserResetPassword] {
 	validationErrors := make([]error, 0, 2)
-	
+
 	userResetPassword.ResetToken = strings.TrimSpace(userResetPassword.ResetToken)
 	userResetPassword.Password = strings.TrimSpace(userResetPassword.Password)
 	userResetPassword.PasswordConfirm = strings.TrimSpace(userResetPassword.PasswordConfirm)
@@ -120,11 +119,11 @@ func validateUserResetPassword(logger interfaces.Logger, userResetPassword user.
 
 func validateEmail(logger interfaces.Logger, location, email string, validationErrors []error) []error {
 	errors := validationErrors
-	
+
 	emailValidator := utility.NewStringValidator(EmailField, email, emailRegex, constants.MinStringLength, constants.MaxStringLength, false)
-	validateFieldError := validateField(logger, location+".validateEmail", emailAllowedCharacters, emailValidator)
-	if validator.IsError(validateFieldError) {
-		errors = append(errors, validateFieldError)
+	emailValidator.Notification = emailAllowedCharacters
+	errors = utility.ValidateField(logger, location+".validateEmail", emailValidator, errors)
+	if len(errors) > 0 {
 		return errors
 	}
 
@@ -138,13 +137,10 @@ func validateEmail(logger interfaces.Logger, location, email string, validationE
 
 func validatePassword(logger interfaces.Logger, location, password, passwordConfirm string, validationErrors []error) []error {
 	errors := validationErrors
-	
+
 	passwordValidator := utility.NewStringValidator(passwordField, password, passwordRegex, constants.MinStringLength, constants.MaxStringLength, false)
-	validateFieldError := validateField(logger, location+".validatePassword", passwordAllowedCharacters, passwordValidator)
-	if validator.IsError(validateFieldError) {
-		errors = append(errors, validateFieldError)
-		return errors
-	}
+	passwordValidator.Notification = passwordAllowedCharacters
+	errors = utility.ValidateField(logger, location+".validatePassword", passwordValidator, errors)
 	if password != passwordConfirm {
 		validationError := domain.NewValidationError(
 			location+".validatePassword",
@@ -152,7 +148,6 @@ func validatePassword(logger interfaces.Logger, location, password, passwordConf
 			constants.FieldRequired,
 			passwordsDoNotMatch,
 		)
-
 		logger.Debug(validationError)
 		errors = append(errors, validationError)
 	}
@@ -196,37 +191,13 @@ func checkPasswords(logger interfaces.Logger, location, hashedPassword string, c
 }
 
 func checkEmail(logger interfaces.Logger, location, email string) error {
+	validationErrors := make([]error, 0, 1)
+
 	emailValidator := utility.NewStringValidator(EmailField, email, emailRegex, constants.MinStringLength, constants.MaxStringLength, false)
-	validateFieldError := validateField(logger, location+".checkEmail", emailAllowedCharacters, emailValidator)
-	if validator.IsError(validateFieldError) {
-		return validateFieldError
+	validationErrors = utility.ValidateField(logger, location+".checkEmail", emailValidator, validationErrors)
+	if len(validationErrors) > 0 {
+		return validationErrors[0]
 	}
 
 	return checkEmailDomain(logger, location+".checkEmail", email)
-}
-
-func validateField(logger interfaces.Logger, location, notification string, stringValidator utility.StringValidator) error {
-	if utility.IsStringLengthInvalid(stringValidator.Field, stringValidator.MinLength, stringValidator.MaxLength) {
-		validationError := domain.NewValidationError(
-			location+".validateField.IsStringLengthInvalid",
-			stringValidator.FieldName,
-			constants.FieldRequired,
-			fmt.Sprintf(constants.StringAllowedLength, stringValidator.MinLength, stringValidator.MaxLength),
-		)
-		logger.Debug(validationError)
-		return validationError
-	}
-	if utility.AreStringCharactersInvalid(stringValidator.Field, stringValidator.FieldRegex) {
-		validationError := domain.NewValidationError(
-			location+".validateField.AreStringCharactersInvalid",
-			stringValidator.FieldName,
-			constants.FieldRequired,
-			notification,
-		)
-
-		logger.Debug(validationError)
-		return validationError
-	}
-
-	return nil
 }

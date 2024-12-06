@@ -11,8 +11,8 @@ import (
 
 func TestIsTimeNotValidPastTime(t *testing.T) {
 	t.Parallel()
-	PastTime := time.Now().Add(-100 * time.Millisecond)
-	result := validator.IsTimeNotValid(PastTime)
+	pastTime := time.Now().Add(-100 * time.Millisecond)
+	result := validator.IsTimeNotValid(pastTime)
 
 	assert.True(t, result, test.NotFailureMessage)
 }

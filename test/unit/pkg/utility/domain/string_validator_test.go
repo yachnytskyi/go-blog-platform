@@ -62,7 +62,7 @@ func TestValidateOptionalFieldEmptyField(t *testing.T) {
 	mockLogger := mock.NewMockLogger()
 
 	validationErrors := []error{}
-	stringValidator := utility.NewStringValidator(testField, "No", alphaNumericRegex, 3, 10, false)
+	stringValidator := utility.NewStringValidator(testField, "", alphaNumericRegex, 3, 10, true)
 	validationErrors = utility.ValidateField(mockLogger, location+"TestValidateOptionalFieldEmptyField", stringValidator, validationErrors)
 
 	assert.Len(t, validationErrors, 0, test.ErrorNilMessage)

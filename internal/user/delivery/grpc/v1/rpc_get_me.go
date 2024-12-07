@@ -12,15 +12,14 @@ import (
 func (userGrpcServer *UserGrpcServer) GetMe(ctx context.Context, request *pb.GetMeRequest) (*pb.UserView, error) {
 	userID := request.GetId()
 	user := userGrpcServer.userUseCase.GetUserById(ctx, userID)
-
 	if user.Error != nil {
-		return nil, status.Errorf(codes.Unimplemented, user.Error.Error())
+		return nil, status.Errorf(codes.Unimplemented, user.Error.Error(), "error")
 	}
 
 	response := &pb.UserView{
 		User: &pb.User{
-			Id: user.Data.ID,
-			Name:  user.Data.Username,
+			Id:        user.Data.ID,
+			Name:      user.Data.Username,
 			Email:     user.Data.Email,
 			Role:      user.Data.Role,
 			CreatedAt: timestamppb.New(user.Data.CreatedAt),

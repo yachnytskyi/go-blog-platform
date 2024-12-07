@@ -23,10 +23,10 @@ func (postGrpcServer *PostGrpcServer) CreatePost(ctx context.Context, createdPos
 
 	if err != nil {
 		if strings.Contains(err.Error(), "sorry, but this title already exists. Please choose another one") {
-			return nil, status.Errorf(codes.AlreadyExists, err.Error())
+			return nil, status.Errorf(codes.AlreadyExists, err.Error(), "error")
 		}
 
-		return nil, status.Errorf(codes.Internal, err.Error())
+		return nil, status.Errorf(codes.Internal, err.Error(), "error")
 	}
 
 	postView := &postProtobufV1.PostView{

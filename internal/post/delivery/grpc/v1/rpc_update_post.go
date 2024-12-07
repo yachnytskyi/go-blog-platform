@@ -26,10 +26,10 @@ func (postGrpcServer *PostGrpcServer) UpdatePostById(ctx context.Context, update
 
 	if err != nil {
 		if strings.Contains(err.Error(), "Id exists") {
-			return nil, status.Errorf(codes.NotFound, err.Error())
+			return nil, status.Errorf(codes.NotFound, err.Error(), "error")
 		}
 
-		return nil, status.Errorf(codes.Internal, err.Error())
+		return nil, status.Errorf(codes.Internal, err.Error(), "error")
 	}
 
 	postView := &postProtobufV1.PostView{

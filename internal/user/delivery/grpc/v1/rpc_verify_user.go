@@ -21,7 +21,7 @@ func (userGrpcServer *UserGrpcServer) VerifyEmail(ctx context.Context, request *
 	result, err := userGrpcServer.userCollection.UpdateOne(ctx, query, update)
 
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, err.Error())
+		return nil, status.Errorf(codes.Internal, err.Error(), "error")
 	}
 
 	if result.MatchedCount == 0 {

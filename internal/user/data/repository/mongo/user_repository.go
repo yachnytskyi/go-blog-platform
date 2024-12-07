@@ -315,16 +315,6 @@ func (userRepository UserRepository) ResetUserPassword(ctx context.Context, user
 	return nil
 }
 
-// // SendEmail sends an email to the specified user with the provided data.
-// func (userRepository UserRepository) SendEmail(user user.User, data user.EmailData) error {
-// 	sendEmailError := repositoryMail.SendEmail(userRepository.Config, userRepository.Logger, location+"SendEmail", user, data)
-// 	if validator.IsError(sendEmailError) {
-// 		return sendEmailError
-// 	}
-
-// 	return nil
-// }
-
 // ensureUniqueEmailIndex creates a unique index on the email field to enforce email uniqueness in the database.
 func (userRepository UserRepository) ensureUniqueEmailIndex(ctx context.Context, location string) error {
 	option := options.Index()
@@ -352,17 +342,4 @@ func (userRepository UserRepository) getUserByQuery(location string, ctx context
 	}
 
 	return common.NewResultOnSuccess[user.User](repository.UserRepositoryToUserMapper(fetchedUser))
-}
-
-// getUserRepositoryByQuery retrieves a user based on the provided query from the database.
-func (userRepository UserRepository) getUserRepositoryByQuery(location string, ctx context.Context, query bson.M) common.Result[repository.UserRepository] {
-	fetchedUser := repository.UserRepository{}
-	userFindOneError := userRepository.Users.FindOne(ctx, query).Decode(&fetchedUser)
-	if validator.IsError(userFindOneError) {
-		itemNotFoundError := domain.NewItemNotFoundError(location+".getUserRepositoryByQuery.Decode", utility.BSONToStringMapper(query), userFindOneError.Error())
-		userRepository.Logger.Error(itemNotFoundError)
-		return common.NewResultOnFailure[repository.UserRepository](itemNotFoundError)
-	}
-
-	return common.NewResultOnSuccess[repository.UserRepository](fetchedUser)
 }

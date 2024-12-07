@@ -1,0 +1,25 @@
+name: Release (pre-Production)
+
+on:
+  push:
+    branches: [ "release" ]
+  pull_request:
+    branches: [ "release" ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: stable
+
+    - name: Test
+      run: go test -v ./...
+
+    - name: Build and Run Release
+      run: docker compose up mongodb app-release -d

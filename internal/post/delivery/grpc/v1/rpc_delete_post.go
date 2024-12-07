@@ -16,10 +16,10 @@ func (PostGrpcServer *PostGrpcServer) DeletePostById(ctx context.Context, postDa
 	err := PostGrpcServer.postUseCase.DeletePostByID(ctx, postID, userID)
 	if err != nil {
 		if strings.Contains(err.Error(), "Id exists") {
-			return nil, status.Errorf(codes.NotFound, err.Error())
+			return nil, status.Errorf(codes.NotFound, err.Error(), "error")
 		}
 
-		return nil, status.Errorf(codes.Internal, err.Error())
+		return nil, status.Errorf(codes.Internal, err.Error(), "error")
 	}
 
 	postDeleteView := &postProtobufV1.PostDeleteView{

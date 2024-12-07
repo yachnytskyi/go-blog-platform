@@ -32,12 +32,6 @@ jobs:
       with:
         go-version: '1.23.3'
 
-    - name: Cache Docker Images
-      uses: actions/cache@v3
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-docker-${{ github.sha }}
-
     - name: Build and Run Develop Services
       run: docker compose up mongodb app-dev -d
 
@@ -52,12 +46,6 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version: '1.23.3'
-
-    - name: Cache Docker Images
-      uses: actions/cache@v3
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-docker-${{ github.sha }}
 
     - name: Build and Run Release Services
       run: docker compose up mongodb app-release -d
@@ -76,12 +64,6 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version: '1.23.3'
-
-    - name: Cache Docker Images
-      uses: actions/cache@v3
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-docker-${{ github.sha }}
 
     - name: Build and Run Production Services
       run: docker compose up mongodb app-production -d

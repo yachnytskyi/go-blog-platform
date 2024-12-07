@@ -11,22 +11,22 @@ const (
 
 // Environment configuration paths.
 const (
-	DefaultEnvironmentsPath = EnvironmentsPath           // Default path for environment configuration files.
 	EnvironmentsPath        = "config/environment/.env." // Base path for environment configuration files.
+	DefaultEnvironmentsPath = "config/environment/.env." // Default path for environment configuration files.
 
 	// Environment types.
-	DefaultEnvironment       = LocalEnvironment // Default environment defines the default environment setting for the application.
-	Environment              = LocalEnvironment // Environment defines the environment setting for the application.
-	TestEnvironment          = "test"           // Test development environment.
-	LocalEnvironment         = "local"          // Local development environment.
-	DockerDevEnvironment     = "docker.dev"     // Docker development environment.
-	DockerReleaseEnvironment = "docker.release" // Docker release environment.
-	DockerProductEnvironment = "docker.prod"    // Docker productuction environment.
+	Environment        = LocalEnvironment // Environment defines the environment setting for the application.
+	TestEnvironment    = "test"           // Test development environment.
+	LocalEnvironment   = "local"          // Local development environment.
+	DevEnvironment     = "docker.dev"     // Development environment.
+	ReleaseEnvironment = "docker.release" // Release environment.
+	ProductEnvironment = "docker.prod"    // Productuction environment.
+	DefaultEnvironment = "docker.prod"    // Default environment defines the default environment setting for the application.
 
 	// Configuration paths.
-	DefaultConfigPath = YamlConfigPath                          // Default path for the application configuration file.
 	ConfigPath        = YamlConfigPath                          // Path for the application configuration file.
 	YamlConfigPath    = "config/yaml/v1/local.application.yaml" // Path for the application yaml configuration file.
+	DefaultConfigPath = "config/yaml/v1/local.application.yaml" // Default path for the application configuration file.
 
 	// Notification messages.
 	DefaultConfigPathNotification      = "Using default configuration path" // Notification message for using the default configuration path.

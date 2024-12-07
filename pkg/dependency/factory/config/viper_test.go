@@ -25,6 +25,7 @@ const (
 
 	writePermissions = 0755
 	readPermissions  = 0644
+	
 	openFileError    = "open %s: no such file or directory"
 	yamlParsingError = "While parsing config: yaml: line 1: did not find expected ',' or ']'"
 )
@@ -82,7 +83,7 @@ grpc:
 }
 
 func setupEnvFilePath() string {
-	envFilePath := constants.EnvironmentsPath + constants.Environment
+	envFilePath := constants.DefaultEnvironmentsPath + constants.DefaultEnvironment
 	envContent := []byte(fmt.Sprintf(v1, constants.ConfigPath))
 
 	err := os.MkdirAll(environmentConfigPath, writePermissions)

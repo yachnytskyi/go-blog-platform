@@ -47,7 +47,7 @@ func validateUserCreate(logger interfaces.Logger, userCreate user.UserCreate) co
 	userCreate.Username = commonUtility.SanitizeAndCollapseWhitespace(userCreate.Username)
 	userCreate.Password = strings.TrimSpace(userCreate.Password)
 	userCreate.PasswordConfirm = strings.TrimSpace(userCreate.PasswordConfirm)
-	usernameValidator := utility.NewStringValidator(usernameField, userCreate.Username, usernameRegex, constants.MinStringLength, constants.MaxStringLength, false)
+	usernameValidator := utility.NewStringValidator(usernameField, userCreate.Username, usernameRegex, constants.DefaultMinStringLength, constants.DefaultMaxStringLength, false)
 
 	validationErrors = validateEmail(logger, location+"validateUserCreate", userCreate.Email, validationErrors)
 	validationErrors = utility.ValidateField(logger, location+"validateUserCreate", usernameValidator, validationErrors)
@@ -63,7 +63,7 @@ func validateUserUpdate(logger interfaces.Logger, userUpdate user.UserUpdate) co
 	validationErrors := make([]error, 0, 1)
 
 	userUpdate.Username = commonUtility.SanitizeAndCollapseWhitespace(userUpdate.Username)
-	usernameValidator := utility.NewStringValidator(usernameField, userUpdate.Username, usernameRegex, constants.MinStringLength, constants.MaxStringLength, false)
+	usernameValidator := utility.NewStringValidator(usernameField, userUpdate.Username, usernameRegex, constants.DefaultMinStringLength, constants.DefaultMaxStringLength, false)
 	validationErrors = utility.ValidateField(logger, location+"validateUserUpdate", usernameValidator, validationErrors)
 	if len(validationErrors) > 0 {
 		return common.NewResultOnFailure[user.UserUpdate](domain.NewValidationErrors(validationErrors))
@@ -77,7 +77,7 @@ func validateUserLogin(logger interfaces.Logger, userLogin user.UserLogin) commo
 
 	userLogin.Email = commonUtility.SanitizeAndToLowerString(userLogin.Email)
 	userLogin.Password = strings.TrimSpace(userLogin.Password)
-	passwordValidator := utility.NewStringValidator(passwordField, userLogin.Password, passwordRegex, constants.MinStringLength, constants.MaxStringLength, false)
+	passwordValidator := utility.NewStringValidator(passwordField, userLogin.Password, passwordRegex, constants.DefaultMinStringLength, constants.DefaultMaxStringLength, false)
 
 	validationErrors = validateEmail(logger, location+"validateUserLogin", userLogin.Email, validationErrors)
 	validationErrors = utility.ValidateField(logger, location+"validateUserLogin", passwordValidator, validationErrors)
@@ -106,7 +106,7 @@ func validateUserResetPassword(logger interfaces.Logger, userResetPassword user.
 	userResetPassword.ResetToken = strings.TrimSpace(userResetPassword.ResetToken)
 	userResetPassword.Password = strings.TrimSpace(userResetPassword.Password)
 	userResetPassword.PasswordConfirm = strings.TrimSpace(userResetPassword.PasswordConfirm)
-	tokenValidator := utility.NewStringValidator(resetTokenField, userResetPassword.ResetToken, usernameRegex, constants.MinStringLength, constants.MaxStringLength, false)
+	tokenValidator := utility.NewStringValidator(resetTokenField, userResetPassword.ResetToken, usernameRegex, constants.DefaultMinStringLength, constants.DefaultMaxStringLength, false)
 
 	validationErrors = utility.ValidateField(logger, location+"validateUserResetPassword", tokenValidator, validationErrors)
 	validationErrors = validatePassword(logger, location+"validateUserResetPassword", userResetPassword.Password, userResetPassword.PasswordConfirm, validationErrors)
@@ -120,7 +120,7 @@ func validateUserResetPassword(logger interfaces.Logger, userResetPassword user.
 func validateEmail(logger interfaces.Logger, location, email string, validationErrors []error) []error {
 	errors := validationErrors
 
-	emailValidator := utility.NewStringValidator(EmailField, email, emailRegex, constants.MinStringLength, constants.MaxStringLength, false)
+	emailValidator := utility.NewStringValidator(EmailField, email, emailRegex, constants.DefaultMinStringLength, constants.DefaultMaxStringLength, false)
 	emailValidator.Notification = emailAllowedCharacters
 	errors = utility.ValidateField(logger, location+".validateEmail", emailValidator, errors)
 	if len(errors) > 0 {
@@ -138,7 +138,7 @@ func validateEmail(logger interfaces.Logger, location, email string, validationE
 func validatePassword(logger interfaces.Logger, location, password, passwordConfirm string, validationErrors []error) []error {
 	errors := validationErrors
 
-	passwordValidator := utility.NewStringValidator(passwordField, password, passwordRegex, constants.MinStringLength, constants.MaxStringLength, false)
+	passwordValidator := utility.NewStringValidator(passwordField, password, passwordRegex, constants.DefaultMinStringLength, constants.DefaultMaxStringLength, false)
 	passwordValidator.Notification = passwordAllowedCharacters
 	errors = utility.ValidateField(logger, location+".validatePassword", passwordValidator, errors)
 	if password != passwordConfirm {
@@ -193,7 +193,7 @@ func checkPasswords(logger interfaces.Logger, location, hashedPassword string, c
 func checkEmail(logger interfaces.Logger, location, email string) error {
 	validationErrors := make([]error, 0, 1)
 
-	emailValidator := utility.NewStringValidator(EmailField, email, emailRegex, constants.MinStringLength, constants.MaxStringLength, false)
+	emailValidator := utility.NewStringValidator(EmailField, email, emailRegex, constants.DefaultMinStringLength, constants.DefaultMaxStringLength, false)
 	validationErrors = utility.ValidateField(logger, location+".checkEmail", emailValidator, validationErrors)
 	if len(validationErrors) > 0 {
 		return validationErrors[0]

@@ -26,6 +26,7 @@ const (
 
 	writePermissions = 0755
 	readPermissions  = 0644
+	
 	openFileError    = "open %s: no such file or directory"
 	yamlParsingError = "While parsing config: yaml: line 1: did not find expected ',' or ']'"
 )
@@ -142,7 +143,7 @@ func TestViperLoadYamlConfiguration(t *testing.T) {
 }
 
 func TestViperWithoutEnvironment(t *testing.T) {
-	notification := fmt.Sprintf(openFileError, constants.EnvironmentsPath+constants.Environment)
+	notification := fmt.Sprintf(openFileError, constants.DefaultEnvironmentsPath+constants.DefaultEnvironment)
 	expectedError := domain.NewInternalError(expectedLocation+"loadDefaultEnvironment", notification)
 
 	defer func() {
@@ -151,7 +152,7 @@ func TestViperWithoutEnvironment(t *testing.T) {
 			assert.Equal(t, recover, expectedError, test.EqualMessage)
 		}
 	}()
-	
+
 	config.NewViper()
 }
 
@@ -199,6 +200,6 @@ func TestViperUnmarshalEmptyAML(t *testing.T) {
 			assert.Equal(t, recover, expectedError, test.EqualMessage)
 		}
 	}()
-	
+
 	config.NewViper()
 }

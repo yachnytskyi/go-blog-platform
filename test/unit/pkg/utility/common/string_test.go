@@ -24,7 +24,7 @@ const (
 func TestDecodeValidBase64String(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
-	
+
 	result := utility.Decode(mockLogger, location+"TestDecodeValidBase64String", encodedString)
 	assert.False(t, validator.IsError(result.Error), test.NotFailureMessage)
 	assert.Equal(t, originalString, result.Data, test.EqualMessage)
@@ -33,7 +33,7 @@ func TestDecodeValidBase64String(t *testing.T) {
 func TestDecodeEmptyString(t *testing.T) {
 	t.Parallel()
 	mockLogger := mock.NewMockLogger()
-	
+
 	result := utility.Decode(mockLogger, location+"TestDecodeEmptyString", emptyString)
 	assert.False(t, validator.IsError(result.Error), test.NotFailureMessage)
 	assert.Equal(t, emptyString, result.Data, test.EqualMessage)
@@ -45,7 +45,7 @@ func TestDecodeInvalidBase64String(t *testing.T) {
 
 	result := utility.Decode(mockLogger, location+"TestDecodeInvalidBase64String", invalidString)
 	expectedLocation := location + "TestDecodeInvalidBase64String.Decode.DecodeString"
-	expectedError := domain.NewInternalError(expectedLocation, decodeErrorMessage+"8")
+	expectedError := domain.NewInternalError(expectedLocation, decodeErrorMessage+"7")
 
 	assert.Equal(t, "", result.Data, test.DataNilMessage)
 	assert.True(t, validator.IsError(result.Error), test.FailureMessage)

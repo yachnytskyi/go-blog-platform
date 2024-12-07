@@ -1,8 +1,9 @@
 name: General Build and Unit Tests
 
 on:
-  pull_request:
     branches: ['**']
+  # pull_request:
+    # branches: ['**']
 
 jobs:
   build:

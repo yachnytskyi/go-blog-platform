@@ -49,6 +49,7 @@ jobs:
             docker compose up mongodb app-release -d
           elif [[ "${{ github.ref_name }}" == "main" ]]; then
             docker compose up mongodb app-production -d
+            run: docker compose down -v
           fi
 
       # Clean up Docker containers

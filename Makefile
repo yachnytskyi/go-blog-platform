@@ -12,7 +12,7 @@ mongo-local:
 	docker compose up mongodb -d 
 	reflex -s go run cmd/server/main.go 
 
-mongo--local-docker:
+mongo-local-docker:
 	docker compose up mongodb app-local
 
 mongo-dev:
@@ -24,20 +24,20 @@ mongo-release:
 mongo-production:
 	docker compose up mongodb app-production 
 
-build-mongo
-	docker-compose build mongodb
+build-mongo:
+	docker compose build mongodb
 
-build-local-docker
-  	docker-compose build app-local
+# build-local-docker:
+  	# docker compose build app-local
 
-build-dev
-  	docker-compose build app-dev
+# build-dev:
+# 	docker compose build app-dev
 
-build-release
-  	docker-compose build app-release
+# build-release:
+#   	docker compose build app-release
 
-build-production
-  	docker-compose build app-production
+# build-production:
+#   	docker compose build app-production
 
 make tests:
 	go test ./test/...
@@ -59,7 +59,7 @@ up:
 	docker compose up 
 
 build:
-	docker-compose build --no-cache
+	docker compose build --no-cache
 
 stop:
 	docker compose stop

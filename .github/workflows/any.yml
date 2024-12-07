@@ -1,13 +1,12 @@
-name: Github Workflow
+name: GoFlow CI/CD Pipeline
 
 on:
   push:
-    branches: ['**']  
+    branches: ['**']
   pull_request:
-    branches: ['**']  
+    branches: ['**']
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
     steps:
@@ -18,10 +17,12 @@ jobs:
       with:
         go-version: '1.23.3'
 
-    - name: Unit tests
+    - name: Lint Go Code
+      run: golangci-lint run
+
+    - name: Run Unit Tests
       run: go test ./test/unit/...
 
-  # Develop services (only for dev branch)
   develop:
     if: github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
@@ -33,10 +34,15 @@ jobs:
       with:
         go-version: '1.23.3'
 
+    - name: Cache Docker Images
+      uses: actions/cache@v3
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-docker-${{ github.sha }}
+
     - name: Build and Run Develop Services
       run: docker compose up mongodb app-dev -d
 
-  # Release services (only for release branch)
   release:
     if: github.ref == 'refs/heads/release'
     runs-on: ubuntu-latest
@@ -48,13 +54,18 @@ jobs:
       with:
         go-version: '1.23.3'
 
+    - name: Cache Docker Images
+      uses: actions/cache@v3
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-docker-${{ github.sha }}
+
     - name: Build and Run Release Services
       run: docker compose up mongodb app-release -d
 
-    # - name: Integration tests
+    # - name: Run Integration Tests
     #   run: go test ./test/integration/...
 
-  # Production services (only for main branch)
   production:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
@@ -66,8 +77,14 @@ jobs:
       with:
         go-version: '1.23.3'
 
+    - name: Cache Docker Images
+      uses: actions/cache@v3
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-docker-${{ github.sha }}
+
     - name: Build and Run Production Services
       run: docker compose up mongodb app-production -d
 
-    # - name: Integration tests
-      # run: go test ./test/integration/...
+    # - name: Run Integration Tests
+    #   run: go test ./test/integration/...

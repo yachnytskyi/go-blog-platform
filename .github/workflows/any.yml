@@ -1,8 +1,10 @@
-name: Unit Tests for Any Branch
+name: Github Workflow
 
 on:
   push:
-    branches: [ '**' ]  # Trigger on push to any branch
+    branches: ['**']  
+  pull_request:
+    branches: ['**']  
 
 jobs:
 
@@ -19,9 +21,45 @@ jobs:
     - name: Test
       run: go test ./test/unit/...
 
-  # Optionally, include build and deploy for main branch only
+  # Develop services (only for dev branch)
+  develop:
+    if: github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.23.3'
+
+    - name: Test
+      run: go test -v ./...
+
+    - name: Build and Run Develop Services
+      run: docker compose up mongodb app-dev -d
+
+  # Release services (only for release branch)
+  release:
+    if: github.ref == 'refs/heads/release'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.23.3'
+
+    - name: Test
+      run: go test -v ./...
+
+    - name: Build and Run Release Services
+      run: docker compose up mongodb app-release -d
+
+  # Production services (only for main branch)
   production:
-    if: github.ref == 'refs/heads/main'  # Only runs on main branch
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4

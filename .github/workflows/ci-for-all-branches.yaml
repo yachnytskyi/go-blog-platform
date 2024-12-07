@@ -21,6 +21,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Cache Go modules
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/go-build
+          key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-mod-
+
       # Set up Go with the latest stable version
       - name: Setup Go
         uses: actions/setup-go@v4

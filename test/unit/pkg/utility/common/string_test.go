@@ -45,7 +45,7 @@ func TestDecodeInvalidBase64String(t *testing.T) {
 
 	result := utility.Decode(mockLogger, location+"TestDecodeInvalidBase64String", invalidString)
 	expectedLocation := location + "TestDecodeInvalidBase64String.Decode.DecodeString"
-	expectedError := domain.NewInternalError(expectedLocation, decodeErrorMessage+"7")
+	expectedError := domain.NewInternalError(expectedLocation, decodeErrorMessage+"8")
 
 	assert.Equal(t, "", result.Data, test.DataNilMessage)
 	assert.True(t, validator.IsError(result.Error), test.FailureMessage)

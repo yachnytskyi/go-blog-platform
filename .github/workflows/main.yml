@@ -7,21 +7,11 @@ on:
     branches: [ "master" ]
 
 jobs:
+
   build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-
-    # Cache Go Modules.
-    - name: Cache Go modules
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.cache/go-build
-          ~/go/pkg/mod
-        key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-mod-
 
     - name: Set up Go
       uses: actions/setup-go@v4
@@ -32,18 +22,9 @@ jobs:
     - name: Test
       run: go test -v ./...
 
-    # Cache Docker layers (optional).
-    - name: Cache Docker layers
-      uses: actions/cache@v3
-      with:
-        path: /tmp/.buildx-cache
-        key: ${{ runner.os }}-docker-${{ hashFiles('**/Dockerfile') }}
-        restore-keys: |
-          ${{ runner.os }}-docker-
-
     - name: Build and Run Production Services
       run: docker compose up mongodb app-production -d
 
-    # Clean up Docker containers.
+    # Clean up Docker containers
     - name: Clean Up Docker
-      run: docker compose down -v
+      run: docker compose down -v how to use caching?

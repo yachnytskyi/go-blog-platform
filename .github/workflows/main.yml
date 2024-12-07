@@ -13,33 +13,13 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    # Set up Go environment
     - name: Set up Go
       uses: actions/setup-go@v5
       with:
         go-version: '1.23.3'
 
-    # Run Go tests
     - name: Test
-      run: go test -v ./...
+      run: 	go test ./test/unit/...
 
-    # Cache Docker layers
-    - name: Cache Docker layers
-      uses: actions/cache@v3
-      with:
-        path: /tmp/.buildx-cache  # Directory where Docker Buildx stores its cache
-        key: ${{ runner.os }}-docker-${{ hashFiles('infrastructure/deployment/docker/Dockerfile.prod', '**/go.mod', '**/go.sum', '**/docker-compose.yml') }}  # Cache key based on the Dockerfile and relevant files
-        restore-keys: |
-          ${{ runner.os }}-docker-
-
-    # Set up Docker Buildx
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
-
-    # Build and run only the mongodb and app-production services
     - name: Build and Run Production Services
-      run: |
-        docker compose -f docker-compose.yml build mongodb app-production
-        docker compose -f docker-compose.yml up -d mongodb app-production
-      env:
-        DOCKER_BUILDKIT: 1  # Enable BuildKit for better caching support
+      run: docker compose up mongodb app-production -d

@@ -25,6 +25,6 @@ jobs:
     - name: Build and Run Production Services
       run: docker compose up mongodb app-production -d
 
-    # Clean up Docker containers
-    - name: Clean Up Docker
-      run: docker compose down -v 
+    # # Clean up Docker containers
+    # - name: Clean Up Docker
+    #   run: docker compose down -v 

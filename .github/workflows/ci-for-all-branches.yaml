@@ -1,4 +1,4 @@
-name: CI for All Branches
+name: CI/CD Pipeline
 
 on:
   push:
@@ -17,41 +17,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the code
+      # Step 1: Check out the code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Cache Go modules
-      - name: Cache Go modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/go-build
-          key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-mod-
-
-      # Set up Go with the latest stable version
+      # Step 2: Set up Go
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
-          go-version: 'stable'
+          go-version: '1.23.3' # Replace with your Go version
 
-      # Run unit tests for each commit (common step)
+      # Step 3: Run Unit Tests for All Commits
       - name: Run Unit Tests
-        run: go test ./test/unit/...
+        run: make unit-tests
 
-      # Build and run services based on branch
-      - name: Build and Run Services
+      # Step 4: Conditional Build and Testing for Merges
+      - name: Build and Test Based on Branch
+        if: github.event_name == 'push' || github.event_name == 'pull_request'
         run: |
           if [[ "${{ github.ref_name }}" == "dev" ]]; then
-            docker compose up mongodb app-dev -d
+            echo "Building for dev branch"
+            make tests
+            make mongo-dev app-dev
           elif [[ "${{ github.ref_name }}" == "release" ]]; then
-            docker compose up mongodb app-release -d
+            echo "Building for release branch"
+            make tests
+            make mongo-release app-release
           elif [[ "${{ github.ref_name }}" == "main" ]]; then
-            docker compose up mongodb app-production -d
-            run: docker compose down -v
+            echo "Building for main (production) branch"
+            make tests
+            make mongo-production app-production
+          else
+            echo "Branch not recognized for build steps"
           fi
-
-      # Clean up Docker containers
-      - name: Clean Up Docker
-        run: docker compose down -v

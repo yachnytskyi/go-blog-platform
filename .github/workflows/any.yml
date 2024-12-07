@@ -48,11 +48,11 @@ jobs:
       with:
         go-version: '1.23.3'
 
-    - name: Test
-      # run: go test ./test/integration/...
-
     - name: Build and Run Release Services
       run: docker compose up mongodb app-release -d
+
+    # - name: Integration tests
+    #   run: go test ./test/integration/...
 
   # Production services (only for main branch)
   production:
@@ -66,8 +66,8 @@ jobs:
       with:
         go-version: '1.23.3'
 
-    - name: Test
-      # run: go test ./test/integration/...
-
     - name: Build and Run Production Services
       run: docker compose up mongodb app-production -d
+
+    # - name: Integration tests
+      # run: go test ./test/integration/...

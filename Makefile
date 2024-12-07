@@ -24,6 +24,21 @@ mongo-release:
 mongo-production:
 	docker compose up mongodb app-production 
 
+build-mongo
+	docker-compose build mongodb
+
+build-local-docker
+  	docker-compose build app-local
+
+build-dev
+  	docker-compose build app-dev
+
+build-release
+  	docker-compose build app-release
+
+build-production
+  	docker-compose build app-production
+
 make tests:
 	go test ./test/...
 
@@ -42,6 +57,9 @@ update:
 
 up:
 	docker compose up 
+
+build:
+	docker-compose build --no-cache
 
 stop:
 	docker compose stop

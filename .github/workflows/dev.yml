@@ -2,9 +2,9 @@ name: Main (Production)
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "dev" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "dev" ]
 
 jobs:
 
@@ -21,8 +21,8 @@ jobs:
     - name: Test
       run: go test -v ./...
 
-    - name: Build and Run Production Services
-      run: docker compose up mongodb app-production -d
+    - name: Build and Run Develop Services
+      run: docker compose up mongodb app-dev -d
 
     # Clean up Docker containers
     - name: Clean Up Docker

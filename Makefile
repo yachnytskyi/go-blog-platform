@@ -27,17 +27,17 @@ mongo-production:
 build-mongo:
 	docker compose build mongodb
 
-# build-local-docker:
-  	# docker compose build app-local
+build-local-docker:
+  	docker compose build app-local
 
-# build-dev:
-# 	docker compose build app-dev
+build-dev:
+	docker compose build app-dev
 
-# build-release:
-#   	docker compose build app-release
+build-release:
+  	docker compose build app-release
 
-# build-production:
-#   	docker compose build app-production
+build-production:
+  	docker compose build app-production
 
 make tests:
 	go test ./test/...

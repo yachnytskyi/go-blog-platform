@@ -1,9 +1,10 @@
 name: General Build and Unit Tests
 
 on:
-    branches: ['**']
+  push:
+    branches: ['**']  
   # pull_request:
-    # branches: ['**']
+    # branches: ['**'] 
 
 jobs:
   build:

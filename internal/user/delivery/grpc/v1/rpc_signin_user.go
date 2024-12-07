@@ -5,8 +5,8 @@ import (
 	"time"
 
 	pb "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/grpc/v1/model/pb"
-	utility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
 	model "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
+	utility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/utility"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -20,7 +20,7 @@ func (userGrpcServer *UserGrpcServer) Login(ctx context.Context, request *pb.Log
 	user := userGrpcServer.userUseCase.GetUserByEmail(ctx, request.GetEmail())
 
 	if user.Error != nil {
-		return nil, status.Errorf(codes.Internal, user.Error.Error())
+		return nil, status.Errorf(codes.Internal, user.Error.Error(), "error")
 	}
 
 	if !user.Data.Verified {
@@ -46,7 +46,7 @@ func (userGrpcServer *UserGrpcServer) Login(ctx context.Context, request *pb.Log
 		userTokenPayload,
 	)
 	if validator.IsError(accessToken.Error) {
-		return nil, status.Errorf(codes.PermissionDenied, accessToken.Error.Error())
+		return nil, status.Errorf(codes.PermissionDenied, accessToken.Error.Error(), "error")
 	}
 
 	refreshToken := utility.GenerateJWTToken(
@@ -59,7 +59,7 @@ func (userGrpcServer *UserGrpcServer) Login(ctx context.Context, request *pb.Log
 		userTokenPayload,
 	)
 	if validator.IsError(refreshToken.Error) {
-		return nil, status.Errorf(codes.PermissionDenied, refreshToken.Error.Error())
+		return nil, status.Errorf(codes.PermissionDenied, refreshToken.Error.Error(), "error")
 	}
 
 	response := &pb.LoginUserView{

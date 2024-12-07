@@ -28,16 +28,16 @@ build-mongo:
 	docker compose build mongodb
 
 build-local-docker:
-  	docker compose build app-local
+	docker compose build app-local
 
 build-dev:
 	docker compose build app-dev
 
 build-release:
-  	docker compose build app-release
+	docker compose build app-release
 
 build-production:
-  	docker compose build app-production
+	docker compose build app-production
 
 make tests:
 	go test ./test/...
@@ -50,6 +50,9 @@ unit-tests-pkg:
 
 unit-tests-internal:
 	go test ./test/unit/internal...
+
+lint:
+	golangci-lint run
 
 update:
 	go get -u ./...	

@@ -15,7 +15,7 @@ const (
 	DefaultEnvironmentsPath = "config/environment/.env." // Default path for environment configuration files.
 
 	// Environment types.
-	Environment        = ProductEnvironment // Environment defines the environment setting for the application.
+	Environment        = LocalEnvironment // Environment defines the environment setting for the application.
 	TestEnvironment    = "test"             // Test development environment.
 	LocalEnvironment   = "local"            // Local development environment.
 	DevEnvironment     = "docker.dev"       // Development environment.

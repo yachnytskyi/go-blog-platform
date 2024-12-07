@@ -75,9 +75,5 @@ func IsStringLengthInvalid(checkedString string, minLength int, maxLength int) b
 
 // AreStringCharactersInvalid checks if the characters in the input string match the specified regex pattern.
 func AreStringCharactersInvalid(checkedString string, regex *regexp.Regexp) bool {
-	if regex.MatchString(checkedString) {
-		return false
-	}
-
-	return true
+	return !regex.MatchString(checkedString)
 }

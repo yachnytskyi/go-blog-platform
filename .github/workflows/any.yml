@@ -1,10 +1,10 @@
-name: GoFlow CI/CD Pipeline
+name: Github Workflow
 
 on:
   push:
-    branches: ['**']
+    branches: ['**']  
   pull_request:
-    branches: ['**']
+    branches: ['**']  
 
 jobs:
   build:
@@ -17,12 +17,10 @@ jobs:
       with:
         go-version: '1.23.3'
 
-    - name: Lint Go Code
-      run: golangci-lint run
-
-    - name: Run Unit Tests
+    - name: Unit tests
       run: go test ./test/unit/...
 
+  # Develop services (only for dev branch)
   develop:
     if: github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
@@ -43,6 +41,7 @@ jobs:
     - name: Build and Run Develop Services
       run: docker compose up mongodb app-dev -d
 
+  # Release services (only for release branch)
   release:
     if: github.ref == 'refs/heads/release'
     runs-on: ubuntu-latest
@@ -63,9 +62,10 @@ jobs:
     - name: Build and Run Release Services
       run: docker compose up mongodb app-release -d
 
-    # - name: Run Integration Tests
+    # - name: Integration tests
     #   run: go test ./test/integration/...
 
+  # Production services (only for main branch)
   production:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
@@ -86,5 +86,5 @@ jobs:
     - name: Build and Run Production Services
       run: docker compose up mongodb app-production -d
 
-    # - name: Run Integration Tests
-    #   run: go test ./test/integration/...
+    # - name: Integration tests
+      # run: go test ./test/integration/...

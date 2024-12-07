@@ -3,6 +3,8 @@ package domain
 import (
 	"fmt"
 	"strings"
+
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 )
 
 type Errors interface {
@@ -16,7 +18,7 @@ type BaseError struct {
 }
 
 func (baseError BaseError) Error() string {
-	return fmt.Sprintf("location: %s notification: %s", baseError.Location, baseError.Notification)
+	return fmt.Sprintf(constants.BaseErrorMessageFormat, baseError.Location, baseError.Notification)
 }
 
 func NewBaseError(location, notification string) BaseError {
@@ -76,7 +78,7 @@ func NewValidationError(location, field, fieldType, notification string) Validat
 }
 
 func (validationError ValidationError) Error() string {
-	return fmt.Sprintf("location: %s notification: %s field: %s type: %s",
+	return fmt.Sprintf(constants.BaseErrorMessageFormat+" "+"field: %s type: %s",
 		validationError.Location,
 		validationError.Notification,
 		validationError.Field,
@@ -116,7 +118,7 @@ func NewItemNotFoundError(location, query, notification string) ItemNotFoundErro
 }
 
 func (itemNotFoundError ItemNotFoundError) Error() string {
-	return fmt.Sprintf("location: %s notification: %s query: %s",
+	return fmt.Sprintf(constants.BaseErrorMessageFormat+" "+"query: %s",
 		itemNotFoundError.Location,
 		itemNotFoundError.Notification,
 		itemNotFoundError.Query)
@@ -157,7 +159,7 @@ func NewPaginationError(location, currentPage, totalPages, notification string) 
 }
 
 func (paginationError PaginationError) Error() string {
-	return fmt.Sprintf("location: %s notification: %s current_page: %s total_pages: %s",
+	return fmt.Sprintf(constants.BaseErrorMessageFormat+" "+" current_page: %s total_pages: %s",
 		paginationError.Location,
 		paginationError.Notification,
 		paginationError.CurrentPage,

@@ -1,13 +1,8 @@
 package http
 
 import (
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
-	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
-)
-
-const (
-	success = "success"
-	fail    = "fail"
 )
 
 type JSONResponse struct {
@@ -20,12 +15,12 @@ type JSONResponse struct {
 func NewJSONResponseOnSuccess(data any) JSONResponse {
 	return JSONResponse{
 		Data:   data,
-		Status: success,
+		Status: constants.Success,
 	}
 }
 
 func NewJSONResponseOnFailure(err error) JSONResponse {
-	jsonResponse := JSONResponse{Status: fail}
+	jsonResponse := JSONResponse{Status: constants.Fail}
 
 	switch errorType := err.(type) {
 	case model.Errors:
@@ -38,17 +33,6 @@ func NewJSONResponseOnFailure(err error) JSONResponse {
 		jsonResponse.Error = errorType
 	default:
 		jsonResponse.Error = errorType
-	}
-
-	return jsonResponse
-}
-
-func SetStatus(jsonResponse JSONResponse) JSONResponse {
-	switch {
-	case validator.IsValueNotEmpty(jsonResponse.Data):
-		jsonResponse.Status = success
-	case validator.IsError(jsonResponse.Error) || validator.IsError(jsonResponse.Errors):
-		jsonResponse.Status = fail
 	}
 
 	return jsonResponse

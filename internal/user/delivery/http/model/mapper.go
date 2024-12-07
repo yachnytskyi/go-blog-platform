@@ -7,7 +7,7 @@ import (
 
 func UserCreateViewToUserCreateMapper(userCreateView UserCreateView) user.UserCreate {
 	return user.NewUserCreate(
-		userCreateView.Name,
+		userCreateView.Username,
 		userCreateView.Email,
 		userCreateView.Password,
 		userCreateView.PasswordConfirm,
@@ -17,7 +17,7 @@ func UserCreateViewToUserCreateMapper(userCreateView UserCreateView) user.UserCr
 func UserUpdateViewToUserUpdateMapper(userUpdateView UserUpdateView) user.UserUpdate {
 	return user.NewUserUpdate(
 		userUpdateView.ID,
-		userUpdateView.Name,
+		userUpdateView.Username,
 	)
 }
 
@@ -48,27 +48,20 @@ func UsersToUsersViewMapper(users user.Users) UsersView {
 		usersView[index] = UserToUserViewMapper(user)
 	}
 
-	return NewUsersView(usersView, model.NewHTTPPaginationResponse(
-		users.PaginationResponse.Page,
-		users.PaginationResponse.TotalPages,
-		users.PaginationResponse.PagesLeft,
-		users.PaginationResponse.ItemsLeft,
-		users.PaginationResponse.TotalItems,
-		users.PaginationResponse.Limit,
-		users.PaginationResponse.OrderBy,
-		users.PaginationResponse.SortOrder,
-		users.PaginationResponse.PageLinks,
-	))
+	return NewUsersView(
+		usersView,
+		model.NewHTTPPaginationResponse(users.PaginationResponse),
+	)
 }
 
 func UserToUserViewMapper(user user.User) UserView {
 	return NewUserView(
 		user.ID,
-		user.CreatedAt,
-		user.UpdatedAt,
-		user.Name,
+		user.Username,
 		user.Email,
 		user.Role,
+		user.CreatedAt,
+		user.UpdatedAt,
 	)
 }
 

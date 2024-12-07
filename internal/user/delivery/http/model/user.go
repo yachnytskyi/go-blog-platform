@@ -17,21 +17,21 @@ type UsersView struct {
 
 type UserView struct {
 	model.BaseEntity
-	Name  string `json:"name"`
-	Email string `json:"email"`
-	Role  string `json:"role"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Role     string `json:"role"`
 }
 
 type UserCreateView struct {
-	Name            string `json:"name"`
+	Username        string `json:"username"`
 	Email           string `json:"email"`
 	Password        string `json:"password"`
 	PasswordConfirm string `json:"password_confirm"`
 }
 
 type UserUpdateView struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID       string `json:"id"`
+	Username string `json:"username"`
 }
 
 type UserLoginView struct {
@@ -71,28 +71,27 @@ func NewUsersView(users []UserView, paginationResponse model.HTTPPaginationRespo
 	}
 }
 
-func NewUserView(id string, createdAt, updatedAt time.Time, name, email, role string) UserView {
+func NewUserView(id string, username, email, role string, createdAt, updatedAt time.Time) UserView {
 	return UserView{
 		BaseEntity: model.NewBaseEntity(id, createdAt, updatedAt),
-		Name:       name,
+		Username:   username,
 		Email:      email,
 		Role:       role,
 	}
 }
 
-func NewUserCreateView(name, email, password, passwordConfirm string) UserCreateView {
+func NewUserCreateView(username, email, password, passwordConfirm string) UserCreateView {
 	return UserCreateView{
-		Name:            name,
 		Email:           email,
 		Password:        password,
 		PasswordConfirm: passwordConfirm,
 	}
 }
 
-func NewUserUpdateView(id, name string) UserUpdateView {
+func NewUserUpdateView(id, username string) UserUpdateView {
 	return UserUpdateView{
-		ID:   id,
-		Name: name,
+		ID:       id,
+		Username: username,
 	}
 }
 

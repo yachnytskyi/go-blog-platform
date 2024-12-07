@@ -5,25 +5,30 @@ type contextKey string
 
 // Application version.
 const (
-	Version = "v1" // Version of the application.
+	AppVersion = V1   // AppVersion represents the application's current version.
+	V1         = "v1" // V1 specifies the version value of the application.
 )
 
 // Environment configuration paths.
 const (
-	EnvironmentsPath = "config/environment/.env." // Base path for environment configuration files.
+	EnvironmentsPath        = "config/environment/.env." // Base path for environment configuration files.
+	DefaultEnvironmentsPath = "config/environment/.env." // Default path for environment configuration files.
 
-	// Environment types
-	TestEnvironment          = "test"           // Test development environment.
-	LocalEnvironment         = "local"          // Local development environment.
-	DockerDevEnvironment     = "docker.dev"     // Docker development environment.
-	DockerStagingEnvironment = "docker.staging" // Docker staging environment.
-	DockerProductEnvironment = "docker.prod"    // Docker product environment.
+	// Environment types.
+	Environment        = LocalEnvironment // Environment defines the environment setting for the application.
+	TestEnvironment    = "test"           // Test development environment.
+	LocalEnvironment   = "local"          // Local development environment.
+	DevEnvironment     = "docker.dev"     // Development environment.
+	ReleaseEnvironment = "docker.release" // Release environment.
+	ProductEnvironment = "docker.prod"    // Productuction environment.
+	DefaultEnvironment = "docker.prod"    // Default environment defines the default environment setting for the application.
 
-	// Default configuration paths
-	DefaultEnvironmentsPath = "config/environment/.env."                  // Default path for environment configuration files.
-	DefaultConfigPath       = "config/yaml/v1/local.dev.application.yaml" // Default path for the application configuration file.
+	// Configuration paths.
+	ConfigPath        = YamlConfigPath                          // Path for the application configuration file.
+	YamlConfigPath    = "config/yaml/v1/local.application.yaml" // Path for the application yaml configuration file.
+	DefaultConfigPath = "config/yaml/v1/local.application.yaml" // Default path for the application configuration file.
 
-	// Notification messages
+	// Notification messages.
 	DefaultConfigPathNotification      = "Using default configuration path" // Notification message for using the default configuration path.
 	DefaultEnvironmentPathNotification = "Using default environment path"   // Notification message for using the default environment path.
 )
@@ -39,14 +44,14 @@ const (
 	Zerolog = "Zerolog" // Zerolog logger library.
 )
 
+// Email libraries used in the application.
+const (
+	GoMail = "GoMail" // GoMail email library.
+)
+
 // Databases used in the application.
 const (
 	MongoDB = "MongoDB" // MongoDB database name.
-)
-
-// Domains used in the application.
-const (
-	UseCaseV1 = "UseCaseV1" // UseCaseV1 domain name.
 )
 
 // Deliveries used in the application.

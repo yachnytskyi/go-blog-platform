@@ -26,10 +26,10 @@ func (PostGrpcServer *PostGrpcServer) GetPostById(ctx context.Context, postData 
 	postView := &postProtobufV1.PostView{
 		Post: &postProtobufV1.Post{
 			PostID:    post.PostID,
+			UserID:    post.UserID,
 			Title:     post.Title,
 			Content:   post.Content,
 			Image:     post.Image,
-			User:      post.User,
 			CreatedAt: timestamppb.New(post.CreatedAt),
 			UpdatedAt: timestamppb.New(post.UpdatedAt),
 		},

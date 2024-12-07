@@ -12,7 +12,7 @@ type Post struct {
 	Title     string
 	Content   string
 	Image     string
-	User      string
+	Username  string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -22,7 +22,6 @@ type PostCreate struct {
 	Title     string
 	Content   string
 	Image     string
-	User      string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -33,7 +32,5 @@ type PostUpdate struct {
 	Title     string
 	Content   string
 	Image     string
-	User      string
-	CreatedAt time.Time
 	UpdatedAt time.Time
 }

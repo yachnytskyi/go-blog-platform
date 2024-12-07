@@ -1,18 +1,18 @@
 package model
 
 import (
-	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
-	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	http "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
+	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
 
-func HTTPAuthorizationErrorToJSONAuthorizationErrorMapper(httpAuthorizationError httpError.HTTPAuthorizationError) JSONAuthorizationError {
+func HTTPAuthorizationErrorToJSONAuthorizationErrorMapper(httpAuthorizationError http.HTTPAuthorizationError) JSONAuthorizationError {
 	return NewJSONAuthorizationError(
 		httpAuthorizationError.Location,
 		httpAuthorizationError.Notification,
 	)
 }
 
-func HTTPRequestErrorToJSONRequestErrorMapper(httpRequestError httpError.HTTPRequestError) JSONRequestError {
+func HTTPRequestErrorToJSONRequestErrorMapper(httpRequestError http.HTTPRequestError) JSONRequestError {
 	return NewJSONRequestError(
 		httpRequestError.Location,
 		httpRequestError.RequestType,
@@ -20,21 +20,21 @@ func HTTPRequestErrorToJSONRequestErrorMapper(httpRequestError httpError.HTTPReq
 	)
 }
 
-func HTTPInternalErrorToJSONInternalErrorMapper(httpInternalError httpError.HTTPInternalError) JSONInternalError {
+func HTTPInternalErrorToJSONInternalErrorMapper(httpInternalError http.HTTPInternalError) JSONInternalError {
 	return NewJSONInternalError(
 		httpInternalError.Location,
 		httpInternalError.Notification,
 	)
 }
 
-func InfoMessageToJSONInfoMessageMapper(infoMessage domainError.InfoMessage) JSONInfoMessage {
+func InfoMessageToJSONInfoMessageMapper(infoMessage domain.InfoMessage) JSONInfoMessage {
 	return NewJSONInfoMessage(
 		infoMessage.Location,
 		infoMessage.Notification,
 	)
 }
 
-func ValidationErrorToJSONValidationErrorMapper(validationError domainError.ValidationError) JSONValidationError {
+func ValidationErrorToJSONValidationErrorMapper(validationError domain.ValidationError) JSONValidationError {
 	return NewJSONValidationError(
 		validationError.Location,
 		validationError.Field,
@@ -43,10 +43,10 @@ func ValidationErrorToJSONValidationErrorMapper(validationError domainError.Vali
 	)
 }
 
-func ValidationErrorsToJSONValidationErrorsMapper(validationErrors domainError.ValidationErrors) JSONValidationErrors {
+func ValidationErrorsToJSONValidationErrorsMapper(validationErrors domain.ValidationErrors) JSONValidationErrors {
 	JSONValidationErrors := make([]error, 0, len(validationErrors.Errors))
 	for _, validationError := range validationErrors.Errors {
-		validationError, ok := validationError.(domainError.ValidationError)
+		validationError, ok := validationError.(domain.ValidationError)
 		if ok {
 			JSONValidationError := NewJSONValidationError(
 				validationError.Location,
@@ -61,14 +61,14 @@ func ValidationErrorsToJSONValidationErrorsMapper(validationErrors domainError.V
 	return NewJSONValidationErrors(JSONValidationErrors)
 }
 
-func AuthorizationErrorToJSONAuthorizationErrorMapper(authorizationError domainError.AuthorizationError) JSONAuthorizationError {
+func AuthorizationErrorToJSONAuthorizationErrorMapper(authorizationError domain.AuthorizationError) JSONAuthorizationError {
 	return NewJSONAuthorizationError(
 		authorizationError.Location,
 		authorizationError.Notification,
 	)
 }
 
-func ItemNotFoundErrorToJSONItemNotFoundErrorMapper(itemNotFoundError domainError.ItemNotFoundError) JSONItemNotFoundError {
+func ItemNotFoundErrorToJSONItemNotFoundErrorMapper(itemNotFoundError domain.ItemNotFoundError) JSONItemNotFoundError {
 	return NewJSONItemNotFoundError(
 		itemNotFoundError.Location,
 		itemNotFoundError.Notification,
@@ -76,21 +76,21 @@ func ItemNotFoundErrorToJSONItemNotFoundErrorMapper(itemNotFoundError domainErro
 	)
 }
 
-func InvalidTokenErrorToJSONIvalidTokenErrorMapper(invalidTokenError domainError.InvalidTokenError) JSONInvalidTokenError {
+func InvalidTokenErrorToJSONIvalidTokenErrorMapper(invalidTokenError domain.InvalidTokenError) JSONInvalidTokenError {
 	return NewJSONInvalidTokenError(
 		invalidTokenError.Location,
 		invalidTokenError.Notification,
 	)
 }
 
-func TimeExpiredErrorToJSONTimeExpiredErrorMapper(timeExpiredError domainError.TimeExpiredError) JSONTimeExpiredError {
+func TimeExpiredErrorToJSONTimeExpiredErrorMapper(timeExpiredError domain.TimeExpiredError) JSONTimeExpiredError {
 	return NewJSONTimeExpiredError(
 		timeExpiredError.Location,
 		timeExpiredError.Notification,
 	)
 }
 
-func PaginationErrorToJSONPaginationErrorMapper(paginationError domainError.PaginationError) JSONPaginationError {
+func PaginationErrorToJSONPaginationErrorMapper(paginationError domain.PaginationError) JSONPaginationError {
 	return NewJSONPaginationError(
 		paginationError.Location,
 		paginationError.CurrentPage,
@@ -99,7 +99,7 @@ func PaginationErrorToJSONPaginationErrorMapper(paginationError domainError.Pagi
 	)
 }
 
-func InternalErrorToJSONInternalErrorMapper(internalError domainError.InternalError) JSONInternalError {
+func InternalErrorToJSONInternalErrorMapper(internalError domain.InternalError) JSONInternalError {
 	return NewJSONInternalError(
 		internalError.Location,
 		internalError.Notification,

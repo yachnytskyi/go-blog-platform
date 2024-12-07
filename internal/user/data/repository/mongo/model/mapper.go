@@ -1,7 +1,7 @@
 package model
 
 import (
-	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/interfaces"
 	userModel "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/model"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
@@ -29,13 +29,13 @@ func UsersRepositoryToUsersMapper(usersRepository UsersRepository) userModel.Use
 func UserRepositoryToUserMapper(userRepository UserRepository) userModel.User {
 	return userModel.NewUser(
 		userRepository.ID.Hex(),
-		userRepository.CreatedAt,
-		userRepository.UpdatedAt,
-		userRepository.Name,
+		userRepository.Username,
 		userRepository.Email,
 		userRepository.Password,
 		userRepository.Role,
 		userRepository.Verified,
+		userRepository.CreatedAt,
+		userRepository.UpdatedAt,
 	)
 }
 
@@ -47,14 +47,12 @@ func UserResetExpiryRepositoryToUserResetExpiryMapper(userResetExpiryRepository 
 
 func UserCreateToUserCreateRepositoryMapper(userCreate userModel.UserCreate) UserCreateRepository {
 	return NewUserCreateRepository(
-		userCreate.Name,
+		userCreate.Username,
 		userCreate.Email,
 		userCreate.Password,
 		userCreate.Role,
 		userCreate.Verified,
 		userCreate.VerificationCode,
-		userCreate.CreatedAt,
-		userCreate.UpdatedAt,
 	)
 }
 
@@ -66,8 +64,7 @@ func UserUpdateToUserUpdateRepositoryMapper(logger interfaces.Logger, location s
 
 	return common.NewResultOnSuccess(NewUserUpdateRepository(
 		userObjectID.Data,
-		userUpdate.Name,
-		userUpdate.UpdatedAt,
+		userUpdate.Username,
 	))
 }
 

@@ -14,7 +14,7 @@ type Users struct {
 
 type User struct {
 	model.BaseEntity
-	Name     string
+	Username string
 	Email    string
 	Password string
 	Role     string
@@ -22,21 +22,18 @@ type User struct {
 }
 
 type UserCreate struct {
-	Name             string
+	Username         string
 	Email            string
 	Password         string
 	PasswordConfirm  string
 	Role             string
 	Verified         bool
 	VerificationCode string
-	CreatedAt        time.Time
-	UpdatedAt        time.Time
 }
 
 type UserUpdate struct {
 	ID        string
-	Name      string
-	UpdatedAt time.Time
+	Username  string
 }
 
 type UserLogin struct {
@@ -72,10 +69,10 @@ func NewUsers(users []User, paginationResponse common.PaginationResponse) Users 
 	}
 }
 
-func NewUser(id string, createdAt, updatedAt time.Time, name, email, password, role string, verified bool) User {
+func NewUser(id string, username, email, password, role string, verified bool, createdAt, updatedAt time.Time) User {
 	return User{
 		BaseEntity: model.NewBaseEntity(id, createdAt, updatedAt),
-		Name:       name,
+		Username:   username,
 		Email:      email,
 		Password:   password,
 		Role:       role,
@@ -83,19 +80,19 @@ func NewUser(id string, createdAt, updatedAt time.Time, name, email, password, r
 	}
 }
 
-func NewUserCreate(name, email, password, passwordConfirm string) UserCreate {
+func NewUserCreate(username, email, password, passwordConfirm string) UserCreate {
 	return UserCreate{
-		Name:            name,
+		Username:        username,
 		Email:           email,
 		Password:        password,
 		PasswordConfirm: passwordConfirm,
 	}
 }
 
-func NewUserUpdate(id, name string) UserUpdate {
+func NewUserUpdate(id, username string) UserUpdate {
 	return UserUpdate{
-		ID:   id,
-		Name: name,
+		ID:       id,
+		Username: username,
 	}
 }
 

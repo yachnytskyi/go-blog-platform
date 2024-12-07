@@ -9,10 +9,11 @@ func PostsToPostsViewMapper(posts *model.Posts) PostsView {
 	for _, post := range posts.Posts {
 		postView := &PostView{}
 		postView.PostID = post.PostID
+		postView.UserID = post.UserID
 		postView.Title = post.Title
 		postView.Content = post.Content
 		postView.Image = post.Image
-		postView.User = post.User
+		postView.Username = post.Username
 		postView.CreatedAt = post.CreatedAt
 		postView.UpdatedAt = post.UpdatedAt
 		postsView = append(postsView, postView)
@@ -26,10 +27,11 @@ func PostsToPostsViewMapper(posts *model.Posts) PostsView {
 func PostToPostViewMapper(post *model.Post) PostView {
 	return PostView{
 		PostID:    post.PostID,
+		UserID:    post.UserID,
 		Title:     post.Title,
 		Content:   post.Content,
 		Image:     post.Image,
-		User:      post.User,
+		Username:  post.Username,
 		CreatedAt: post.CreatedAt,
 		UpdatedAt: post.UpdatedAt,
 	}

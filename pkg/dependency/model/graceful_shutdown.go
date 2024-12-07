@@ -3,8 +3,8 @@ package model
 import (
 	"context"
 
-	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
-	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/interfaces"
+	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 )
 
 const (
@@ -17,5 +17,5 @@ func GracefulShutdown(ctx context.Context, logger interfaces.Logger, close ...in
 		close.Close(ctx)
 	}
 
-	logger.Info(domainError.NewInfoMessage(location+"GracefulShutdown", completed))
+	logger.Info(domain.NewInfoMessage(location+"GracefulShutdown", completed))
 }

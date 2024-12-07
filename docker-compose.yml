@@ -7,18 +7,18 @@ services:
       - '27017:27017'
     volumes:
       - mongodbDATA:/data/db
+      - ./infrastructure/script/data/repository/mongo/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
+      - ./infrastructure/script/data/repository/mongo/init-test-data-mongo.js:/docker-entrypoint-initdb.d/init-test-data-mongo.js
     networks:
       - application-network
 
-  app:
+  app-local:
     build:
       context: ./
-      dockerfile: infrastructure/docker/Dockerfile.dev
-    image: app
+      dockerfile: infrastructure/deployment/docker/Dockerfile.local
+    image: app-local
     ports:
       - "8080:8080"
-    environment:
-      - ENV=dev
     volumes:
       - ./:/app
     working_dir: /app
@@ -28,15 +28,41 @@ services:
       - application-network
     command: reflex -r '\.go$' -s -- go run ./cmd/server/main.go
 
+  app-dev:
+    build:
+      context: ./
+      dockerfile: infrastructure/deployment/docker/Dockerfile.dev
+    image: app-dev
+    ports:
+      - "8080:8080"
+    working_dir: /app
+    depends_on:
+      - mongodb
+    networks:
+      - application-network
+    command: ./main 
+
+  app-release:
+    build:
+      context: ./
+      dockerfile: infrastructure/deployment/docker/Dockerfile.release
+    image: app-release
+    ports:
+      - "8080:8080"
+    working_dir: /app
+    depends_on:
+      - mongodb
+    networks:
+      - application-network
+    command: ./main 
+
   app-production:
     build:
       context: ./
-      dockerfile: infrastructure/docker/Dockerfile.prod
+      dockerfile: infrastructure/deployment/docker/Dockerfile.prod
     image: app-production
     ports:
       - "8080:8080"
-    environment:
-      - ENV=prod
     working_dir: /app
     depends_on:
       - mongodb

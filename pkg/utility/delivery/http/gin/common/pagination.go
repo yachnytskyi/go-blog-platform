@@ -20,12 +20,10 @@ func ParsePaginationQuery(ginContext *gin.Context) common.PaginationQuery {
 		scheme = constants.HTTPS
 	}
 
-	baseURL := fmt.Sprintf("%s://%s%s", scheme, ginContext.Request.Host, ginContext.Request.URL.Path)
 	return common.NewPaginationQuery(
-		common.GetPage(page),
-		common.GetLimit(limit),
+		page,
+		limit,
 		orderBy,
 		sortOrder,
-		baseURL,
-	)
+		fmt.Sprintf("%s://%s%s", scheme, ginContext.Request.Host, ginContext.Request.URL.Path))
 }

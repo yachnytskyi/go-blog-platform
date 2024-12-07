@@ -10,10 +10,11 @@ type PostsView struct {
 // [GET].
 type PostView struct {
 	PostID    string    `json:"post_id"`
+	UserID    string    `json:"user_id"`
 	Title     string    `json:"title"`
 	Content   string    `json:"content"`
 	Image     string    `json:"image,omitempty"`
-	User      string    `json:"user"`
+	Username  string    `json:"username"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }

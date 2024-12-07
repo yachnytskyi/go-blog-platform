@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+
+	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 )
 
 type JSONBaseError struct {
@@ -12,7 +14,7 @@ type JSONBaseError struct {
 }
 
 func (jsonBaseError JSONBaseError) Error() string {
-	return fmt.Sprintf("location: %s notification: %s", jsonBaseError.Location, jsonBaseError.Notification)
+	return fmt.Sprintf(constants.BaseErrorMessageFormat, jsonBaseError.Location, jsonBaseError.Notification)
 }
 
 func NewJSONBaseError(location, notification string) JSONBaseError {
@@ -39,6 +41,7 @@ func (jsonBaseErrors JSONBaseErrors) Error() string {
 		}
 		result.WriteString(baseError.Error())
 	}
+	
 	result.WriteString("]")
 	return result.String()
 }
@@ -134,27 +137,23 @@ func NewJSONPaginationError(location, currentPage, totalPages, notification stri
 }
 
 type JSONRequestError struct {
-	Location    string `json:"location"`
 	RequestType string `json:"request_type"`
 	JSONBaseError
 }
 
 func NewJSONRequestError(location, requestType, notification string) JSONRequestError {
 	return JSONRequestError{
-		Location:      location,
 		RequestType:   requestType,
 		JSONBaseError: NewJSONBaseError(location, notification),
 	}
 }
 
 type JSONInternalError struct {
-	Location string `json:"location"`
 	JSONBaseError
 }
 
 func NewJSONInternalError(location, notification string) JSONInternalError {
 	return JSONInternalError{
-		Location:      location,
 		JSONBaseError: NewJSONBaseError(location, notification),
 	}
 }

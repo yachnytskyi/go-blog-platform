@@ -3,13 +3,11 @@ package cookie
 import (
 	"github.com/gin-gonic/gin"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
+	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
 )
 
 // CleanCookies is a helper function for Gin controllers that clears specific cookies.
-func CleanCookies(ctx *gin.Context, configInstance interfaces.Config, path string) {
-	config := configInstance.GetConfig()
-
+func CleanCookies(ctx *gin.Context, config *config.ApplicationConfig, path string) {
 	// Clear the access token cookie by setting its value to an empty string and
 	// configuring it with the logout max age, path, and domain.
 	// The security settings from the configuration are applied to ensure proper handling.

@@ -1,12 +1,13 @@
 package middleware
 
 import (
+	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
-	http "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/interfaces"
+	delivery "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 )
 
 // AnonymousMiddleware is a Gin middleware to check if the user is anonymous based on the presence of an access token.
@@ -16,8 +17,8 @@ func AnonymousMiddleware(logger interfaces.Logger) gin.HandlerFunc {
 
 		// If the access token is present, indicating that the user is already authenticated.
 		if anonymousAccessToken {
-			httpAuthorizationError := http.NewHTTPAuthorizationError(location+"AnonymousMiddleware.anonymousAccessToken", constants.AlreadyLoggedInNotification)
-			abortWithStatusJSON(ginContext, logger, httpAuthorizationError, constants.StatusForbidden)
+			httpAuthorizationError := delivery.NewHTTPAuthorizationError(location+"AnonymousMiddleware.anonymousAccessToken", constants.AlreadyLoggedInNotification)
+			abortWithStatusJSON(ginContext, logger, httpAuthorizationError, http.StatusForbidden)
 			return
 		}
 
@@ -25,19 +26,17 @@ func AnonymousMiddleware(logger interfaces.Logger) gin.HandlerFunc {
 	}
 }
 
-// isUserAnonymous checks if the user is anonymous based on the presence of an access token.
 func isUserAnonymous(ginContext *gin.Context) bool {
 	authorizationHeader := ginContext.Request.Header.Get(constants.Authorization)
-	fields := strings.Fields(authorizationHeader)
 
-	// Check if the Authorization header contains a Bearer token.
-	if len(fields) > 0 && fields[0] == constants.Bearer {
+	// Attempt to retrieve the access token from the cookie if no valid Bearer token is found in the Authorization header.
+	_, cookieError := ginContext.Cookie(constants.AccessTokenValue)
+	if cookieError == nil {
 		return true
 	}
 
-	// If no Bearer token in the Authorization header, try to get the token from the cookie.
-	_, cookieError := ginContext.Cookie(constants.AccessTokenValue)
-	if cookieError == nil {
+	// Verify that the Authorization header contains a Bearer token.
+	if strings.HasPrefix(authorizationHeader, constants.Bearer) && len(authorizationHeader) > len(constants.Bearer) {
 		return true
 	}
 

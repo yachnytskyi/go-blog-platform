@@ -1,8 +1,9 @@
 package mongo
 
 import (
+	"strings"
+
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	utility "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/domain"
 )
 
 const (
@@ -16,7 +17,7 @@ const (
 // falls back to the default sort order.
 func SetSortOrder(sortOrder string) int {
 	// Map the sort order string to lower case for case-insensitive comparison.
-	sortOrder = utility.ToLowerString(sortOrder)
+	sortOrder = strings.ToLower(sortOrder)
 
 	// Determine the corresponding numeric sort order value based on the input string.
 	switch sortOrder {

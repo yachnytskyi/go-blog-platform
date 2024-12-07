@@ -1,24 +1,25 @@
 package constants
 
 import (
-	"net/http"
 	"time"
 )
 
 // Pagination constants.
 const (
-	Page                 = "page"       // Page query parameter.
-	Limit                = "limit"      // Limit query parameter.
-	OrderBy              = "order_by"   // Order by query parameter.
-	SortOrder            = "sort_order" // Sort order query parameter.
-	DefaultAmountOfPages = 10           // Default amount of pages for pagination.
-	DefaultPage          = "1"          // Default page number.
-	DefaultLimit         = "10"         // Default limit per page.
-	MaxItemsPerPage      = 100          // Maximum items per page.
-	DefaultOrderBy       = "created_at" // Default order by field.
-	DefaultSortOrder     = "descend"    // Default sort order.
-	SortAscend           = "ascend"     // Ascending sort order.
-	SortDescend          = "descend"    // Descending sort order.
+	Page                     = "page"       // Page query parameter.
+	Limit                    = "limit"      // Limit query parameter.
+	OrderBy                  = "order_by"   // Order by query parameter.
+	SortOrder                = "sort_order" // Sort order query parameter.
+	DefaultPage              = "1"          // Default page number.
+	DefaultLimit             = "10"         // Default limit per page.
+	DefaultAmountOfPageLinks = 10           // Default amount of page links for pagination.
+	DefaultPageInteger       = 1            // Default page number.
+	DefaultLimitInteger      = 10           // Default limit per page.
+	MaxItemsPerPage          = 100          // Maximum items per page.
+	DefaultSortOrder         = SortDescend  // Default sort order.
+	DefaultOrderBy           = "created_at" // Default order by field.
+	SortAscend               = "ascend"     // Ascending sort order.
+	SortDescend              = "descend"    // Descending sort order.
 )
 
 // Context timers.
@@ -30,6 +31,11 @@ const (
 const (
 	DateTimeFormat       = "02-Jan-2006 03:04:05 PM MST" // Format for human-readable dates.
 	LoggerDateTimeFormat = time.RFC3339                  // Format for machine-readable dates (ISO 8601).
+)
+
+// Error message formatting constants.
+const (
+	BaseErrorMessageFormat = "location: %s notification: %s" // Format string for logging or displaying error messages with location and notification details.
 )
 
 // Token-related constants.
@@ -82,6 +88,7 @@ const (
 // Database table names.
 const (
 	UsersTable = "users" // Users table name in the database.
+	PostsTable = "posts" // Posts table name in the database.
 )
 
 // Schemes used in the application.
@@ -92,23 +99,16 @@ const (
 
 // HTTP Headers used in the application.
 const (
-	CorrelationIDHeader = "X-Correlation-ID" // Correlation-ID header for tracking requests across systems.
-	ContentType         = "Content-Type"     // Content-Type header.
-	Authorization       = "Authorization"    // Authorization header.
-	Bearer              = "Bearer"           // Bearer token prefix.
+	RequestIDHeader = "X-Request-ID"  // Request-ID header for tracking requests across systems.
+	ContentType     = "Content-Type"  // Content-Type header.
+	Authorization   = "Authorization" // Authorization header.
+	Bearer          = "Bearer "       // Bearer token prefix.
 )
 
-// HTTP status codes.
+// Operation status messages.
 const (
-	StatusOk               = http.StatusOK               // HTTP 200 OK.
-	StatusCreated          = http.StatusCreated          // HTTP 201 Created.
-	StatusNoContent        = http.StatusNoContent        // HTTP 204 No Content.
-	StatusBadRequest       = http.StatusBadRequest       // HTTP 400 Bad Request.
-	StatusUnauthorized     = http.StatusUnauthorized     // HTTP 401 Unauthorized.
-	StatusForbidden        = http.StatusForbidden        // HTTP 403 Forbidden.
-	StatusNotFound         = http.StatusNotFound         // HTTP 404 Not Found.
-	StatusMethodNotAllowed = http.StatusMethodNotAllowed // HTTP 405 Not Allowed.
-	StatusBadGateway       = http.StatusBadGateway       // HTTP 502 Bad Gateway.
+	Success = "success" // Success message for successful operations.
+	Fail    = "fail"    // Failure message for unsuccessful operations.
 )
 
 // HTTP methods for RESTful operations.

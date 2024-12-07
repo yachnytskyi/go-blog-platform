@@ -1,7 +1,7 @@
 package model
 
 import (
-	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/interfaces"
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/data/repository/mongo"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -27,7 +27,7 @@ func PostRepositoryToPostMapper(postRepository *PostRepository) *post.Post {
 		Title:     postRepository.Title,
 		Content:   postRepository.Content,
 		Image:     postRepository.Image,
-		User:      postRepository.User,
+		Username:  postRepository.Username,
 		CreatedAt: postRepository.CreatedAt,
 		UpdatedAt: postRepository.UpdatedAt,
 	}
@@ -44,7 +44,6 @@ func PostCreateToPostCreateRepositoryMapper(logger interfaces.Logger, postCreate
 		Title:     postCreate.Title,
 		Content:   postCreate.Content,
 		Image:     postCreate.Image,
-		User:      postCreate.User,
 		CreatedAt: postCreate.CreatedAt,
 		UpdatedAt: postCreate.UpdatedAt,
 	}, nil
@@ -62,13 +61,10 @@ func PostUpdateToPostUpdateRepositoryMapper(logger interfaces.Logger, postUpdate
 	}
 
 	return &PostUpdateRepository{
-		PostID:    postObjectID.Data,
-		UserID:    userObjectID.Data,
-		Title:     postUpdate.Title,
-		Content:   postUpdate.Content,
-		Image:     postUpdate.Image,
-		User:      postUpdate.User,
-		CreatedAt: postUpdate.CreatedAt,
-		UpdatedAt: postUpdate.UpdatedAt,
+		PostID:  postObjectID.Data,
+		UserID:  userObjectID.Data,
+		Title:   postUpdate.Title,
+		Content: postUpdate.Content,
+		Image:   postUpdate.Image,
 	}, nil
 }

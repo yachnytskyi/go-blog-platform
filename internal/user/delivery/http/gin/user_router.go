@@ -3,17 +3,18 @@ package gin
 import (
 	"github.com/gin-gonic/gin"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/interfaces"
+	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
 	middleware "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/middleware"
 )
 
 type UserRouter struct {
-	interfaces.Config
+	Config         *config.ApplicationConfig
 	Logger         interfaces.Logger
 	UserController interfaces.UserController
 }
 
-func NewUserRouter(config interfaces.Config, logger interfaces.Logger, userController interfaces.UserController) UserRouter {
+func NewUserRouter(config *config.ApplicationConfig, logger interfaces.Logger, userController interfaces.UserController) UserRouter {
 	return UserRouter{
 		Config:         config,
 		Logger:         logger,
@@ -76,9 +77,9 @@ func (userRouter UserRouter) Router(routerGroup any) {
 		})
 	}
 
-	// Token-related routes with refresh token authentication middleware.
+	// Token-related routes with refresh token middleware.
 	tokenRoutes := router.Group("")
-	tokenRoutes.Use(middleware.RefreshTokenAuthenticationMiddleware(userRouter.Config, userRouter.Logger))
+	tokenRoutes.Use(middleware.RefreshTokenMiddleware(userRouter.Config, userRouter.Logger))
 	{
 		tokenRoutes.GET(constants.RefreshTokenPath, func(ginContext *gin.Context) {
 			userRouter.UserController.RefreshAccessToken(ginContext)

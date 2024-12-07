@@ -1,43 +1,89 @@
-<div align="left">
-  
-## Golang Mongo gRPC     
-Source code for  Golang Mongo gRPC App.
+# Go Blog Platform
 
-The project uses:  
-**Golang    
-Gin  
-MongoDB  
-gRPC**
+Source code for the Go Blog Platform App.
 
-Hexagonal architecture, manual dependency injection and abstract factory are implemented in the project.  
+## Introduction
 
-## Initializing
-`config/yaml/v1/local.dev.application.example.yaml` and `config/yaml/v1/docker.dev.application.example.yaml` file are provided you as the examples of your own config settings,  
-you need to put them in your `config/yaml/v1/local.dev.application.example.yaml` and/or `config/yaml/v1/docker.dev.application.example.yaml` (you should create them  on your own). 
+This project is a Golang-based application that uses MongoDB, REST API, gRPC, following hexagonal architecture principles, manual dependency injection, and the abstract factory pattern.
 
-## From the project root directory, run:  
-```make up``` For docker environment.  ```make local ``` For local environment     
-    
-The API will then be available at  **http://localhost:8080/api/posts  http://localhost:8080/api/users**  
-You can also find all possible API requests/urls when you launch the project in your server terminal. 
+## Prerequisites
 
-If you need to make rebuild, you can use these commands:  
-```make build``` if you prefer a shortcut command from Makefile.   
-```docker-compose build``` if you you prefer to enter a full command on your own.
-  
-After that repeat this command:
-```make up``` For docker environment.  ```make local ``` For local environment    
+Ensure you have the following installed:
+- Golang 
+- Docker
+- Docker Compose
 
-## Run server
-To run this code, you will need docker and docker-compose installed on your machine. From the root project directory, run:  
-```make up``` use default dockerized launch mode     
-```make local``` use local launch mode 
+## Initializing 
 
-## Stop Docker Compose services 
-```make down``` if you prefer a shortcut command from Makefile.  
-```docker-compose down``` if you you prefer to enter a full command on your own.
- 
-## Ways of possible improvements
-I am open for new ideas. At first add unit and integration tests. Secondly, refactoring of the system.
+To set up the project, run the following command:
+- `make initial` 
 
-</div>
+After this, review and update the configuration settings to match your environment (local, development, release, production, etc.).
+
+## API Endpoints
+
+The API is available at the following URLs:
+- `http://localhost:8080/api/posts`
+- `http://localhost:8080/api/users`
+
+For a complete list of available API requests/URLs, check the server terminal upon launching the project.
+
+## Build and Run
+
+To run the project, choose from:
+- `make mongo-local` (for local environment)
+- `make mongo-dev` (for dev Docker environment)
+- `make mongo-release` (for release Docker environment)
+- `make mongo-production` (for production Docker environment)
+
+Make sure Docker and Docker Compose are installed.
+
+## Stop Docker Compose Services
+
+To stop and clean up the running services, use the following `make` commands:
+
+- **Stop the services**:  
+  `make stop` – Stops the services without removing the containers.
+
+- **Remove the containers**:  
+  `make down` – Stops the services and removes the containers.
+
+- **Remove containers and volumes**:  
+  `make down-v` – Stops the services, removes the containers, and also removes any associated Docker volumes (which may contain persistent data).
+
+## Update Dependencies
+
+To update all Go dependencies to their latest compatible versions, use the following command:
+
+- `make update`
+
+## Testing
+
+To run tests, use the following `make` commands:
+
+- **Run all tests**:  
+  `make tests` – Executes all tests in the project.
+
+- **Run unit tests only**:  
+  `make unit-tests` – Executes only the unit tests.
+
+## License
+
+This project is licensed under the [Creative Commons Attribution-NonCommercial 4.0 International License](https://creativecommons.org/licenses/by-nc/4.0/).
+
+You are free to:
+- Share — copy and redistribute the material in any medium or format
+- Adapt — remix, transform, and build upon the material
+
+The above rights are granted under the following terms:
+- **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made. You may do so in any reasonable manner, but not in any way that suggests the licensor endorses you or your use.
+- **NonCommercial** — You may not use the material for commercial purposes.
+
+**Note**: This license does not grant you the rights to use the work for commercial purposes. For more details, visit the [Creative Commons License Deed](https://creativecommons.org/licenses/by-nc/4.0/).
+
+## Ways to Improve
+
+- **Add Unit and Integration Tests**: Enhance testing coverage.
+- **Refactor the System**: Improve code structure and efficiency.
+
+Feel free to provide additional ideas or suggestions for further improvements.

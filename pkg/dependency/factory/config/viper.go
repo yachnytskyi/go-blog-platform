@@ -8,68 +8,62 @@ import (
 	"github.com/spf13/viper"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
-	domainError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
-type Viper struct {
-	ApplicationConfig *config.ApplicationConfig
-}
+const (
+	location = "pkg.dependency.factory.config."
+)
 
-func NewViper() Viper {
-	loadEnvironmentsError := godotenv.Load(constants.EnvironmentsPath + constants.LocalEnvironment)
+func NewViper() *config.ApplicationConfig {
+	loadEnvironmentsError := godotenv.Load(constants.EnvironmentsPath + constants.Environment)
 	if validator.IsError(loadEnvironmentsError) {
-		loadEnvironmentsInternalError := domainError.NewInternalError(location+"viper.Load", loadEnvironmentsError.Error())
+		loadEnvironmentsInternalError := domain.NewInternalError(location+"viper.Load", loadEnvironmentsError.Error())
 		log.Println(loadEnvironmentsInternalError)
 		loadDefaultEnvironment()
 	}
 
-	configPath := os.Getenv(constants.Version)
+	configPath := os.Getenv(constants.AppVersion)
 	viperInstance := viper.New()
 	viperInstance.SetConfigFile(configPath)
 	viperInstance.AutomaticEnv()
 
 	readInConfigError := viperInstance.ReadInConfig()
 	if validator.IsError(readInConfigError) {
-		readInInternalError := domainError.NewInternalError(location+"viper.ReadInConfig", readInConfigError.Error())
+		readInInternalError := domain.NewInternalError(location+"viper.ReadInConfig", readInConfigError.Error())
 		log.Println(readInInternalError)
 		loadDefaultConfig(viperInstance)
 	}
 
-	var viperConfig config.YamlConfig
-	unmarshalError := viperInstance.Unmarshal(&viperConfig)
+	var yamlConfig config.YamlConfig
+	unmarshalError := viperInstance.Unmarshal(&yamlConfig)
 	if validator.IsError(unmarshalError) {
-		panic(domainError.NewInternalError(location+"viper.Unmarshal", unmarshalError.Error()))
+		panic(domain.NewInternalError(location+"viper.Unmarshal", unmarshalError.Error()))
 	}
 
-	applicationConfig := viperConfigToApplicationConfigMapper(&viperConfig)
-	return Viper{
-		ApplicationConfig: &applicationConfig,
-	}
+	applicationConfig := yamlConfigToApplicationConfigMapper(&yamlConfig)
+	return &applicationConfig
 }
 
 func loadDefaultEnvironment() {
-	defaultEnvironmentError := godotenv.Load(constants.DefaultEnvironmentsPath + constants.LocalEnvironment)
+	defaultEnvironmentError := godotenv.Load(constants.DefaultEnvironmentsPath + constants.DefaultEnvironment)
 	if validator.IsError(defaultEnvironmentError) {
-		panic(domainError.NewInternalError(location+"viper.loadDefaultEnvironment", defaultEnvironmentError.Error()))
+		panic(domain.NewInternalError(location+"viper.loadDefaultEnvironment", defaultEnvironmentError.Error()))
 	}
-	log.Println(domainError.NewInfoMessage(location+"viper.loadDefaultEnvironment", constants.DefaultConfigPathNotification))
+	log.Println(domain.NewInfoMessage(location+"viper.loadDefaultEnvironment", constants.DefaultConfigPathNotification))
 }
 
 func loadDefaultConfig(viper *viper.Viper) {
 	viper.SetConfigFile(constants.DefaultConfigPath)
 	readInConfigError := viper.ReadInConfig()
 	if validator.IsError(readInConfigError) {
-		panic(domainError.NewInternalError(location+"viper.loadDefaultConfig", readInConfigError.Error()))
+		panic(domain.NewInternalError(location+"viper.loadDefaultConfig", readInConfigError.Error()))
 	}
-	log.Println(domainError.NewInfoMessage(location+"viper.loadDefaultConfig", constants.DefaultConfigPathNotification))
+	log.Println(domain.NewInfoMessage(location+"viper.loadDefaultConfig", constants.DefaultConfigPathNotification))
 }
 
-func (viper Viper) GetConfig() *config.ApplicationConfig {
-	return viper.ApplicationConfig
-}
-
-func viperConfigToApplicationConfigMapper(yamlConfig *config.YamlConfig) config.ApplicationConfig {
+func yamlConfigToApplicationConfigMapper(yamlConfig *config.YamlConfig) config.ApplicationConfig {
 	return config.ApplicationConfig{
 		Core:         convertCore(&yamlConfig.Core),
 		MongoDB:      convertMongoDB(&yamlConfig.MongoDB),
@@ -87,7 +81,6 @@ func convertCore(core *config.YamlCore) config.Core {
 		Logger:   core.Logger,
 		Email:    core.Email,
 		Database: core.Database,
-		UseCase:  core.UseCase,
 		Delivery: core.Delivery,
 	}
 }

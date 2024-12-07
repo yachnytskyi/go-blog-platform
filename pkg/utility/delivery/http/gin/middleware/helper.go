@@ -5,49 +5,40 @@ import (
 
 	"github.com/gin-gonic/gin"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/interfaces"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/common"
 	http "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
-	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
-	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
+	delivery "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 )
 
 const (
 	location = "pkg.utility.delivery.http.gin.middleware."
 )
 
-// extractAccessToken extracts the access token from the request headers or cookies.
-func extractAccessToken(ginContext *gin.Context, location string) common.Result[string] {
-	cookie, cookieError := ginContext.Cookie(constants.AccessTokenValue)
-	authorizationHeader := ginContext.Request.Header.Get(constants.Authorization)
-	fields := strings.Fields(authorizationHeader)
-
-	// Check if the Authorization header contains a Bearer token.
-	if len(fields) > 0 && fields[0] == constants.Bearer {
-		// If a Bearer token is present, set the access token.
-		return common.NewResultOnSuccess[string](fields[1])
-	} else if cookieError == nil {
-		// If no Bearer token in the Authorization header, try to get the token from the cookie.
+// extractToken extracts the token from the request headers or cookies.
+func extractToken(ginContext *gin.Context, location, tokenType string) common.Result[string] {
+	// Check if the cookie contains the token.
+	cookie, cookieError := ginContext.Cookie(tokenType)
+	if cookieError == nil {
 		return common.NewResultOnSuccess[string](cookie)
 	}
 
-	// If access token is still empty, create and log an HTTP authorization error.
-	return common.NewResultOnFailure[string](httpError.NewHTTPAuthorizationError(location+".extractAccessToken.accessToken", constants.LoggingErrorNotification))
-}
-
-// extractRefreshToken extracts the refresh token from the request cookies.
-func extractRefreshToken(ginContext *gin.Context, location string) common.Result[string] {
-	refreshToken, refreshTokenError := ginContext.Cookie(constants.RefreshTokenValue)
-	if validator.IsError(refreshTokenError) {
-		return common.NewResultOnFailure[string](httpError.NewHTTPAuthorizationError(location+".extractRefreshToken.refreshToken", constants.LoggingErrorNotification))
+	// If no token in the cookie, try to get the token from the Authorization header.
+	authorizationHeader := ginContext.Request.Header.Get(constants.Authorization)
+	if strings.HasPrefix(authorizationHeader, constants.Bearer) {
+		authorizationHeader = authorizationHeader[len(constants.Bearer):]
+		if len(authorizationHeader) > 0 {
+			return common.NewResultOnSuccess[string](authorizationHeader)
+		}
 	}
 
-	return common.NewResultOnSuccess[string](refreshToken)
+	// If no token was found, return a failure with an HTTP authorization error.
+	return common.NewResultOnFailure[string](delivery.NewHTTPAuthorizationError(location+".extractToken.token", constants.LoggingErrorNotification))
 }
 
 // abortWithStatusJSON aborts the request, logs the error, and responds with a JSON error.
 func abortWithStatusJSON(ginContext *gin.Context, logger interfaces.Logger, err error, httpCode int) {
 	logger.Error(err)
-	jsonResponse := http.NewJSONResponseOnFailure(httpError.HandleError(err))
+	jsonResponse := http.NewJSONResponseOnFailure(delivery.HandleError(err))
 	ginContext.AbortWithStatusJSON(httpCode, jsonResponse)
 }

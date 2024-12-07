@@ -4,17 +4,18 @@ import (
 	"github.com/gin-gonic/gin"
 
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/interfaces"
+	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
 	middleware "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/middleware"
 )
 
 type PostRouter struct {
-	Config         interfaces.Config
+	Config         *config.ApplicationConfig
 	Logger         interfaces.Logger
 	PostController interfaces.PostController
 }
 
-func NewPostRouter(config interfaces.Config, logger interfaces.Logger, postController interfaces.PostController) interfaces.Router {
+func NewPostRouter(config *config.ApplicationConfig, logger interfaces.Logger, postController interfaces.PostController) interfaces.Router {
 	return PostRouter{
 		Config:         config,
 		Logger:         logger,

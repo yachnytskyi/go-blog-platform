@@ -8,19 +8,17 @@ import (
 
 	"github.com/gin-gonic/gin"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	interfaces "github.com/yachnytskyi/golang-mongo-grpc/internal/common/interfaces"
 	view "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/model"
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/model"
+	useCase "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/usecase"
 )
 
 type PostController struct {
-	userUseCase interfaces.UserUseCase
-	postUseCase interfaces.PostUseCase
+	postUseCase useCase.PostUseCase
 }
 
-func NewPostController(userUseCase interfaces.UserUseCase, postUseCase interfaces.PostUseCase) PostController {
+func NewPostController(postUseCase useCase.PostUseCase) PostController {
 	return PostController{
-		userUseCase: userUseCase,
 		postUseCase: postUseCase,
 	}
 }
@@ -80,10 +78,7 @@ func (postController PostController) CreatePost(controllerContext any) {
 	defer cancel()
 
 	var createdPostData *post.PostCreate = new(post.PostCreate)
-	currentUserID := ctx.Value(constants.ID).(string)
-	user := postController.userUseCase.GetUserById(ctx, currentUserID)
-	createdPostData.UserID = user.Data.ID
-	createdPostData.User = user.Data.Name
+	createdPostData.UserID = ctx.Value(constants.ID).(string)
 	err := ginContext.ShouldBindJSON(&createdPostData)
 	if err != nil {
 		ginContext.JSON(http.StatusBadRequest, err.Error())
@@ -139,6 +134,7 @@ func (postController PostController) DeletePostByID(controllerContext any) {
 	ginContext := controllerContext.(*gin.Context)
 	ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
 	defer cancel()
+
 	postID := ginContext.Param("postID")
 	currentUserID := ctx.Value(constants.ID).(string)
 	err := postController.postUseCase.DeletePostByID(ctx, postID, currentUserID)

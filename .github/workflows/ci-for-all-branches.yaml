@@ -1,0 +1,47 @@
+name: CI for All Branches
+
+on:
+  push:
+    branches:
+      - dev
+      - release
+      - main
+  pull_request:
+    branches:
+      - dev
+      - release
+      - main
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up Go with the latest stable version
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 'stable'
+
+      # Run unit tests for each commit (common step)
+      - name: Run Unit Tests
+        run: go test ./test/unit/...
+
+      # Build and run services based on branch
+      - name: Build and Run Services
+        run: |
+          if [[ "${{ github.ref_name }}" == "dev" ]]; then
+            docker compose up mongodb app-dev -d
+          elif [[ "${{ github.ref_name }}" == "release" ]]; then
+            docker compose up mongodb app-release -d
+          elif [[ "${{ github.ref_name }}" == "main" ]]; then
+            docker compose up mongodb app-production -d
+          fi
+
+      # Clean up Docker containers
+      - name: Clean Up Docker
+        run: docker compose down -v

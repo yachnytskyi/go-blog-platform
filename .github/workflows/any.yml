@@ -18,7 +18,7 @@ jobs:
       with:
         go-version: '1.23.3'
 
-    - name: Test
+    - name: Unit tests
       run: go test ./test/unit/...
 
   # Develop services (only for dev branch)
@@ -33,8 +33,6 @@ jobs:
       with:
         go-version: '1.23.3'
 
-    - name: Test
-      run: go test -v ./...
 
     - name: Build and Run Develop Services
       run: docker compose up mongodb app-dev -d
@@ -52,7 +50,7 @@ jobs:
         go-version: '1.23.3'
 
     - name: Test
-      run: go test -v ./...
+      run: go test ./test/integration/...
 
     - name: Build and Run Release Services
       run: docker compose up mongodb app-release -d
@@ -70,7 +68,7 @@ jobs:
         go-version: '1.23.3'
 
     - name: Test
-      run: go test ./test/unit/...
+      run: go test ./test/integration/...
 
     - name: Build and Run Production Services
       run: docker compose up mongodb app-production -d

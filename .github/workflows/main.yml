@@ -1,4 +1,4 @@
-name: Production Services
+name: Production
 
 on:
   push:
@@ -17,5 +17,5 @@ jobs:
       with:
         go-version: stable
 
-    - name: Build and Run Production Services
+    - name: Build and Run Production
       run: docker compose up mongodb app-production -d

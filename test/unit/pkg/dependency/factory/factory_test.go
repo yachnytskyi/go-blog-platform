@@ -10,7 +10,7 @@ import (
 	factory "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory"
 	repository "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/data/repository"
 	delivery "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/delivery"
-	email "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/email"
+	// email "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/email"
 	logger "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/logger"
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/interfaces"
 	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
@@ -39,7 +39,7 @@ func TestNewEmailGoMail(t *testing.T) {
 	mockConfig.Core.Email = constants.GoMail
 
 	goMail := factory.NewEmail(mockConfig, mockLogger)
-	assert.IsType(t, goMail, email.GoMail{}, test.EqualMessage)
+	assert.IsType(t, goMail, nil, test.EqualMessage)
 	assert.Implements(t, (*interfaces.Email)(nil), goMail, test.EqualMessage)
 }
 

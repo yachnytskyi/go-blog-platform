@@ -27,7 +27,7 @@ jobs:
       uses: actions/setup-go@v4
       with:
         go-version: '1.23.3'
-        cache:true
+        cache: true
 
     - name: Test
       run: go test -v ./...

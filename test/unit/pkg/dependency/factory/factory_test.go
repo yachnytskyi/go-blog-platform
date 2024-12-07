@@ -39,7 +39,7 @@ func TestNewEmailGoMail(t *testing.T) {
 	mockConfig.Core.Email = constants.GoMail
 
 	goMail := factory.NewEmail(mockConfig, mockLogger)
-	assert.IsType(t, goMail, nil, test.EqualMessage)
+	assert.IsType(t, goMail, email.GoMail{}, test.EqualMessage)
 	assert.Implements(t, (*interfaces.Email)(nil), goMail, test.EqualMessage)
 }
 

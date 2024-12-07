@@ -27,4 +27,4 @@ jobs:
 
     # Clean up Docker containers
     - name: Clean Up Docker
-      run: docker compose down -v how to use caching?
+      run: docker compose down -v 

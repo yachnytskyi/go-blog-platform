@@ -1,0 +1,21 @@
+name: Release Services
+
+on:
+  push:
+    branches: ['release']
+  pull_request:
+    branches: ['release']
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.23.3'
+
+    - name: Build and Run Release Services
+      run: docker compose up mongodb app-release -d

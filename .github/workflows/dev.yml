@@ -1,0 +1,21 @@
+name: Develop Services
+
+on:
+  push:
+    branches: ['dev']
+  pull_request:
+    branches: ['dev']
+
+jobs:
+  develop:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.23.3'
+
+    - name: Build and Run Develop Services
+      run: docker compose up mongodb app-dev -d

@@ -3,7 +3,7 @@ initial:
 	cp config/yaml/v1/example/test.application.example.yaml config/yaml/v1/test.application.yaml
 	cp config/yaml/v1/example/docker.develop.application.example.yaml config/yaml/v1/docker.develop.application.yaml
 	cp config/yaml/v1/example/docker.release.application.example.yaml config/yaml/v1/docker.release.application.yaml
-	cp config/yaml/v1/example/docker.prod.application.example.yaml config/yaml/v1/docker.prod.application.yaml
+	cp config/yaml/v1/example/docker.production.application.example.yaml config/yaml/v1/docker.production.application.yaml
 
 	cp infrastructure/script/data/repository/mongo/example/init-mongo.example.js infrastructure/script/data/repository/mongo/init-mongo.js
 	cp infrastructure/script/data/repository/mongo/example/init-test-data-mongo.example.js infrastructure/script/data/repository/mongo/init-test-data-mongo.js

@@ -59,7 +59,7 @@ services:
   app-production:
     build:
       context: ./
-      dockerfile: infrastructure/deployment/docker/Dockerfile.prod
+      dockerfile: infrastructure/deployment/docker/Dockerfile.production
     image: app-production
     ports:
       - "8080:8080"

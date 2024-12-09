@@ -28,11 +28,11 @@ services:
       - application-network
     command: reflex -r '\.go$' -s -- go run ./cmd/server/main.go
 
-  app-dev:
+  app-develop:
     build:
       context: ./
-      dockerfile: infrastructure/deployment/docker/Dockerfile.dev
-    image: app-dev
+      dockerfile: infrastructure/deployment/docker/Dockerfile.develop
+    image: app-develop
     ports:
       - "8080:8080"
     working_dir: /app

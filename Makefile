@@ -1,7 +1,7 @@
 initial:
 	cp config/yaml/v1/example/local.application.example.yaml config/yaml/v1/local.application.yaml
 	cp config/yaml/v1/example/test.application.example.yaml config/yaml/v1/test.application.yaml
-	cp config/yaml/v1/example/docker.dev.application.example.yaml config/yaml/v1/docker.dev.application.yaml
+	cp config/yaml/v1/example/docker.develop.application.example.yaml config/yaml/v1/docker.develop.application.yaml
 	cp config/yaml/v1/example/docker.release.application.example.yaml config/yaml/v1/docker.release.application.yaml
 	cp config/yaml/v1/example/docker.prod.application.example.yaml config/yaml/v1/docker.prod.application.yaml
 
@@ -15,8 +15,8 @@ mongo-local:
 mongo-local-docker:
 	docker compose up mongodb app-local
 
-mongo-dev:
-	docker compose up mongodb app-dev
+mongo-develop:
+	docker compose up mongodb app-develop
 
 mongo-release:
 	docker compose up mongodb app-release
@@ -30,8 +30,8 @@ build-mongo:
 build-local-docker:
 	docker compose build app-local
 
-build-dev:
-	docker compose build app-dev
+build-develop:
+	docker compose build app-develop
 
 build-release:
 	docker compose build app-release

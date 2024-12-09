@@ -18,7 +18,7 @@ Ensure you have the following installed:
 To set up the project, run the following command:
 - `make initial` 
 
-After this, review and update the configuration settings to match your environment (local, development, release, production, etc.).
+After this, review and update the configuration settings to match your environment (local, develop, release, production, etc.).
 
 ## API Endpoints
 
@@ -32,7 +32,7 @@ For a complete list of available API requests/URLs, check the server terminal up
 
 To run the project, choose from:
 - `make mongo-local` (for local environment)
-- `make mongo-dev` (for dev Docker environment)
+- `make mongo-develop` (for develop Docker environment)
 - `make mongo-release` (for release Docker environment)
 - `make mongo-production` (for production Docker environment)
 

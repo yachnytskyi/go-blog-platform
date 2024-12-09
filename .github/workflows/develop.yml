@@ -2,9 +2,9 @@ name: Develop
 
 on:
   push:
-    branches: [ "dev" ]
+    branches: [ "develop" ]
   pull_request:
-    branches: [ "dev" ]
+    branches: [ "develop" ]
 
 jobs:
 
@@ -22,4 +22,4 @@ jobs:
       run: go test -v ./...
 
     - name: Build and Run Develop Services
-      run: docker compose up mongodb app-dev -d
+      run: docker compose up mongodb app-develop -d

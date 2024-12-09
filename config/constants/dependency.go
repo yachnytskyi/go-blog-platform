@@ -16,12 +16,11 @@ const (
 
 	// Environment types.
 	Environment        = LocalEnvironment // Environment defines the environment setting for the application.
-	TestEnvironment    = "test"             // Test development environment.
-	LocalEnvironment   = "local"            // Local development environment.
-	DevEnvironment     = "docker.dev"       // Development environment.
-	ReleaseEnvironment = "docker.release"   // Release environment.
-	ProductEnvironment = "docker.prod"      // Productuction environment.
-	DefaultEnvironment = "docker.prod"      // Default environment defines the default environment setting for the application.
+	LocalEnvironment   = "local"          // Local development environment.
+	DevelopEnvironment = "docker.develop" // Development environment.
+	ReleaseEnvironment = "docker.release" // Release environment.
+	ProductEnvironment = "docker.prod"    // Productuction environment.
+	DefaultEnvironment = "docker.prod"    // Default environment defines the default environment setting for the application.
 
 	// Configuration paths.
 	ConfigPath        = YamlConfigPath                          // Path for the application configuration file.

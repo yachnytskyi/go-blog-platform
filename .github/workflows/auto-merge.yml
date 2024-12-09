@@ -1,4 +1,5 @@
-name: Auto-Merge
+name: Auto Merge
+
 on:
   pull_request:
     types: [opened, ready_for_review]
@@ -7,8 +8,24 @@ jobs:
   auto-merge:
     runs-on: ubuntu-latest
     steps:
-      - name: Auto-Merge the PR
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh pr merge ${{ github.event.pull_request.number }} --auto
+    - name: Check all required status checks
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const { data: pullRequest } = await github.pulls.get({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: context.payload.pull_request.number
+          });
+
+          if (pullRequest.mergeable && pullRequest.merge_state_status === 'clean') {
+            await github.pulls.merge({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              commit_title: `Auto-merged PR #${context.payload.pull_request.number} by GitHub Actions`,
+              merge_method: "merge"  // Use "merge", "squash", or "rebase" based on your preferences
+            });
+          } else {
+            core.setFailed("PR is not ready to merge or has conflicts.");
+          }

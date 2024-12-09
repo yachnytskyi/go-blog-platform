@@ -1,4 +1,4 @@
-name: Release (pre-Production)
+name: Release (pre-Production) workflow
 
 on:
   # push:

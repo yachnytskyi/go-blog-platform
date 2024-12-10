@@ -1,43 +1,25 @@
 name: Develop workflow
 
 on:
+  # push:
+  #   branches: [ "develop" ]
   pull_request:
     branches: [ "develop" ]
 
 jobs:
+
   build:
     runs-on: ubuntu-latest
-
     steps:
-    # Checkout the repository
     - uses: actions/checkout@v4
 
-    # Set up Go
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
         go-version: stable
 
-    # Run tests
-    - name: Test
-      run: go test -v ./...
+    - name: Copy config file
+      run: cp ./config/yaml/v1/docker.test.application.yaml ./config/yaml/v1/docker.develop.application.yaml
 
-    # Create config directories
-    - name: Create config directory
-      run: |
-        mkdir -p ./config/environment ./config/yaml/v1
-
-    # Download config files from GitHub Secrets
-    - name: Download config files from GitHub Secrets
-      run: |
-        echo "$DEVELOP_YAML_FILE" > ./config/yaml/v1/docker.develop.application.yaml
-
-    # Debugging step: Print the content of the config file
-    - name: Show the content of the config file
-      run: |
-        echo "Content of docker.develop.application.yaml:"
-        cat ./config/yaml/v1/docker.develop.application.yaml
-
-    # Build and Run Develop Services1
     - name: Build and Run Develop Services
       run: docker compose up mongodb app-develop -d

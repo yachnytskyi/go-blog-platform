@@ -25,7 +25,7 @@ jobs:
           while true; do
             # Get the number of checks that are either "SUCCESS" or "FAILURE" (i.e., completed checks)
             FINISHED_CHECKS=$(gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup -q '.statusCheckRollup | map(select(.conclusion == "SUCCESS" or .conclusion == "FAILURE")) | length')
-
+  
             # If the finished checks are equal to the expected count, break out of the loop
             if [ "$FINISHED_CHECKS" -ge "$EXPECTED_FINISHED_CHECKS" ]; then
               echo "All required checks passed. Proceeding with the merge."
@@ -35,6 +35,8 @@ jobs:
               sleep 10
             fi
           done
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Merge Pull Request
         if: success()

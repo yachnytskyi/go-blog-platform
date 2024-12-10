@@ -5,27 +5,16 @@ type contextKey string
 
 // Application version.
 const (
-	AppVersion = V1   // AppVersion represents the application's current version.
-	V1         = "v1" // V1 specifies the version value of the application.
+	version = "version" // Version specifies the constant value of the application.
 )
 
 // Environment configuration paths.
 const (
-	EnvironmentsPath        = "config/environment/.env." // Base path for environment configuration files.
-	DefaultEnvironmentsPath = "config/environment/.env." // Default path for environment configuration files.
-
-	// Environment types.
-	Environment           = ProductionEnvironment  // Environment defines the environment setting for the application.
-	LocalEnvironment      = "local"             // Local development environment.
-	DevelopEnvironment    = "docker.develop"    // Development environment.
-	ReleaseEnvironment    = "docker.release"    // Release environment.
-	ProductionEnvironment = "docker.production" // Productuction environment.
-	DefaultEnvironment    = "docker.production" // Default environment defines the default environment setting for the application.
-
 	// Configuration paths.
-	ConfigPath        = YamlConfigPath                          // Path for the application configuration file.
-	YamlConfigPath    = "config/yaml/v1/local.application.yaml" // Path for the application yaml configuration file.
-	DefaultConfigPath = "config/yaml/v1/local.application.yaml" // Default path for the application configuration file.
+	EnvironmentsPath        = "config/environment/.env"               // Base path for environment configuration files.
+	DefaultEnvironmentsPath = "config/environment/.env"               // Default path for environment configuration files.
+	DefaultEnvironment      = ".local"                                // Default environment defines the default environment setting for the application.
+	DefaultConfigPath       = "config/yaml/v1/local.application.yaml" // Default path for the application configuration file.
 
 	// Notification messages.
 	DefaultConfigPathNotification      = "Using default configuration path" // Notification message for using the default configuration path.

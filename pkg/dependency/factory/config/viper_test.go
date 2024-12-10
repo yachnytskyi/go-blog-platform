@@ -71,17 +71,17 @@ grpc:
 		return ""
 	}
 
-	err = os.WriteFile(constants.YamlConfigPath, yamlContent, readPermissions)
+	err = os.WriteFile(constants.DefaultConfigPath, yamlContent, readPermissions)
 	if err != nil {
 		return ""
 	}
 
-	return constants.YamlConfigPath
+	return constants.DefaultConfigPath
 }
 
 func setupEnvFilePath() string {
-	envFilePath := constants.DefaultEnvironmentsPath + constants.DefaultEnvironment
-	envContent := []byte(fmt.Sprintf(v1, constants.ConfigPath))
+	envFilePath := constants.EnvironmentsPath + constants.DefaultEnvironment
+	envContent := []byte(fmt.Sprintf(v1, constants.DefaultConfigPath))
 
 	err := os.MkdirAll(environmentConfigPath, writePermissions)
 	if err != nil {

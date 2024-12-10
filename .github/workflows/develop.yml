@@ -11,18 +11,13 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Set up Go
-      uses: actions/setup-go@v4
+      uses: actions/setup-go@v5
       with:
         go-version: stable
 
     - name: Decode and Create YAML File
       run: |
         echo "${{ secrets.DOCKER_DEVELOP_APPLICATION_CONFIG_YAML }}" | base64 -d > config/yaml/v1/docker.develop.application.yaml
-
-    - name: Debug - Print YAML File Content
-      run: |
-        echo "Content of docker.develop.application.yaml:"
-        cat config/yaml/v1/docker.develop.application.yaml
 
     - name: Build and Run Develop Services
       run: docker compose up mongodb app-develop -d

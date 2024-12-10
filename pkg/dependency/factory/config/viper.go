@@ -17,14 +17,14 @@ const (
 )
 
 func NewViper() *config.ApplicationConfig {
-	loadEnvironmentsError := godotenv.Load(constants.EnvironmentsPath + constants.Environment)
+	loadEnvironmentsError := godotenv.Load(constants.EnvironmentsPath)
 	if validator.IsError(loadEnvironmentsError) {
 		loadEnvironmentsInternalError := domain.NewInternalError(location+"viper.Load", loadEnvironmentsError.Error())
 		log.Println(loadEnvironmentsInternalError)
 		loadDefaultEnvironment()
 	}
 
-	configPath := os.Getenv(constants.AppVersion)
+	configPath := os.Getenv("version")
 	viperInstance := viper.New()
 	viperInstance.SetConfigFile(configPath)
 	viperInstance.AutomaticEnv()

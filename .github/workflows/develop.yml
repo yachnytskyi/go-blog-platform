@@ -17,7 +17,7 @@ jobs:
 
     - name: Decode and Create YAML File
       run: |
-        echo "${{ secrets.DOCKER_DEVELOPER_APPLICATION_CONFIG_YAML }}" | base64 -d > config/yaml/v1/docker.develop.application.yaml
+        echo "${{ secrets.DOCKER_DEVELOP_APPLICATION_CONFIG_YAML }}" | base64 -d > config/yaml/v1/docker.develop.application.yaml
 
     - name: Debug - Print YAML File Content
       run: |

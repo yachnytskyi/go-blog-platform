@@ -1,4 +1,4 @@
-name: Auto Merge workflow
+name: Auto Merge workflow test
 
 on:
   pull_request:

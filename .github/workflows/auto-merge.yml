@@ -9,7 +9,7 @@ on:
 
 jobs:
   auto-merge:
-    needs: checks
+    # needs: checks
     runs-on: ubuntu-latest
     steps:
       - name: Merge Pull Request

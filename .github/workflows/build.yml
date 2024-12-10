@@ -1,4 +1,4 @@
-name: General Build and Unit Tests
+name: General workflow
 
 on:
   push:

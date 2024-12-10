@@ -13,7 +13,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3  
 
-      - name: Wait for all checks except this workflow to finish
+      - name: Wait for all checks to finish successfully (with timeout)
         run: |
           # Get the total number of checks (including the current workflow check)
           TOTAL_CHECKS=$(gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup -q '.statusCheckRollup | length')
@@ -21,19 +21,29 @@ jobs:
           # Exclude this workflow's check by subtracting 1
           EXPECTED_FINISHED_CHECKS=$((TOTAL_CHECKS - 1))
 
-          # Wait until the number of checks that are finished matches the expected number (total - 1)
+          # Start a timer (timeout in 10 minutes)
+          TIMEOUT=600  # Timeout in seconds (10 minutes)
+          SECONDS=0  # Initialize the SECONDS variable to track time elapsed
+
+          # Wait until the number of successful checks matches the expected number (total - 1)
           while true; do
-            # Get the number of checks that are either "SUCCESS" or "FAILURE" (i.e., completed checks)
-            FINISHED_CHECKS=$(gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup -q '.statusCheckRollup | map(select(.conclusion == "SUCCESS" or .conclusion == "FAILURE")) | length')
+            # Get the number of successful checks only
+            SUCCESSFUL_CHECKS=$(gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup -q '.statusCheckRollup | map(select(.conclusion == "SUCCESS")) | length')
   
-            # If the finished checks are equal to the expected count, break out of the loop
-            if [ "$FINISHED_CHECKS" -ge "$EXPECTED_FINISHED_CHECKS" ]; then
-              echo "All required checks passed. Proceeding with the merge."
+            # If the successful checks are equal to the expected count, break out of the loop
+            if [ "$SUCCESSFUL_CHECKS" -ge "$EXPECTED_FINISHED_CHECKS" ]; then
+              echo "All required checks passed successfully. Proceeding with the merge."
               break
-            else
-              echo "Waiting for checks to finish..."
-              sleep 10
             fi
+
+            # Check if the timeout has been reached
+            if [ "$SECONDS" -ge "$TIMEOUT" ]; then
+              echo "Timeout reached (10 minutes). Exiting the process."
+              exit 1  # Terminate the script with a failure status
+            fi
+
+            echo "Waiting for checks to pass successfully... ($SECONDS seconds elapsed)"
+            sleep 10  # Wait for 10 seconds before checking again
           done
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -21,10 +21,5 @@ jobs:
       run: |
         echo "${{ secrets.DOCKER_PRODUCTION_APPLICATION_CONFIG_YAML }}" | base64 -d > config/yaml/v1/docker.production.application.yaml
 
-    - name: Debug - Print YAML File Content
-      run: |
-        echo "Content of docker.production.application.yaml:"
-        cat config/yaml/v1/docker.production.application.yaml
-
     - name: Build and Run Production
       run: docker compose up mongodb app-production -d

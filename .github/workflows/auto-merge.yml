@@ -1,44 +1,20 @@
-name: Auto Merge Workflow
+name: Auto Merge workflow
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]  # Trigger on PR events like open, update, reopen
+    branches: ['**']  
+  merge_group:
+    branches: ['**']  
 
 jobs:
-  check-status:
+  auto-merge:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Get PR Status
-        id: pr_status
-        run: |
-          # Fetch the pull request information to check if it is not a draft
-          pr_status=$(gh pr view ${{ github.event.pull_request.number }} --json state,mergeable,draft -q '.state,.mergeable,.draft')
-          IFS=$'\n' read -r pr_state mergeable draft <<< "$pr_status"
-
-          if [[ "$draft" == "true" ]]; then
-            echo "This PR is in draft state. Skipping merge."
-            exit 1  # Exit the job early if the PR is still in draft state.
-          fi
-
-          if [[ "$pr_state" != "open" ]]; then
-            echo "This PR is not open. Skipping merge."
-            exit 1  # Exit early if the PR is closed or merged.
-          fi
-
-          if [[ "$mergeable" != "MERGEABLE" ]]; then
-            echo "This PR is not mergeable. Skipping merge."
-            exit 1  # Exit if the PR is not mergeable (e.g., due to conflicts).
-          fi
-
-          echo "PR is open, not a draft, and mergeable."
+        uses: actions/checkout@v3  
 
       - name: Merge Pull Request
-        if: ${{ success() }}  # Only proceed if all checks are passed above
-        run: |
-          echo "All checks passed. Proceeding with the merge."
-          gh pr merge ${{ github.event.pull_request.number }} --merge --auto
+        if: success()
+        run: gh pr merge ${{ github.event.pull_request.number }} --merge --auto
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Explicitly set GH_TOKEN for GitHub CLI authentication
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 

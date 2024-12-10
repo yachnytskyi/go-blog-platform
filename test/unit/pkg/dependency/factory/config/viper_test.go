@@ -75,12 +75,12 @@ grpc:
 		return ""
 	}
 
-	err = os.WriteFile(constants.YamlConfigPath, yamlContent, readPermissions)
+	err = os.WriteFile(constants.DefaultConfigPath, yamlContent, readPermissions)
 	if err != nil {
 		return ""
 	}
 
-	return constants.YamlConfigPath
+	return constants.DefaultConfigPath
 }
 
 func setupInvalidYamlFilePath() {
@@ -89,7 +89,7 @@ func setupInvalidYamlFilePath() {
 	err := os.MkdirAll(yamlConfigPath, writePermissions)
 	fmt.Println(err)
 
-	err = os.WriteFile(constants.YamlConfigPath, invalidYAMLContent, readPermissions)
+	err = os.WriteFile(constants.DefaultConfigPath, invalidYAMLContent, readPermissions)
 	fmt.Println(err)
 }
 
@@ -100,17 +100,17 @@ func setupEmptyYamlFilePath() string {
 	if err != nil {
 		return ""
 	}
-	err = os.WriteFile(constants.YamlConfigPath, invalidYAMLContent, readPermissions)
+	err = os.WriteFile(constants.DefaultConfigPath, invalidYAMLContent, readPermissions)
 	if err != nil {
 		return ""
 	}
 
-	return constants.YamlConfigPath
+	return constants.DefaultConfigPath
 }
 
 func setupEnvFilePath() string {
-	envFilePath := constants.EnvironmentsPath + constants.Environment
-	envContent := []byte(fmt.Sprintf(v1, constants.ConfigPath))
+	envFilePath := constants.EnvironmentsPath + constants.DefaultEnvironment
+	envContent := []byte(fmt.Sprintf(v1, constants.DefaultConfigPath))
 
 	err := os.MkdirAll(environmentConfigPath, writePermissions)
 	if err != nil {
@@ -160,7 +160,7 @@ func TestViperLoadEnvironmentWithoutYamlConfig(t *testing.T) {
 	setupEnvFilePath()
 	defer cleanupTestEnvironment()
 
-	notification := fmt.Sprintf(openFileError, constants.ConfigPath)
+	notification := fmt.Sprintf(openFileError, constants.DefaultConfigPath)
 	expectedError := domain.NewInternalError(expectedLocation+"loadDefaultConfig", notification)
 	defer func() {
 		recover := recover()

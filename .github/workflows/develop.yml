@@ -18,11 +18,14 @@ jobs:
     - name: Test
       run: go test -v ./...
 
-    - name: Set up configuration files
+    - name: Create config directory
       run: |
-        # Use printf to correctly handle multi-line secrets and special characters
-        printf "%s" "${{ secrets.DEVELOP_ENV_FILE }}" > ./config/environment/.develop.env
-        printf "%s" "${{ secrets.DEVELOP_YAML_FILE }}" > ./config/yaml/v1/develop.application.yaml
+        mkdir -p ./config/environment ./config/yaml/v1
+
+    - name: Download config files from GitHub Secrets
+      run: |
+        echo "$SECRET_ENV_FILE" > ./config/environment/.env.docker.develop
+        echo "$SECRET_YAML_FILE" > ./config/yaml/v1/docker.develop.application.yaml
 
     - name: Build and Run Develop Services
       run: docker compose up mongodb app-develop -d

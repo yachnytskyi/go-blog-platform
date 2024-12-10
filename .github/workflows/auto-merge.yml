@@ -2,24 +2,25 @@ name: Auto Merge workflow
 
 on:
   pull_request:
-    branches: ['**']  
+    branches: ['**']
   merge_group:
-    branches: ['**']  
+    branches: ['**']
 
 jobs:
   auto-merge:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3  
+        uses: actions/checkout@v3
 
       - name: Wait for checks to pass
         run: |
-          PR_STATUS=$(gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup -q '.statusCheckRollup.state')
-          while [[ "$PR_STATUS" != "SUCCESS" && "$PR_STATUS" != "ERROR" && "$PR_STATUS" != "FAILURE" ]]; do
+          # Wait for status check rollup to show all checks are successful
+          PR_STATUS=$(gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup -q '.statusCheckRollup[0].conclusion')
+          while [[ "$PR_STATUS" != "SUCCESS" && "$PR_STATUS" != "FAILURE" && "$PR_STATUS" != "ERROR" ]]; do
             echo "Waiting for checks to pass..."
             sleep 10
-            PR_STATUS=$(gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup -q '.statusCheckRollup.state')
+            PR_STATUS=$(gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup -q '.statusCheckRollup[0].conclusion')
           done
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -3,11 +3,6 @@ package constants
 // contextKey is a custom type for context keys to prevent collisions.
 type contextKey string
 
-// Application version.
-const (
-	version = "version" // Version specifies the constant value of the application.
-)
-
 // Environment configuration paths.
 const (
 	// Configuration paths.

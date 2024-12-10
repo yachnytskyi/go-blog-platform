@@ -2,7 +2,7 @@ name: Auto Merge Workflow
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]  
+    types: [opened, synchronize, reopened]  # Trigger on PR events like open, update, reopen
 
 jobs:
   check-status:
@@ -41,4 +41,4 @@ jobs:
           echo "All checks passed. Proceeding with the merge."
           gh pr merge ${{ github.event.pull_request.number }} --merge --auto
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Explicitly set GH_TOKEN for GitHub CLI authentication

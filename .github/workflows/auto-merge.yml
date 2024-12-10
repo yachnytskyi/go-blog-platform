@@ -2,29 +2,39 @@ name: Auto Merge workflow
 
 on:
   pull_request:
-    branches: ['**']
+    branches: ['**']  
   merge_group:
-    branches: ['**']
+    branches: ['**']  
 
 jobs:
   auto-merge:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3  
 
-      - name: Wait for checks to pass
+      - name: Wait for all checks except this workflow to finish
         run: |
-          # Wait for status check rollup to show all checks are successful, excluding the current workflow check
-          PR_STATUS=$(gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup -q '.statusCheckRollup | map(select(.app.slug != "github-actions")) | all(.conclusion == "SUCCESS")')
+          # Get the total number of checks (including the current workflow check)
+          TOTAL_CHECKS=$(gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup -q '.statusCheckRollup | length')
           
-          while [[ "$PR_STATUS" != "true" ]]; do
-            echo "Waiting for checks to pass..."
-            sleep 10
-            PR_STATUS=$(gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup -q '.statusCheckRollup | map(select(.app.slug != "github-actions")) | all(.conclusion == "SUCCESS")')
+          # Exclude this workflow's check by subtracting 1
+          EXPECTED_FINISHED_CHECKS=$((TOTAL_CHECKS - 1))
+
+          # Wait until the number of checks that are finished matches the expected number (total - 1)
+          while true; do
+            # Get the number of checks that are either "SUCCESS" or "FAILURE" (i.e., completed checks)
+            FINISHED_CHECKS=$(gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup -q '.statusCheckRollup | map(select(.conclusion == "SUCCESS" or .conclusion == "FAILURE")) | length')
+
+            # If the finished checks are equal to the expected count, break out of the loop
+            if [ "$FINISHED_CHECKS" -ge "$EXPECTED_FINISHED_CHECKS" ]; then
+              echo "All required checks passed. Proceeding with the merge."
+              break
+            else
+              echo "Waiting for checks to finish..."
+              sleep 10
+            fi
           done
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Merge Pull Request
         if: success()

@@ -1,4 +1,4 @@
-name: Auto Merge
+name: Auto Merge workflow
 
 on:
   pull_request:
@@ -11,10 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3  # Ensures the repository is cloned and accessible
+        uses: actions/checkout@v3  
 
       - name: Merge Pull Request
         if: success()
-        run: gh pr merge ${{ github.event.pull_request.number }} --merge
+        run: gh pr merge ${{ github.event.pull_request.number }} --merge --auto
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

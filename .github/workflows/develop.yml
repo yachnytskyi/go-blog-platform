@@ -1,13 +1,10 @@
 name: Develop workflow
 
 on:
-  # push:
-  #   branches: [ "develop" ]
   pull_request:
     branches: [ "develop" ]
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
     steps:
@@ -20,6 +17,11 @@ jobs:
 
     - name: Test
       run: go test -v ./...
+
+    - name: Set up configuration files
+      run: |
+        echo "${{ secrets.DEVELOP_ENV_FILE }}" > ./config/environment/.develop.env
+        echo "${{ secrets.DEVELOP_YAML_FILE }}" > ./config/yaml/v1/develop.application.yaml
 
     - name: Build and Run Develop Services
       run: docker compose up mongodb app-develop -d

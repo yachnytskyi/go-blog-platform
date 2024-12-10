@@ -1,43 +1,50 @@
-name: Develop workflow
+name: Dev workflow
 
 on:
+  push:
+    branches: ['dev']
   pull_request:
-    branches: [ "develop" ]
+    branches: ['dev']
 
 jobs:
-  build:
+  dev:
     runs-on: ubuntu-latest
 
     steps:
-    # Checkout the repository
     - uses: actions/checkout@v4
 
-    # Set up Go
     - name: Set up Go
-      uses: actions/setup-go@v4
+      uses: actions/setup-go@v5
       with:
         go-version: stable
 
-    # Run tests
-    - name: Test
-      run: go test -v ./...
-
-    # Create config directories
-    - name: Create config directory
+    # Step to ensure the correct files are available before building
+    - name: Set up environment and configuration files
       run: |
+        # Create necessary directories
         mkdir -p ./config/environment ./config/yaml/v1
+        
+        # Debugging the content of the secrets before writing to the file
+        echo "Debugging DOCKER_ENV_FILE content:"
+        echo "${{ secrets.DOCKER_ENV_FILE }}"
 
-    # Download config files from GitHub Secrets
-    - name: Download config files from GitHub Secrets
-      run: |
-        echo "$DEVELOP_YAML_FILE" > ./config/yaml/v1/docker.develop.application.yaml
+        echo "Debugging DOCKER_YAML_FILE content:"
+        echo "${{ secrets.DOCKER_YAML_FILE }}"
 
-    # Debugging step: Print the content of the config file
-    - name: Show the content of the config file
+        # Write the secrets to the respective files
+        echo "${{ secrets.DOCKER_ENV_FILE }}" > ./config/environment/.env.docker.develop
+        echo "${{ secrets.DOCKER_YAML_FILE }}" > ./config/yaml/v1/docker.develop.application.yaml
+
+    # Optional: Print the content of the files after writing them for debugging
+    - name: Verify file contents
       run: |
-        echo "Content of docker.develop.application.yaml:"
+        echo "Contents of .env.docker.develop:"
+        cat ./config/environment/.env.docker.develop
+        
+        echo "Contents of docker.develop.application.yaml:"
         cat ./config/yaml/v1/docker.develop.application.yaml
 
-    # Build and Run Develop Services1
-    - name: Build and Run Develop Services
-      run: docker compose up mongodb app-develop -d
+    - name: Build and Run Development
+      run: |
+        # Ensure Docker Compose is up and running in detached mode
+        docker-compose -f docker-compose.dev.yml up -d

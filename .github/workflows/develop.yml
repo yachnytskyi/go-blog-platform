@@ -1,13 +1,10 @@
 name: Develop workflow
 
 on:
-  # push:
-  #   branches: [ "develop" ]
   pull_request:
     branches: [ "develop" ]
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
     steps:
@@ -17,6 +14,15 @@ jobs:
       uses: actions/setup-go@v4
       with:
         go-version: stable
+
+    - name: Decode and Create YAML File
+      run: |
+        echo "${{ secrets.DOCKER_DEVELOPER_APPLICATION_CONFIG_YAML }}" | base64 -d > config/yaml/v1/docker.develop.application.yaml
+
+    - name: Debug - Print YAML File Content
+      run: |
+        echo "Content of docker.develop.application.yaml:"
+        cat config/yaml/v1/docker.develop.application.yaml
 
     - name: Build and Run Develop Services
       run: docker compose up mongodb app-develop -d

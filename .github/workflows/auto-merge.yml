@@ -15,17 +15,17 @@ jobs:
 
       - name: Wait for checks to pass
         run: |
-          PR_STATUS=$(gh pr view ${{ github.event.pull_request.number }} --json status -q '.status')
+          PR_STATUS=$(gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup -q '.statusCheckRollup.state')
           while [[ "$PR_STATUS" != "SUCCESS" && "$PR_STATUS" != "ERROR" && "$PR_STATUS" != "FAILURE" ]]; do
             echo "Waiting for checks to pass..."
             sleep 10
-            PR_STATUS=$(gh pr view ${{ github.event.pull_request.number }} --json status -q '.status')
+            PR_STATUS=$(gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup -q '.statusCheckRollup.state')
           done
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
-          
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Merge Pull Request
         if: success()
         run: gh pr merge ${{ github.event.pull_request.number }} --merge --auto
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

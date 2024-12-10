@@ -15,44 +15,15 @@ jobs:
 
       - name: Wait for checks to pass
         run: |
-          # Wait for status check rollup to show all checks are successful, excluding this workflow's check
-          PR_STATUS=$(gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup -q '.statusCheckRollup')
-          
-          # Loop to check the status, ignoring the current workflow's check
-          while true; do
-            # Get the status of the checks
-            PR_STATUS=$(gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup -q '.statusCheckRollup')
-            
-            # Check if the statusCheckRollup is not empty and filter out this workflow's own check
-            PASSED=true
-            for check in $(echo "$PR_STATUS" | jq -r '.[] | @base64'); do
-              _jq() {
-                echo ${check} | base64 --decode | jq -r ${1}
-              }
-              
-              check_name=$(_jq '.check.name')
-              
-              # Skip this workflow's own check by name (adjust name if necessary)
-              if [[ "$check_name" == "Auto Merge workflow" ]]; then
-                continue
-              fi
-
-              check_status=$(_jq '.check.conclusion')
-
-              if [[ "$check_status" != "success" ]]; then
-                PASSED=false
-                break
-              fi
-            done
-
-            # Exit the loop if all checks (excluding this workflow's) are successful
-            if [ "$PASSED" == true ]; then
-              break
-            fi
-
+          # Wait for status check rollup to show all checks are successful
+          PR_STATUS=$(gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup -q '.statusCheckRollup[0].conclusion')
+          while [[ "$PR_STATUS" != "SUCCESS" && "$PR_STATUS" != "FAILURE" && "$PR_STATUS" != "ERROR" ]]; do
             echo "Waiting for checks to pass..."
             sleep 10
+            PR_STATUS=$(gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup -q '.statusCheckRollup[0].conclusion')
           done
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Merge Pull Request
         if: success()

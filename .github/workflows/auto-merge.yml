@@ -15,12 +15,13 @@ jobs:
 
       - name: Wait for checks to pass
         run: |
-          # Wait for status check rollup to show all checks are successful
-          PR_STATUS=$(gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup -q '.statusCheckRollup[0].conclusion')
-          while [[ "$PR_STATUS" != "SUCCESS" && "$PR_STATUS" != "FAILURE" && "$PR_STATUS" != "ERROR" ]]; do
+          # Wait for status check rollup to show all checks are successful, excluding the current workflow check
+          PR_STATUS=$(gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup -q '.statusCheckRollup | map(select(.app.slug != "github-actions")) | all(.conclusion == "SUCCESS")')
+          
+          while [[ "$PR_STATUS" != "true" ]]; do
             echo "Waiting for checks to pass..."
             sleep 10
-            PR_STATUS=$(gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup -q '.statusCheckRollup[0].conclusion')
+            PR_STATUS=$(gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup -q '.statusCheckRollup | map(select(.app.slug != "github-actions")) | all(.conclusion == "SUCCESS")')
           done
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

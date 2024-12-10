@@ -2,7 +2,10 @@ name: Auto Merge
 
 on:
   pull_request:
+    branches: ['**']  
   merge_group:
+    branches: ['**']  
+
 
 jobs:
   auto-merge:

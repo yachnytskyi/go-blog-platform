@@ -1,12 +1,20 @@
 initial:
+	# Copy example configuration files to their respective locations.
 	cp config/yaml/v1/example/local.application.example.yaml config/yaml/v1/local.application.yaml
 	cp config/yaml/v1/example/docker.local.application.example.yaml config/yaml/v1/docker.local.application.yaml
 	cp config/yaml/v1/example/docker.develop.application.example.yaml config/yaml/v1/docker.develop.application.yaml
 	cp config/yaml/v1/example/docker.release.application.example.yaml config/yaml/v1/docker.release.application.yaml
 	cp config/yaml/v1/example/docker.production.application.example.yaml config/yaml/v1/docker.production.application.yaml
 
+	# Copy MongoDB initialization scripts.
 	cp infrastructure/script/data/repository/mongo/example/init-mongo.example.js infrastructure/script/data/repository/mongo/init-mongo.js
 	cp infrastructure/script/data/repository/mongo/example/init-test-data-mongo.example.js infrastructure/script/data/repository/mongo/init-test-data-mongo.js
+
+	# Encode Docker configuration YAML files to base64.
+	# On Windows, you need to use a Linux Subsystem (WSL) or PowerShell equivalent.
+	base64 -i config/yaml/v1/docker.develop.application.yaml -o config/yaml/v1/docker_config_develop.txt
+	base64 -i config/yaml/v1/docker.develop.application.yaml -o config/yaml/v1/docker_config_production.txt
+	base64 -i config/yaml/v1/docker.develop.application.yaml -o config/yaml/v1/docker_config_release.txt
 
 mongo-local:
 	docker compose up mongodb -d 
@@ -72,11 +80,3 @@ down:
 
 down-v:
 	docker compose down -v
-
-
-
-
-
-
-
-

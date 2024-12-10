@@ -6,14 +6,15 @@ on:
   merge_group:
     branches: ['**']  
 
-
 jobs:
   auto-merge:
-    # needs: checks
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3  # Ensures the repository is cloned and accessible
+
       - name: Merge Pull Request
-        if: ${{ github.event_name == 'pull_request' && success() }}
+        if: success()
         run: gh pr merge ${{ github.event.pull_request.number }} --merge
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

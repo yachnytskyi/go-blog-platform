@@ -18,5 +18,8 @@ jobs:
       with:
         go-version: stable
 
+    - name: Copy config file
+      run: cp ./config/yaml/v1/docker.test.application.yaml ./config/yaml/v1/docker.develop.application.yaml
+
     - name: Build and Run Develop Services
       run: docker compose up mongodb app-develop -d

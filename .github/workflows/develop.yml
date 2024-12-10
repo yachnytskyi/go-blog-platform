@@ -26,5 +26,16 @@ jobs:
       run: |
         echo "$DEVELOP_YAML_FILE" > ./config/yaml/v1/docker.develop.application.yaml
 
+     # Debugging step: Check if the file exists and print its content
+    - name: Verify file content
+      run: |
+        if [ -f ./config/yaml/v1/docker.develop.application.yaml ]; then
+          echo "File exists and its content is:"
+          cat ./config/yaml/v1/docker.develop.application.yaml
+        else
+          echo "File not found!"
+          exit 1
+        fi
+
     - name: Build and Run Develop Services
       run: docker compose up mongodb app-develop -d

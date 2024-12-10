@@ -15,9 +15,11 @@ jobs:
       with:
         go-version: stable
 
-    - name: Decode and Create YAML File
+    - name: Decode and Decrypt YAML File
       run: |
-        echo "${{ secrets.DOCKER_DEVELOP_APPLICATION_CONFIG_YAML }}" | base64 -d > config/yaml/v1/docker.develop.application.yaml
+        # Decode the Base64-encoded secret and decrypt it with OpenSSL
+        echo "${{ secrets.DOCKER_DEVELOP_APPLICATION_CONFIG_YAML }}" | base64 -d > docker.develop.application.yaml.enc
+        openssl enc -aes-256-cbc -d -in docker.develop.application.yaml.enc -out config/yaml/v1/docker.develop.application.yaml -pass pass:${{ secrets.ENCRYPTION_PASSWORD }}
 
     - name: Debug - Print YAML File Content
       run: |

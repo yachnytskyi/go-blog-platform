@@ -38,6 +38,6 @@ jobs:
         echo "Content of docker.develop.application.yaml:"
         cat ./config/yaml/v1/docker.develop.application.yaml
 
-    # Build and Run Develop Services
+    # Build and Run Develop Services1
     - name: Build and Run Develop Services
       run: docker compose up mongodb app-develop -d

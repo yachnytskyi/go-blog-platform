@@ -2,14 +2,14 @@ name: Golangci-lint workflow
 on:
   push:
     branches: ['**']
-  pull_request:
-    branches: ['**']
+  # pull_request:
+    # branches: ['**']
 
 
 permissions:
   contents: read
   # Optional: allow read access to pull request. Use with `only-new-issues` option.
-  pull-requests: read
+  # pull-requests: read
 
 jobs:
   golangci:

@@ -1,50 +1,22 @@
-name: Dev workflow
+name: Develop workflow
 
 on:
-  push:
-    branches: ['develop']
+  # push:
+  #   branches: [ "develop" ]
   pull_request:
-    branches: ['develop']
+    branches: [ "develop" ]
 
 jobs:
-  dev:
-    runs-on: ubuntu-latest
 
+  build:
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
 
     - name: Set up Go
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@v4
       with:
         go-version: stable
 
-    # Step to ensure the correct files are available before building
-    - name: Set up environment and configuration files
-      run: |
-        # Create necessary directories
-        mkdir -p ./config/environment ./config/yaml/v1
-        
-        # Debugging the content of the secrets before writing to the file
-        echo "Debugging DOCKER_ENV_FILE content:"
-        echo "${{ secrets.DOCKER_ENV_FILE }}"
-
-        echo "Debugging DOCKER_YAML_FILE content:"
-        echo "${{ secrets.DOCKER_YAML_FILE }}"
-
-        # Write the secrets to the respective files
-        echo "${{ secrets.DOCKER_ENV_FILE }}" > ./config/environment/.env.docker.develop
-        echo "${{ secrets.DOCKER_YAML_FILE }}" > ./config/yaml/v1/docker.develop.application.yaml
-
-    # Optional: Print the content of the files after writing them for debugging
-    - name: Verify file contents
-      run: |
-        echo "Contents of .env.docker.develop:"
-        cat ./config/environment/.env.docker.develop
-        
-        echo "Contents of docker.develop.application.yaml:"
-        cat ./config/yaml/v1/docker.develop.application.yaml
-
-    - name: Build and Run Development
-      run: |
-        # Ensure Docker Compose is up and running in detached mode
-        docker-compose -f docker-compose.dev.yml up -d
+    - name: Build and Run Develop Services
+      run: docker compose up mongodb app-develop -d

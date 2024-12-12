@@ -32,9 +32,9 @@ For a complete list of available API requests/URLs, check the server terminal up
 
 To run the project, choose from:
 - `make mongo-local` (for local environment)
-- `make mongo-develop` (for develop Docker environment)
-- `make mongo-release` (for release Docker environment)
-- `make mongo-production` (for production Docker environment)
+- `make mongo-develop` (for develop environment)
+- `make mongo-release` (for release environment)
+- `make mongo-production` (for production environment)
 
 Make sure Docker and Docker Compose are installed.
 

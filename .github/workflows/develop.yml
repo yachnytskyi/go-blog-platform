@@ -1,6 +1,8 @@
 name: Develop workflow
 
 on:
+ # push:
+    # branches: [ "develop" ]
   pull_request:
     branches: [ "develop" ]
 
@@ -19,8 +21,8 @@ jobs:
       run: |
         echo "${{ secrets.DOCKER_DEVELOP_APPLICATION_CONFIG_YAML }}" | base64 -d > config/yaml/v1/docker.develop.application.yaml
 
-    - name: Build and Run Develop Services
+    - name: Build and Run Develop
       run: docker compose up mongodb app-develop -d
 
-    - name: Stop Develop Services
+    - name: Stop Develop
       run: docker stop $(docker ps -a -q)

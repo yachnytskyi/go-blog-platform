@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"context"
 	"net/http"
 	"strings"
 	"time"
@@ -12,8 +11,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/interfaces"
 	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/interfaces"
 	delivery "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 	httpError "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
@@ -94,28 +93,6 @@ func ValidateInputMiddleware(config *config.ApplicationConfig, logger interfaces
 		}
 
 		ginContext.Next()
-	}
-}
-
-// TimeoutMiddleware sets a timeout for each request.
-func TimeoutMiddleware(logger interfaces.Logger) gin.HandlerFunc {
-	return func(ginContext *gin.Context) {
-		ctx, cancel := context.WithTimeout(ginContext.Request.Context(), constants.DefaultContextTimer)
-		defer cancel()
-
-		ginContext.Request = ginContext.Request.WithContext(ctx)
-		ch := make(chan struct{})
-		go func() {
-			defer close(ch)
-			ginContext.Next()
-		}()
-
-		select {
-		case <-ch:
-		case <-ctx.Done():
-			httpInternalError := httpError.NewHTTPInternalError(location+"TimeOutMiddleware", ctx.Err().Error())
-			abortWithStatusJSON(ginContext, logger, httpInternalError, http.StatusBadGateway)
-		}
 	}
 }
 

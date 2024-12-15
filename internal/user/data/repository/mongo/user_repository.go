@@ -27,6 +27,10 @@ const (
 	passwordKey    = "password"
 	resetTokenKey  = "reset_token"
 	resetExpiryKey = "reset_expiry"
+
+	invalidEmailOrPassword = "Invalid email or password."
+	emailOrPasswordFields  = "email or password"
+	passwordsDoNotMatch    = "Passwords do not match."
 )
 
 type UserRepository struct {
@@ -48,7 +52,7 @@ func NewUserRepository(config *config.ApplicationConfig, logger interfaces.Logge
 	// Ensure the unique index on email during initialization.
 	ensureUniqueEmailIndexError := repository.ensureUniqueEmailIndex(ctx, location+"NewUserRepository")
 	if validator.IsError(ensureUniqueEmailIndexError) {
-		logger.Panic(ensureUniqueEmailIndexError)
+		logger.Panic(domain.NewInternalError(location+"GetAllUsers.Users.CountDocuments", ensureUniqueEmailIndexError.Error()))
 	}
 
 	return repository
@@ -103,10 +107,6 @@ func (userRepository UserRepository) GetAllUsers(ctx context.Context, pagination
 		return common.NewResultOnFailure[user.Users](internalError)
 	}
 
-	if len(fetchedUsers) == 0 {
-		return common.NewResultOnSuccess[user.Users](user.Users{})
-	}
-
 	usersRepository := repository.UserRepositoryToUsersRepositoryMapper(fetchedUsers)
 	usersRepository.PaginationResponse = common.NewPaginationResponse(paginationQuery)
 	return common.NewResultOnSuccess[user.Users](repository.UsersRepositoryToUsersMapper(usersRepository))
@@ -125,8 +125,23 @@ func (userRepository UserRepository) GetUserById(ctx context.Context, userID str
 
 // GetUserByEmail retrieves a user by their email from the database.
 func (userRepository UserRepository) GetUserByEmail(ctx context.Context, email string) common.Result[user.User] {
+	fetchedUser := repository.UserRepository{}
+
 	query := bson.M{emailKey: email}
-	return userRepository.getUserByQuery(location+"GetUserByEmail", ctx, query)
+	userFindOneError := userRepository.Users.FindOne(ctx, query).Decode(&fetchedUser)
+	if validator.IsError(userFindOneError) {
+		if repositoryUtility.IsMongoDBError(userFindOneError) {
+			internalError := domain.NewInternalError(location+"GetUserByEmail.FindOne.Decode", userFindOneError.Error())
+			userRepository.Logger.Error(internalError)
+			return common.NewResultOnFailure[user.User](internalError)
+		}
+		userRepository.Logger.Error(domain.NewItemNotFoundError(location+"GetUserByEmail.FindOne.Decode", utility.BSONToStringMapper(query), userFindOneError.Error()))
+		validationError := domain.NewValidationError(location+".checkPasswords.CompareHashAndPassword", emailOrPasswordFields, constants.FieldRequired, passwordsDoNotMatch)
+		validationError.Notification = invalidEmailOrPassword
+		return common.NewResultOnFailure[user.User](validationError)
+	}
+
+	return common.NewResultOnSuccess[user.User](repository.UserRepositoryToUserMapper(fetchedUser))
 }
 
 // CheckEmailDuplicate checks if an email already exists in the database.
@@ -149,12 +164,7 @@ func (userRepository UserRepository) CheckEmailDuplicate(ctx context.Context, em
 	}
 
 	// If a user with the given email is found, return a validation error.
-	validationError := domain.NewValidationError(
-		location+"CheckEmailDuplicate",
-		useCase.EmailField,
-		constants.FieldRequired,
-		constants.EmailAlreadyExists,
-	)
+	validationError := domain.NewValidationError(location+"CheckEmailDuplicate", useCase.EmailField, constants.FieldRequired, constants.EmailAlreadyExists)
 
 	userRepository.Logger.Error(validationError)
 	return validationError
@@ -237,8 +247,14 @@ func (userRepository UserRepository) DeleteUserById(ctx context.Context, userID 
 func (userRepository UserRepository) GetResetExpiry(ctx context.Context, token string) common.Result[user.UserResetExpiry] {
 	fetchedResetExpiry := repository.UserResetExpiryRepository{}
 	query := bson.M{resetTokenKey: token}
+
 	userFindOneError := userRepository.Users.FindOne(ctx, query).Decode(&fetchedResetExpiry)
 	if validator.IsError(userFindOneError) {
+		if repositoryUtility.IsMongoDBError(userFindOneError) {
+			internalError := domain.NewInternalError(location+"GetResetExpiry.FindOne.Decode", userFindOneError.Error())
+			userRepository.Logger.Error(internalError)
+			return common.NewResultOnFailure[user.UserResetExpiry](internalError)
+		}
 		invalidTokenError := domain.NewInvalidTokenError(location+"GetResetExpiry.Decode", userFindOneError.Error())
 		userRepository.Logger.Error(invalidTokenError)
 		invalidTokenError.Notification = constants.InvalidTokenErrorMessage
@@ -336,7 +352,12 @@ func (userRepository UserRepository) getUserByQuery(location string, ctx context
 	fetchedUser := repository.UserRepository{}
 	userFindOneError := userRepository.Users.FindOne(ctx, query).Decode(&fetchedUser)
 	if validator.IsError(userFindOneError) {
-		itemNotFoundError := domain.NewItemNotFoundError(location+".getUserByQuery.Decode", utility.BSONToStringMapper(query), userFindOneError.Error())
+		if repositoryUtility.IsMongoDBError(userFindOneError) {
+			internalError := domain.NewInternalError(location+".getUserByQuery.FindOne.Decode", userFindOneError.Error())
+			userRepository.Logger.Error(internalError)
+			return common.NewResultOnFailure[user.User](internalError)
+		}
+		itemNotFoundError := domain.NewItemNotFoundError(location+".getUserByQuery.FindOne.Decode", utility.BSONToStringMapper(query), userFindOneError.Error())
 		userRepository.Logger.Error(itemNotFoundError)
 		return common.NewResultOnFailure[user.User](itemNotFoundError)
 	}

@@ -23,6 +23,8 @@ type Email interface {
 type Repository interface {
 	CreateRepository(ctx context.Context) any
 	NewRepository(createRepository any, repository any) any
+	HealthCheck(delivery Delivery)
+	DatabasePing() bool
 	Close
 }
 

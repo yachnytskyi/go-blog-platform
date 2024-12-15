@@ -132,6 +132,10 @@ func (userUseCase UserUseCase) Login(ctx context.Context, userLoginData user.Use
 	}
 
 	fetchedUser := userUseCase.UserRepository.GetUserByEmail(ctx, userLogin.Data.Email)
+	if validator.IsError(fetchedUser.Error) {
+		return common.NewResultOnFailure[user.UserToken](domain.HandleError(fetchedUser.Error))
+	}
+	
 	checkPasswordsError := checkPasswords(userUseCase.Logger, location+"Login", fetchedUser.Data.Password, userLoginData.Password)
 	if validator.IsError(checkPasswordsError) {
 		return common.NewResultOnFailure[user.UserToken](domain.HandleError(checkPasswordsError))

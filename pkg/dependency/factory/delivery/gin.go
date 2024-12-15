@@ -8,12 +8,12 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/interfaces"
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/http/gin"
 	postUseCase "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/usecase"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin"
 	userUseCase "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
 	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/interfaces"
 	httpModel "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 	delivery "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
@@ -106,7 +106,6 @@ func applyMiddleware(router *gin.Engine, config *config.ApplicationConfig, logge
 	router.Use(middleware.CSPMiddleware(config))
 	router.Use(middleware.RateLimitMiddleware(config))
 	router.Use(middleware.ValidateInputMiddleware(config, logger))
-	router.Use(middleware.TimeoutMiddleware(logger))
 	router.Use(middleware.LoggerMiddleware(logger))
 }
 

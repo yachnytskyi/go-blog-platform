@@ -176,12 +176,7 @@ func checkEmailDomain(logger interfaces.Logger, location, emailString string) er
 
 func checkPasswords(logger interfaces.Logger, location, hashedPassword string, checkedPassword string) error {
 	if validator.IsError(bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(checkedPassword))) {
-		validationError := domain.NewValidationError(
-			location+".checkPasswords.CompareHashAndPassword",
-			emailOrPasswordFields,
-			constants.FieldRequired,
-			passwordsDoNotMatch,
-		)
+		validationError := domain.NewValidationError(location+".checkPasswords.CompareHashAndPassword", emailOrPasswordFields, constants.FieldRequired, passwordsDoNotMatch)
 		logger.Debug(validationError)
 		validationError.Notification = invalidEmailOrPassword
 		return validationError

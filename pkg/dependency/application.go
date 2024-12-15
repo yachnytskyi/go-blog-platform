@@ -4,11 +4,11 @@ import (
 	"context"
 
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/interfaces"
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/usecase"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
 	factory "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory"
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/interfaces"
 )
 
 // NewApplication initializes the application by setting up the container,
@@ -41,6 +41,7 @@ func NewApplication(ctx context.Context) model.Container {
 	)
 
 	deliveryFactory.CreateDelivery(serverRouters)
+	repositoryFactory.HealthCheck(deliveryFactory)
 	container := model.NewContainer(logger, repositoryFactory, deliveryFactory)
 	return container
 }

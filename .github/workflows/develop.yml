@@ -21,3 +21,6 @@ jobs:
 
     - name: Build and Run Develop Services
       run: docker compose up mongodb app-develop -d
+
+    - name: Stop Develop Services
+      run: docker stop $(docker ps -a -q)

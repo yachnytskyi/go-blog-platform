@@ -23,3 +23,6 @@ jobs:
 
     - name: Build and Run Release
       run: docker compose up mongodb app-release -d
+
+    - name: Stop Release
+      run: docker stop $(docker ps -a -q)

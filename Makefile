@@ -21,16 +21,16 @@ mongo-local:
 	reflex -s go run cmd/server/main.go 
 
 mongo-local-docker:
-	docker compose up mongodb app-local
+	docker compose up mongodb app-local -d
 
 mongo-develop:
-	docker compose up mongodb app-develop
+	docker compose up mongodb app-develop -d
 
 mongo-release:
-	docker compose up mongodb app-release
+	docker compose up mongodb app-release -d
 
 mongo-production:
-	docker compose up mongodb app-production 
+	docker compose up mongodb app-production -d
 
 build-mongo:
 	docker compose build mongodb

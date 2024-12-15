@@ -8,6 +8,8 @@ func HandleError(err error) error {
 	switch errorType := err.(type) {
 	case ValidationErrors:
 		return errorType
+	case ValidationError:
+		return errorType
 	case AuthorizationError:
 		errorType.Notification = constants.AuthorizationErrorNotification
 		return errorType

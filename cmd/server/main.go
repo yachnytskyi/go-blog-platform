@@ -6,14 +6,13 @@ import (
 	"os/signal"
 	"syscall"
 
-	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
 	dependency "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency"
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 )
 
 func main() {
-	// Create a context with a timeout for the entire application lifecycle.
-	ctx, cancel := context.WithTimeout(context.Background(), constants.DefaultContextTimer)
+	// Create a context with cancel for the entire application lifecycle.
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel() // Ensure the context is canceled to release resources.
 
 	// Initialize the application and get the container with all dependencies.

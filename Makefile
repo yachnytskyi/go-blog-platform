@@ -6,7 +6,8 @@ initial:
 	cp config/yaml/v1/example/docker.release.application.example.yaml config/yaml/v1/docker.release.application.yaml
 	cp config/yaml/v1/example/docker.production.application.example.yaml config/yaml/v1/docker.production.application.yaml
 
-	# Copy MongoDB initialization scripts.
+	# Copy MongoDB initialization scripts and environment.
+	cp infrastructure/script/data/repository/mongo/example/.example.env infrastructure/script/data/repository/mongo/.env
 	cp infrastructure/script/data/repository/mongo/example/init-mongo.example.js infrastructure/script/data/repository/mongo/init-mongo.js
 	cp infrastructure/script/data/repository/mongo/example/init-test-data-mongo.example.js infrastructure/script/data/repository/mongo/init-test-data-mongo.js
 

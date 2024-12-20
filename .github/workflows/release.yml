@@ -21,6 +21,12 @@ jobs:
       run: |
         echo "${{ secrets.DOCKER_RELEASE_APPLICATION_CONFIG_YAML }}" | base64 -d > config/yaml/v1/docker.release.application.yaml
 
+    - name: Create .env file for MongoDB
+      run: |
+        echo "MONGO_INITDB_DATABASE=${{ secrets.MONGO_INITDB_DATABASE }}" > infrastructure/script/data/repository/mongo/.env
+        echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" >> infrastructure/script/data/repository/mongo/.env
+        echo "MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}" >> infrastructure/script/data/repository/mongo/.env
+
     - name: Build and Run Release
       run: docker compose up mongodb app-release -d
 

@@ -23,24 +23,12 @@ jobs:
 
     - name: Create .env file for MongoDB
       run: |
-        # Dynamically generate the .env file for MongoDB using secrets
         echo "MONGO_INITDB_DATABASE=${{ secrets.MONGO_INITDB_DATABASE }}" > infrastructure/script/data/repository/mongo/.env
         echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" >> infrastructure/script/data/repository/mongo/.env
         echo "MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}" >> infrastructure/script/data/repository/mongo/.env
 
-    - name: Verify .env File Contents
-      run: |
-        echo "Contents of .env file:"
-        cat infrastructure/script/data/repository/mongo/.env
-    
     - name: Build and Run Develop
       run: docker compose up mongodb app-develop -d
-
-    - name: Check MongoDB Logs
-      run: docker logs mongodb
-
-    - name: Debug MongoDB Environment Variables
-      run: docker exec mongodb env
 
     - name: Stop Develop
       run: docker stop $(docker ps -a -q)

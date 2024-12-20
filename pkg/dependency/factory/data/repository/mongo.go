@@ -22,8 +22,10 @@ const (
 	location                           = "pkg.dependency.factory.data.repository."
 	connectingToMongoDBNotification    = "Attempting to connect to the MongoDB database..."
 	databasePingingMongoDBNotification = "Attempting to ping the MongoDB database..."
-	retryDelayInterval                 = 30 * time.Second
-	maxRetryAttempts                   = 5
+
+	retryDelayInterval        = 30 * time.Second
+	maxRetryAttempts          = 5
+	healthCheckTickerInterval = 60 * time.Second
 )
 
 type MongoDBRepository struct {
@@ -61,7 +63,7 @@ func (mongoDBRepository MongoDBRepository) NewRepository(createRepository any, r
 
 func (mongoDBRepository *MongoDBRepository) HealthCheck(delivery interfaces.Delivery) {
 	go func() {
-		ticker := time.NewTicker(retryDelayInterval)
+		ticker := time.NewTicker(healthCheckTickerInterval)
 		defer ticker.Stop()
 
 		for range ticker.C {

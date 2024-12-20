@@ -23,9 +23,9 @@ const (
 	connectingToMongoDBNotification    = "Attempting to connect to the MongoDB database..."
 	databasePingingMongoDBNotification = "Attempting to ping the MongoDB database..."
 
-	retryDelayInterval        = 30 * time.Second
+	retryDelayInterval        = 1 * time.Second
 	maxRetryAttempts          = 5
-	healthCheckTickerInterval = 60 * time.Second
+	healthCheckTickerInterval = 1 * time.Second
 )
 
 type MongoDBRepository struct {
@@ -96,6 +96,8 @@ func (mongoDBRepository *MongoDBRepository) connectToMongoDB(ctx context.Context
 	var client *mongo.Client
 	var connectError error
 	var delay = time.Second
+	fmt.Println("hey")
+	fmt.Println(mongoDBRepository.Config.MongoDB.URI)
 
 	for index := 0; index < maxRetryAttempts; index++ {
 		mongoDBRepository.Logger.Warn(domain.NewInfoMessage(location+"mongo.connectToMongoDB", connectingToMongoDBNotification))

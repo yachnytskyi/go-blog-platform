@@ -97,6 +97,9 @@ func (mongoDBRepository *MongoDBRepository) connectToMongoDB(ctx context.Context
 	var connectError error
 	var delay = time.Second
 
+	fmt.Println("hey")
+	fmt.Println(mongoDBRepository.Config.MongoDB.URI)
+
 	for index := 0; index < maxRetryAttempts; index++ {
 		mongoDBRepository.Logger.Warn(domain.NewInfoMessage(location+"mongo.connectToMongoDB", connectingToMongoDBNotification))
 		client, connectError = mongo.Connect(ctx, options.Client().ApplyURI(mongoDBRepository.Config.MongoDB.URI))

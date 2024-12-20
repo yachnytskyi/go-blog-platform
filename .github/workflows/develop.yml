@@ -1,6 +1,8 @@
 name: Develop workflow
 
 on:
+ # push:
+    # branches: [ "develop" ]
   pull_request:
     branches: [ "develop" ]
 
@@ -8,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
     - name: Set up Go
       uses: actions/setup-go@v5
@@ -17,7 +19,6 @@ jobs:
 
     - name: Decode and Create YAML File
       run: |
-        # Decode the Docker config YAML and store it in the appropriate path
         echo "${{ secrets.DOCKER_DEVELOP_APPLICATION_CONFIG_YAML }}" | base64 -d > config/yaml/v1/docker.develop.application.yaml
 
     - name: Create .env file for MongoDB
@@ -31,7 +32,7 @@ jobs:
       run: |
         echo "Contents of .env file:"
         cat infrastructure/script/data/repository/mongo/.env
-
+    
     - name: Build and Run Develop
       run: docker compose up mongodb app-develop -d
 

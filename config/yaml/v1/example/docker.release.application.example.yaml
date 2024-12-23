@@ -5,6 +5,7 @@ Core:
   Delivery: Gin
 
 Security:
+  Cookie_Domain_Value: localhost
   Cookie_Secure: true
   HTTP_Only: true
   Rate_Limit: 5.0
@@ -37,6 +38,7 @@ MongoDB:
   URI: mongodb://default_user:default_password@mongodb:27017/default_db
 
 Gin:
+  Mode: debug
   Port: 8080
   Allow_Origins: http://localhost:8080
   Allow_Credentials: true

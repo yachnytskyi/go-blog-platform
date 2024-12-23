@@ -21,6 +21,7 @@ type YamlCore struct {
 }
 
 type YamlSecurity struct {
+	CookieDomainValue               string     `mapstructure:"Cookie_Domain_Value"`
 	CookieSecure                    bool       `mapstructure:"Cookie_Secure"`
 	HTTPOnly                        bool       `mapstructure:"HTTP_Only"`
 	RateLimit                       float64    `mapstructure:"Rate_Limit"`
@@ -43,6 +44,7 @@ type YamlMongoDB struct {
 }
 
 type YamlGin struct {
+	Mode             string `mapstructure:"Mode"`
 	Port             string `mapstructure:"Port"`
 	AllowOrigins     string `mapstructure:"Allow_Origins"`
 	AllowCredentials bool   `mapstructure:"Allow_Credentials"`

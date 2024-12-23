@@ -14,8 +14,8 @@ initial:
 	# Encode Docker configuration YAML files to base64.
 	# On Windows, you need to use a Linux Subsystem (WSL) or PowerShell equivalent.
 	base64 -i config/yaml/v1/docker.develop.application.yaml -o config/yaml/v1/docker_config_develop.txt
-	base64 -i config/yaml/v1/docker.develop.application.yaml -o config/yaml/v1/docker_config_production.txt
-	base64 -i config/yaml/v1/docker.develop.application.yaml -o config/yaml/v1/docker_config_release.txt
+	base64 -i config/yaml/v1/docker.release.application.yaml -o config/yaml/v1/docker_config_release.txt
+	base64 -i config/yaml/v1/docker.production.application.yaml -o config/yaml/v1/docker_config_production.txt
 
 mongo-local:
 	docker compose up mongodb -d 

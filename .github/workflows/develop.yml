@@ -35,7 +35,7 @@ jobs:
 
     - name: Show Develop Logs
       run: |
-        sleep 5  # Wait for 5 seconds to allow containers to start up
+        sleep 15  # Wait for 15 seconds to allow containers to start up
         # docker logs --tail 100 mongodb
         docker logs go-blog-platform-app-develop-1
 

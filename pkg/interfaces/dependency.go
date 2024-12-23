@@ -30,7 +30,9 @@ type Repository interface {
 
 type Delivery interface {
 	CreateDelivery(serverRouters ServerRouters)
+	NewHealthCheckController(repository Repository) any
 	NewController(useCase any) any
+	NewHealthRouter(router any, repository Repository) Router
 	NewRouter(router any) Router
 	LaunchServer(ctx context.Context, repository Repository)
 	Close

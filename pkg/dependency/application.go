@@ -30,11 +30,13 @@ func NewApplication(ctx context.Context) model.Container {
 
 	// Create delivery factory and controllers.
 	delivery := factory.NewDeliveryFactory(ctx, config, logger, repository)
+	healthController := delivery.NewHealthCheckController(repository)
 	userController := delivery.NewController(userUseCase)
 	postController := delivery.NewController(postUseCase)
 
 	// Create routers.
 	serverRouters := interfaces.NewServerRouters(
+		delivery.NewHealthRouter(healthController, repository),
 		delivery.NewRouter(userController),
 		delivery.NewRouter(postController),
 		// Add other routers as needed.

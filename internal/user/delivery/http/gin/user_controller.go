@@ -252,7 +252,7 @@ func setAccessLoginCookies(ginContext *gin.Context, config *config.ApplicationCo
 		accessToken,
 		config.AccessToken.MaxAge,
 		path,
-		constants.TokenDomainValue,
+		config.Security.CookieDomainValue,
 		config.Security.CookieSecure,
 		config.Security.HTTPOnly,
 	)
@@ -262,7 +262,7 @@ func setAccessLoginCookies(ginContext *gin.Context, config *config.ApplicationCo
 		refreshToken,
 		config.RefreshToken.MaxAge,
 		path,
-		constants.TokenDomainValue,
+		config.Security.CookieDomainValue,
 		config.Security.CookieSecure,
 		config.Security.HTTPOnly,
 	)
@@ -272,7 +272,7 @@ func setAccessLoginCookies(ginContext *gin.Context, config *config.ApplicationCo
 		constants.True,
 		config.AccessToken.MaxAge,
 		path,
-		constants.TokenDomainValue,
+		config.Security.CookieDomainValue,
 		config.Security.CookieSecure,
 		config.Security.HTTPOnly,
 	)
@@ -284,7 +284,7 @@ func setRefreshTokenCookies(ginContext *gin.Context, config *config.ApplicationC
 		accessToken,
 		config.AccessToken.MaxAge,
 		path,
-		constants.TokenDomainValue,
+		config.Security.CookieDomainValue,
 		config.Security.CookieSecure,
 		config.Security.HTTPOnly,
 	)
@@ -295,7 +295,7 @@ func setRefreshTokenCookies(ginContext *gin.Context, config *config.ApplicationC
 			refreshToken,
 			config.RefreshToken.MaxAge,
 			path,
-			constants.TokenDomainValue,
+			config.Security.CookieDomainValue,
 			config.Security.CookieSecure,
 			config.Security.HTTPOnly,
 		)
@@ -306,7 +306,7 @@ func setRefreshTokenCookies(ginContext *gin.Context, config *config.ApplicationC
 		constants.True,
 		config.AccessToken.MaxAge,
 		path,
-		constants.TokenDomainValue,
+		config.Security.CookieDomainValue,
 		config.Security.CookieSecure,
 		config.Security.HTTPOnly,
 	)

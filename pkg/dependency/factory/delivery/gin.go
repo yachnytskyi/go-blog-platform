@@ -42,7 +42,7 @@ func NewGinDelivery(config *config.ApplicationConfig, logger interfaces.Logger) 
 
 func (ginDelivery *GinDelivery) CreateDelivery(serverRouters interfaces.ServerRouters) {
 	// Set Gin to release mode for production
-	gin.SetMode(gin.ReleaseMode)
+	// gin.SetMode(gin.ReleaseMode)
 
 	ginDelivery.Router = gin.Default()
 	applyMiddleware(ginDelivery.Router, ginDelivery.Config, ginDelivery.Logger)

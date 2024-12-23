@@ -6,7 +6,9 @@ const (
 	UnsupportedLogger     = "Unsupported logger type: %s"     // Unsupported logger type error message.
 	UnsupportedEmail      = "Unsupported email type: %s"      // Unsupported email type error message.
 	UnsupportedRepository = "Unsupported repository type: %s" // Unsupported repository type error message.
+	UnsupportedUsecase    = "Unsupported use case type: %s"   // Unsupported use case type error message.
 	UnsupportedDelivery   = "Unsupported delivery type: %s"   // Unsupported delivery type error message.
+	UnsupportedController = "Unsupported controller type: %s" // Unsupported controller type error message.
 )
 
 // Server Notifications.

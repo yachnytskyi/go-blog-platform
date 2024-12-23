@@ -28,7 +28,9 @@ jobs:
         echo "MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}" >> infrastructure/script/data/repository/mongo/.env
 
     - name: Build and Run Develop
-      run: docker compose up mongodb app-develop -d
+      run: |
+        docker compose up mongodb app-develop -d
+        docker logs --tail 100 go-blog-platform-app-develop-1
 
     - name: List All Running Containers
       run: docker ps

@@ -19,29 +19,31 @@ func NewApplication(ctx context.Context) model.Container {
 	email := factory.NewEmail(config, logger)
 
 	// Create repository factory and repositories, then assert their types.
-	repositoryFactory := factory.NewRepositoryFactory(config, logger)
-	createRepository := repositoryFactory.CreateRepository(ctx)
-	userRepository := repositoryFactory.NewRepository(createRepository, (*interfaces.UserRepository)(nil)).(interfaces.UserRepository)
-	postRepository := repositoryFactory.NewRepository(createRepository, (*interfaces.PostRepository)(nil)).(interfaces.PostRepository)
+	repository := factory.NewRepositoryFactory(config, logger)
+	createRepository := repository.CreateRepository(ctx)
+	userRepository := repository.NewRepository(createRepository, (*interfaces.UserRepository)(nil)).(interfaces.UserRepository)
+	postRepository := repository.NewRepository(createRepository, (*interfaces.PostRepository)(nil)).(interfaces.PostRepository)
 
 	// Create use cases.
 	userUseCase := user.NewUserUseCase(config, logger, email, userRepository)
 	postUseCase := post.NewPostUseCase(logger, postRepository)
 
 	// Create delivery factory and controllers.
-	deliveryFactory := factory.NewDeliveryFactory(ctx, config, logger, repositoryFactory)
-	userController := deliveryFactory.NewController(userUseCase)
-	postController := deliveryFactory.NewController(postUseCase)
+	delivery := factory.NewDeliveryFactory(ctx, config, logger, repository)
+	healthController := delivery.NewHealthCheckController(repository)
+	userController := delivery.NewController(userUseCase)
+	postController := delivery.NewController(postUseCase)
 
 	// Create routers.
 	serverRouters := interfaces.NewServerRouters(
-		deliveryFactory.NewRouter(userController),
-		deliveryFactory.NewRouter(postController),
+		delivery.NewHealthRouter(healthController, repository),
+		delivery.NewRouter(userController),
+		delivery.NewRouter(postController),
 		// Add other routers as needed.
 	)
 
-	deliveryFactory.CreateDelivery(serverRouters)
-	repositoryFactory.HealthCheck(deliveryFactory)
-	container := model.NewContainer(logger, repositoryFactory, deliveryFactory)
+	delivery.CreateDelivery(serverRouters)
+	repository.HealthCheck(delivery)
+	container := model.NewContainer(logger, repository, delivery)
 	return container
 }

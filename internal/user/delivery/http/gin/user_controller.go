@@ -7,11 +7,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
-	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/interfaces"
 	utility "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin/utility/cookie"
 	view "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/model"
 	domain "github.com/yachnytskyi/golang-mongo-grpc/internal/user/domain/usecase"
 	config "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/factory/config/model"
+	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/interfaces"
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/delivery/http"
 	delivery "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/delivery/http"
 	common "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/common"
@@ -49,8 +49,7 @@ func (userController UserController) GetAllUsers(controllerContext any) {
 		return
 	}
 
-	ginContext.JSON(
-		http.StatusOK, model.NewJSONResponseOnSuccess(view.UsersToUsersViewMapper(fetchedUsers.Data)))
+	ginContext.JSON(http.StatusOK, model.NewJSONResponseOnSuccess(view.UsersToUsersViewMapper(fetchedUsers.Data)))
 }
 
 func (userController UserController) GetCurrentUser(controllerContext any) {
@@ -102,10 +101,8 @@ func (userController UserController) Register(controllerContext any) {
 		return
 	}
 
-	ginContext.JSON(
-		http.StatusCreated,
-		model.NewJSONResponseOnSuccess(view.NewWelcomeMessageView(fmt.Sprintf(constants.SendingEmailNotification, createdUser.Data.Email))),
-	)
+	ginContext.JSON(http.StatusCreated,
+		model.NewJSONResponseOnSuccess(view.NewWelcomeMessageView(fmt.Sprintf(constants.SendingEmailNotification, createdUser.Data.Email))))
 }
 
 func (userController UserController) UpdateCurrentUser(controllerContext any) {
@@ -220,8 +217,7 @@ func (userController UserController) ForgottenPassword(controllerContext any) {
 		return
 	}
 
-	ginContext.JSON(
-		http.StatusCreated,
+	ginContext.JSON(http.StatusCreated,
 		model.NewJSONResponseOnSuccess(view.NewWelcomeMessageView(constants.SendingEmailWithInstructionsNotification+" "+userForgottenPassword.Email)))
 }
 

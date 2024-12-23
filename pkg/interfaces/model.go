@@ -1,15 +1,17 @@
 package interfaces
 
 type ServerRouters struct {
-	UserRouter Router
-	PostRouter Router
+	HealthCheckRouter Router
+	UserRouter        Router
+	PostRouter        Router
 	// Add other routers as needed.
 }
 
-func NewServerRouters(userRouter Router, postRouter Router) ServerRouters {
+func NewServerRouters(healthCheckRouter, userRouter, postRouter Router) ServerRouters {
 	return ServerRouters{
-		UserRouter: userRouter,
-		PostRouter: postRouter,
+		HealthCheckRouter: healthCheckRouter,
+		UserRouter:        userRouter,
+		PostRouter:        postRouter,
 		// Add other routers as needed.
 	}
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	constants "github.com/yachnytskyi/golang-mongo-grpc/config/constants"
+	health "github.com/yachnytskyi/golang-mongo-grpc/infrastructure/health/delivery/http/gin"
 	post "github.com/yachnytskyi/golang-mongo-grpc/internal/post/delivery/http/gin"
 	postUseCase "github.com/yachnytskyi/golang-mongo-grpc/internal/post/domain/usecase"
 	user "github.com/yachnytskyi/golang-mongo-grpc/internal/user/delivery/http/gin"
@@ -19,6 +20,10 @@ import (
 	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
 	middleware "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/delivery/http/gin/middleware"
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
+)
+
+const (
+	location = "pkg.dependency.delivery."
 )
 
 type GinDelivery struct {
@@ -36,10 +41,16 @@ func NewGinDelivery(config *config.ApplicationConfig, logger interfaces.Logger) 
 }
 
 func (ginDelivery *GinDelivery) CreateDelivery(serverRouters interfaces.ServerRouters) {
+	// Set Gin to release mode for production
+	gin.SetMode(gin.ReleaseMode)
+
 	ginDelivery.Router = gin.Default()
 	applyMiddleware(ginDelivery.Router, ginDelivery.Config, ginDelivery.Logger)
 	configureCORS(ginDelivery.Router, ginDelivery.Config)
 	router := ginDelivery.Router.Group(ginDelivery.Config.Gin.ServerGroup)
+
+	// Initialize health-specific routers.
+	serverRouters.HealthCheckRouter.Router(router)
 
 	// Initialize entity-specific routers.
 	serverRouters.UserRouter.Router(router)
@@ -67,6 +78,10 @@ func (ginDelivery GinDelivery) LaunchServer(ctx context.Context, repository inte
 	ginDelivery.Logger.Info(domain.NewInfoMessage(location+"gin.LaunchServer", constants.ServerConnectionSuccess))
 }
 
+func (ginDelivery GinDelivery) NewHealthCheckController(repository interfaces.Repository) any {
+	return health.NewHealthCheckController(ginDelivery.Config, ginDelivery.Logger, repository)
+}
+
 func (ginDelivery GinDelivery) NewController(useCase any) any {
 	switch useCaseType := useCase.(type) {
 	case userUseCase.UserUseCase:
@@ -74,7 +89,17 @@ func (ginDelivery GinDelivery) NewController(useCase any) any {
 	case postUseCase.PostUseCase:
 		return post.NewPostController(useCaseType)
 	default:
-		ginDelivery.Logger.Panic(domain.NewInternalError(location+"gin.NewController.default", fmt.Sprintf(constants.UnsupportedDelivery, useCaseType)))
+		ginDelivery.Logger.Panic(domain.NewInternalError(location+"gin.NewController.default", fmt.Sprintf(constants.UnsupportedUsecase, useCaseType)))
+		return nil
+	}
+}
+
+func (ginDelivery GinDelivery) NewHealthRouter(controller any, repository interfaces.Repository) interfaces.Router {
+	switch controllerType := controller.(type) {
+	case interfaces.HealthCheckController:
+		return health.NewHealthCheckRouter(ginDelivery.Config, ginDelivery.Logger, controllerType, repository)
+	default:
+		ginDelivery.Logger.Panic(domain.NewInternalError(location+"gin.NewHealthRouter.default", fmt.Sprintf(constants.UnsupportedController, controllerType)))
 		return nil
 	}
 }
@@ -85,10 +110,10 @@ func (ginDelivery GinDelivery) NewRouter(controller any) interfaces.Router {
 		return user.NewUserRouter(ginDelivery.Config, ginDelivery.Logger, controllerType)
 	case interfaces.PostController:
 		return post.NewPostRouter(ginDelivery.Config, ginDelivery.Logger, controllerType)
+	default:
+		ginDelivery.Logger.Panic(domain.NewInternalError(location+"gin.NewRouter.default", fmt.Sprintf(constants.UnsupportedController, controllerType)))
+		return nil
 	}
-
-	userController := controller.(interfaces.UserController)
-	return user.NewUserRouter(ginDelivery.Config, ginDelivery.Logger, userController)
 }
 
 func (ginDelivery GinDelivery) Close(ctx context.Context) {

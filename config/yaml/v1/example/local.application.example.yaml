@@ -5,6 +5,7 @@ Core:
   Delivery: Gin
 
 Security:
+  Cookie_Domain_Value: localhost
   Cookie_Secure: true
   HTTP_Only: true
   Rate_Limit: 5.0

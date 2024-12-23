@@ -23,10 +23,8 @@ After this, review and update the configuration settings to match your environme
 ## API Endpoints
 
 The API is available at the following URLs:
-- `http://localhost:8080/api/posts`
-- `http://localhost:8080/api/users`
-
-For a complete list of available API requests/URLs, check the server terminal upon launching the project.
+- `http://your_domain_name/api/posts`
+- `http://your_domain_name/api/users`
 
 ## Build and Run
 

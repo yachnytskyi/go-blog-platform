@@ -30,9 +30,6 @@ jobs:
     - name: Build and Run Develop
       run: |
         docker compose up mongodb app-develop -d
-
-    - name: Show App Develop Logs
-      run: |
         docker logs --tail 100 app-develop
 
     - name: List All Running Containers

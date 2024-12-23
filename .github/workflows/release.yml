@@ -28,7 +28,13 @@ jobs:
         echo "MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}" >> infrastructure/script/data/repository/mongo/.env
 
     - name: Build and Run Release
-      run: docker compose up mongodb app-release -d
+      run: |
+        docker compose up mongodb app-release -d
+        sleep 7  # Wait for 7 seconds to allow containers to start up
+        docker logs go-blog-platform-app-release-1
+
+    - name: List All Running Containers
+      run: docker ps
 
     - name: Stop Release
       run: docker stop $(docker ps -a -q)

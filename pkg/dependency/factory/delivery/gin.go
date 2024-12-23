@@ -21,6 +21,10 @@ import (
 	validator "github.com/yachnytskyi/golang-mongo-grpc/pkg/utility/validator"
 )
 
+const (
+	location = "pkg.dependency.delivery."
+)
+
 type GinDelivery struct {
 	Config *config.ApplicationConfig
 	Logger interfaces.Logger

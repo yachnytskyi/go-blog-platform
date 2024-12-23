@@ -24,6 +24,7 @@ type Core struct {
 }
 
 type Security struct {
+	CookieDomainValue               string
 	CookieSecure                    bool
 	HTTPOnly                        bool
 	RateLimit                       float64
@@ -46,6 +47,7 @@ type MongoDB struct {
 }
 
 type Gin struct {
+	Mode             string
 	Port             string
 	AllowOrigins     string
 	AllowCredentials bool

@@ -33,7 +33,7 @@ jobs:
 
     - name: Show Develop Logs
       run: |
-        sleep 10  # Wait for 10 seconds to allow containers to start up
+        # sleep 10  # Wait for 10 seconds to allow containers to start up
         docker logs go-blog-platform-app-develop-1
 
     - name: List All Running Containers

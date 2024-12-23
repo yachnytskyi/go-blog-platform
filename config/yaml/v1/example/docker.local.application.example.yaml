@@ -37,6 +37,7 @@ MongoDB:
   URI: mongodb://default_user:default_password@localhost:27017/default_db
 
 Gin:
+  Mode: debug
   Port: 8080
   Allow_Origins: http://localhost:8080
   Allow_Credentials: true

@@ -60,8 +60,9 @@ const (
 
 // Domain-specific routes.
 const (
-	UsersGroupPath = "/users" // Users domain route.
-	PostsGroupPath = "/posts" // Posts domain route.
+	HealthGroupPath = "/health" // Health domain route.
+	UsersGroupPath  = "/users"  // Users domain route.
+	PostsGroupPath  = "/posts"  // Posts domain route.
 	// Initialize other routes here.
 )
 

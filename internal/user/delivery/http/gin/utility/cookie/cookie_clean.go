@@ -12,13 +12,13 @@ func CleanCookies(ctx *gin.Context, config *config.ApplicationConfig, path strin
 	// configuring it with the logout max age, path, and domain.
 	// The security settings from the configuration are applied to ensure proper handling.
 	ctx.SetCookie(
-		constants.AccessTokenValue,   // Name of the cookie
-		"",                           // Value of the cookie (empty to clear)
-		constants.LogoutMaxAgeValue,  // Max age of the cookie
-		path,                         // Path for which the cookie is valid
-		constants.TokenDomainValue,   // Domain for which the cookie is valid
-		config.Security.CookieSecure, // Secure flag from configuration
-		config.Security.HTTPOnly,     // HTTPOnly flag from configuration
+		constants.AccessTokenValue,        // Name of the cookie
+		"",                                // Value of the cookie (empty to clear)
+		constants.LogoutMaxAgeValue,       // Max age of the cookie
+		path,                              // Path for which the cookie is valid
+		config.Security.CookieDomainValue, // Domain for which the cookie is valid
+		config.Security.CookieSecure,      // Secure flag from configuration
+		config.Security.HTTPOnly,          // HTTPOnly flag from configuration
 	)
 
 	// Clear the refresh token cookie in a similar manner.
@@ -27,7 +27,7 @@ func CleanCookies(ctx *gin.Context, config *config.ApplicationConfig, path strin
 		"",
 		constants.LogoutMaxAgeValue,
 		path,
-		constants.TokenDomainValue,
+		config.Security.CookieDomainValue,
 		config.Security.CookieSecure,
 		config.Security.HTTPOnly,
 	)
@@ -38,7 +38,7 @@ func CleanCookies(ctx *gin.Context, config *config.ApplicationConfig, path strin
 		"",
 		constants.LogoutMaxAgeValue,
 		path,
-		constants.TokenDomainValue,
+		config.Security.CookieDomainValue,
 		config.Security.CookieSecure,
 		config.Security.HTTPOnly,
 	)

@@ -43,7 +43,6 @@ const (
 	AccessTokenValue                            = "access_token"                          // Access token value.
 	RefreshTokenValue                           = "refresh_token"                         // Refresh token value.
 	LoggedInValue                               = "logged_in"                             // Logged in status value.
-	TokenDomainValue                            = "localhost"                             // Token domain value.
 	LogoutMaxAgeValue                           = -1                                      // Logout max age value.
 	User                             contextKey = "user"                                  // User context key.
 	ID                               contextKey = "id"                                    // ID context key.
@@ -61,8 +60,9 @@ const (
 
 // Domain-specific routes.
 const (
-	UsersGroupPath = "/users" // Users domain route.
-	PostsGroupPath = "/posts" // Posts domain route.
+	HealthGroupPath = "/health" // Health domain route.
+	UsersGroupPath  = "/users"  // Users domain route.
+	PostsGroupPath  = "/posts"  // Posts domain route.
 	// Initialize other routes here.
 )
 

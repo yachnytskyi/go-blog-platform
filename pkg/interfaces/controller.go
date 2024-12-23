@@ -1,5 +1,9 @@
 package interfaces
 
+type HealthCheckController interface {
+	HealthCheck(controllerContext any)
+}
+
 type UserController interface {
 	GetAllUsers(controllerContext any)
 	GetCurrentUser(controllerContext any)

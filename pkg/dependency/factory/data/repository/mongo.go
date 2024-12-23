@@ -43,8 +43,6 @@ func NewMongoDBRepository(config *config.ApplicationConfig, logger interfaces.Lo
 
 func (mongoDBRepository *MongoDBRepository) CreateRepository(ctx context.Context) any {
 	mongoDBRepository.connectToMongoDB(ctx)
-	mongoDBRepository.Logger.Info(domain.NewInfoMessage(location+"mongo.CreateRepository", constants.DatabaseConnectionSuccess))
-
 	return mongoDBRepository.MongoClient.Database(mongoDBRepository.Config.MongoDB.Name)
 }
 
@@ -108,7 +106,6 @@ func (mongoDBRepository *MongoDBRepository) connectToMongoDB(ctx context.Context
 				return
 			}
 		}
-
 		time.Sleep(delay)
 		delay += retryDelayInterval
 	}
@@ -132,7 +129,6 @@ func (mongoDBRepository *MongoDBRepository) handleReconnection(delivery interfac
 				return
 			}
 		}
-
 		time.Sleep(delay)
 		delay += retryDelayInterval
 	}

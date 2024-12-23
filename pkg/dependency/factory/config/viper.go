@@ -85,15 +85,9 @@ func convertCore(core *config.YamlCore) config.Core {
 	}
 }
 
-func convertMongoDB(mongoDB *config.YamlMongoDB) config.MongoDB {
-	return config.MongoDB{
-		Name: mongoDB.Name,
-		URI:  mongoDB.URI,
-	}
-}
-
 func convertSecurity(security *config.YamlSecurity) config.Security {
 	return config.Security{
+		CookieDomainValue:               security.CookieDomainValue,
 		CookieSecure:                    security.CookieSecure,
 		HTTPOnly:                        security.HTTPOnly,
 		RateLimit:                       security.RateLimit,
@@ -113,8 +107,16 @@ func convertHeader(header *config.YamlHeader) config.Header {
 	}
 }
 
+func convertMongoDB(mongoDB *config.YamlMongoDB) config.MongoDB {
+	return config.MongoDB{
+		Name: mongoDB.Name,
+		URI:  mongoDB.URI,
+	}
+}
+
 func convertGin(gin *config.YamlGin) config.Gin {
 	return config.Gin{
+		Mode:             gin.Mode,
 		Port:             gin.Port,
 		AllowOrigins:     gin.AllowOrigins,
 		AllowCredentials: gin.AllowCredentials,

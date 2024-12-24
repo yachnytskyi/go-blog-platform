@@ -9,6 +9,9 @@ const PostsTable = "posts";
 const usersNumber = 1000; // Number of test users
 const postsNumber = 5; // Number of posts per user
 
+// Precomputed bcrypt hashed password
+const hashedPassword = "$2b$12$2TnOFrMkPCzvGQZ.PjwdHenVH7kiReJKvXTkp0LPeAC9DnNt8m3ze"; // "somepassword"
+
 // Insert Users first.
 let users = [];
 for (let i = 0; i < usersNumber; i++) {
@@ -17,7 +20,7 @@ for (let i = 0; i < usersNumber; i++) {
         _id: userId, // Assign generated ID to user
         username: `test${i}`,
         email: `test${i}@gmail.com`,
-        password: "somepassword",
+        password: hashedPassword, // Use the precomputed hashed password
         role: "user",
         verified: true,
         created_at: new Date(),

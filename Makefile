@@ -1,3 +1,5 @@
+KEY_SIZE ?= 2048
+
 initial:
 	# Copy example configuration files to their respective locations.
 	cp config/yaml/v1/example/local.application.example.yaml config/yaml/v1/local.application.yaml
@@ -6,16 +8,20 @@ initial:
 	cp config/yaml/v1/example/docker.release.application.example.yaml config/yaml/v1/docker.release.application.yaml
 	cp config/yaml/v1/example/docker.production.application.example.yaml config/yaml/v1/docker.production.application.yaml
 
-	# Copy MongoDB initialization scripts and environment.
+	# Copy MongoDB environments.
 	cp infrastructure/script/data/repository/mongo/example/.example.env infrastructure/script/data/repository/mongo/.env
-	cp infrastructure/script/data/repository/mongo/example/init-mongo.example.js infrastructure/script/data/repository/mongo/init-mongo.js
-	cp infrastructure/script/data/repository/mongo/example/init-test-data-mongo.example.js infrastructure/script/data/repository/mongo/init-test-data-mongo.js
 
 	# Encode Docker configuration YAML files to base64.
 	# On Windows, you need to use a Linux Subsystem (WSL) or PowerShell equivalent.
-	base64 -i config/yaml/v1/docker.develop.application.yaml -o config/yaml/v1/docker_config_develop.txt
-	base64 -i config/yaml/v1/docker.release.application.yaml -o config/yaml/v1/docker_config_release.txt
-	base64 -i config/yaml/v1/docker.production.application.yaml -o config/yaml/v1/docker_config_production.txt
+	base64 -i config/yaml/v1/docker.develop.application.yaml -o DOCKER_DEVELOP_APPLICATION_CONFIG_YAML.txt
+	base64 -i config/yaml/v1/docker.release.application.yaml -o DOCKER_RELEASE_APPLICATION_CONFIG_YAML.txt
+	base64 -i config/yaml/v1/docker.production.application.yaml -o DOCKER_PRODUCTION_APPLICATION_CONFIG_YAML.txt
+
+	# Generate Public and Private Keys.
+	openssl genpkey -algorithm RSA -out private_key.pem -pkeyopt rsa_keygen_bits:$(KEY_SIZE)
+	openssl rsa -pubout -in private_key.pem -out public_key.pem
+	base64 -i private_key.pem > private_key_base64.txt	
+	base64 -i public_key.pem > public_key_base64.txt	
 
 mongo-local:
 	docker compose up mongodb -d 
@@ -81,3 +87,10 @@ down:
 
 down-v:
 	docker compose down -v
+
+clean:
+	rm -f private_key.pem public_key.pem
+	rm -f private_key_base64.txt public_key_base64.txt
+	rm -f DOCKER_DEVELOP_APPLICATION_CONFIG_YAML.txt
+	rm -f DOCKER_RELEASE_APPLICATION_CONFIG_YAML.txt
+	rm -f DOCKER_PRODUCTION_APPLICATION_CONFIG_YAML.txt

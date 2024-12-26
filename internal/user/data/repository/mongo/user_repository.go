@@ -141,7 +141,7 @@ func (userRepository UserRepository) GetUserByEmail(ctx context.Context, email s
 			return common.NewResultOnFailure[user.User](internalError)
 		}
 		userRepository.Logger.Error(domain.NewItemNotFoundError(location+"GetUserByEmail.FindOne.Decode", utility.BSONToStringMapper(query), userFindOneError.Error()))
-		validationError := domain.NewValidationError(location+".checkPasswords.CompareHashAndPassword", emailOrPasswordFields, constants.FieldRequired, passwordsDoNotMatch)
+		validationError := domain.NewValidationError(location+"GetUserByEmail.FindOne.Decode", emailOrPasswordFields, constants.FieldRequired, passwordsDoNotMatch)
 		validationError.Notification = invalidEmailOrPassword
 		return common.NewResultOnFailure[user.User](validationError)
 	}

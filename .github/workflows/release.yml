@@ -1,8 +1,8 @@
 name: Release (pre-Production) workflow
 
 on:
-  # push:
-    # branches: [ "release" ]
+  push:
+    branches: [ "release" ]
   pull_request:
     branches: [ "release" ]
 

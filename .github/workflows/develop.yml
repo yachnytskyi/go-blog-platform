@@ -1,6 +1,8 @@
 name: Develop workflow
 
 on:
+  push:
+    branches: [ "develop" ]
   pull_request:
     branches: [ "develop" ]
 
@@ -25,40 +27,17 @@ jobs:
         echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" >> infrastructure/script/data/repository/mongo/.env
         echo "MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}" >> infrastructure/script/data/repository/mongo/.env
 
-    - name: Build and Start Containers
-      run: docker compose up mongodb -d
-
-    - name: Wait for MongoDB to be ready
+    - name: Build and Run Develop
       run: |
-        for i in {1..10}; do
-          if docker inspect --format '{{json .State.Health.Status}}' mongodb | grep -q '"healthy"'; then
-            echo "MongoDB is ready!"
-            break
-          fi
-          echo "Waiting for MongoDB..."
-          sleep 5
-        done
-
-    - name: Start Application
-      run: docker compose up app-develop -d
-
-    - name: Wait for Application to be ready
-      run: |
-        for i in {1..10}; do
-          if docker inspect --format '{{json .State.Health.Status}}' app-develop | grep -q '"healthy"'; then
-            echo "Application is ready!"
-            break
-          fi
-          echo "Waiting for Application..."
-          sleep 5
-        done
-
-    - name: Check Application Logs
-      run: docker logs go-blog-platform-app-develop-1
+        docker compose up mongodb -d
+        sleep 4  # Wait for 4 seconds to allow container to start up
+        docker compose up app-develop -d
+       
+        sleep 32  # Wait for 32 seconds to allow container to start up
+        docker logs go-blog-platform-app-develop-1
 
     - name: List All Running Containers
       run: docker ps
 
-    - name: Stop and Cleanup Containers
+    - name: Stop Develop
       run: docker stop $(docker ps -a -q)
-

@@ -1,6 +1,8 @@
 KEY_SIZE ?= 2048
 
 initial:
+	go install github.com/cespare/reflex@latest
+
 	# Copy example configuration files to their respective locations.
 	cp config/yaml/v1/example/local.application.example.yaml config/yaml/v1/local.application.yaml
 	cp config/yaml/v1/example/docker.local.application.example.yaml config/yaml/v1/docker.local.application.yaml
@@ -24,35 +26,35 @@ initial:
 	base64 -i public_key.pem > public_key_base64.txt	
 
 mongo-local:
-	docker compose up mongodb -d 
+	docker-compose up mongodb -d 
 	reflex -s go run cmd/server/main.go 
 
 mongo-local-docker:
-	docker compose up mongodb app-local -d
+	docker-compose up mongodb app-local -d
 
 mongo-develop:
-	docker compose up mongodb app-develop -d
+	docker-compose up mongodb app-develop -d
 
 mongo-release:
-	docker compose up mongodb app-release -d
+	docker-compose up mongodb app-release -d
 
 mongo-production:
-	docker compose up mongodb app-production -d
+	docker-compose up mongodb app-production -d
 
 build-mongo:
-	docker compose build mongodb
+	docker-compose build mongodb
 
 build-local:
-	docker compose build app-local
+	docker-compose build app-local
 
 build-develop:
-	docker compose build app-develop
+	docker-compose build app-develop
 
 build-release:
-	docker compose build app-release
+	docker-compose build app-release
 
 build-production:
-	docker compose build app-production
+	docker-compose build app-production
 
 make tests:
 	go test ./test/...
@@ -74,19 +76,19 @@ update:
 	go mod tidy
 
 up:
-	docker compose up 
+	docker-compose up 
 
 build:
-	docker compose build --no-cache
+	docker-compose build --no-cache
 
 stop:
-	docker compose stop
+	docker-compose stop
 
 down:
-	docker compose down
+	docker-compose down
 
 down-v:
-	docker compose down -v
+	docker-compose down -v
 
 clean:
 	rm -f private_key.pem public_key.pem

@@ -1,4 +1,4 @@
-name: General workflow
+name: Unit tests workflow
 
 on:
   # push:

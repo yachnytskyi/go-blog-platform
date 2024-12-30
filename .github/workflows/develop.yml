@@ -39,6 +39,9 @@ jobs:
           nc -zv localhost 27017 && break || sleep 5
         done || exit 1
 
+    - name: App Develop Logs
+      run: |
+        docker logs go-blog-platform-app-develop-1
 
     - name: List All Running Containers
       run: docker ps

@@ -100,12 +100,15 @@ func (mongoDBRepository *MongoDBRepository) connectToMongoDB(ctx context.Context
 		client, connectError = mongo.Connect(ctx, options.Client().ApplyURI(mongoDBRepository.Config.MongoDB.URI))
 		if connectError == nil {
 			pingError := client.Ping(ctx, readpref.Primary())
+			mongoDBRepository.Logger.Info(domain.NewInfoMessage(location+"mongo.connectToMongoDB", pingError.Error()))
+
 			if pingError == nil {
 				mongoDBRepository.MongoClient = client
 				mongoDBRepository.Logger.Info(domain.NewInfoMessage(location+"mongo.connectToMongoDB", constants.DatabaseConnectionSuccess))
 				return
 			}
 		}
+
 		time.Sleep(delay)
 		delay += retryDelayInterval
 	}

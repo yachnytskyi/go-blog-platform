@@ -1,8 +1,6 @@
 name: Develop workflow
 
 on:
- # push:
-    # branches: [ "develop" ]
   pull_request:
     branches: [ "develop" ]
 
@@ -27,16 +25,24 @@ jobs:
         echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" >> infrastructure/script/data/repository/mongo/.env
         echo "MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}" >> infrastructure/script/data/repository/mongo/.env
 
-    - name: Build and Run Develop
-      run: |
-        docker compose up mongodb -d
-        docker compose up app-develop -d
+    - name: Start MongoDB
+      run: docker compose up mongodb -d
 
-        sleep 7  # Wait for 7 seconds to allow containers to start up
-        docker logs go-blog-platform-app-develop-1
+    - name: Wait for MongoDB to be Ready
+      run: |
+        for i in {1..10}; do
+          nc -zv localhost 27017 && break || sleep 5
+        done || exit 1
+
+    - name: Start Application
+      run: docker compose up app-develop -d
+
+    - name: Check Application Logs
+      sleep 10  # Wait for 10 seconds to allow containers to start up
+      run: docker logs go-blog-platform-app-develop-1
 
     - name: List All Running Containers
       run: docker ps
 
-    - name: Stop Develop
+    - name: Stop All Containers
       run: docker stop $(docker ps -a -q)

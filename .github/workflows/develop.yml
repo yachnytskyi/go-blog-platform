@@ -30,7 +30,7 @@ jobs:
     - name: Build and Run Develop
       run: |
         docker compose up mongodb app-develop -d
-        sleep 60  # Wait for 60 seconds to allow containers to start up
+        sleep 7  # Wait for 7 seconds to allow containers to start up
         docker logs go-blog-platform-app-develop-1
 
     - name: List All Running Containers

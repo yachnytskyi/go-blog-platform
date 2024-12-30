@@ -27,15 +27,15 @@ jobs:
 
     - name: Build and Run MongoDB
       run: |
-        docker-compose up -d mongodb
+        docker compose up -d mongodb
         # Wait for MongoDB healthcheck to pass
-        docker-compose exec mongodb bash -c 'until curl -s mongodb:27017 >/dev/null; do echo waiting for mongodb; sleep 1; done'
+        docker compose exec mongodb bash -c 'until curl -s mongodb:27017 >/dev/null; do echo waiting for mongodb; sleep 1; done'
         # Optionally, check MongoDB health status directly:
         docker inspect --format='{{.State.Health.Status}}' mongodb
 
     - name: Build and Run Web Server (App)
       run: |
-        docker-compose up -d app-develop
+        docker compose up -d app-develop
 
     - name: Show MongoDB logs
       run: docker logs go-blog-platform-mongodb

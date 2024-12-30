@@ -39,7 +39,7 @@ jobs:
           nc -zv localhost 27017 && break || sleep 5
         done || exit 1
 
-    - name: App Develop Logs
+    - name: Build and Run Develop
       run: |
         docker logs go-blog-platform-app-develop-1
 

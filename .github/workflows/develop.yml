@@ -35,7 +35,7 @@ jobs:
 
     - name: Check MongoDB Logs
       run: docker logs mongodb
-
+   
     - name: Wait for MongoDB to be Ready
       run: |
         for i in {1..10}; do
@@ -44,7 +44,6 @@ jobs:
 
     - name: Check App-Develop Logs
       run:  docker logs go-blog-platform-app-develop-1
-
 
     - name: List All Running Containers
       run: docker ps

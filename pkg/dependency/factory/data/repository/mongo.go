@@ -23,8 +23,8 @@ const (
 	connectingToMongoDBNotification    = "Attempting to connect to the MongoDB database..."
 	databasePingingMongoDBNotification = "Attempting to ping the MongoDB database..."
 
-	retryDelayInterval        = 1 * time.Second
-	maxRetryAttempts          = 2
+	retryDelayInterval        = 30 * time.Second
+	maxRetryAttempts          = 5
 	healthCheckTickerInterval = 60 * time.Second
 )
 

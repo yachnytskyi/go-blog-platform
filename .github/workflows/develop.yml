@@ -42,8 +42,9 @@ jobs:
       run: docker logs mongodb
 
     - name: Show App Logs
-      sleep 4  # Wait for 4 seconds to allow container to start up
-      run: docker logs go-blog-platform-app-develop-1
+      run: |
+        sleep 4  # Wait for 4 seconds to allow container to start up
+        docker logs go-blog-platform-app-develop-1
 
     - name: List All Running Containers
       run: docker ps

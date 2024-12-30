@@ -1,8 +1,8 @@
 name: Develop workflow
 
 on:
- # push:
-    # branches: [ "develop" ]
+# push:
+    # branches: [ "release" ]
   pull_request:
     branches: [ "develop" ]
 
@@ -27,14 +27,22 @@ jobs:
         echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" >> infrastructure/script/data/repository/mongo/.env
         echo "MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}" >> infrastructure/script/data/repository/mongo/.env
 
-    - name: Build and Run Develop
+    - name: Build and Run MongoDB
       run: |
-        docker compose up mongodb -d
-        sleep 4  # Wait for 4 seconds to allow container to start up
-        docker compose up app-develop -d
-       
-        sleep 32  # Wait for 32 seconds to allow container to start up
-        docker logs go-blog-platform-app-develop-1
+        docker compose up -d mongodb
+      
+        # Optionally, check MongoDB health status directly:
+        docker inspect --format='{{.State.Health.Status}}' mongodb
+
+    - name: Build and Run Web Server (App)
+      run: |
+        docker compose up -d app-develop
+
+    - name: Show MongoDB logs
+      run: docker logs mongodb
+
+    - name: Show App Logs
+      run: docker logs go-blog-platform-app-develop-1
 
     - name: List All Running Containers
       run: docker ps

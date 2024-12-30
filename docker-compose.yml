@@ -15,11 +15,11 @@ services:
     networks:
       - application-network
     healthcheck:
-      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      test: ["CMD", "curl", "-f", "http://localhost:27017"]
       interval: 10s
       timeout: 10s
       retries: 10
-      start_period: 30s
+      start_period: 10s
 
   app-local:
     build:

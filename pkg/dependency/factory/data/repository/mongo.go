@@ -23,9 +23,9 @@ const (
 	connectingToMongoDBNotification    = "Attempting to connect to the MongoDB database..."
 	databasePingingMongoDBNotification = "Attempting to ping the MongoDB database..."
 
-	retryDelayInterval        = 30 * time.Second
-	maxRetryAttempts          = 5
-	healthCheckTickerInterval = 60 * time.Second
+	retryDelayInterval        = 1 * time.Second
+	maxRetryAttempts          = 1
+	healthCheckTickerInterval = 1 * time.Second
 )
 
 type MongoDBRepository struct {

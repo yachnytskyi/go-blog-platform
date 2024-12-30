@@ -2,7 +2,7 @@ name: Develop workflow
 
 on:
 push:
-    branches: [ "release" ]
+  branches: [ "release" ]
   pull_request:
     branches: [ "develop" ]
 
@@ -43,7 +43,6 @@ jobs:
 
     - name: Show App Logs
       sleep 7  # Wait for 7 seconds to allow container to start up
-
       run: docker logs go-blog-platform-app-develop-1
 
     - name: List All Running Containers

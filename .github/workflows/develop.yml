@@ -39,7 +39,7 @@ jobs:
         docker compose up -d app-develop
 
     - name: Show MongoDB logs
-      run: docker logs go-blog-platform-mongodb
+      run: docker logs mongodb
 
     - name: Show App Logs
       run: docker logs go-blog-platform-app-develop-1

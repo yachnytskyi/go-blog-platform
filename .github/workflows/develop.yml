@@ -38,6 +38,7 @@ jobs:
       run: docker compose up app-develop -d
 
     - name: Check Application Logs
+      sleep 7  # Wait for 7 seconds to allow container to start up
       run: docker logs go-blog-platform-app-develop-1
 
     - name: List All Running Containers

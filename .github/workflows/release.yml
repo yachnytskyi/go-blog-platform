@@ -1,8 +1,8 @@
 name: Release (pre-Production) workflow
 
 on:
-  # push:
-    # branches: [ "release" ]
+  push:
+    branches: [ "release" ]
   pull_request:
     branches: [ "release" ]
 
@@ -30,10 +30,10 @@ jobs:
     - name: Build and Run Release
       run: |
         docker compose up mongodb -d
-        sleep 4  # Wait for 4 seconds to allow container to start up
+        sleep 32  # Wait for 32 seconds to allow container to start up
         docker compose up app-release -d
        
-        sleep 32  # Wait for 32 seconds to allow container to start up
+        sleep 4  # Wait for 4 seconds to allow container to start up
         docker logs go-blog-platform-app-release-1
 
     - name: List All Running Containers

@@ -14,12 +14,6 @@ services:
       - ./infrastructure/script/data/repository/mongo/.env 
     networks:
       - application-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:27017"]
-      interval: 10s
-      timeout: 10s
-      retries: 10
-      start_period: 10s
 
   app-local:
     build:
@@ -48,8 +42,7 @@ services:
       - "8080:8080"
     working_dir: /app
     depends_on:
-      mongodb:
-        condition: service_healthy
+      - mongodb
     networks:
       - application-network
     command: ./main 

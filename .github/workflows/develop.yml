@@ -33,7 +33,7 @@ jobs:
         # sleep 4  # Wait for 4 seconds to allow container to start up
 
         docker logs mongodb
-        sleep 7  # Wait for 7 seconds to allow container to start up
+        sleep 30  # Wait for 30 seconds to allow container to start up
 
         docker compose up app-develop -d
 

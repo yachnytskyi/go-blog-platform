@@ -17,6 +17,14 @@ jobs:
       with:
         go-version: stable
 
+    - name: Run GolangCI-Lint
+      uses: golangci/golangci-lint-action@v6
+      with:
+        version: v1.60
+
+    - name: Unit tests
+      run: go test ./test/unit/...
+
     - name: Decode and Create YAML File
       run: |
         echo "${{ secrets.DOCKER_PRODUCTION_APPLICATION_CONFIG_YAML }}" | base64 -d > config/yaml/v1/docker.production.application.yaml

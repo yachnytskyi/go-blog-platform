@@ -1,8 +1,6 @@
 name: Develop workflow
 
 on:
- # push:
-    # branches: [ "develop" ]
   pull_request:
     branches: [ "develop" ]
 
@@ -16,6 +14,14 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version: stable
+
+    - name: Run GolangCI-Lint
+      uses: golangci/golangci-lint-action@v6
+      with:
+        version: v1.60
+
+    - name: Unit tests
+      run: go test ./test/unit/...
 
     - name: Decode and Create YAML File
       run: |

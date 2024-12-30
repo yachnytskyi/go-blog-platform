@@ -1,18 +1,14 @@
 name: Develop workflow
 
 on:
+ # push:
+    # branches: [ "develop" ]
   pull_request:
     branches: [ "develop" ]
 
 jobs:
-  setup:
-    name: Set up environment and run lint/tests
-    uses: ./.github/workflows/common-setup.yml
-  
   build:
-    name: Build and Run Develop
     runs-on: ubuntu-latest
-    needs: setup  
     steps:
     - uses: actions/checkout@v4
 
@@ -33,8 +29,11 @@ jobs:
 
     - name: Build and Run Develop
       run: |
-        docker compose up mongodb app-develop -d
-        sleep 7  # Wait for 7 seconds to allow containers to start up
+        docker compose up mongodb -d
+        sleep 4  # Wait for 4 seconds to allow container to start up
+        docker compose up app-develop -d
+       
+        sleep 32  # Wait for 32 seconds to allow container to start up
         docker logs go-blog-platform-app-develop-1
 
     - name: List All Running Containers

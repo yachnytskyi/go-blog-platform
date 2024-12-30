@@ -1,8 +1,8 @@
 name: Develop workflow
 
 on:
-push:
-  branches: [ "release" ]
+  push:
+    branches: [ "release" ]
   pull_request:
     branches: [ "develop" ]
 

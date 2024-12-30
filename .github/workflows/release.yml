@@ -1,18 +1,14 @@
 name: Release (pre-Production) workflow
 
 on:
+  # push:
+    # branches: [ "release" ]
   pull_request:
     branches: [ "release" ]
 
 jobs:
-  setup:
-    name: Set up environment and run lint/tests
-    uses: ./.github/workflows/common-setup.yml  
-  
   build:
-    name: Build and Run Release
     runs-on: ubuntu-latest
-    needs: setup
     steps:
     - uses: actions/checkout@v4
 
@@ -33,8 +29,11 @@ jobs:
 
     - name: Build and Run Release
       run: |
-        docker compose up mongodb app-release -d
-        sleep 7  # Wait for 7 seconds to allow containers to start up
+        docker compose up mongodb -d
+        sleep 4  # Wait for 4 seconds to allow container to start up
+        docker compose up app-release -d
+       
+        sleep 32  # Wait for 32 seconds to allow container to start up
         docker logs go-blog-platform-app-release-1
 
     - name: List All Running Containers

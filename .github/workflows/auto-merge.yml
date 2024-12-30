@@ -18,14 +18,11 @@ jobs:
           # Get the total number of checks (including the current workflow check)
           TOTAL_CHECKS=$(gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup -q '.statusCheckRollup | length')
           
-          # Exclude this workflow's check by subtracting 1
-          # EXPECTED_FINISHED_CHECKS=$((TOTAL_CHECKS - 1))
-
           # Start a timer (timeout in 10 minutes)
           TIMEOUT=600  # Timeout in seconds (10 minutes)
           SECONDS=0  # Initialize the SECONDS variable to track time elapsed
 
-          # Wait until the number of successful checks matches the expected number (total - 1)
+          # Wait until the number of successful checks matches the expected number
           while true; do
             # Get the number of successful checks only
             SUCCESSFUL_CHECKS=$(gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup -q '.statusCheckRollup | map(select(.conclusion == "SUCCESS")) | length')

@@ -35,7 +35,7 @@ jobs:
       run: |
         docker compose up mongodb app-develop -d
         sleep 7  # Wait for 7 seconds to allow containers to start up
-        docker compose logs go-blog-platform-app-develop-1
+        docker compose logs app-develop
 
     - name: List All Running Containers
       run: docker ps

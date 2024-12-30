@@ -1,6 +1,8 @@
 name: Develop workflow
 
 on:
+  push:
+    branches: [ "release" ]
   pull_request:
     branches: [ "develop" ]
 
@@ -25,40 +27,27 @@ jobs:
         echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" >> infrastructure/script/data/repository/mongo/.env
         echo "MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}" >> infrastructure/script/data/repository/mongo/.env
 
-    - name: Build and Start Containers
-      run: docker compose up mongodb -d
-
-    - name: Wait for MongoDB to be ready
+    - name: Build and Run MongoDB
       run: |
-        for i in {1..10}; do
-          if docker inspect --format '{{json .State.Health.Status}}' mongodb | grep -q '"healthy"'; then
-            echo "MongoDB is ready!"
-            break
-          fi
-          echo "Waiting for MongoDB..."
-          sleep 5
-        done
+        docker compose up -d mongodb
+      
+        # Optionally, check MongoDB health status directly:
+        docker inspect --format='{{.State.Health.Status}}' mongodb
 
-    - name: Start Application
-      run: docker compose up app-develop -d
-
-    - name: Wait for Application to be ready
+    - name: Build and Run Web Server (App)
       run: |
-        for i in {1..10}; do
-          if docker inspect --format '{{json .State.Health.Status}}' app-develop | grep -q '"healthy"'; then
-            echo "Application is ready!"
-            break
-          fi
-          echo "Waiting for Application..."
-          sleep 5
-        done
+        docker compose up -d app-develop
 
-    - name: Check Application Logs
-      run: docker logs go-blog-platform-app-develop-1
+    - name: Show MongoDB logs
+      run: docker logs mongodb
+
+    - name: Show App Logs
+      run: |
+        sleep 10  # Wait for 10 seconds to allow container to start up
+        docker logs go-blog-platform-app-develop-1
 
     - name: List All Running Containers
       run: docker ps
 
-    - name: Stop and Cleanup Containers
+    - name: Stop Develop
       run: docker stop $(docker ps -a -q)
-

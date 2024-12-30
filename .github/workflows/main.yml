@@ -1,10 +1,10 @@
-name: Main workflow
+name: Main (Production) workflow
 
 on:
-  # push:
-    # branches: ['main']
+  push:
+    branches: [ "main" ]
   pull_request:
-    branches: ['main']
+    branches: [ "main" ]
 
 jobs:
   production:
@@ -30,10 +30,10 @@ jobs:
     - name: Build and Run Production
       run: |
         docker compose up mongodb -d
-        sleep 4  # Wait for 4 seconds to allow container to start up
+        sleep 32  # Wait for 32 seconds to allow container to start up
         docker compose up app-production -d
        
-        sleep 32  # Wait for 32 seconds to allow container to start up
+        sleep 4  # Wait for 4 seconds to allow container to start up
         docker logs go-blog-platform-app-production-1
 
     - name: List All Running Containers

@@ -1,14 +1,18 @@
 name: Develop workflow
 
 on:
- # push:
-    # branches: [ "develop" ]
   pull_request:
     branches: [ "develop" ]
 
 jobs:
+  setup:
+    name: Set up environment and run lint/tests
+    uses: ./.github/workflows/common-setup.yml
+  
   build:
+    name: Build and Run Develop
     runs-on: ubuntu-latest
+    needs: setup  
     steps:
     - uses: actions/checkout@v4
 

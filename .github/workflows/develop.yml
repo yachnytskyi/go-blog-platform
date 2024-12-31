@@ -33,23 +33,26 @@ jobs:
         # Fetch all Git tags
         git fetch --tags
         
-        # Use manually provided version if available
-        if [ -n "${{ github.event.inputs.version }}" ]; then
-          VERSION="${{ github.event.inputs.version }}"
-        else
-          # Get the latest Git tag or default to "v1.0.0"
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v1.0.0")
+        # Get the latest Git tag or default to "1.0.0"
+        LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "1.0.0")
 
-          # Parse the version (major.minor.patch)
-          IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST_TAG"
-          PATCH=$((PATCH+1))  # Increment the patch version
-          
-          # Set the new version (e.g., v1.0.1)
-          VERSION="v$MAJOR.$MINOR.$PATCH"
-        fi
+        # Parse the version (major.minor.patch)
+        IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST_TAG"
+        PATCH=$((PATCH+1))  # Increment the patch version
+        
+        # Set the new version (e.g., 1.0.1)
+        VERSION="$MAJOR.$MINOR.$PATCH"
+
+        # Loop until we find a tag that does not exist
+        while git rev-parse "$VERSION" >/dev/null 2>&1; do
+          PATCH=$((PATCH+1))  # Increment patch version again
+          VERSION="$MAJOR.$MINOR.$PATCH"
+        done
 
         echo "VERSION=$VERSION" >> $GITHUB_ENV
         echo "Version Tag: $VERSION"
+
+
 
     # Step 4: Push New Git Tag
     - name: Push New Git Tag

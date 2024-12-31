@@ -1,9 +1,3 @@
-name: Develop Workflow with Version Tagging and Git Tag Sync
-
-on:
-  pull_request:
-    branches: [ "develop" ]
-
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -34,8 +28,14 @@ jobs:
         IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST_TAG"
         PATCH=$((PATCH+1)) # Increment the patch version
 
-        # Generate the new tag
+        # Try to generate a unique tag
         NEW_TAG="$MAJOR.$MINOR.$PATCH"
+        
+        # Loop until we find a tag that does not exist
+        while git rev-parse "$NEW_TAG" >/dev/null 2>&1; do
+          PATCH=$((PATCH+1))  # Increment patch version again
+          NEW_TAG="$MAJOR.$MINOR.$PATCH"
+        done
 
         # Output the new tag for use in later steps
         echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV

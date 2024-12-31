@@ -61,7 +61,7 @@ jobs:
         echo "VERSION=$VERSION" >> $GITHUB_ENV
         echo "Version Tag: $VERSION"
 
-    # Step 4: Push New Git Tag.
+    # Step 4: Push New Git Tag
     - name: Push New Git Tag
       if: ${{ success() }}
       run: |

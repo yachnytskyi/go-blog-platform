@@ -18,5 +18,5 @@ jobs:
         go-version: stable
 
     - name: Unit tests
-      if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && !contains(github.event.head_commit.message, '[skip ci]') && github.event.pull_request == null) }}
+      if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.event.pull_request == null) }}
       run: go test ./test/unit/...

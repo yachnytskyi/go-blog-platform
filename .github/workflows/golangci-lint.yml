@@ -1,7 +1,7 @@
 name: Golangci-lint workflow
 on:
-  # push:
-    # branches: ['**']
+  push:
+    branches: ['**']
   pull_request:
     branches: ['**']
 
@@ -24,6 +24,6 @@ jobs:
         with:
           version: v1.60
 
-  - name: Lint
-      if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' && github.actor != 'github-actions' }}
-      run: go test ./test/unit/...
+  - name: Unit tests
+    if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' && github.actor != 'github-actions' }}
+    run: go test ./test/unit/...

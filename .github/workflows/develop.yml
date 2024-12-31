@@ -1,3 +1,9 @@
+name: Develop Workflow with Version Tagging and Git Tag Sync
+
+on:
+  pull_request:
+    branches: [ "develop" ]
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest

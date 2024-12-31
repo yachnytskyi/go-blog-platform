@@ -37,6 +37,12 @@ jobs:
         # Set the new version (e.g., v1.0.1)
         VERSION="v$MAJOR.$MINOR.$PATCH"
 
+        # Loop until we find a tag that does not exist
+        while git rev-parse "$VERSION" >/dev/null 2>&1; do
+          PATCH=$((PATCH+1))  # Increment patch version again
+          VERSION="$MAJOR.$MINOR.$PATCH"
+        done
+
         echo "VERSION=$VERSION" >> $GITHUB_ENV
         echo "Version Tag: $VERSION"
 

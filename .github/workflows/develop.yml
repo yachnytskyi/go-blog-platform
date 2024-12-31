@@ -79,7 +79,7 @@ jobs:
         echo "ADMIN_HASHED_PASSWORD=${{ secrets.ADMIN_HASHED_PASSWORD }}" >> infrastructure/script/data/repository/mongo/.env
 
     # Step 8: Build Docker Image
-        - name: Build Docker Image
+    - name: Build Docker Image
       run: |
         docker buildx build -f infrastructure/deployment/docker/Dockerfile.develop -t ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:${{ env.NEW_TAG }} . --push
         docker buildx build -f infrastructure/deployment/docker/Dockerfile.develop -t ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:latest . --push
@@ -87,8 +87,8 @@ jobs:
     # Step 9: Push Docker Image to Registry
     - name: Push Docker Image
       run: |
-        docker push {{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:${{ env.NEW_TAG }}
-        docker push {{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:latest
+        docker push ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:${{ env.NEW_TAG }}
+        docker push ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:latest
 
     # Step 10: Deploy with Docker Compose
     - name: Deploy with Docker Compose

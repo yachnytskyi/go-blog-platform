@@ -81,8 +81,8 @@ jobs:
     # Step 8: Build Docker Image
     - name: Build Docker Image
       run: |
-        docker build -t {{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:${{ env.NEW_TAG }} .
-        docker tag {{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:${{ env.NEW_TAG }} {{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:latest
+        docker buildx build -t ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:${{ env.NEW_TAG }} . --push
+        docker buildx build -t ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:latest . --push
 
     # Step 9: Push Docker Image to Registry
     - name: Push Docker Image

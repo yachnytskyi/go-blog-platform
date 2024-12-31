@@ -2,7 +2,7 @@ name: Unit tests workflow
 
 on:
   push:
-    branches: ['**']  
+    branches: ['**']
   pull_request:
     branches: ['**']
 
@@ -18,5 +18,5 @@ jobs:
         go-version: stable
 
     - name: Unit tests
-      if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' && github.actor != 'github-actions' }}
+      if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && !contains(github.event.head_commit.message, '[skip ci]') && github.event.pull_request == null) }}
       run: go test ./test/unit/...

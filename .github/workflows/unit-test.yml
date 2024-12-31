@@ -1,10 +1,8 @@
 name: Unit tests workflow
 
 on:
-  push:
-    branches: ['**']
   pull_request:
-    branches: ['**']
+    branches: ['**'] 
 
 jobs:
   build:
@@ -18,5 +16,4 @@ jobs:
         go-version: stable
 
     - name: Unit tests
-      if: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.event.pull_request == null) }}
       run: go test ./test/unit/...

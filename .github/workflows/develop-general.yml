@@ -1,10 +1,11 @@
-name: Develop workflow
+name: Develop-general workflow
 
 on:
   push:
-    branches: [ "develop" ]
-  pull_request:
-    branches: [ "develop" ]
+    branches-ignore:
+      - "develop"
+      - "release"
+      - "main"
 
 jobs:
   build:

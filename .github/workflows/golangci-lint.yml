@@ -23,3 +23,7 @@ jobs:
         uses: golangci/golangci-lint-action@v6
         with:
           version: v1.60
+
+  - name: Lint
+      if: ${{ github.event_name == 'pull_request' || github.event_name == 'push' && github.actor != 'github-actions' }}
+      run: go test ./test/unit/...

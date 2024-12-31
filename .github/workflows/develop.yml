@@ -81,24 +81,21 @@ jobs:
     # Step 8: Build Docker Image for app-develop
     - name: Build Docker Image for app-develop
       run: |
+        docker compose up mongodb -d
+        sleep 32  # Wait for 32 seconds to allow container to start up
+        docker compose up app-develop -d
+       
+        sleep 4  # Wait for 4 seconds to allow container to start up
+        docker logs go-blog-platform-app-develop-1
+
         docker buildx build -f infrastructure/deployment/docker/Dockerfile.develop -t ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:${{ env.NEW_TAG }} . --push
         docker buildx build -f infrastructure/deployment/docker/Dockerfile.develop -t ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:latest . --push
 
-    # # Step 9: Build and Run Develop Containers (Docker Compose)
-    # - name: Build and Run Develop Containers
-    #   run: |
-    #     docker compose up mongodb -d
-    #     sleep 32  # Wait for 32 seconds to allow container to start up
-    #     docker compose up app-develop -d
-       
-    #     sleep 4  # Wait for 4 seconds to allow container to start up
-    #     docker logs go-blog-platform-app-develop-1
-
-    # Step 10: List All Running Containers
+    # Step 9: List All Running Containers
     - name: List All Running Containers
       run: docker ps
 
-    # Step 11: Push Docker Image to Registry
+    # Step 10: Push Docker Image to Registry
     - name: Push Docker Image
       run: |
         docker push ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:${{ env.NEW_TAG }}

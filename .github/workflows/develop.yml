@@ -1,16 +1,56 @@
-name: Develop workflow
+name: Develop Workflow with Version Tagging and Git Tag Sync
 
 on:
-  push:
-    branches: [ "develop" ]
   pull_request:
     branches: [ "develop" ]
 
 jobs:
-  build:
+  generate-tag:
     runs-on: ubuntu-latest
+
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Generate Version Tag
+      id: version
+      run: |
+        git fetch --tags
+        LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "1.0.0")
+        IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST_TAG"
+        PATCH=$((PATCH+1))
+        NEW_TAG="$MAJOR.$MINOR.$PATCH"
+        echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
+        echo "Generated Tag: $NEW_TAG"
+
+  push-git-tag:
+    runs-on: ubuntu-latest
+    needs: generate-tag
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Push New Git Tag
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git tag ${{ env.NEW_TAG }}
+        git push origin ${{ env.NEW_TAG }}
+
+  build-and-push:
+    runs-on: ubuntu-latest
+    needs: [generate-tag, push-git-tag]
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Log in to DockerHub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Set up Go
       uses: actions/setup-go@v5
@@ -29,13 +69,22 @@ jobs:
         echo "ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}" >> infrastructure/script/data/repository/mongo/.env
         echo "ADMIN_HASHED_PASSWORD=${{ secrets.ADMIN_HASHED_PASSWORD }}" >> infrastructure/script/data/repository/mongo/.env
 
-    - name: Build and Run Develop
+    - name: Build Docker Image
+      run: |
+        docker build -t ${{ secrets.DOCKER_USERNAME }}/app-develop:${{ env.NEW_TAG }} .
+        docker tag ${{ secrets.DOCKER_USERNAME }}/app-develop:${{ env.NEW_TAG }} ${{ secrets.DOCKER_USERNAME }}/app-develop:latest
+
+    - name: Push Docker Image
+      run: |
+        docker push ${{ secrets.DOCKER_USERNAME }}/app-develop:${{ env.NEW_TAG }}
+        docker push ${{ secrets.DOCKER_USERNAME }}/app-develop:latest
+
+    - name: Build and Run Develop Containers
       run: |
         docker compose up mongodb -d
-        sleep 32  # Wait for 32 seconds to allow container to start up
+        sleep 32
         docker compose up app-develop -d
-       
-        sleep 4  # Wait for 4 seconds to allow container to start up
+        sleep 4
         docker logs go-blog-platform-app-develop-1
 
     - name: List All Running Containers

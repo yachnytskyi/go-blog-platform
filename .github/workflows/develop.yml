@@ -3,12 +3,6 @@ name: Develop Workflow with Version Tagging and Git Tag Sync
 on:
   pull_request:
     branches: [ "develop" ]
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'Manually specify the version'
-        required: false
-        default: ''
 
 jobs:
   build-and-push:
@@ -26,24 +20,28 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    # Step 3: Determine Version Tag (Use Git tag or fallback to auto-increment)
+    # Step 3: Determine Version Tag (Using Git Tag)
     - name: Determine Version Tag
       id: version
       run: |
-        # If a version is provided via the workflow dispatch input, use it
-        if [ -n "${{ github.event.inputs.version }}" ]; then
-          VERSION="${{ github.event.inputs.version }}"
-        else
-          # If no version is provided, fetch the latest Git tag
-          git fetch --tags
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v1.0.0")
+        # Fetch all Git tags
+        git fetch --tags
+        
+        # Get the latest Git tag or default to "v1.0.0"
+        LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v1.0.0")
 
-          # Parse the version (major.minor.patch)
-          IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST_TAG"
-          PATCH=$((PATCH+1))  # Increment the patch version
-          
-          VERSION="v$MAJOR.$MINOR.$PATCH"
-        fi
+        # Parse the version (major.minor.patch)
+        IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST_TAG"
+        PATCH=$((PATCH+1))  # Increment the patch version
+        
+        # Set the new version (e.g., v1.0.1)
+        VERSION="v$MAJOR.$MINOR.$PATCH"
+
+        # Loop until we find a tag that does not exist
+        while git rev-parse "$VERSION" >/dev/null 2>&1; do
+          PATCH=$((PATCH+1))  # Increment patch version again
+          VERSION="$MAJOR.$MINOR.$PATCH"
+        done
 
         echo "VERSION=$VERSION" >> $GITHUB_ENV
         echo "Version Tag: $VERSION"
@@ -79,24 +77,27 @@ jobs:
         echo "ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}" >> infrastructure/script/data/repository/mongo/.env
         echo "ADMIN_HASHED_PASSWORD=${{ secrets.ADMIN_HASHED_PASSWORD }}" >> infrastructure/script/data/repository/mongo/.env
 
-    # Step 8: Build and Push Docker Images for app-develop
-    - name: Build Docker Image for app-develop
+    # Step 8: Start MongoDB and App-Develop Containers
+    - name: Start MongoDB and App Containers
       run: |
-        docker compose up mongodb -d 
+        docker compose up mongodb -d
         sleep 32  # Wait for MongoDB to start
-
+        
         docker compose up app-develop -d
         sleep 4  # Wait for the app container to initialize
         docker logs go-blog-platform-app-develop-1
 
-        docker buildx build -f infrastructure/deployment/docker/Dockerfile.develop -t ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:${{ env.VERSION }} . --push
-        docker buildx build -f infrastructure/deployment/docker/Dockerfile.develop -t ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:latest . --push
+    # Step 9: Build Docker Image for app-develop
+    - name: Build Docker Image for app-develop
+      run: |
+        docker buildx build -f infrastructure/deployment/docker/Dockerfile.develop -t ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:${{ env.VERSION }} . --cache-from ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:latest --push
+        docker buildx build -f infrastructure/deployment/docker/Dockerfile.develop -t ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:latest . --cache-from ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:${{ env.VERSION }} --push
 
-    # Step 9: List All Running Containers
+    # Step 10: List All Running Containers
     - name: List All Running Containers
       run: docker ps
 
-    # Step 10: Push Docker Image to Registry
+    # Step 11: Push Docker Image to Registry
     - name: Push Docker Image
       run: |
         docker push ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:${{ env.VERSION }}

@@ -78,24 +78,29 @@ jobs:
         echo "ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}" >> infrastructure/script/data/repository/mongo/.env
         echo "ADMIN_HASHED_PASSWORD=${{ secrets.ADMIN_HASHED_PASSWORD }}" >> infrastructure/script/data/repository/mongo/.env
 
-    # Step 8: Build Docker Image
-        - name: Build Docker Image
+    # Step 8: Build Docker Image for app-develop
+    - name: Build Docker Image for app-develop
       run: |
+        docker compose up mongodb -d
+        sleep 32  # Wait for 32 seconds to allow container to start up
+        docker compose up app-develop -d
+       
+        sleep 4  # Wait for 4 seconds to allow container to start up
+        docker logs go-blog-platform-app-develop-1
+
         docker buildx build -f infrastructure/deployment/docker/Dockerfile.develop -t ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:${{ env.NEW_TAG }} . --push
         docker buildx build -f infrastructure/deployment/docker/Dockerfile.develop -t ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:latest . --push
 
-    # Step 9: Push Docker Image to Registry
+    # Step 9: List All Running Containers
+    - name: List All Running Containers
+      run: docker ps
+
+    # Step 10: Push Docker Image to Registry
     - name: Push Docker Image
       run: |
-        docker push {{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:${{ env.NEW_TAG }}
-        docker push {{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:latest
+        docker push ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:${{ env.NEW_TAG }}
+        docker push ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:latest
 
-    # Step 10: Deploy with Docker Compose
-    - name: Deploy with Docker Compose
-      run: |
-        docker compose up -d
-        docker ps
-
-    # Step 11: Stop and Clean Up Containers
+    # Step 12: Stop Running Containers
     - name: Stop Running Containers
       run: docker stop $(docker ps -a -q)

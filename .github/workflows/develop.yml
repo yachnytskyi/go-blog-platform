@@ -28,8 +28,10 @@ jobs:
     needs: generate-tag
 
     steps:
-    - name: Checkout Code
+    - name: Checkout Code on Develop Branch
       uses: actions/checkout@v4
+      with:
+        ref: develop  # Explicitly checkout the 'develop' branch
 
     - name: Push New Git Tag
       run: |

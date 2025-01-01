@@ -1,8 +1,6 @@
 name: Release (pre-Production) Workflow
 
 on:
-  push:
-    branches: [ "release" ]
   pull_request:
     branches: [ "release" ]
 
@@ -47,10 +45,10 @@ jobs:
     - name: Start MongoDB and App Release Containers
       run: |
         docker compose up mongodb -d
-        sleep 32  # Wait for MongoDB to start
+        sleep 32  # Wait for MongoDB to start.
         
         docker compose up app-release -d
-        sleep 4  # Wait for the app container to initialize
+        sleep 4  # Wait for the app container to initialize.
         docker logs go-blog-platform-app-release-1
 
     # Step 7: List All Running Containers.
@@ -72,13 +70,13 @@ jobs:
     - name: Determine Version Tag
       id: version
       run: |
-        # Fetch all Git tags
+        # Fetch all Git tags.
         git fetch --tags
         
-        # Get the latest tag (without incrementation)
+        # Get the latest tag (without incrementation).
         LATEST_TAG=$(git tag -l --sort=-v:refname | head -n 1)
 
-        # Set the version to the latest tag
+        # Set the version to the latest tag.
         VERSION="$LATEST_TAG"
         
         echo "VERSION=$VERSION" >> $GITHUB_ENV

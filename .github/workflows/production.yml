@@ -1,8 +1,6 @@
 name: Production workflow
 
 on:
-  push:
-    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
 
@@ -47,10 +45,10 @@ jobs:
     - name: Start MongoDB and App Production Containers
       run: |
         docker compose up mongodb -d
-        sleep 32  # Wait for MongoDB to start
+        sleep 32  # Wait for MongoDB to start.
         
         docker compose up app-production -d
-        sleep 4  # Wait for the app container to initialize
+        sleep 4  # Wait for the app container to initialize.
         docker logs go-blog-platform-app-production-1
 
     # Step 7: List All Running Containers.

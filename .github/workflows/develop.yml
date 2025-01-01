@@ -41,23 +41,23 @@ jobs:
         echo "ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}" >> infrastructure/script/data/repository/mongo/.env
         echo "ADMIN_HASHED_PASSWORD=${{ secrets.ADMIN_HASHED_PASSWORD }}" >> infrastructure/script/data/repository/mongo/.env
 
-    # Step 6: Start MongoDB and App Develop Containers.
-    - name: Start MongoDB and App Develop Containers
-      run: |
-        docker compose up mongodb -d
-        sleep 32  # Wait for MongoDB to start.
+    # # Step 6: Start MongoDB and App Develop Containers.
+    # - name: Start MongoDB and App Develop Containers
+    #   run: |
+    #     docker compose up mongodb -d
+    #     sleep 32  # Wait for MongoDB to start.
         
-        docker compose up app-develop -d
-        sleep 4  # Wait for the app container to initialize.
-        docker logs go-blog-platform-app-develop-1
+    #     docker compose up app-develop -d
+    #     sleep 4  # Wait for the app container to initialize.
+    #     docker logs go-blog-platform-app-develop-1
 
-    # Step 7: List All Running Containers.
-    - name: List All Running Containers
-      run: docker ps
+    # # Step 7: List All Running Containers.
+    # - name: List All Running Containers
+    #   run: docker ps
 
-    # Step 8: Stop Running Containers.
-    - name: Stop Running Containers
-      run: docker stop $(docker ps -a -q)
+    # # Step 8: Stop Running Containers.
+    # - name: Stop Running Containers
+    #   run: docker stop $(docker ps -a -q)
 
     # Step 9: Log in to DockerHub.
     - name: Log in to DockerHub
@@ -109,16 +109,23 @@ jobs:
         echo "VERSION=$VERSION" >> $GITHUB_ENV
         echo "Version Tag: $VERSION"
 
-    # Step 11: Push New Git Tag.
+    # Step 11: Push New Git Tag, only if the tag doesn't exist.
     - name: Push New Git Tag
       if: ${{ success() }}
       run: |
         git config user.name "GitHub Actions"
         git config user.email "actions@github.com"
         
-        # Create and push the new tag
-        git tag "${{ env.VERSION }}"
-        git push origin "${{ env.VERSION }}"
+        # Check if the tag already exists.
+        TAG_EXISTS=$(git tag -l "${{ env.VERSION }}")
+        
+        if [[ -z "$TAG_EXISTS" ]]; then
+          # If tag doesn't exist, create and push the new tag.
+          git tag "${{ env.VERSION }}"
+          git push origin "${{ env.VERSION }}"
+        else
+          echo "Tag ${{ env.VERSION }} already exists. Skipping tag creation."
+        fi
 
     # Step 12: Build Docker Image for app-develop.
     - name: Build Docker Image for app-develop

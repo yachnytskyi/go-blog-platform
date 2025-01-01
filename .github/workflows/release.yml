@@ -47,10 +47,10 @@ jobs:
         # Fetch all Git tags
         git fetch --tags
         
-        # Get the latest Git tag (no incrementation)
-        LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "1.0.0")
+        # Get the latest tag (without incrementation)
+        LATEST_TAG=$(git tag -l --sort=-v:refname | head -n 1)
 
-        # Set the version to the latest tag.
+        # Set the version to the latest tag
         VERSION="$LATEST_TAG"
         
         echo "VERSION=$VERSION" >> $GITHUB_ENV

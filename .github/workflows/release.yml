@@ -66,18 +66,7 @@ jobs:
         echo "VERSION=$VERSION" >> $GITHUB_ENV
         echo "Version Tag: $VERSION"
 
-    # Step 8: Push New Git Tag (use the same tag as Develop).
-    - name: Push New Git Tag
-      if: ${{ success() }}
-      run: |
-        git config user.name "GitHub Actions"
-        git config user.email "actions@github.com"
-        
-        # Push the latest tag (same as Develop)
-        git tag "${{ env.VERSION }}"
-        git push origin "${{ env.VERSION }}"
-
-    # Step 9: Start MongoDB and App-Release Containers.
+    # Step 8: Start MongoDB and App-Release Containers.
     - name: Start MongoDB and App Containers
       run: |
         docker compose up mongodb -d
@@ -87,21 +76,21 @@ jobs:
         sleep 4  # Wait for the app container to initialize
         docker logs go-blog-platform-app-release-1
 
-    # Step 10: List All Running Containers.
+    # Step 9: List All Running Containers.
     - name: List All Running Containers
       run: docker ps
 
-    # Step 11: Stop Running Containers.
+    # Step 10: Stop Running Containers.
     - name: Stop Running Containers
       run: docker stop $(docker ps -a -q)
 
-    # Step 12: Build Docker Image for app-release.
+    # Step 11: Build Docker Image for app-release.
     - name: Build Docker Image for app-release
       run: |
         docker buildx build -f infrastructure/deployment/docker/Dockerfile.release -t ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-release:${{ env.VERSION }} . --cache-from ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-release:latest --push
         docker buildx build -f infrastructure/deployment/docker/Dockerfile.release -t ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-release:latest . --cache-from ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-release:${{ env.VERSION }} --push
 
-    # Step 13: Push Docker Image to Registry.
+    # Step 12: Push Docker Image to Registry.
     - name: Push Docker Image
       run: |
         docker push ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-release:${{ env.VERSION }}

@@ -7,9 +7,7 @@ on:
 jobs:
   # Step 1: Call the Common Workflow.
   common-workflow:
-    uses: ./.github/workflows/common.yml
-    with:
-      # Any required inputs for the common workflow can be passed here.
+    uses: ./.github/workflows/common.yml  # Reference the reusable workflow.
     permissions:
       contents: read
       pull-requests: read

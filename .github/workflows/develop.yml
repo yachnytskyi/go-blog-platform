@@ -108,18 +108,18 @@ jobs:
     - name: List All Running Containers
       run: docker ps
 
-    # Step 11: Build Docker Image for app-develop.
+    # Step 11: Stop Running Containers.
+    - name: Stop Running Containers
+      run: docker stop $(docker ps -a -q)
+
+    # Step 12: Build Docker Image for app-develop.
     - name: Build Docker Image for app-develop
       run: |
         docker buildx build -f infrastructure/deployment/docker/Dockerfile.develop -t ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:${{ env.VERSION }} . --cache-from ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:latest --push
         docker buildx build -f infrastructure/deployment/docker/Dockerfile.develop -t ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:latest . --cache-from ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:${{ env.VERSION }} --push
 
-    # Step 12: Push Docker Image to Registry.
+    # Step 13: Push Docker Image to Registry.
     - name: Push Docker Image
       run: |
         docker push ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:${{ env.VERSION }}
         docker push ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:latest
-
-    # Step 13: Stop Running Containers.
-    - name: Stop Running Containers
-      run: docker stop $(docker ps -a -q)

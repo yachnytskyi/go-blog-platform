@@ -12,9 +12,9 @@ jobs:
       contents: read
       pull-requests: read
 
-  # build-and-push:
-  #   needs: common-workflow  # Ensure common workflow completes before proceeding.
-  #   runs-on: ubuntu-latest
+  build-and-push:
+    needs: common-workflow  # Ensure common workflow completes before proceeding.
+    runs-on: ubuntu-latest
 
     steps:
     # Step 2: Check out the repository.

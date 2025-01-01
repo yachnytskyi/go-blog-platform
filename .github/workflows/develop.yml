@@ -48,7 +48,7 @@ jobs:
         sleep 32  # Wait for MongoDB to start.
         
         docker compose up app-develop -d
-        sleep 4  # Wait for the app container to initialize.
+        sleep 5  # Wait for the app container to initialize.
         docker logs go-blog-platform-app-develop-1
 
     # Step 7: List All Running Containers.
@@ -98,16 +98,23 @@ jobs:
         echo "VERSION=$VERSION" >> $GITHUB_ENV
         echo "Version Tag: $VERSION"
 
-    # Step 11: Push New Git Tag.
+    # Step 11: Push New Git Tag, only if the tag doesn't exist.
     - name: Push New Git Tag
       if: ${{ success() }}
       run: |
         git config user.name "GitHub Actions"
         git config user.email "actions@github.com"
         
-        # Create and push the new tag
-        git tag "${{ env.VERSION }}"
-        git push origin "${{ env.VERSION }}"
+        # Check if the tag already exists.
+        TAG_EXISTS=$(git tag -l "${{ env.VERSION }}")
+        
+        if [[ -z "$TAG_EXISTS" ]]; then
+          # If tag doesn't exist, create and push the new tag.
+          git tag "${{ env.VERSION }}"
+          git push origin "${{ env.VERSION }}"
+        else
+          echo "Tag ${{ env.VERSION }} already exists. Skipping tag creation."
+        fi
 
     # Step 12: Build Docker Image for app-develop.
     - name: Build Docker Image for app-develop

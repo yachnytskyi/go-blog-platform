@@ -17,15 +17,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 2: Check out the repository.
-    # - name: Checkout Code
-    #   uses: actions/checkout@v4
+    Step 2: Check out the repository.
+    - name: Checkout Code
+      uses: actions/checkout@v4
 
-    # # Step 3: Set up Go.
-    # - name: Set up Go
-    #   uses: actions/setup-go@v5
-    #   with:
-    #     go-version: stable
+    # Step 3: Set up Go.
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: stable
 
     # # Step 4: Decode and Create YAML File.
     # - name: Decode and Create YAML File

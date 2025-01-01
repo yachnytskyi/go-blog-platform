@@ -70,34 +70,32 @@ jobs:
     - name: Determine Version Tag
       id: version
       run: |
-        # Fetch all Git tags
+        # Fetch all tags
         git fetch --tags
         
-        # Get the latest Git tag or default to "1.0.0"
-        LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "1.0.0")
+        # Get all tags and sort them to get the latest
+        LATEST_TAG=$(git tag -l | sort -V | tail -n 1)
         
-        # Parse the version (major.minor.patch)
-        IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST_TAG"
-        
-        # Check if the latest tag is a major version (e.g., "1")
-        if [[ "$MINOR" == "0" && "$PATCH" == "0" ]]; then
-          # If it's a major version (e.g., "1"), increment the minor version
-          MINOR=$((MINOR+1))
-          PATCH=0
+        # Set default version if no tag exists
+        if [[ -z "$LATEST_TAG" ]]; then
+          VERSION="1.0.0"
         else
-          # If it's a minor or patch version, increment the patch version
-          PATCH=$((PATCH+1))
-        fi
-
-        # Set the new version (e.g., 1.0.1 or 1.1.0)
-        VERSION="$MAJOR.$MINOR.$PATCH"
-
-        # Loop until we find a tag that does not exist
-        while git rev-parse "$VERSION" >/dev/null 2>&1; do
-          PATCH=$((PATCH+1))  # Increment patch version again
+          # Parse the version (major.minor.patch)
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST_TAG"
+          
+          # Increment the version based on the current version (increment patch by default)
+          PATCH=$((PATCH + 1))
+          
+          # Set the new version (e.g., 1.0.1 or 1.1.0)
           VERSION="$MAJOR.$MINOR.$PATCH"
-        done
-
+          
+          # Loop until we find a tag that does not exist
+          while git rev-parse "$VERSION" >/dev/null 2>&1; do
+            PATCH=$((PATCH+1))  # Increment patch version again
+            VERSION="$MAJOR.$MINOR.$PATCH"
+          done
+        fi
+        
         echo "VERSION=$VERSION" >> $GITHUB_ENV
         echo "Version Tag: $VERSION"
 

@@ -87,7 +87,7 @@ jobs:
           if [[ -z "$PATCH" ]]; then
             PATCH=0
           else
-            # Increment the version based on the current version (increment patch by default)
+            # Increment the version based on the current version (increment patch by default).
             PATCH=$((PATCH + 1))
           fi
           

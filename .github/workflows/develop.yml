@@ -104,15 +104,15 @@ jobs:
         sleep 4  # Wait for the app container to initialize
         docker logs go-blog-platform-app-develop-1
 
-    # Step 10: Build Docker Image for app-develop.
+    # Step 10: List All Running Containers.
+    - name: List All Running Containers
+      run: docker ps
+
+    # Step 11: Build Docker Image for app-develop.
     - name: Build Docker Image for app-develop
       run: |
         docker buildx build -f infrastructure/deployment/docker/Dockerfile.develop -t ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:${{ env.VERSION }} . --cache-from ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:latest --push
         docker buildx build -f infrastructure/deployment/docker/Dockerfile.develop -t ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:latest . --cache-from ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:${{ env.VERSION }} --push
-
-    # Step 11: List All Running Containers.
-    - name: List All Running Containers
-      run: docker ps
 
     # Step 12: Push Docker Image to Registry.
     - name: Push Docker Image

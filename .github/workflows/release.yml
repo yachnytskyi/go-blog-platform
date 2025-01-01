@@ -1,4 +1,4 @@
-name: Release (pre-Production) workflow
+name: Release (pre-Production) Workflow
 
 on:
   push:
@@ -7,37 +7,92 @@ on:
     branches: [ "release" ]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
+  # Step 1: Call the Common Workflow.
+  common-workflow:
+    uses: ./.github/workflows/common.yml  # Reference the reusable workflow.
+    permissions:
+      contents: read
+      pull-requests: read
 
+  build-and-push:
+    needs: common-workflow  # Ensure common workflow completes before proceeding.
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # Step 2: Set up Go.
     - name: Set up Go
       uses: actions/setup-go@v5
       with:
         go-version: stable
 
+    # Step 3: Decode and Create YAML File (using release-specific secret).
     - name: Decode and Create YAML File
       run: |
         echo "${{ secrets.DOCKER_RELEASE_APPLICATION_CONFIG_YAML }}" | base64 -d > config/yaml/v1/docker.release.application.yaml
 
+    # Step 4: Create .env File for MongoDB (using secrets for release environment).
     - name: Create .env file for MongoDB
       run: |
         echo "MONGO_INITDB_DATABASE=${{ secrets.MONGO_INITDB_DATABASE }}" > infrastructure/script/data/repository/mongo/.env
         echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" >> infrastructure/script/data/repository/mongo/.env
         echo "MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}" >> infrastructure/script/data/repository/mongo/.env
 
-    - name: Build and Run Release
+    # Step 5: Determine Version Tag (Without Incrementing).
+    - name: Determine Version Tag
+      id: version
+      run: |
+        # Fetch all Git tags
+        git fetch --tags
+        
+        # Get the latest Git tag (no incrementation)
+        LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "1.0.0")
+
+        # Set the version to the latest tag.
+        VERSION="$LATEST_TAG"
+        
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "Version Tag: $VERSION"
+
+    # Step 6: Push New Git Tag (use the same tag as Develop).
+    - name: Push New Git Tag
+      if: ${{ success() }}
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        
+        # Push the latest tag (same as Develop)
+        git tag "${{ env.VERSION }}"
+        git push origin "${{ env.VERSION }}"
+
+    # Step 7: Start MongoDB and App-Release Containers.
+    - name: Start MongoDB and App Containers
       run: |
         docker compose up mongodb -d
-        sleep 32  # Wait for 32 seconds to allow container to start up
+        sleep 32  # Wait for MongoDB to start
+        
         docker compose up app-release -d
-       
-        sleep 4  # Wait for 4 seconds to allow container to start up
+        sleep 4  # Wait for the app container to initialize
         docker logs go-blog-platform-app-release-1
 
+    # Step 8: List All Running Containers.
     - name: List All Running Containers
       run: docker ps
 
-    - name: Stop Release
+    # Step 9: Build Docker Image for app-release.
+    - name: Build Docker Image for app-release
+      run: |
+        docker buildx build -f infrastructure/deployment/docker/Dockerfile.release -t ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-release:${{ env.VERSION }} . --cache-from ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-release:latest --push
+        docker buildx build -f infrastructure/deployment/docker/Dockerfile.release -t ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-release:latest . --cache-from ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-release:${{ env.VERSION }} --push
+
+    # Step 10: Push Docker Image to Registry.
+    - name: Push Docker Image
+      run: |
+        docker push ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-release:${{ env.VERSION }}
+        docker push ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-release:latest
+
+    # Step 11: Stop Running Containers.
+    - name: Stop Running Containers
       run: docker stop $(docker ps -a -q)

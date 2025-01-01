@@ -83,6 +83,11 @@ jobs:
           # Parse the version (major.minor.patch)
           IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST_TAG"
           
+          # Check if there is only major and minor, and add patch .0 if missing
+          if [[ -z "$PATCH" ]]; then
+            PATCH=0
+          fi
+
           # Increment the version based on the current version (increment patch by default)
           PATCH=$((PATCH + 1))
           

@@ -1,10 +1,10 @@
-name: Release (pre-Production) Workflow
+name: Production workflow
 
 on:
   push:
-    branches: [ "release" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "release" ]
+    branches: [ "main" ]
 
 jobs:
   # Step 1: Call the Common Workflow.
@@ -41,17 +41,17 @@ jobs:
     # Step 5: Decode and Create YAML File.
     - name: Decode and Create YAML File
       run: |
-        echo "${{ secrets.DOCKER_RELEASE_APPLICATION_CONFIG_YAML }}" | base64 -d > config/yaml/v1/docker.release.application.yaml
+        echo "${{ secrets.DOCKER_production_APPLICATION_CONFIG_YAML }}" | base64 -d > config/yaml/v1/docker.production.application.yaml
 
-    # Step 6: Start MongoDB and App-Release Containers.
+    # Step 6: Start MongoDB and App-Production Containers.
     - name: Start MongoDB and App Containers
       run: |
         docker compose up mongodb -d
         sleep 32  # Wait for MongoDB to start
         
-        docker compose up app-release -d
+        docker compose up app-production -d
         sleep 4  # Wait for the app container to initialize
-        docker logs go-blog-platform-app-release-1
+        docker logs go-blog-platform-app-production-1
 
     # Step 7: List All Running Containers.
     - name: List All Running Containers
@@ -61,11 +61,11 @@ jobs:
     - name: Stop Running Containers
       run: docker stop $(docker ps -a -q)
 
-    # Step 9: Build Docker Image for app-release.
-    - name: Build Docker Image for app-release
+    # Step 9: Build Docker Image for app-production.
+    - name: Build Docker Image for app-production
       run: |
-        docker buildx build -f infrastructure/deployment/docker/Dockerfile.release -t ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-release:${{ env.VERSION }} . --cache-from ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-release:latest --push
-        docker buildx build -f infrastructure/deployment/docker/Dockerfile.release -t ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-release:latest . --cache-from ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-release:${{ env.VERSION }} --push
+        docker buildx build -f infrastructure/deployment/docker/Dockerfile.production -t ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-production:${{ env.VERSION }} . --cache-from ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-production:latest --push
+        docker buildx build -f infrastructure/deployment/docker/Dockerfile.production -t ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-production:latest . --cache-from ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-production:${{ env.VERSION }} --push
 
     # Step 10: Log in to DockerHub.
     - name: Log in to DockerHub
@@ -93,6 +93,6 @@ jobs:
     # Step 11: Push Docker Image to Registry.
     - name: Push Docker Image
       run: |
-        docker push ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-release:${{ env.VERSION }}
-        docker push ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-release:latest
+        docker push ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-production:${{ env.VERSION }}
+        docker push ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-production:latest
     

@@ -1,4 +1,4 @@
-name: Develop workflow
+name: Develop Workflow
 
 on:
   push:
@@ -7,37 +7,128 @@ on:
     branches: [ "develop" ]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
+  # Step 1: Call the Common Workflow.
+  common-workflow:
+    uses: ./.github/workflows/common.yml  # Reference the reusable workflow.
+    permissions:
+      contents: read
+      pull-requests: read
 
+  build-and-push:
+    needs: common-workflow  # Ensure common workflow completes before proceeding.
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 2: Check out the repository.
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # Step 3: Set up Go.
     - name: Set up Go
       uses: actions/setup-go@v5
       with:
         go-version: stable
 
+    # Step 4: Decode and Create YAML File.
     - name: Decode and Create YAML File
       run: |
         echo "${{ secrets.DOCKER_DEVELOP_APPLICATION_CONFIG_YAML }}" | base64 -d > config/yaml/v1/docker.develop.application.yaml
 
-    - name: Create .env file for MongoDB
+    # Step 5: Create .env File for MongoDB.
+    - name: Create .env File for MongoDB
       run: |
         echo "MONGO_INITDB_DATABASE=${{ secrets.MONGO_INITDB_DATABASE }}" > infrastructure/script/data/repository/mongo/.env
         echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" >> infrastructure/script/data/repository/mongo/.env
         echo "MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}" >> infrastructure/script/data/repository/mongo/.env
+        echo "ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}" >> infrastructure/script/data/repository/mongo/.env
+        echo "ADMIN_HASHED_PASSWORD=${{ secrets.ADMIN_HASHED_PASSWORD }}" >> infrastructure/script/data/repository/mongo/.env
 
-    - name: Build and Run Develop
+    # Step 6: Start MongoDB and App Develop Containers.
+    - name: Start MongoDB and App Develop Containers
       run: |
         docker compose up mongodb -d
-        sleep 32  # Wait for 32 seconds to allow container to start up
+        sleep 32  # Wait for MongoDB to start
+        
         docker compose up app-develop -d
-       
-        sleep 4  # Wait for 4 seconds to allow container to start up
+        sleep 4  # Wait for the app container to initialize
         docker logs go-blog-platform-app-develop-1
 
+    # Step 7: List All Running Containers.
     - name: List All Running Containers
       run: docker ps
 
-    - name: Stop Develop
+    # Step 8: Stop Running Containers.
+    - name: Stop Running Containers
       run: docker stop $(docker ps -a -q)
+
+    # Step 9: Log in to DockerHub.
+    - name: Log in to DockerHub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    # Step 10: Determine Version Tag (Using Git Tag or Manually Provided Version).
+    - name: Determine Version Tag
+      id: version
+      run: |
+        # Fetch all tags
+        git fetch --tags
+        
+        # Get all tags and sort them to get the latest
+        LATEST_TAG=$(git tag -l | sort -V | tail -n 1)
+        
+        # Set default version if no tag exists
+        if [[ -z "$LATEST_TAG" ]]; then
+          VERSION="1.0.0"
+        else
+          # Parse the latest version tag into major, minor, and patch components
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$LATEST_TAG"
+          
+          # If no PATCH is set, default to 0
+          if [[ -z "$PATCH" ]]; then
+            PATCH=0
+          fi
+
+          # Check the current version we're trying to create:
+          # If it has a different major or minor, it's a custom tag, so no need to increment
+          if [[ "$VERSION" =~ ^$MAJOR\.$MINOR\.$PATCH$ ]]; then
+            # It's the same version as the latest tag, increment the patch
+            PATCH=$((PATCH + 1))
+          fi
+          
+          # Form the new version tag
+          VERSION="$MAJOR.$MINOR.$PATCH"
+          
+          # Ensure the version doesn't already exist (increment if it does)
+          while git rev-parse "$VERSION" >/dev/null 2>&1; do
+            PATCH=$((PATCH + 1))  # Increment patch version again if the tag already exists
+            VERSION="$MAJOR.$MINOR.$PATCH"
+          done
+        fi
+
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "Version Tag: $VERSION"
+
+    # Step 11: Push New Git Tag.
+    - name: Push New Git Tag
+      if: ${{ success() }}
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        
+        # Create and push the new tag
+        git tag "${{ env.VERSION }}"
+        git push origin "${{ env.VERSION }}"
+
+    # Step 12: Build Docker Image for app-develop.
+    - name: Build Docker Image for app-develop
+      run: |
+        docker buildx build -f infrastructure/deployment/docker/Dockerfile.develop -t ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:${{ env.VERSION }} . --cache-from ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:latest --push
+        docker buildx build -f infrastructure/deployment/docker/Dockerfile.develop -t ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:latest . --cache-from ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:${{ env.VERSION }} --push
+
+    # Step 13: Push Docker Image to Registry.
+    - name: Push Docker Image
+      run: |
+        docker push ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:${{ env.VERSION }}
+        docker push ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-develop:latest

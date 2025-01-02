@@ -45,17 +45,11 @@ jobs:
     - name: Start MongoDB and App Develop Containers
       run: |
         docker compose up mongodb -d
-        # Wait for MongoDB to start, and check if it's ready.
-        until docker exec mongodb mongo --eval "db.adminCommand('ping')" > /dev/null 2>&1; do
-          echo "Waiting for MongoDB to start..."
-          sleep 5
-        done
-        echo "MongoDB is up and running!"
-
+        sleep 32  # Wait for MongoDB to start.
+        
         docker compose up app-develop -d
-        # Wait for the app container to initialize.
-        sleep 4
-        docker logs go-blog-platform-app-develop-1 || echo "App container failed to start."
+        sleep 4  # Wait for the app container to initialize.
+        docker logs go-blog-platform-app-develop-1
 
     # Step 7: List All Running Containers.
     - name: List All Running Containers

@@ -7,7 +7,7 @@ on:
 jobs:
   # Step 1: Call the Common Workflow.
   common-workflow:
-    uses: ./.github/workflows/common.yml  # Reference common workflow.
+    uses: ./.github/workflows/common.yml  # Call Common Workflow.
     permissions:
       contents: read
       pull-requests: read
@@ -62,7 +62,7 @@ jobs:
     # Step 9: Call the Reusable Version Determination Workflow.
     - name: Determine Version Tag
       id: version
-      uses: ./.github/workflows/determine-version.yml  # Calling version workflow.
+      uses: ./.github/workflows/version.yml  # Call Version Workflow.
 
     # Step 10: Log in to DockerHub.
     - name: Log in to DockerHub

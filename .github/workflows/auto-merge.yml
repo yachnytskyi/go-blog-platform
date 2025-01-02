@@ -20,12 +20,13 @@ jobs:
         uses: peter-evans/wait-for-status@v2
         with:
           status-context: 'ci/circleci'  # Replace with your actual status check context if needed.
-          check-interval: '5'  # Check every 5 seconds.
+          check-interval: '15'  # Check every 15 seconds.
           max-wait: '1800'  # Wait for a maximum of 30 minutes.
 
-      # Step 3: Log and check the PR mergeable state
+      # Step 3: Log mergeable state
       - name: Log mergeable state
-        run: echo "Mergeable state: ${{ github.event.pull_request.mergeable_state }}"
+        run: |
+          echo "Mergeable state: ${{ github.event.pull_request.mergeable_state }}"
 
       # Step 4: Merge the pull request automatically if checks are passed.
       - name: Merge PR

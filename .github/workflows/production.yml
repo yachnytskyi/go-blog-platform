@@ -1,4 +1,4 @@
-name: Production workflow
+name: Production Workflow
 
 on:
   pull_request:

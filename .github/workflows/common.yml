@@ -1,4 +1,4 @@
-name: Common workflow
+name: Common Workflow
 
 on:
   workflow_call:

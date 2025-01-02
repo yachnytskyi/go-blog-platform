@@ -14,6 +14,7 @@ import (
 	model "github.com/yachnytskyi/golang-mongo-grpc/pkg/dependency/model"
 	interfaces "github.com/yachnytskyi/golang-mongo-grpc/pkg/interfaces"
 	domain "github.com/yachnytskyi/golang-mongo-grpc/pkg/model/error/domain"
+	emailMock "github.com/yachnytskyi/golang-mongo-grpc/test/unit/mock/dependency/email"
 )
 
 const (
@@ -44,6 +45,8 @@ func NewEmail(config *configModel.ApplicationConfig, logger interfaces.Logger) i
 	switch config.Core.Email {
 	case constants.GoMail:
 		return email.NewGoMail(config, logger)
+	case constants.Mock:
+		return emailMock.NewMockEmail() 
 	// Add other email options here as needed.
 	default:
 		panic(domain.NewInternalError(location+"NewEmail", fmt.Sprintf(constants.UnsupportedEmail, config.Core.Email)))

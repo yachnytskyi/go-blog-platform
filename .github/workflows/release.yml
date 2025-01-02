@@ -1,4 +1,4 @@
-name: Release (pre-Production) Workflow
+name: Release workflow
 
 on:
   pull_request:

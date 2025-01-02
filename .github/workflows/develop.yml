@@ -68,7 +68,7 @@ jobs:
 
     # Step 9: Call Tag Version workflow
     - name: Get latest git tag
-      uses: ./.github/workflows/determine-version.yml
+      uses: ./.github/workflows/tag-version.yml
 
     # Step 10: Build Docker Image for app-develop.
     - name: Build Docker Image for app-develop

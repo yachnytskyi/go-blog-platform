@@ -1,19 +1,47 @@
-name: Auto Merge PRs
+name: Auto Merge on Success
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    branches: ["*"]  # Trigger on all branches.
 
 jobs:
-  auto-merge:
-    runs-on: ubuntu-latest
-    if: ${{ github.actor == 'trusted-user' }}
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v4
+  # Step 1: Call the Common Workflow.
+  common-workflow:
+    uses: ./.github/workflows/common.yml  # Reference the reusable workflow.
+    permissions:
+      contents: read
+      pull-requests: read
 
-      - name: Merge PR
+  # Step 2: Check if all checks have passed.
+  check-pr-status:
+    needs: common-workflow
+    runs-on: ubuntu-latest
+    steps:
+      # Step 2.1: Wait for all checks to pass
+      - name: Wait for checks to pass
         run: |
-          gh pr merge ${{ github.event.pull_request.number }} --auto --squash --delete-branch
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_STATUS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }})
+          STATE=$(echo "$PR_STATUS" | jq -r '.state')
+          if [ "$STATE" != "open" ]; then
+            echo "Pull request is not open, exiting."
+            exit 1
+          fi
+          CHECKS_STATUS=$(echo "$PR_STATUS" | jq -r '.statuses[] | select(.state=="success")')
+          if [ -z "$CHECKS_STATUS" ]; then
+            echo "Checks are not successful yet, exiting."
+            exit 1
+          fi
+
+  # Step 3: Auto Merge PR if all checks have passed.
+  auto-merge:
+    needs: check-pr-status
+    runs-on: ubuntu-latest
+    if: needs.check-pr-status.result == 'success'  # Ensure this runs only when previous job is successful.
+    steps:
+      - name: Merge Pull Request
+        run: |
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          curl -X PUT -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -d '{"commit_message":"Auto-merging PR #${PR_NUMBER}","merge_method":"merge"}' \
+            https://api.github.com/repos/${{ github.repository }}/pulls/${PR_NUMBER}/merge

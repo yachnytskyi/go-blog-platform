@@ -8,17 +8,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Check out the repository.
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      # Step 2: Set up Go.
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: stable
-
-      # Step 3: Determine Version Tag (keep original logic)
       - name: Determine Version Tag
         id: version
         run: |
@@ -31,9 +20,7 @@ jobs:
             VERSION="$LATEST_TAG"
           fi
 
+          # Set the environment variable for the next steps
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "Version Tag: $VERSION"
 
-      # Step 4: Set the output of the version tag for reuse
-      - name: Set Output
-        run: echo "::set-output name=version::${{ env.VERSION }}"

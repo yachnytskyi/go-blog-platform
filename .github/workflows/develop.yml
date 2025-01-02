@@ -80,4 +80,3 @@ jobs:
           --tag ${{ secrets.DOCKER_USERNAME }}/app-develop:latest \
           --cache-from type=registry,ref=${{ secrets.DOCKER_USERNAME }}/app-develop:latest \
           --push .
-          

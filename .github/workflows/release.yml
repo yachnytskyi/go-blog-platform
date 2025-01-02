@@ -66,16 +66,10 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
     
-    # Step 10: Determine Version Tag.
+# Step 10: Call the Reusable Version Determination Workflow.
     - name: Determine Version Tag
       id: version
-      run: |
-        git fetch --tags
-        LATEST_TAG=$(git tag -l --sort=-v:refname | head -n 1)
-        VERSION="$LATEST_TAG"
-        
-        echo "VERSION=$VERSION" >> $GITHUB_ENV
-        echo "Version Tag: $VERSION"
+      uses: ./.github/workflows/determine-version.yml  # Calling version workflow.
 
     # Step 11: Build and Push Docker Image for app-release.
     - name: Build and Push Docker Image for app-release

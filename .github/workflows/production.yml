@@ -66,26 +66,18 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    # Step 10: Determine Version Tag.
+    # Step 10: Call the Reusable Version Determination Workflow.
     - name: Determine Version Tag
       id: version
-      run: |
-        git fetch --tags
-        LATEST_TAG=$(git tag -l --sort=-v:refname | head -n 1)
-        VERSION="$LATEST_TAG"
-        
-        echo "VERSION=$VERSION" >> $GITHUB_ENV
-        echo "Version Tag: $VERSION"
+      uses: ./.github/workflows/determine-version.yml  # Calling version workflow.
 
-    # Step 11: Build Docker Image for app-production.
-    - name: Build Docker Image for app-production
+    # Step 11: Build and Push Docker Image for app-production.
+    - name: Build and Push Docker Image for app-production
       run: |
-        docker buildx build -f infrastructure/deployment/docker/Dockerfile.production -t ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-production:${{ env.VERSION }} . --cache-from ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-production:latest --push
-        docker buildx build -f infrastructure/deployment/docker/Dockerfile.production -t ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-production:latest . --cache-from ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-production:${{ env.VERSION }} --push
-
-    # Step 12: Push Docker Image to Registry.
-    - name: Push Docker Image
-      run: |
-        docker push ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-production:${{ env.VERSION }}
-        docker push ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-production:latest
+        docker buildx build \
+          --file infrastructure/deployment/docker/Dockerfile.production \
+          --tag ${{ secrets.DOCKER_USERNAME }}/app-production:${{ env.VERSION }} \
+          --tag ${{ secrets.DOCKER_USERNAME }}/app-production:latest \
+          --cache-from type=registry,ref=${{ secrets.DOCKER_USERNAME }}/app-production:latest \
+          --push .
     

@@ -1,6 +1,6 @@
 Core:
   Logger: Zerolog
-  Email: GoMail
+  Email: Mock
   Database: MongoDB
   Delivery: Gin
 

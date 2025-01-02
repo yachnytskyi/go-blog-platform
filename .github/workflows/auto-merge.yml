@@ -1,52 +1,44 @@
-name: Auto Merge PRs
+name: Auto Merge for Docs
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
-    branches:
-      - '**'  # Matches all branches.
+    types: [opened, synchronize, reopened]  # Trigger on PR opened, updated, or reopened.
+    branches: [*]  # Apply to all branches.
+    paths:
+      - '**/*.md'  # Trigger only for changes in markdown files (docs).
 
 jobs:
   auto-merge:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the PR's code.
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Checkout Code
+      uses: actions/checkout@v4
 
-      # Step 2: Wait for status checks to complete.
-      - name: Wait for status checks
-        uses: peter-evans/wait-for-status@v2
-        with:
-          status-context: 'ci/circleci'  # Replace with your actual status check context if needed.
-          check-interval: '15'  # Check every 15 seconds.
-          max-wait: '1800'  # Wait for a maximum of 30 minutes.
+    - name: Set up GitHub CLI
+      uses: cli/cli@v2
+      with:
+        version: '2.x'
 
-      # Step 3: Log mergeable state
-      - name: Log mergeable state
-        run: |
-          echo "Mergeable state: ${{ github.event.pull_request.mergeable_state }}"
+    - name: Check for successful status checks
+      run: |
+        pr_number=$(jq --raw-output .pull_request.number $GITHUB_EVENT_PATH)
+        status=$(gh pr view "$pr_number" --json checkSuites -q ".checkSuites.state")
+        
+        if [ "$status" != "SUCCESS" ]; then
+          echo "Required checks have not passed. Exiting."
+          exit 1
+        fi
 
-      # Step 4: Merge the pull request automatically if checks are passed.
-      - name: Merge PR
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const pr = github.context.payload.pull_request;
-            const owner = github.context.repo.owner;
-            const repo = github.context.repo.repo;
-            
-            console.log(`Checking PR #${pr.number} mergeable state...`);
+    - name: Check if the PR is only documentation changes
+      run: |
+        pr_files=$(gh pr diff --name-only ${{ github.event.pull_request.number }})
+        if [[ ! "$pr_files" =~ \.md$ ]]; then
+          echo "PR is not related to documentation only. Exiting."
+          exit 1
+        fi
 
-            // Check if the PR is mergeable
-            if (pr.mergeable_state === 'clean') {
-              await github.rest.pulls.merge({
-                owner: owner,
-                repo: repo,
-                pull_number: pr.number,
-              });
-              console.log(`Pull request #${pr.number} merged successfully.`);
-            } else {
-              console.log(`Pull request #${pr.number} is not mergeable (state: ${pr.mergeable_state}).`);
-            }
+    - name: Merge Pull Request
+      run: |
+        pr_number=$(jq --raw-output .pull_request.number $GITHUB_EVENT_PATH)
+        gh pr merge "$pr_number" --merge --auto --admin

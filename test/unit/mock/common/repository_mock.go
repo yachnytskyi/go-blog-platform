@@ -12,20 +12,20 @@ func NewMockRepository() MockRepository {
 	return MockRepository{}
 }
 
-func (m MockRepository) CreateRepository(ctx context.Context) any {
+func (mockRepository MockRepository) CreateRepository(ctx context.Context) any {
 	return nil
 }
 
-func (m MockRepository) NewRepository(createRepository any, repository any) any {
+func (mockRepository MockRepository) NewRepository(createRepository any, repository any) any {
 	return nil
 }
 
-func (m MockRepository) HealthCheck(interfaces.Delivery) {
+func (mockRepository MockRepository) HealthCheck(interfaces.Delivery) {
 }
 
-func (m MockRepository) DatabasePing() bool {
+func (mockRepository MockRepository) DatabasePing() bool {
 	return true
 }
 
-func (m MockRepository) Close(ctx context.Context) {
+func (mockRepository MockRepository) Close(ctx context.Context) {
 }

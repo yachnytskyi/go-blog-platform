@@ -18,6 +18,10 @@ const (
 
 // Configuration libraries used in the application.
 const (
+	Mock = "Mock" // Mock for testing or development purposes.
+)
+
+const (
 	Config = Viper   // Configuration library to use.
 	Viper  = "Viper" // Viper configuration library.
 )

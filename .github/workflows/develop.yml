@@ -66,11 +66,19 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    # Step 10: Call the Tag Version.
+    # Step 10: Determine Version Tag.
     - name: Determine Version Tag
       id: version
       run: |
-        VERSION=$(git describe --tags --abbrev=0 || echo "1.0.0")
+        # Fetch all Git tags
+        git fetch --tags
+        
+        # Get the latest tag (without incrementation)
+        LATEST_TAG=$(git tag -l --sort=-v:refname | head -n 1)
+
+        # Set the version to the latest tag
+        VERSION="$LATEST_TAG"
+        
         echo "VERSION=$VERSION" >> $GITHUB_ENV
         echo "Version Tag: $VERSION"
 

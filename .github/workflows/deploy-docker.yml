@@ -1,0 +1,42 @@
+name: Deploy Docker Image
+
+on:
+  workflow_call:
+    inputs:
+      docker_username:
+        required: true
+        type: string
+      docker_password:
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Determine Version Tag
+    - name: Determine Version Tag
+      id: version
+      run: |
+        git fetch --tags
+        LATEST_TAG=$(git tag -l --sort=-v:refname | head -n 1)
+
+        if [ -z "$LATEST_TAG" ]; then
+          VERSION="1.0.0"
+        else
+          VERSION="$LATEST_TAG"
+        fi
+
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "Version Tag: $VERSION"
+
+    # Step 2: Build and Push Docker Image for app-develop
+    - name: Build and Push Docker Image for app-develop
+      run: |
+        docker buildx build \
+          --file infrastructure/deployment/docker/Dockerfile.develop \
+          --tag ${{ inputs.docker_username }}/app-develop:${{ env.VERSION }} \
+          --tag ${{ inputs.docker_username }}/app-develop:latest \
+          --cache-from type=registry,ref=${{ inputs.docker_username }}/app-develop:latest \
+          --push .

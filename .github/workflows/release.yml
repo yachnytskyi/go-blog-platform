@@ -41,23 +41,23 @@ jobs:
       run: |
         echo "${{ secrets.DOCKER_RELEASE_APPLICATION_CONFIG_YAML }}" | base64 -d > config/yaml/v1/docker.release.application.yaml
 
-    # Step 6: Start MongoDB and App Release Containers.
-    - name: Start MongoDB and App Release Containers
-      run: |
-        docker compose up mongodb -d
-        sleep 32  # Wait for MongoDB to start.
+    # # Step 6: Start MongoDB and App Release Containers.
+    # - name: Start MongoDB and App Release Containers
+    #   run: |
+    #     docker compose up mongodb -d
+    #     sleep 32  # Wait for MongoDB to start.
         
-        docker compose up app-release -d
-        sleep 4  # Wait for the app container to initialize.
-        docker logs go-blog-platform-app-release-1
+    #     docker compose up app-release -d
+    #     sleep 4  # Wait for the app container to initialize.
+    #     docker logs go-blog-platform-app-release-1
 
-    # Step 7: List All Running Containers.
-    - name: List All Running Containers
-      run: docker ps
+    # # Step 7: List All Running Containers.
+    # - name: List All Running Containers
+    #   run: docker ps
 
-    # Step 8: Stop Running Containers.
-    - name: Stop Running Containers
-      run: docker stop $(docker ps -a -q)
+    # # Step 8: Stop Running Containers.
+    # - name: Stop Running Containers
+    #   run: docker stop $(docker ps -a -q)
 
     # Step 9: Log in to DockerHub.
     - name: Log in to DockerHub

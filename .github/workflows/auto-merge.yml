@@ -1,58 +1,19 @@
-name: Auto Merge workflow
+name: Auto Merge PRs
 
 on:
   pull_request:
-    branches: ['**']
-  merge_group:
-    branches: ['**']
+    types: [opened, synchronize, reopened]
 
 jobs:
   auto-merge:
     runs-on: ubuntu-latest
-
+    if: ${{ github.actor == 'trusted-user' }}
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+      - name: Check out code
+        uses: actions/checkout@v4
 
-      - name: Wait for all checks to finish successfully (with timeout)
+      - name: Merge PR
         run: |
-          # Get the total number of checks associated with the pull request, excluding the merge check.
-          TOTAL_CHECKS=$(gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup -q '.statusCheckRollup | length')
-          
-          # Subtract 1 to exclude the merge group check.
-          TOTAL_CHECKS=$((TOTAL_CHECKS - 1))
-
-          # Start a timer (timeout in 10 minutes).
-          TIMEOUT=600  # Timeout in seconds (10 minutes)
-          SECONDS=0  # Initialize the SECONDS variable to track time elapsed
-
-          echo "Waiting for all checks to complete..."
-
-          # Loop until all checks are successful or timeout.
-          while true; do
-            # Get the number of successful checks, excluding the merge check.
-            SUCCESSFUL_CHECKS=$(gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup -q '.statusCheckRollup | map(select(.conclusion == "SUCCESS")) | length')
-            
-            # If all checks have passed successfully, break out of the loop.
-            if [ "$SUCCESSFUL_CHECKS" -eq "$TOTAL_CHECKS" ]; then
-              echo "All required checks passed successfully. Proceeding with the merge."
-              break
-            fi
-
-            # Check if the timeout has been reached.
-            if [ "$SECONDS" -ge "$TIMEOUT" ]; then
-              echo "Timeout reached (10 minutes). Exiting the process."
-              exit 1  # Terminate the script with a failure status.
-            fi
-
-            echo "Waiting for checks to pass successfully... ($SECONDS seconds elapsed)"
-            sleep 10  # Wait for 10 seconds before checking again.
-          done
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Merge Pull Request
-        if: success()
-        run: gh pr merge ${{ github.event.pull_request.number }} --merge --auto
+          gh pr merge ${{ github.event.pull_request.number }} --auto --squash --delete-branch
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

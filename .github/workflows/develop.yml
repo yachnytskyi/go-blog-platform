@@ -83,7 +83,7 @@ jobs:
     #     echo "Version Tag: $VERSION"
 
     - name: Call Docker login and version tag workflow
-        uses: ./.github/workflows/docker-login-and-version-tag.yml
+      uses: ./.github/workflows/docker-login-and-version-tag.yml
 
     # Step 11: Build Docker Image for app-develop.
     - name: Build Docker Image for app-develop

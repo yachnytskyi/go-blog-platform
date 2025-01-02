@@ -32,14 +32,14 @@ jobs:
       run: |
         echo "${{ secrets.DOCKER_DEVELOP_APPLICATION_CONFIG_YAML }}" | base64 -d > config/yaml/v1/docker.develop.application.yaml
 
-    # Step 5: Create .env File for MongoDB.
-    - name: Create .env File for MongoDB
-      run: |
-        echo "MONGO_INITDB_DATABASE=${{ secrets.MONGO_INITDB_DATABASE }}" > infrastructure/script/data/repository/mongo/.env
-        echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" >> infrastructure/script/data/repository/mongo/.env
-        echo "MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}" >> infrastructure/script/data/repository/mongo/.env
-        echo "ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}" >> infrastructure/script/data/repository/mongo/.env
-        echo "ADMIN_HASHED_PASSWORD=${{ secrets.ADMIN_HASHED_PASSWORD }}" >> infrastructure/script/data/repository/mongo/.env
+    # # Step 5: Create .env File for MongoDB.
+    # - name: Create .env File for MongoDB
+    #   run: |
+    #     echo "MONGO_INITDB_DATABASE=${{ secrets.MONGO_INITDB_DATABASE }}" > infrastructure/script/data/repository/mongo/.env
+    #     echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" >> infrastructure/script/data/repository/mongo/.env
+    #     echo "MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}" >> infrastructure/script/data/repository/mongo/.env
+    #     echo "ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}" >> infrastructure/script/data/repository/mongo/.env
+    #     echo "ADMIN_HASHED_PASSWORD=${{ secrets.ADMIN_HASHED_PASSWORD }}" >> infrastructure/script/data/repository/mongo/.env
 
     # # Step 6: Start MongoDB and App Develop Containers.
     # - name: Start MongoDB and App Develop Containers

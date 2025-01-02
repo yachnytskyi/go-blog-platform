@@ -77,15 +77,13 @@ jobs:
         echo "VERSION=$VERSION" >> $GITHUB_ENV
         echo "Version Tag: $VERSION"
 
-    # Step 11: Build Docker Image for app-release.
-    - name: Build Docker Image for app-release
+    # Step 11: Build and Push Docker Image for app-release.
+    - name: Build and Push Docker Image for app-release
       run: |
-        docker buildx build -f infrastructure/deployment/docker/Dockerfile.release -t ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-release:${{ env.VERSION }} . --cache-from ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-release:latest --push
-        docker buildx build -f infrastructure/deployment/docker/Dockerfile.release -t ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-release:latest . --cache-from ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-release:${{ env.VERSION }} --push
-
-    # Step 12: Push Docker Image to Registry.
-    - name: Push Docker Image
-      run: |
-        docker push ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-release:${{ env.VERSION }}
-        docker push ${{ secrets.MONGO_INITDB_ROOT_USERNAME }}/app-release:latest
-    
+        docker buildx build \
+          --file infrastructure/deployment/docker/Dockerfile.release \
+          --tag ${{ secrets.DOCKER_USERNAME }}/app-release:${{ env.VERSION }} \
+          --tag ${{ secrets.DOCKER_USERNAME }}/app-release:latest \
+          --cache-from type=registry,ref=${{ secrets.DOCKER_USERNAME }}/app-release:latest \
+          --push .
+          

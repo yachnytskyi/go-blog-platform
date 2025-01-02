@@ -26,7 +26,7 @@ jobs:
 
       # Step 3: Merge the pull request automatically if checks are passed.
       - name: Merge PR
-        uses: github-script@v6
+        uses: github-actions/github-script@v6
         with:
           script: |
             const pr = github.context.payload.pull_request;

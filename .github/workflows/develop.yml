@@ -45,7 +45,7 @@ jobs:
     - name: Start MongoDB and App Develop Containers
       run: |
         docker compose up mongodb -d
-        timeout=30
+        timeout=32
         while ! docker exec mongodb mongo --eval "db.stats()" > /dev/null 2>&1; do
           timeout=$((timeout-1))
           if [ $timeout -le 0 ]; then
@@ -56,6 +56,7 @@ jobs:
         done
 
         docker compose up app-develop -d
+        sleep 4  # Wait for the app container to initialize.
         docker logs go-blog-platform-app-develop-1
 
     # Step 7: List All Running Containers.

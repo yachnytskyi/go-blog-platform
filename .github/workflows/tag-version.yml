@@ -1,0 +1,15 @@
+name: Tag Version
+
+runs-on: ubuntu-latest
+
+steps:
+  - name: Checkout Code
+    uses: actions/checkout@v4
+
+  - name: Determine Version Tag
+    id: version
+    run: |
+      # Try to get the latest version tag from Git
+      VERSION=$(git describe --tags --abbrev=0 || echo "1.0.0")
+      echo "VERSION=$VERSION" >> $GITHUB_ENV
+      echo "Version Tag: $VERSION"

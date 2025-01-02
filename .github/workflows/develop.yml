@@ -27,7 +27,7 @@ jobs:
       with:
         go-version: stable
 
-    # # Step 4: Decode and Create YAML File.
+    # Step 4: Decode and Create YAML File.
     # - name: Decode and Create YAML File
     #   run: |
     #     echo "${{ secrets.DOCKER_DEVELOP_APPLICATION_CONFIG_YAML }}" | base64 -d > config/yaml/v1/docker.develop.application.yaml
@@ -62,13 +62,7 @@ jobs:
   deploy:
     needs: build-and-push  # Ensure the previous steps complete before proceeding.
     runs-on: ubuntu-latest  # This runs the deploy job locally.
-    env:  # Set secrets as environment variables.
-      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
     steps:
     - name: Deploy Docker Image
       uses: ./.github/workflows/deploy-docker.yml  # Reuse the deploy Docker workflow.
-      with:
-        docker_username: ${{ env.DOCKER_USERNAME }}  # Pass env variable here
-        docker_password: ${{ env.DOCKER_PASSWORD }}  # Pass env variable here

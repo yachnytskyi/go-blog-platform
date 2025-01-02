@@ -1,21 +1,12 @@
-name: Deploy Docker Image
-
 on:
   workflow_call:
-    inputs:
-      docker_username:
-        required: true
-        type: string
-      docker_password:
-        required: true
-        type: string
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Determine Version Tag
+    # Step 1: Determine Version Tag.
     - name: Determine Version Tag
       id: version
       run: |
@@ -36,7 +27,7 @@ jobs:
       run: |
         docker buildx build \
           --file infrastructure/deployment/docker/Dockerfile.develop \
-          --tag ${{ inputs.docker_username }}/app-develop:${{ env.VERSION }} \
-          --tag ${{ inputs.docker_username }}/app-develop:latest \
-          --cache-from type=registry,ref=${{ inputs.docker_username }}/app-develop:latest \
+          --tag ${{ secrets.DOCKER_USERNAME }}/app-develop:${{ env.VERSION }} \
+          --tag ${{ secrets.DOCKER_USERNAME }}/app-develop:latest \
+          --cache-from type=registry,ref=${{ secrets.DOCKER_USERNAME }}/app-develop:latest \
           --push .

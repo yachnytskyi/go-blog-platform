@@ -61,11 +61,14 @@ jobs:
 
   deploy:
     needs: build-and-push  # Ensure the previous steps complete before proceeding.
-    uses: ./.github/workflows/deploy-docker.yml  # Reuse the deploy Docker workflow.
-    with:
-      docker_username: ${{ secrets.DOCKER_USERNAME }}
-      docker_password: ${{ secrets.DOCKER_PASSWORD }}
-
-    secrets:
+    runs-on: ubuntu-latest  # This runs the deploy job locally.
+    env:  # Set secrets as environment variables.
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+    steps:
+    - name: Deploy Docker Image
+      uses: ./.github/workflows/deploy-docker.yml  # Reuse the deploy Docker workflow.
+      with:
+        docker_username: ${{ env.DOCKER_USERNAME }}  # Pass env variable here
+        docker_password: ${{ env.DOCKER_PASSWORD }}  # Pass env variable here

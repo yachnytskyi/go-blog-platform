@@ -70,15 +70,15 @@ jobs:
     - name: Determine Version Tag
       id: version
       run: |
-        # Fetch all Git tags.
         git fetch --tags
-        
-        # Get the latest tag (without incrementation).
         LATEST_TAG=$(git tag -l --sort=-v:refname | head -n 1)
 
-        # Set the version to the latest tag.
-        VERSION="$LATEST_TAG"
-        
+        if [ -z "$LATEST_TAG" ]; then
+          VERSION="1.0.0"
+        else
+          VERSION="$LATEST_TAG"
+        fi
+
         echo "VERSION=$VERSION" >> $GITHUB_ENV
         echo "Version Tag: $VERSION"
 

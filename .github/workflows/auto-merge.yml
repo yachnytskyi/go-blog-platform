@@ -3,7 +3,7 @@ name: Auto Merge for Docs
 on:
   pull_request:
     types: [opened, synchronize, reopened]  # Trigger on PR opened, updated, or reopened.
-    branches: [*]  # Apply to all branches.
+    branches: ["**"]  # Apply to all branches.
     paths:
       - '**/*.md'  # Trigger only for changes in markdown files (docs).
 

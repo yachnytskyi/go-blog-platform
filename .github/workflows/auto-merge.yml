@@ -16,8 +16,11 @@ jobs:
 
       - name: Wait for all checks to finish successfully (with timeout)
         run: |
-          # Get the total number of checks associated with the pull request.
+          # Get the total number of checks associated with the pull request, excluding the merge check.
           TOTAL_CHECKS=$(gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup -q '.statusCheckRollup | length')
+          
+          # Subtract 1 to exclude the merge group check.
+          TOTAL_CHECKS=$((TOTAL_CHECKS - 1))
 
           # Start a timer (timeout in 10 minutes).
           TIMEOUT=600  # Timeout in seconds (10 minutes)
@@ -27,7 +30,7 @@ jobs:
 
           # Loop until all checks are successful or timeout.
           while true; do
-            # Get the number of successful checks
+            # Get the number of successful checks, excluding the merge check.
             SUCCESSFUL_CHECKS=$(gh pr view ${{ github.event.pull_request.number }} --json statusCheckRollup -q '.statusCheckRollup | map(select(.conclusion == "SUCCESS")) | length')
             
             # If all checks have passed successfully, break out of the loop.

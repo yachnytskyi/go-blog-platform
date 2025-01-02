@@ -1,15 +1,24 @@
-name: Tag Version
+name: Tag Version Workflow
 
-runs-on: ubuntu-latest
+on:
+  workflow_call:
 
-steps:
-  - name: Checkout Code
-    uses: actions/checkout@v4
+jobs:
+  determine-version:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
 
-  - name: Determine Version Tag
-    id: version
-    run: |
-      # Try to get the latest version tag from Git
-      VERSION=$(git describe --tags --abbrev=0 || echo "1.0.0")
-      echo "VERSION=$VERSION" >> $GITHUB_ENV
-      echo "Version Tag: $VERSION"
+    - name: Determine Version Tag
+      id: version
+      run: |
+        # Check if an override is provided, otherwise use the latest git tag
+        if [ -n "${{ inputs.version_override }}" ]; then
+          VERSION=${{ inputs.version_override }}
+        else
+          VERSION=$(git describe --tags --abbrev=0 || echo "1.0.0")
+        fi
+        
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "Version Tag: $VERSION"

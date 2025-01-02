@@ -1,7 +1,13 @@
+# .github/workflows/tag-version.yml
 name: Tag Version Workflow
 
 on:
-  workflow_call:
+  workflow_call:  # This makes it reusable
+    inputs:
+      version_override:
+        description: 'Override version (optional)'
+        required: false
+        type: string
 
 jobs:
   determine-version:

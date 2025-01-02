@@ -27,37 +27,37 @@ jobs:
       with:
         go-version: stable
 
-    # Step 4: Decode and Create YAML File.
-    - name: Decode and Create YAML File
-      run: |
-        echo "${{ secrets.DOCKER_DEVELOP_APPLICATION_CONFIG_YAML }}" | base64 -d > config/yaml/v1/docker.develop.application.yaml
+    # # Step 4: Decode and Create YAML File.
+    # - name: Decode and Create YAML File
+    #   run: |
+    #     echo "${{ secrets.DOCKER_DEVELOP_APPLICATION_CONFIG_YAML }}" | base64 -d > config/yaml/v1/docker.develop.application.yaml
 
-    # Step 5: Create .env File for MongoDB.
-    - name: Create .env File for MongoDB
-      run: |
-        echo "MONGO_INITDB_DATABASE=${{ secrets.MONGO_INITDB_DATABASE }}" > infrastructure/script/data/repository/mongo/.env
-        echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" >> infrastructure/script/data/repository/mongo/.env
-        echo "MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}" >> infrastructure/script/data/repository/mongo/.env
-        echo "ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}" >> infrastructure/script/data/repository/mongo/.env
-        echo "ADMIN_HASHED_PASSWORD=${{ secrets.ADMIN_HASHED_PASSWORD }}" >> infrastructure/script/data/repository/mongo/.env
+    # # Step 5: Create .env File for MongoDB.
+    # - name: Create .env File for MongoDB
+    #   run: |
+    #     echo "MONGO_INITDB_DATABASE=${{ secrets.MONGO_INITDB_DATABASE }}" > infrastructure/script/data/repository/mongo/.env
+    #     echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" >> infrastructure/script/data/repository/mongo/.env
+    #     echo "MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}" >> infrastructure/script/data/repository/mongo/.env
+    #     echo "ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}" >> infrastructure/script/data/repository/mongo/.env
+    #     echo "ADMIN_HASHED_PASSWORD=${{ secrets.ADMIN_HASHED_PASSWORD }}" >> infrastructure/script/data/repository/mongo/.env
 
-    # Step 6: Start MongoDB and App Develop Containers.
-    - name: Start MongoDB and App Develop Containers
-      run: |
-        docker compose up mongodb -d
-        sleep 32  # Wait for MongoDB to start.
+    # # Step 6: Start MongoDB and App Develop Containers.
+    # - name: Start MongoDB and App Develop Containers
+    #   run: |
+    #     docker compose up mongodb -d
+    #     sleep 32  # Wait for MongoDB to start.
 
-        docker compose up app-develop -d
-        sleep 4  # Wait for the app container to initialize.
-        docker logs go-blog-platform-app-develop-1
+    #     docker compose up app-develop -d
+    #     sleep 4  # Wait for the app container to initialize.
+    #     docker logs go-blog-platform-app-develop-1
 
-    # Step 7: List All Running Containers.
-    - name: List All Running Containers
-      run: docker ps
+    # # Step 7: List All Running Containers.
+    # - name: List All Running Containers
+    #   run: docker ps
 
-    # Step 8: Stop Running Containers.
-    - name: Stop Running Containers
-      run: docker stop $(docker ps -a -q)
+    # # Step 8: Stop Running Containers.
+    # - name: Stop Running Containers
+    #   run: docker stop $(docker ps -a -q)
 
   deploy:
     needs: build-and-push  # Ensure the previous steps complete before proceeding.
